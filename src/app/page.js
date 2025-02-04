@@ -142,7 +142,7 @@ const Dashboard = () => {
           </Card>
             </Col>
             <Col span={12}>
-            <RevenueDashboard/>
+            
             </Col>
           </Row>
 
