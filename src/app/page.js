@@ -2,6 +2,7 @@
 import { Layout,Dropdown,Space, Menu, Input, Card, Row, Col, Statistic, Table, Button } from 'antd';
 import { DashboardOutlined, ShoppingCartOutlined,DownOutlined , AppstoreOutlined, UserOutlined, FundOutlined, GiftOutlined} from '@ant-design/icons';
 import { useState } from 'react';
+import  RevenueDashboard  from './components/RevenueDashboard';
 import Link from 'next/link';
 
 const { SubMenu } = Menu;
@@ -142,7 +143,7 @@ const Dashboard = () => {
           </Card>
             </Col>
             <Col span={12}>
-            
+            <RevenueDashboard/>
             </Col>
           </Row>
 
