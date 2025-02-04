@@ -80,6 +80,7 @@ const OrderList = () => {
 //     }
 //   }, []);
   useEffect(() => {
+    
     localStorage.setItem("orders", JSON.stringify(orders));
   }, [orders]);
 

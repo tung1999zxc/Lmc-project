@@ -55,22 +55,22 @@ const menuItems = [
       {
         key: '5',
         label: 'Tổng quan',
-        href: '/shipping-summary',
+        href: '/orders',
       },
       {
         key: '6',
         label: 'Vận chuyển',
-        href: '/shipping-orders',
+        href: '/orders',
       },
       {
         key: '7',
         label: 'Option 7',
-        href: '/undelivered-orders',
+        href: '/orders',
       },
       {
         key: '8',
         label: 'Option 8',
-        href: '/undelivered-orders',
+        href: '/orders',
       },
     ],
   },
@@ -82,22 +82,22 @@ const menuItems = [
       {
         key: '9',
         label: 'Tất cả sản Phẩm',
-        href: '/products',
+        href: '/orders',
       },
       {
         key: '10',
         label: 'Tồn Kho',
-        href: '/stock',
+        href: '/orders',
       },
       {
         key: '11',
         label: 'Option 11',
-        href: '/undelivered-orders',
+        href: '/orders',
       },
       {
         key: '12',
         label: 'Option 12',
-        href: '/undelivered-orders',
+        href: '/orders',
       },
     ],
   },
