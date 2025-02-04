@@ -3,7 +3,7 @@ import { Layout,Dropdown,Space, Menu, Input, Card, Row, Col, Statistic, Table, B
 import { DashboardOutlined, ShoppingCartOutlined,DownOutlined , AppstoreOutlined, UserOutlined, FundOutlined, GiftOutlined} from '@ant-design/icons';
 import { useState } from 'react';
 import Link from 'next/link';
-import RevenueDashboard from "./components/RevenueDashboard";
+
 const { SubMenu } = Menu;
 const { Header, Sider, Content } = Layout;
 const { Search } = Input;
