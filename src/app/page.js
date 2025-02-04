@@ -1,114 +1,16 @@
 "use client";
-import { Layout,Dropdown,Space, Menu, Input, Card, Row, Col, Statistic, Table, Button } from 'antd';
-import { DashboardOutlined, ShoppingCartOutlined,DownOutlined , AppstoreOutlined, UserOutlined, FundOutlined, GiftOutlined} from '@ant-design/icons';
-import { useState } from 'react';
+import { Layout, Card, Row, Col, Statistic, Table, Button } from 'antd';
 import  RevenueDashboard  from './components/RevenueDashboard';
 import Link from 'next/link';
 
-const { SubMenu } = Menu;
-const { Header, Sider, Content } = Layout;
-const { Search } = Input;
+// const { SubMenu } = Menu;
+const { Content } = Layout;
+// const { Search } = Input;
 
 const Dashboard = () => {
-  const [collapsed, setCollapsed] = useState(false);
+  // const [collapsed, setCollapsed] = useState(false);
 
-  const item = [
-    {
-      key: 'sub0',
-      label: 'Tổng Quan',
-      icon: <DashboardOutlined />,
-      href: '/',},
-    {
-      key: 'sub1',
-      label: 'Tất cả đơn hàng',
-      icon: <ShoppingCartOutlined />,
-      href: '/draft-orders',
-      children: [
-        {
-          key: '1',
-          label: 'Đơn hàng nháp',
-           href: '/draft-orders',
-        },
-        {
-          key: '2',
-          label: 'Chưa hoàn tất',
-          href: '/pending-orders',
-        },
-        {
-          key: '3',
-          label: 'Giao hàng hàng loạt',
-          href: '/bulk-delivery', // Đường dẫn trang cho "Giao hàng hàng loạt"
-             children: [
-      {
-        key: '4-1',
-        label: 'Đã giao hàng',
-        href: '/delivered-orders', // Đường dẫn trang cho "Đã giao hàng"
-      },
-      {
-        key: '4-2',
-        label: 'Chưa giao hàng',
-        href: '/undelivered-orders', // Đường dẫn trang cho "Chưa giao hàng"
-      },
-    ],
-        },
-        
-      ],
-    },
-    {
-      key: 'sub2',
-      label: 'Vận chuyển',
-      icon: <AppstoreOutlined />,
-      children: [
-        {
-          key: '5',
-          label: 'Tổng quan',
-          href: '/shipping-summary', // Đư��ng d��n trang cho "T��ng quan vận chuyển"
-        },
-        {
-          key: '6',
-          label: 'Vận chuyển',
-          href: '/shipping-orders', // Đư��ng d��n trang cho "Vận chuyển"
-        },
-        {
-          key: '7',
-          label: 'Option 7',
-          href: '/undelivered-orders',
-        },
-        {
-          key: '8',
-          label: 'Option 8',
-          href: '/undelivered-orders',
-        },
-      ],
-    },
-    {
-      key: 'sub4',
-      label: 'Sản phẩm',
-      icon: <AppstoreOutlined />,
-      children: [
-        {
-          key: '9',
-          label: 'Tất cả sản Phẩm',
-          href: '/products', // Đư��ng d��n trang cho "Tất cả sản phẩm"
-        },
-        {
-          key: '10',
-          label: 'Tồn Kho',
-          href: '/stock', // Đư��ng d��n trang cho "Tồn Kho"
-        },
-        { 
-          key: '11',
-          label: 'Option 11',
-          href: '/undelivered-orders',
-        },
-        {
-          key: '12',
-          label: 'Option 12',
-          href: '/undelivered-orders',
-        },
-      ],
-    },
-  ];
+  
 
   const ordersData = [
     { key: '1', status: 'Chưa thanh toán', count: 0 },

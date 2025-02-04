@@ -12,7 +12,7 @@ const { RangePicker } = DatePicker;
 const { Search } = Input;
 
 // Danh sách options
-const productOptions = ['Product 1', 'Product 2', 'Product 3'];
+
 const mktOptions = [
   'Phi-HC', 'V.Phi', 'P.Thành', 'Linh', 'Diện', 'Chi', 'Phong', 
   'Tuấn', 'T.Nhung', 'Sơn', 'Tuấn Anh', 'Lâm', 'N.Linh', 'Nhung', 
@@ -24,16 +24,8 @@ const saleOptions = [
   'Tâm', 'Yến', 'Ngọc', 'Tuyền', 'H.Ngọc', 'Linh', 'Nhi', 
   'Trang', 'U.Nhi', 'Thành', 'T.Phương', 'Kha'
 ];
-const handleTTXLOptions = [
-  'THIẾU/SAI', 'TÌM HÀNG', 'LỖI SP', 'CHẶN KHÁCH', 'BOOK ĐƠN', 
-  'GỬI LẠI', 'MUA LẠI', 'HẸN THIẾU/SAI', 'ĐỢI GỬI LẠI', 
-  'ĐỔI Đ.CHỈ', 'HOÀN', 'S.BAY'
-];
-const saleBaoOptions = [
-  'DONE', 'HỦY', 'ĐỢI XN', 'NGUY CƠ', 'BÙNG', 'ĐANG UP', 'CHECK'
-];
-const thanhToanOptions = ['ĐÃ THANH TOÁN', 'CHƯA THANH TOÁN'];
-const tinhTrangGHOptions = ['ĐÃ GỬI HÀNG', 'GIAO THÀNH CÔNG'];
+
+
 
 interface Order {
   id: string;
