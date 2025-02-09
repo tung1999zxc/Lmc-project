@@ -132,10 +132,7 @@ export interface OrderFormSubmitValues {
 // OrderList Component
 const OrderList = () => {
   // Khởi tạo state cho đơn hàng, đọc từ localStorage nếu có
-  const [orders, setOrders] = useState<Order[]>(() => {
-    const savedOrders = localStorage.getItem("orders");
-    return savedOrders ? (JSON.parse(savedOrders) as Order[]) : [];
-  });
+  const [orders, setOrders] = useState<Order[]>([]);
   const [currentEditId, setCurrentEditId] = useState<string | null>(null);
   const [formVisible, setFormVisible] = useState<boolean>(false);
   const [dateRange, setDateRange] = useState<[Dayjs, Dayjs] | undefined>(undefined);
@@ -150,7 +147,19 @@ const OrderList = () => {
 
   // Lưu đơn hàng vào localStorage mỗi khi orders thay đổi
   useEffect(() => {
-    localStorage.setItem("orders", JSON.stringify(orders));
+    if (typeof window !== "undefined") {
+      const savedOrders = localStorage.getItem("orders");
+      if (savedOrders) {
+        setOrders(JSON.parse(savedOrders) as Order[]);
+      }
+    }
+  }, []);
+
+  // Lưu đơn hàng vào localStorage mỗi khi orders thay đổi (chỉ chạy trên client)
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      localStorage.setItem("orders", JSON.stringify(orders));
+    }
   }, [orders]);
 
   // Lọc đơn hàng theo ngày, từ khóa tìm kiếm và các bộ lọc khác

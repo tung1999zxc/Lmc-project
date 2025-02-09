@@ -19,10 +19,7 @@ const { Option } = Select;
 
 const Dashboard = () => {
   const [form] = Form.useForm();
-  const [records, setRecords] =useState(() => {
-    
-    return localStorage.getItem("records")? JSON.parse(localStorage.getItem("records")) : [];
-  });
+  const [records, setRecords] =useState([]);
   const [editingRecord, setEditingRecord] = useState(null);
   // Bộ lọc theo khoảng thời gian (mặc định 7 ngày)
   const [filterOption, setFilterOption] = useState("7");
@@ -32,7 +29,7 @@ const Dashboard = () => {
 
   /*** Giả lập thông tin người dùng ***/
   // Ví dụ: userId của người đang đăng nhập
-  const currentUserId = 1;
+  const currentUserId = 5;
   // currentUserRole có thể là: 'employee', 'lead', hoặc 'manager'
   // Bạn có thể thay đổi giá trị này để test
   const currentUserRole = 'manager'; // thay manager đổi thành 'employee' hoặc 'lead' để kiểm tra
@@ -106,7 +103,21 @@ const sampleOrders = [
     sales: 1000,
   },
 ];
+useEffect(() => {
+  if (typeof window !== "undefined") {
+    const savedRecords = localStorage.getItem("records");
+    if (savedRecords) {
+      setRecords(JSON.parse(savedRecords));
+    }
+  }
+}, []);
 
+// Lưu đơn hàng vào localStorage mỗi khi orders thay đổi (chỉ chạy trên client)
+useEffect(() => {
+  if (typeof window !== "undefined") {
+    localStorage.setItem("records", JSON.stringify(records));
+  }
+}, [records]);
  useEffect(() => {
     
     localStorage.setItem("records", JSON.stringify(records));
