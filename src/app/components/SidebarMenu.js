@@ -49,29 +49,40 @@ const menuItems = [
   },
   {
     key: 'sub2',
-    label: 'Vận chuyển',
+    label: 'Maketing',
     icon: <AppstoreOutlined />,
     children: [
       {
         key: '5',
-        label: 'Tổng quan',
-        href: '/orders',
+        label: 'Báo cáo MKT',
+        href: '/mkt',
+      },
+      
+      
+    ],
+  },
+  {
+    key: 'sub3',
+    label: 'Báo cáo Sale',
+    icon: <AppstoreOutlined />,
+    children: [
+    
+      {
+        key: '10',
+        label: 'Sale nhập đơn',
+        href: '/sale/saleOrder',
       },
       {
         key: '6',
-        label: 'Vận chuyển',
-        href: '/orders',
+        label: 'Sale Xác nhận',
+        href: '/sale/saleConfirm',
       },
       {
         key: '7',
-        label: 'Option 7',
-        href: '/orders',
+        label: 'Sale xử lý',
+        href: '/sale/saleProcessing',
       },
-      {
-        key: '8',
-        label: 'Option 8',
-        href: '/orders',
-      },
+     
     ],
   },
   {
@@ -101,15 +112,28 @@ const menuItems = [
       },
     ],
   },
+  {
+    key: 'sub5',
+    label: 'Quản lý tài khoản',
+    icon: <AppstoreOutlined />,
+    children: [
+      {
+        key: '30',
+        label: 'Tổng quan',
+        href: '/accounts',
+      },
+      
+    ],
+  },
 ];
 
 const SidebarMenu = () => {
   return (
-    <Menu theme="dark" mode="inline">
+    <Menu theme="dark" mode="inline"  >
       {menuItems.map((menuItem) => {
         if (menuItem.children) {
           return (
-            <SubMenu key={menuItem.key} title={menuItem.label} icon={menuItem.icon}>
+            <SubMenu  key={menuItem.key} title={menuItem.label} icon={menuItem.icon}>
               {menuItem.children.map((child) => (
                 <Menu.Item key={child.key}>
                   <Link href={child.href}>{child.label}</Link>

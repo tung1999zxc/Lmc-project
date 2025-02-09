@@ -43,12 +43,14 @@ interface Order {
   phone: string;
   address: string;
   note: string;
+  noteKHO: string;
   processStatus: string;
   saleReport: string;
   paymentStatus: string;
   deliveryStatus: string;
   trackingCode: string;
-  shippingDate: string;
+  shippingDate1: string;
+  shippingDate2: string;
 }
 
 const OrderList = () => {
@@ -64,7 +66,8 @@ const OrderList = () => {
   const [selectedFilter, setSelectedFilter] = useState('');
   const [selectedSale, setSelectedSale] = useState<string>();
   const [selectedMKT, setSelectedMKT] = useState<string>();
-
+  const NVKHO = false;
+  const NVMKT = true;
 //   useEffect(() => { // Đánh dấu component đã mount trên client
 //     const savedOrders = localStorage.getItem("orders");
 //     if (savedOrders) {
@@ -136,13 +139,53 @@ const OrderList = () => {
     { title: 'DOANH THU', dataIndex: 'profit', key: 'profit' },
     { title: 'SĐT', dataIndex: 'phone', key: 'phone' },
     { title: 'ĐỊA CHỈ', dataIndex: 'address', key: 'address' },
-    { title: 'GHI CHÚ', dataIndex: 'note', key: 'note' },
+    { title: 'GHI CHÚ SALE', dataIndex: 'note', key: 'note' },
+    { title: 'GHI CHÚ KHO', dataIndex: 'noteKHO', key: 'noteKHO' },
     { title: 'TT XỬ LÍ', dataIndex: 'processStatus', key: 'processStatus' },
-    { title: 'STT', dataIndex: 'stt', key: 'stt' },
-    { title: 'NGÀY GỬI/NHẬN', dataIndex: 'shippingDate', key: 'shippingDate', render: (text: string) => text && dayjs(text).format('DD/MM/YYYY') }
+    { title: 'NGÀY GỬI', dataIndex: 'shippingDate1', key: 'shippingDate1', render: (text: string) => text && dayjs(text).format('DD/MM/YYYY') },
+    { title: 'NGÀY NHẬN', dataIndex: 'shippingDate2', key: 'shippingDate2', render: (text: string) => text && dayjs(text).format('DD/MM/YYYY') }
     
   ];
+  const columnsMKT = [
 
+    { title: 'NGÀY ĐẶT', dataIndex: 'orderDate', key: 'orderDate', render: (text: string) => dayjs(text).format('DD/MM/YYYY') },
+    { title: 'THANH TOÁN', dataIndex: 'paymentStatus', key: 'paymentStatus', render: (text: string) => <Tag color={text === 'ĐÃ THANH TOÁN' ? 'green' : 'red'}>{text}</Tag> },
+    { title: 'TÊN KHÁCH', dataIndex: 'customerName', key: 'customerName' },
+    { title: 'TÊN PAGE', dataIndex: 'pageName', key: 'pageName' },
+    { title: 'SẢN PHẨM', dataIndex: 'product', key: 'product' },
+    { title: 'SL SP', dataIndex: 'quantity', key: 'quantity' },
+    { title: 'MKT', dataIndex: 'mkt', key: 'mkt' },
+    { title: 'DOANH SỐ', dataIndex: 'revenue', key: 'revenue' },
+    { title: 'DOANH THU', dataIndex: 'profit', key: 'profit' },
+    { title: 'GHI CHÚ SALE', dataIndex: 'note', key: 'note' },
+    
+  ];
+  const columnsKHO = [
+    {
+        title: 'Thao Tác',
+        key: 'action',
+        render: (_: any, record: Order) => (
+          <Space>
+            <Button icon={<EditOutlined />} onClick={() => handleEdit(record)} />
+            
+          </Space>
+        )
+      },
+    { title: 'NGÀY ĐẶT', dataIndex: 'orderDate', key: 'orderDate', render: (text: string) => dayjs(text).format('DD/MM/YYYY') },
+    { title: 'TÌNH TRẠNG GH', dataIndex: 'deliveryStatus', key: 'deliveryStatus', render: (text: string) => <Tag color={text === 'GIAO THÀNH CÔNG' ? 'blue' : 'orange'}>{text}</Tag> },
+    { title: 'MÃ VẬN ĐƠN', dataIndex: 'trackingCode', key: 'trackingCode' },
+    { title: 'TÊN KHÁCH', dataIndex: 'customerName', key: 'customerName' },
+    { title: 'SẢN PHẨM', dataIndex: 'product', key: 'product' },
+    { title: 'Phân loại', dataIndex: 'category', key: 'category' },
+    { title: 'SL SP', dataIndex: 'quantity', key: 'quantity' },
+    { title: 'SĐT', dataIndex: 'phone', key: 'phone' },
+    { title: 'ĐỊA CHỈ', dataIndex: 'address', key: 'address' },
+    { title: 'GHI CHÚ SALE', dataIndex: 'note', key: 'note' },
+    { title: 'GHI CHÚ KHO', dataIndex: 'noteKHO', key: 'noteKHO' },
+    { title: 'NGÀY GỬI', dataIndex: 'shippingDate1', key: 'shippingDate1', render: (text: string) => text && dayjs(text).format('DD/MM/YYYY') },
+    { title: 'NGÀY NHẬN', dataIndex: 'shippingDate2', key: 'shippingDate2', render: (text: string) => text && dayjs(text).format('DD/MM/YYYY') }
+    
+  ];
   const handleAddNew = () => {
     setCurrentEditId(null);
     setFormVisible(true);
@@ -240,7 +283,7 @@ const OrderList = () => {
       </Row>
 
       <Table
-        columns={columns}
+        columns={ NVKHO? columnsKHO: NVMKT?columnsMKT : columns}
         dataSource={filteredOrders}
         rowKey="id"
         scroll={{ x: 2500 }}

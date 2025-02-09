@@ -11,10 +11,10 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
   return (
     <html lang="en">
       <body>
-        <Layout style={{ minHeight: '100vh' }}>
+        <Layout style={{ minHeight: '100vh' }} >
           <Sider collapsible collapsed={collapsed} onCollapse={(value) => setCollapsed(value)} style={{paddingLeft: '-20px'}}>
             <div className="logo" style={{ color: 'white', textAlign: 'center', padding: '20px' }}>
-              Haravan
+            
             </div>
             <SidebarMenu />
           </Sider>
