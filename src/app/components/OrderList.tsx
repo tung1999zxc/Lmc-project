@@ -146,7 +146,7 @@ const OrderList = () => {
 
   // Giả lập quyền của người dùng: NVKHO = true nếu người dùng là kho, NVMKT = true nếu là MKT
   const NVKHO = false;
-  const NVMKT = true;
+  const NVMKT = false;
 
   // Lưu đơn hàng vào localStorage mỗi khi orders thay đổi
   useEffect(() => {
@@ -217,16 +217,16 @@ const OrderList = () => {
   }, [orders, dateRange, searchText, selectedFilter, selectedSale, selectedMKT]);
 
   // Hàm nhóm đơn hàng theo tên khách (hoặc bất kỳ trường nào bạn muốn nhóm)
-  const groupOrdersByCustomer = (ordersList: Order[]): Record<string, Order[]> => {
-    return ordersList.reduce<Record<string, Order[]>>((acc, order) => {
-      const key = order.customerName;
-      if (!acc[key]) {
-        acc[key] = [];
-      }
-      acc[key].push(order);
-      return acc;
-    }, {});
-  };
+  // const groupOrdersByCustomer = (ordersList: Order[]): Record<string, Order[]> => {
+  //   return ordersList.reduce<Record<string, Order[]>>((acc, order) => {
+  //     const key = order.customerName;
+  //     if (!acc[key]) {
+  //       acc[key] = [];
+  //     }
+  //     acc[key].push(order);
+  //     return acc;
+  //   }, {});
+  // };
 
   // Các cột cho bảng (cho tất cả các user)
   const columns = [

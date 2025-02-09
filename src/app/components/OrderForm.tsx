@@ -15,7 +15,7 @@ import dayjs from "dayjs";
 const { Option } = Select;
 
 // Giả sử: nếu mã nhân viên là 1 thì isEmployee1 = true
-const isEmployee1 = true;
+const isEmployee1 = false;
 
 // Danh sách options
 const productOptions = ["Product 1", "Product 2", "Product 3"];
