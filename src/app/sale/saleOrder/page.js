@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState ,useEffect} from "react";
 import {
   Form,
   InputNumber,
@@ -11,29 +11,45 @@ import {
 } from "antd";
 import moment from "moment";
 import { EditOutlined, DeleteOutlined } from "@ant-design/icons";
+import { useDispatch, useSelector } from 'react-redux';
 
-// Giả sử thông tin người dùng hiện tại được lấy từ hệ thống xác thực
-const currentUser = {
-  id: 3,
-  role: "lead", // 'employee' chỉ hiển thị dữ liệu của chính mình, còn 'lead' hoặc 'manager' hiển thị toàn bộ
-  name: "Nguyễn Văn c",
-};
+
 
 const Dashboard = () => {
+  const currentUser = useSelector((state) => state.user.currentUser);
+// Giả sử thông tin người dùng hiện tại được lấy từ hệ thống xác thực
+const [sampleOrders, setSampleOrders] = useState([]);
   const [form] = Form.useForm();
   const [records, setRecords] = useState([]);
   // period có thể là 'day', 'week' hoặc 'month'
   const [period, setPeriod] = useState("day");
   // editingKey dùng để xác định record nào đang được chỉnh sửa
   const [editingKey, setEditingKey] = useState(null);
-
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const savedRecords = localStorage.getItem("records2");
+      if (savedRecords) {
+        setRecords(JSON.parse(savedRecords));
+      }
+      const savedOrders = localStorage.getItem("orders");
+      if (savedOrders) {
+        setSampleOrders(JSON.parse(savedOrders));
+      }
+    }
+  }, []);
+  // Lưu đơn hàng vào localStorage mỗi khi orders thay đổi (chỉ chạy trên client)
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      localStorage.setItem("records2", JSON.stringify(records));
+    }
+  }, [records]);
+  
   // Xử lý submit form: Nếu đang chỉnh sửa thì cập nhật record, ngược lại thêm mới
   const onFinish = (values) => {
     const newMess = values.newMess;
     const closedOrders = values.closedOrders;
     const ratio = newMess > 0 ? closedOrders / newMess : 0;
-    const formattedDate = values.date.toISOString();
-
+    const formattedDate = values.date.format('YYYY-MM-DD');
     if (editingKey !== null) {
       // Cập nhật record đã có
       const updatedRecords = records.map((record) => {
@@ -59,10 +75,10 @@ const Dashboard = () => {
         date: formattedDate,
         newMess: newMess,
         closedOrders: closedOrders,
-        dailySales: values.dailySales,
+       
         totalRemarketing: values.totalRemarketing,
         ratio: ratio,
-        employeeId: currentUser.id,
+        employeeId: currentUser.employee_code,
         employeeName: currentUser.name,
       };
       setRecords([...records, record]);
@@ -91,13 +107,24 @@ const Dashboard = () => {
     setEditingKey(record.key);
   };
 
+  const computeTotalSalesForDate = (date, employeeName2) => {
+    return date
+      ? sampleOrders
+          .filter(
+            (p) =>
+              p.orderDate === date &&
+              p.sale === employeeName2
+          )
+          .reduce((sum, p) => sum + p.profit, 0)
+      : 0;
+  };
   // Định nghĩa các cột cho bảng
   const columns = [
     {
       title: "Ngày",
       dataIndex: "date",
       key: "date",
-      render: (text) => moment(text).format("DD/MM/YYYY"),
+      render: (date) => moment(date, 'YYYY-MM-DD').format('DD/MM/YYYY'),
     },
     {
       title: "Số mess mới được cấp",
@@ -108,17 +135,21 @@ const Dashboard = () => {
       title: "Số đơn chốt được",
       dataIndex: "closedOrders",
       key: "closedOrders",
-    },
-    {
-      title: "Doanh số cá nhân trong ngày",
-      dataIndex: "dailySales",
-      key: "dailySales",
-    },
+    }, 
     {
       title: "Tổng số mess tiếp thị lại",
       dataIndex: "totalRemarketing",
       key: "totalRemarketing",
     },
+    {
+      title: "Doanh số cá nhân trong ngày",
+      key: "Sales",
+      render: (_, record) => {
+        const totalSalesForSelectedDate = computeTotalSalesForDate(record.date, record.employeeName);
+        return totalSalesForSelectedDate;
+      },
+    },
+   
     {
       title: "Tỉ lệ chốt",
       dataIndex: "ratio",
@@ -130,8 +161,8 @@ const Dashboard = () => {
       key: "action",
       render: (_, record) => {
         // Với lead hoặc manager: chỉ cho phép sửa/xóa nếu record thuộc về chính họ
-        if (currentUser.role === "lead" || currentUser.role === "manager") {
-          if (record.employeeId === currentUser.id) {
+        if (currentUser.position === "leadSALE" || currentUser.position === "managerSALE") {
+          if (record.employeeId === currentUser.employee_code) {
             return (
               <>
                 <Button
@@ -169,7 +200,24 @@ const Dashboard = () => {
   // Lọc dữ liệu dựa trên vai trò của người dùng và bộ lọc theo thời gian
   const filteredRecords = records.filter((record) => {
     // Nếu người dùng là nhân viên thì chỉ hiển thị dữ liệu của họ
-    if (currentUser.role === "employee" && record.employeeId !== currentUser.id) {
+    if (
+      currentUser.position === "salenhapdon" 
+       &&
+      record.employeeId !== currentUser.employee_code
+    ) {
+      return false;
+    }
+    if (
+      currentUser.position === "salefull" 
+       &&
+      record.employeeId !== currentUser.employee_code
+    ) {
+      return false;
+    }
+  
+    if (
+     currentUser.position_team !== "sale"
+    ) {
       return false;
     }
     const recordDate = moment(record.date);
@@ -234,17 +282,6 @@ const Dashboard = () => {
           />
         </Form.Item>
         <Form.Item
-          name="dailySales"
-          rules={[
-            { required: true, message: "Vui lòng nhập doanh số trong ngày" },
-          ]}
-        >
-          <InputNumber
-            style={{ width: "180px" }}
-            placeholder="Doanh số trong ngày"
-          />
-        </Form.Item>
-        <Form.Item
           name="totalRemarketing"
           rules={[
             {
@@ -258,8 +295,10 @@ const Dashboard = () => {
             placeholder="Tổng số mess tiếp thị lại"
           />
         </Form.Item>
+      
+       
         <Form.Item>
-          <Button type="primary" htmlType="submit">
+          <Button type="primary" htmlType="submit"  disabled ={currentUser.position_team === 'mkt'}>
             {editingKey ? "Cập nhật" : "Thêm"}
           </Button>
         </Form.Item>
@@ -275,7 +314,7 @@ const Dashboard = () => {
       </div>
 
       {/* Render bảng theo vai trò */}
-      {currentUser.role === "manager" || currentUser.role === "lead" ? (
+      {currentUser.position === "managerSALE" || currentUser.position === "leadSALE" ? (
         Object.entries(groupRecordsByUser(filteredRecords)).map(
           ([employeeName, userRecords]) => (
             <div key={employeeName} style={{ marginBottom: 24 }}>

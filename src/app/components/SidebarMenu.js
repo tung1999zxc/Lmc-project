@@ -19,33 +19,11 @@ const menuItems = [
     href: '/orders',
     children: [
       {
-        key: '1',
+        key: '199',
         label: 'Quản lý đơn hàng',
         href: '/orders',
       },
-      {
-        key: '2',
-        label: 'Chưa hoàn tất',
-        href: '/orders',
-      },
-      {
-        key: '3',
-        label: 'Giao hàng hàng loạt',
-        href: '/orders',
-        children: [
-          {
-            key: '4-1',
-            label: 'Đã giao hàng',
-            href: '/orders',
-          },
-          {
-            key: '4-2',
-            label: 'Chưa giao hàng',
-            href: '/orders',
-          },
-        ],
-      },
-    ],
+    ]
   },
   {
     key: 'sub2',
@@ -53,7 +31,7 @@ const menuItems = [
     icon: <AppstoreOutlined />,
     children: [
       {
-        key: '5',
+        key: '999',
         label: 'Báo cáo MKT',
         href: '/mkt',
       },
@@ -68,17 +46,17 @@ const menuItems = [
     children: [
     
       {
-        key: '10',
+        key: '99',
         label: 'Sale nhập đơn',
         href: '/sale/saleOrder',
       },
       {
-        key: '6',
+        key: '699',
         label: 'Sale Xác nhận',
         href: '/sale/saleConfirm',
       },
       {
-        key: '7',
+        key: '799',
         label: 'Sale xử lý',
         href: '/sale/saleProcessing',
       },
@@ -91,25 +69,16 @@ const menuItems = [
     icon: <AppstoreOutlined />,
     children: [
       {
-        key: '9',
+        key: '9999',
         label: 'Tất cả sản Phẩm',
         href: '/orders',
       },
       {
-        key: '10',
+        key: '109999',
         label: 'Tồn Kho',
         href: '/orders',
       },
-      {
-        key: '11',
-        label: 'Option 11',
-        href: '/orders',
-      },
-      {
-        key: '12',
-        label: 'Option 12',
-        href: '/orders',
-      },
+      
     ],
   },
   {

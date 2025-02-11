@@ -1,90 +1,88 @@
 'use client';
-
+import React, { useState ,useEffect} from 'react';
 import { 
   Form, Input, Button, Select, Table, Card, Row, Col, 
   Modal, Popconfirm, message 
 } from 'antd';
 import { EditOutlined, DeleteOutlined } from '@ant-design/icons';
-import { useState, useEffect } from 'react';
-import axios from 'axios';
-
-// Tạo một instance của axios, chỉnh sửa baseURL theo dự án của bạn
-const api = axios.create({
-  baseURL: 'http://localhost:3000/api' // Thay đổi URL cho phù hợp
-});
+import { useSelector, useDispatch } from 'react-redux';
+import { addEmployee, updateEmployee, deleteEmployee } from '../store/employeeSlice';
 
 export default function EmployeeManagement() {
-  // Khai báo state cho danh sách nhân viên
-  const [employees, setEmployees] = useState([]);
+  const dispatch = useDispatch();
+  const employees = useSelector((state) => state.employees.employees);
 
-  // State cho modal chỉnh sửa, loading và nhân viên được chọn để chỉnh sửa
   const [editModalVisible, setEditModalVisible] = useState(false);
   const [loading, setLoading] = useState(false);
   const [selectedEmployee, setSelectedEmployee] = useState(null);
 
-  // Tạo hai instance form: một cho tạo mới và một cho chỉnh sửa
   const [createForm] = Form.useForm();
   const [editForm] = Form.useForm();
 
-  // Danh sách chức vụ và team
   const positions = [
-    {label: 'ADMIN', value: 1 },
-    {label: 'Trưởng phòng MKT', value: 2 },
-    {label: 'Trưởng phòng Sale', value: 3 },
-    {label: 'Lead MKT', value: 4 },
-    {label: 'Nhân viên MKT', value: 5 },
-    {label: 'Lead Sale', value: 6 },
-    {label: 'Nhân viên Sale nhập đơn', value: 7 },
-    {label: 'Nhân viên Sale xác nhận đơn', value: 8 },
-    {label: 'Nhân viên Sale xử lý đơn', value: 9 },
-    {label: 'Nhân viên kho', value: 10 }
+    { label: 'ADMIN', value: 'admin' },
+    { label: 'Trưởng phòng MKT', value: 'managerMKT' },
+    { label: 'Trưởng phòng Sale', value: 'managerSALE' },
+    { label: 'Lead Maketing', value: 'lead' }, 
+    { label: 'Lead Sale', value: 'leadSALE' }, 
+    { label: 'Nhân viên MKT', value: 'mkt' },
+    { label: 'Nhân viên Sale nhập đơn', value: 'salenhapdon' },
+    { label: 'Nhân viên Sale xác nhận đơn', value: 'salexacnhan' },
+    { label: 'Nhân viên Sale xử lý đơn', value: 'salexuly' },
+    { label: 'Nhân viên Sale Full', value: 'salefull' },
+    { label: 'Nhân viên kho', value: 'kho1' },
+    { label: 'Nhân viên kho2', value: 'kho2' }
   ];
   const position_team = [
-    { label: 'SALE', value: 2 },
-    { label: 'MKT', value: 1 },
-    
+    { label: 'SALE', value: 'sale' }, 
+    { label: 'MKT', value: 'mkt' },
+    { label: 'Kho', value: 'kho' }
   ];
-  const teams = Array.from({ length: 10 }, (_, i) => ({
-    value: i + 1,
-    label: `Team ${i + 1}`
-  }));
+  const teams = [
+    { label: 'TEAM SƠN', value: 'SON' }, 
+    { label: 'TEAM QUÂN', value: 'QUAN' }, 
+    { label: 'TEAM CHI', value: 'CHI' }, 
+    { label: 'TEAM LẺ', value: 'LE' }, 
+    { label: 'Team5', value: 5 }, 
+    { label: 'Team6', value: 6 }, 
+    { label: 'Team7', value: 7 }, 
+    { label: 'Team8', value: 8 }, 
+  ];
 
-  // Lấy danh sách nhân viên khi component mount
-  useEffect(() => {
-    // fetchEmployees();
-  }, []);
-
-  const fetchEmployees = async () => {
-    try {
-      const response = await api.get('/employees');
-      setEmployees(response.data);
-    } catch (error) {
-      console.error('Error fetching employees:', error);
-    }
+  const getPositionLabel = (value) => {
+    const pos = positions.find(p => p.value === value);
+    return pos ? pos.label : value;
   };
 
-  // Xử lý tạo nhân viên mới
-  const handleSubmit = async (values) => {
-    try {
-      setLoading(true);
-      await api.post('/employees', values);
-      createForm.resetFields();
-      fetchEmployees();
-    } catch (error) {
-      console.error('Error creating employee:', error);
-    } finally {
-      setLoading(false);
-    }
+  const getTeamName = (team_id) => {
+    const team = teams.find(t => t.value === team_id);
+    return team ? team.label : '';
   };
 
-  // Cấu hình các cột của Table
+  const getPositionTeamLabel = (ptValue) => {
+    const pt = position_team.find(pt => pt.value === ptValue);
+    return pt ? pt.label : ptValue;
+  };
+
   const columns = [
     { title: 'Mã NV', dataIndex: 'employee_code' },
     { title: 'Tài khoản', dataIndex: 'username' },
     { title: 'Họ tên', dataIndex: 'name' },
-    { title: 'Chức vụ', dataIndex: 'position' },
-    { title: 'Team', dataIndex: 'team_name' },
-    { title: 'Bộ phận', dataIndex: 'position_name' },
+    { 
+      title: 'Chức vụ', 
+      dataIndex: 'position', 
+      render: (value) => getPositionLabel(value)
+    },
+    { 
+      title: 'Team', 
+      dataIndex: 'team_id', 
+      render: (value) => getTeamName(value)
+    },
+    { 
+      title: 'Bộ phận', 
+      dataIndex: 'position_team', 
+      render: (value) => getPositionTeamLabel(value)
+    },
     {
       title: 'Thao tác',
       key: 'actions',
@@ -108,45 +106,62 @@ export default function EmployeeManagement() {
     }
   ];
 
-  // Khi bấm nút chỉnh sửa, mở modal và set giá trị cho form chỉnh sửa
+  const handleSubmit = (values) => {
+    setLoading(true);
+    setTimeout(() => {
+      const newEmployee = {
+        employee_id: Date.now(),
+        employee_code: Math.floor(1000 + Math.random() * 9000),
+        username: values.username,
+        name: values.name,
+        position: values.position,
+        team_id: values.team_id,
+        position_team: values.position_team
+      };
+      dispatch(addEmployee(newEmployee));
+      message.success('Tạo tài khoản thành công');
+      createForm.resetFields();
+      setLoading(false);
+    }, 1000);
+  };
+
   const handleEdit = (employee) => {
     setSelectedEmployee(employee);
-    editForm.setFieldsValue({
-      ...employee,
-      password: '' // Xoá trường mật khẩu để người dùng nhập mới nếu cần
-    });
     setEditModalVisible(true);
+    editForm.setFieldsValue({
+      username: employee.username,
+      name: employee.name,
+      position: employee.position,
+      team_id: employee.team_id,
+      position_team: employee.position_team
+    });
   };
 
-  // Xử lý cập nhật nhân viên
-  const handleUpdate = async (values) => {
-    try {
-      // Nếu không nhập mật khẩu mới, loại bỏ trường này khỏi payload
-      const payload = values.password 
-        ? values 
-        : { ...values, password: undefined };
-
-      await api.put(`/employees/${selectedEmployee.employee_id}`, payload);
-      message.success('Cập nhật thành công');
+  const handleUpdate = (values) => {
+    setLoading(true);
+    setTimeout(() => {
+      const updatedEmployee = {
+        ...selectedEmployee,
+        username: values.username,
+        name: values.name,
+        position: values.position,
+        team_id: values.team_id,
+        position_team: values.position_team
+      };
+      dispatch(updateEmployee(updatedEmployee));
+      message.success('Cập nhật nhân viên thành công');
       setEditModalVisible(false);
-      fetchEmployees();
-    } catch (error) {
-      message.error('Cập nhật thất bại');
-    }
+      setSelectedEmployee(null);
+      editForm.resetFields();
+      setLoading(false);
+    }, 1000);
   };
 
-  // Xử lý xóa nhân viên
-  const handleDelete = async (id) => {
-    try {
-      await api.delete(`/employees/${id}`);
-      message.success('Xóa thành công');
-      fetchEmployees();
-    } catch (error) {
-      message.error('Xóa thất bại');
-    }
+  const handleDelete = (employee_id) => {
+    dispatch(deleteEmployee(employee_id));
+    message.success('Xóa nhân viên thành công');
   };
 
-  // Modal chỉnh sửa nhân viên
   const EditModal = () => (
     <Modal
       title="Chỉnh sửa nhân viên"
@@ -197,7 +212,6 @@ export default function EmployeeManagement() {
         <Form.Item
           label="Team"
           name="team_id"
-         
         >
           <Select options={teams} />
         </Form.Item>
@@ -206,11 +220,11 @@ export default function EmployeeManagement() {
           name="position_team"
           rules={[{ required: true, message: 'Vui lòng chọn' }]}
         >
-          <Select options={teams} />
+          <Select options={position_team.map(p => ({ label: p.label, value: p.value }))} />
         </Form.Item>
 
         <Form.Item>
-          <Button type="primary" htmlType="submit">
+          <Button type="primary" htmlType="submit" loading={loading}>
             Cập nhật
           </Button>
         </Form.Item>
@@ -263,16 +277,16 @@ export default function EmployeeManagement() {
               <Form.Item
                 label="Team"
                 name="team_id"
-                rules={[{ required: true, message: 'Vui lòng chọn team' }]}
+               
               >
                 <Select options={teams} />
               </Form.Item>
               <Form.Item
                 label="Bộ Phận"
                 name="position_team"
-                rules={[{ required: true, message: 'Vui lòng chọn team' }]}
+                rules={[{ required: true, message: 'Vui lòng chọn bộ phận' }]}
               >
-                <Select options={position_team} />
+                <Select options={position_team.map(p => ({ label: p.label, value: p.value }))} />
               </Form.Item>
 
               <Form.Item>
