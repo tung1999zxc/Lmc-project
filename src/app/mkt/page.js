@@ -196,6 +196,9 @@ if (currentUser.position === 'admin'){
     }  else if (currentUser.position_team === 'sale') {
        filtered= [];
      }
+     else if (currentUser.position_team === 'kho') {
+       filtered= [];
+     }
     return filtered;
   };
 
@@ -242,7 +245,7 @@ if (currentUser.position === 'admin'){
       title: '%ADS',
       key: 'percentAds',
       render: (_, record) => {
-        const totalSalesForSelectedDate = computeTotalSalesForDate(record.date);
+        const totalSalesForSelectedDate = computeTotalSalesForDate(record.date, record.name);
         const total = record.oldMoney + record.request1 + record.request2;
         if (totalSalesForSelectedDate === 0) return 'N/A';
         const percent = ((total - record.excessMoney) / totalSalesForSelectedDate) * 100;
@@ -302,7 +305,7 @@ if (currentUser.position === 'admin'){
           <InputNumber placeholder="Tiền thừa" />
         </Form.Item>
         <Form.Item>
-          <Button disabled ={currentUser.position_team === 'sale'} type="primary" htmlType="submit">
+          <Button disabled ={currentUser.position_team === 'sale' || currentUser.position_team === 'kho'} type="primary" htmlType="submit">
             {editingRecord ? 'Cập nhật' : 'Thêm mới'}
           </Button>
         </Form.Item>
