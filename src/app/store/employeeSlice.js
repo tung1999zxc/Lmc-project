@@ -6,10 +6,12 @@ import { createSlice } from '@reduxjs/toolkit';
 // Hàm để lấy dữ liệu từ localStorage
 
 const loadEmployeesFromLocalStorage = () => {
-  const savedEmployees = localStorage.getItem('employees');
-  return savedEmployees ? JSON.parse(savedEmployees) : [];
+  if (typeof window !== "undefined" && window.localStorage) {
+    const savedEmployees = localStorage.getItem("employees");
+    return savedEmployees ? JSON.parse(savedEmployees) : [];
+  }
+  return [];
 };
-
 const initialState = {
   employees: loadEmployeesFromLocalStorage(),
 };
@@ -20,8 +22,9 @@ const employeeSlice = createSlice({
   reducers: {
     addEmployee: (state, action) => {
       state.employees.push(action.payload);
-      // Lưu vào localStorage
-      localStorage.setItem('employees', JSON.stringify(state.employees));
+      if (typeof window !== "undefined" && window.localStorage) {
+        localStorage.setItem('employees', JSON.stringify(state.employees));
+      }
     },
     updateEmployee: (state, action) => {
       const index = state.employees.findIndex(
@@ -29,19 +32,20 @@ const employeeSlice = createSlice({
       );
       if (index !== -1) {
         state.employees[index] = action.payload;
-        // Cập nhật localStorage
-        localStorage.setItem('employees', JSON.stringify(state.employees));
+        if (typeof window !== "undefined" && window.localStorage) {
+          localStorage.setItem('employees', JSON.stringify(state.employees));
+        }
       }
     },
     deleteEmployee: (state, action) => {
       state.employees = state.employees.filter(
         (emp) => emp.employee_id !== action.payload
       );
-      // Cập nhật localStorage
-      localStorage.setItem('employees', JSON.stringify(state.employees));
+      if (typeof window !== "undefined" && window.localStorage) {
+        localStorage.setItem('employees', JSON.stringify(state.employees));
+      }
     },
-  },
-});
+}});
 
 export const { addEmployee, updateEmployee, deleteEmployee } = employeeSlice.actions;
 export default employeeSlice.reducer;
