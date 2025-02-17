@@ -10,7 +10,7 @@ const menuItems = [
     key: 'sub0',
     label: 'Tổng Quan',
     icon: <DashboardOutlined />,
-    href: '/Dashboard',
+    href: '/',
   },
   {
     key: 'sub1',
