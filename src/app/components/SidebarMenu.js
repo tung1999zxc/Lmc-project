@@ -10,34 +10,21 @@ const menuItems = [
     key: 'sub0',
     label: 'Tổng Quan',
     icon: <DashboardOutlined />,
-    href: '/',
+    href: '/Dashboard',
   },
   {
     key: 'sub1',
-    label: 'Tất cả đơn hàng',
+    label: 'Quản lý đơn hàng',
     icon: <ShoppingCartOutlined />,
     href: '/orders',
-    children: [
-      {
-        key: '199',
-        label: 'Quản lý đơn hàng',
-        href: '/orders',
-      },
-    ]
+    
   },
   {
     key: 'sub2',
-    label: 'Maketing',
+    label: 'Báo cáo MKT',
     icon: <AppstoreOutlined />,
-    children: [
-      {
-        key: '999',
-        label: 'Báo cáo MKT',
-        href: '/mkt',
-      },
-      
-      
-    ],
+    href: '/mkt',
+   
   },
   {
     key: 'sub3',
@@ -65,34 +52,20 @@ const menuItems = [
   },
   {
     key: 'sub4',
-    label: 'Sản phẩm',
+    label: 'Tất cả sản Phẩm',
     icon: <AppstoreOutlined />,
-    children: [
-      {
-        key: '9999',
-        label: 'Tất cả sản Phẩm',
-        href: '/orders',
-      },
-      {
-        key: '109999',
-        label: 'Tồn Kho',
-        href: '/orders',
-      },
+    href: '/products',
+   
+     
       
-    ],
+   
   },
   {
     key: 'sub5',
     label: 'Quản lý tài khoản',
     icon: <AppstoreOutlined />,
-    children: [
-      {
-        key: '30',
-        label: 'Tổng quan',
-        href: '/accounts',
-      },
-      
-    ],
+    href: '/accounts',
+    
   },
 ];
 

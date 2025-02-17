@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Form,
   Input,
@@ -21,10 +21,10 @@ const OrderForm = ({ visible, onCancel, onSubmit, initialValues }) => {
   const { Option } = Select;
   const currentUser = useSelector((state) => state.user.currentUser);
   // Giả sử: nếu mã nhân viên là 1 thì isEmployee1 = true
-
+  const [productOptions, setProductOptions] = useState([]);
   const employees = useSelector((state) => state.employees.employees);
   // Danh sách options
-  const productOptions = ["Product 1", "Product 2", "Product 3"];
+  
   const mktOptions = employees
   .filter(order => order.position_team === 'mkt')
   .map(order => order.name);
@@ -64,6 +64,15 @@ const OrderForm = ({ visible, onCancel, onSubmit, initialValues }) => {
   const thanhToanOptions = ["ĐÃ THANH TOÁN", "CHƯA THANH TOÁN"];
   const tinhTrangGHOptions = ["ĐÃ GỬI HÀNG", "GIAO THÀNH CÔNG"];
   // Khi có initialValues (dữ liệu cũ) thì chuyển các trường ngày về đối tượng dayjs
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      
+      const productNames = localStorage.getItem("productNames");
+      if (productNames) {
+        setProductOptions(JSON.parse(productNames));
+      }
+    }
+  }, []);
   useEffect(() => {
     if (initialValues) {
       form.setFieldsValue({
@@ -267,24 +276,6 @@ const OrderForm = ({ visible, onCancel, onSubmit, initialValues }) => {
                 <Form.Item label="TÊN PAGE" name="pageName">
                   <Input />
                 </Form.Item>
-                <Form.Item label="SẢN PHẨM" name="product">
-                  <Select>
-                    {productOptions.map((product) => (
-                      <Option key={product} value={product}>
-                        {product}
-                      </Option>
-                    ))}
-                  </Select>
-                </Form.Item>
-              </Col>
-              <Col span={8}>
-                <Form.Item label="Phân loại QUÀ/SIZE/MÀU" name="category">
-                <Input />
-                </Form.Item>
-                <Form.Item label="SỐ LƯỢNG SP" name="quantity">
-                  <Input type="number" />
-                </Form.Item>
-                
                 <Form.Item label="MKT" name="mkt">
                   <Select showSearch>
                     {mktOptions.map((mkt) => (
@@ -294,6 +285,25 @@ const OrderForm = ({ visible, onCancel, onSubmit, initialValues }) => {
                     ))}
                   </Select>
                 </Form.Item>
+               
+              </Col>
+              <Col span={8}>
+              <Form.Item label="SẢN PHẨM" name="product">
+                  <Select>
+                    {productOptions.map((product) => (
+                      <Option key={product} value={product}>
+                        {product}
+                      </Option>
+                    ))}
+                  </Select>
+                </Form.Item>
+                <Form.Item label="SỐ LƯỢNG SP" name="quantity">
+                  <Input type="number" />
+                </Form.Item>
+                <Form.Item label="Phân loại QUÀ/SIZE/MÀU" name="category">
+                <Input />
+                </Form.Item>
+                
                 <Form.Item label="SALE" name="sale">
                   <Select showSearch>
                     {saleOptions.map((sale) => (

@@ -43,7 +43,7 @@ export default function EmployeeManagement() {
     { label: 'TEAM QUÂN', value: 'QUAN' }, 
     { label: 'TEAM CHI', value: 'CHI' }, 
     { label: 'TEAM LẺ', value: 'LE' }, 
-    { label: 'Team5', value: 5 }, 
+    { label: 'Team5', value: 5 },   
     { label: 'Team6', value: 6 }, 
     { label: 'Team7', value: 7 }, 
     { label: 'Team8', value: 8 }, 

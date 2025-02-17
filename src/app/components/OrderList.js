@@ -61,12 +61,13 @@ const OrderList = () => {
       if (savedOrders) {
         setOrders(JSON.parse(savedOrders));
       }
+     
     }
   }, []);
 
   // Lưu đơn hàng vào localStorage mỗi khi orders thay đổi (chỉ chạy trên client)
   useEffect(() => {
-    if (typeof window !== "undefined") {
+    if (typeof window !== "undefined" && orders && orders.length > 0) {
       localStorage.setItem("orders", JSON.stringify(orders));
     }
   }, [orders]);
@@ -171,6 +172,9 @@ const OrderList = () => {
       }
   
       return dateMatch && searchMatch && filterMatch;
+    });
+    return roleFilteredOrders.sort((a, b) => {
+      return dayjs(b.orderDate).valueOf() - dayjs(a.orderDate).valueOf();
     });
   }, [
     orders,
@@ -354,8 +358,10 @@ const OrderList = () => {
         const newOrder = {
           ...values,
           id: currentEditId || Date.now().toString(),
-          stt: orders.length+1 ,
-          quantity: values.quantity || 0,
+          stt: currentEditId 
+    ? orders.find(order => order.id === currentEditId)?.stt 
+    : orders.length + 1,
+          quantity: values.quantity || 0, 
           revenue: revenue,
           profit: profit,
       customerName: values. customerName || "",
@@ -460,7 +466,9 @@ const OrderList = () => {
 
       <Table
         columns={currentUser.position_team ==='kho' ? columnsKHO : currentUser.position_team ==='mkt' ? columnsMKT : columns}
-        dataSource={filteredOrders}
+        dataSource={filteredOrders.sort((a, b) => {
+          return dayjs(b.orderDate).valueOf() - dayjs(a.orderDate).valueOf();
+        })}
         rowKey="id"
         scroll={{ x: 2500 }}
         bordered

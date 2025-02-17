@@ -104,23 +104,25 @@ const GroupedBarChartComponent = dynamic(
 );
 
 // Hàm lọc đơn hàng theo preset (áp dụng cho orders và adsMoney)
-function filterByPreset(dataArray, preset) {
+function filterByPreset(dataArray, preset, dateField = "orderDate") {
   const now = new Date();
   let start, end;
   switch (preset) {
     case "today":
-      start = new Date();
-      end = new Date();
+      // Bắt đầu từ 00:00:00 đến 23:59:59 của hôm nay
+      start = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      end = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999);
       break;
     case "week":
-      start = new Date();
-      start.setDate(now.getDate() - 7);
-      end = now;
+      // 7 ngày gần nhất: từ ngày 7 ngày trước (00:00:00) đến hôm nay (23:59:59)
+      start = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 7);
+      end = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999);
       break;
-    case "currentMonth":
-      start = new Date(now.getFullYear(), now.getMonth(), 1);
-      end = now;
-      break;
+      case "currentMonth":
+        // Từ ngày 1 của tháng đến cuối ngày hôm nay
+        start = new Date(now.getFullYear(), now.getMonth(), 1);
+        end = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999);
+        break;
     case "lastMonth":
       start = new Date(now.getFullYear(), now.getMonth() - 1, 1);
       end = new Date(now.getFullYear(), now.getMonth(), 0);
@@ -490,7 +492,7 @@ export default function HomePage() {
       </Row>
       
       <h2 style={{ marginTop: "2rem" }}>
-        {isFilterApplied ? "Doanh số &amp; Ads hàng ngày (theo bộ lọc)" : "Doanh số &amp; Ads hàng ngày (30 ngày gần nhất)"}
+        {isFilterApplied ? "Doanh số & chi phí Ads hàng ngày (theo bộ lọc)" : "Doanh số & chi phí Ads hàng ngày (30 ngày gần nhất)"}
       </h2>
       <GroupedDoubleBarChartComponent data={dailyChartDataNew} />
       
