@@ -61,6 +61,16 @@ const menuItems = [
    
   },
   {
+    key: 'sub7',
+    label: 'Tên page',
+    icon: <AppstoreOutlined />,
+    href: '/pagesName',
+   
+     
+      
+   
+  },
+  {
     key: 'sub5',
     label: 'Quản lý tài khoản',
     icon: <AppstoreOutlined />,

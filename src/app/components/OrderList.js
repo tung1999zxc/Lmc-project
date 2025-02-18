@@ -48,6 +48,7 @@ const OrderList = () => {
   .filter(order => order.position_team === 'mkt')
   .map(order => order.name);
  
+ 
   const saleOptions = employees
   .filter(order => order.position_team === 'sale')
   .map(order => order.name);
@@ -84,6 +85,11 @@ const OrderList = () => {
     } else if (currentUser.position === "salenhapdon") {
       roleFilteredOrders = roleFilteredOrders.filter(
         (order) => order.employee_code_order === currentUser.employee_code
+      );
+    } else if (currentUser.position === "salexuly") {
+     
+      roleFilteredOrders = roleFilteredOrders.filter(
+        (order) => order.salexuly === currentUser.name
       );
     } else if (currentUser.position_team === "kho") {
       roleFilteredOrders = roleFilteredOrders.filter(
@@ -160,6 +166,12 @@ const OrderList = () => {
           break;
         case "waiting_approval":
           filterMatch = order.saleReport === "ĐỢI XN";
+          break;
+        case "done":
+          filterMatch = order.saleReport === "DONE";
+          break;
+        case "waiting_done":
+          filterMatch = order.saleReport !== "DONE";
           break;
         case "same_sale":
           filterMatch = selectedSale ? order.sale === selectedSale : true;
@@ -402,14 +414,14 @@ const OrderList = () => {
   return (
     <div style={{ padding: 24 }}>
       <div style={{ marginBottom: 16 }}>
-        <Button type="primary" onClick={handleAddNew}>
+        <Button type="primary" onClick={handleAddNew} disabled= {currentUser.position_team ==='mkt'||currentUser.position_team ==='kho'}>
           Thêm đơn hàng mới
         </Button>
       </div>
 
       <Row gutter={[16, 16]} style={{ marginBottom: 24 }}>
         <Col span={6}>
-          <RangePicker
+          <RangePicker allowClear
             format="DD/MM/YYYY"
             onChange={(dates) => setDateRange(dates)}
             style={{ width: "100%" }}
@@ -431,6 +443,8 @@ const OrderList = () => {
             options={[
               
               { value: "today", label: "Đơn mới trong ngày" },
+              { value: "done", label: "Đơn đã Done" },
+              { value: "waiting_done", label: "Đơn chưa Done" },
               { value: "not_delivered", label: "Đã gửi hàng" },
               { value: "delivered", label: "Giao thành công" },
               { value: "unpaid_success", label: "Chưa thanh toán & Giao Thành công" },

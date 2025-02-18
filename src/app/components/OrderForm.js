@@ -13,7 +13,7 @@ import {
 import dayjs from "dayjs";
 import { useDispatch, useSelector } from 'react-redux';
 
-
+import moment from 'moment';
 
 
 const OrderForm = ({ visible, onCancel, onSubmit, initialValues }) => {
@@ -22,13 +22,31 @@ const OrderForm = ({ visible, onCancel, onSubmit, initialValues }) => {
   const currentUser = useSelector((state) => state.user.currentUser);
   // Giả sử: nếu mã nhân viên là 1 thì isEmployee1 = true
   const [productOptions, setProductOptions] = useState([]);
+  const [dataPagename, setdataPagename] = useState([]);
   const employees = useSelector((state) => state.employees.employees);
   // Danh sách options
-  
+  const [pageName, setPageName] = useState("");
+  const [employeeNamepage, setEmployeeNamepage] = useState("");
   const mktOptions = employees
   .filter(order => order.position_team === 'mkt')
   .map(order => order.name);
 
+  const pageMapping = dataPagename.reduce((acc, item) => {
+    const page = item.pageName.trim();
+    acc[page] = item.employee;
+    return acc;
+  }, {});
+
+  const handlePageNameChange = (value) => {
+    setPageName(value);
+    const mappedEmployee = pageMapping[value] || "";
+    setEmployeeNamepage(mappedEmployee);
+    form.setFieldsValue({ mkt: mappedEmployee });
+  };
+
+
+    // Nếu có mapping, tự động cập nhật tên nhân viên tương ứng
+   
   const handleTTXLOptions = [
     "THIẾU/SAI",
     "TÌM HÀNG",
@@ -46,6 +64,11 @@ const OrderForm = ({ visible, onCancel, onSubmit, initialValues }) => {
 
   const saleOptions = employees
   .filter(order => order.position_team === 'sale')
+  .map(order => order.name);
+  const pageNameOptions = dataPagename
+  .map(order => order.pageName);
+  const salexulyOptions = employees
+  .filter(order => order.position === 'salexuly')
   .map(order => order.name);
 
   const saleBaoOptions = [
@@ -70,6 +93,10 @@ const OrderForm = ({ visible, onCancel, onSubmit, initialValues }) => {
       const productNames = localStorage.getItem("productNames");
       if (productNames) {
         setProductOptions(JSON.parse(productNames));
+      }
+      const productNames2 = localStorage.getItem("orders3");
+      if (productNames2) {
+        setdataPagename(JSON.parse(productNames2));
       }
     }
   }, []);
@@ -233,7 +260,7 @@ const OrderForm = ({ visible, onCancel, onSubmit, initialValues }) => {
             </Form.Item>
             <Form.Item label="Chọn SALE Xử lý" name="salexuly" hidden={currentUser.position === 'kho1'||currentUser.position === 'kho2'}>
                   <Select showSearch>
-                    {saleOptions.map((sale) => (
+                    {salexulyOptions.map((sale) => (
                       <Option key={sale} value={sale}>
                         {sale}
                       </Option>
@@ -267,7 +294,7 @@ const OrderForm = ({ visible, onCancel, onSubmit, initialValues }) => {
           <Form form={form} layout="vertical" onFinish={onFinish}>
             <Row gutter={16}>
               <Col span={8}>
-                <Form.Item label="NGÀY ĐẶT" name="orderDate">
+                <Form.Item  initialValue={moment()} label="NGÀY ĐẶT" name="orderDate">
                   <DatePicker style={{ width: "100%" }} />
                 </Form.Item>
                 <Form.Item label="Hàng nặng/nhẹ" name="mass">
@@ -283,22 +310,26 @@ const OrderForm = ({ visible, onCancel, onSubmit, initialValues }) => {
                   <Input />
                 </Form.Item>
                 <Form.Item label="TÊN PAGE" name="pageName">
-                  <Input />
-                </Form.Item>
-                <Form.Item label="MKT" name="mkt">
-                  <Select showSearch>
-                    {mktOptions.map((mkt) => (
-                      <Option key={mkt} value={mkt}>
-                        {mkt}
-                      </Option>
+                <Select showSearch onChange={handlePageNameChange} >
+                    {pageNameOptions.map((pageName) => (
+                      <Option key={pageName} value={pageName} >
+                        {pageName}
+                      </Option >
                     ))}
                   </Select> 
+                </Form.Item>
+                <Form.Item label="MKT" name="mkt">
+                <Input 
+          placeholder="Tên nhân viên" 
+          value={employeeNamepage} 
+          readOnly 
+        /> 
                 </Form.Item>
                
               </Col>
               <Col span={8}>
-              <Form.Item label="SẢN PHẨM" name="product">
-                  <Select>
+              <Form.Item showSearch label="SẢN PHẨM" name="product">
+                  <Select showSearch>
                     {productOptions.map((product) => (
                       <Option key={product} value={product}>
                         {product}
@@ -313,18 +344,18 @@ const OrderForm = ({ visible, onCancel, onSubmit, initialValues }) => {
                 <Input />
                 </Form.Item>
                 
-                <Form.Item label="SALE" name="sale">
-                  <Select showSearch>
-                  {saleOptions.map((sale, idx) => (
-  <Option key={`${sale}-${idx}`} value={sale}>
-    {sale}
+                <Form.Item   label="SALE" name="sale">
+                  <Select  disabled= {initialValues} showSearch defaultValue={currentUser.name}>
+                  
+  <Option value={currentUser.name}>
+  {currentUser.name}
   </Option>
-))}
+
                   </Select>
                 </Form.Item>
                 <Form.Item label="Chọn SALE Xử lý" name="salexuly">
                   <Select showSearch>
-                    {saleOptions.map((sale) => (
+                    {salexulyOptions.map((sale) => (
                       <Option key={sale} value={sale}>
                         {sale}
                       </Option> 
