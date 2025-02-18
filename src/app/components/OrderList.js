@@ -212,12 +212,12 @@ const OrderList = () => {
         </Space>    
       )
     },
-    {
-      title: "STT",
-      dataIndex: "stt",
-      key: "orderDate1",
+    // {
+    //   title: "STT",
+    //   dataIndex: "stt",
+    //   key: "orderDate1",
       
-    },
+    // },
     {
       title: "NGÀY ĐẶT",
       dataIndex: "orderDate",

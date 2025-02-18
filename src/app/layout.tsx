@@ -9,20 +9,20 @@ const { Header, Content, Sider } = Layout;
 import {  useEffect } from "react";
 const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
   const [collapsed, setCollapsed] = useState(false);
-  useEffect(() => {
-    // Áp dụng scale khi component được mount
-    document.documentElement.style.transform = "scale(0.85)";
-    document.documentElement.style.transformOrigin = "top left";
-    document.documentElement.style.width = "120%";
+  // useEffect(() => {
+  //   // Áp dụng scale khi component được mount
+  //   document.documentElement.style.transform = "scale(0.85)";
+  //   document.documentElement.style.transformOrigin = "top left";
+  //   document.documentElement.style.width = "100vh";
    
 
-    return () => {  
-      // Reset lại khi component unmount
-      document.documentElement.style.transform = "";
-      document.documentElement.style.transformOrigin = "";
-    document.documentElement.style.width = "";
-    };
-  }, []);
+  //   return () => {  
+  //     // Reset lại khi component unmount
+  //     document.documentElement.style.transform = "";
+  //     document.documentElement.style.transformOrigin = "";
+  //   document.documentElement.style.width = "";
+  //   };
+  // }, []);
   return (
     <html lang="en" >
       <body><Provider store={store}>

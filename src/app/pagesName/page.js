@@ -1,6 +1,6 @@
 'use client'
 import { useState,useEffect } from "react";
-import { Table, Input, Select, Button, Space, message, Modal } from "antd";
+import { Table, Input, Select, Button, Space, Popconfirm , message, Modal } from "antd";
 import { EditOutlined, DeleteOutlined } from "@ant-design/icons";
 import { useDispatch, useSelector } from 'react-redux';
 
@@ -86,11 +86,13 @@ const EmployeePageTable = () => {
             icon={<EditOutlined />}
             onClick={() => handleEdit(record)}
           />
-          <Button
-            type="danger"
-            icon={<DeleteOutlined />}
-            onClick={() => handleDelete(record.key)}
-          />
+          
+           <Popconfirm
+                  title="Xóa bản ghi?"
+                  onConfirm={() => handleDelete(record.key)}
+                >
+                  <Button danger icon={<DeleteOutlined />} />
+                </Popconfirm>
         </Space>
       ),
     },
