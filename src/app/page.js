@@ -2,7 +2,7 @@
 'use client'
 import React, { useState } from 'react';
 import dynamic from 'next/dynamic';
-import { Select, Row, Col } from 'antd';
+import { Select, Row, Col, Table, Button, Input } from 'antd';
 const { Option } = Select;
 
 // Component biểu đồ Bar (Recharts) cho biểu đồ đơn (có 1 series)
@@ -104,7 +104,7 @@ const GroupedBarChartComponent = dynamic(
 );
 
 // Hàm lọc đơn hàng theo preset (áp dụng cho orders và adsMoney)
-function filterByPreset(dataArray, preset, dateField = "orderDate") {
+function filterByPreset(dataArray, preset) {
   const now = new Date();
   let start, end;
   switch (preset) {
@@ -118,11 +118,11 @@ function filterByPreset(dataArray, preset, dateField = "orderDate") {
       start = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 7);
       end = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999);
       break;
-      case "currentMonth":
-        // Từ ngày 1 của tháng đến cuối ngày hôm nay
-        start = new Date(now.getFullYear(), now.getMonth(), 1);
-        end = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999);
-        break;
+    case "currentMonth":
+      // Từ ngày 1 của tháng đến cuối ngày hôm nay
+      start = new Date(now.getFullYear(), now.getMonth(), 1);
+      end = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999);
+      break;
     case "lastMonth":
       start = new Date(now.getFullYear(), now.getMonth() - 1, 1);
       end = new Date(now.getFullYear(), now.getMonth(), 0);
@@ -165,6 +165,10 @@ export default function HomePage() {
   const [selectedDate, setSelectedDate] = useState(today);
   const [selectedPreset, setSelectedPreset] = useState('');
 
+  // State cho tỉ giá VNĐ và ô nhập giá trị
+  const [exchangeRate, setExchangeRate] = useState(17000);
+  const [exchangeRateInput, setExchangeRateInput] = useState(17000);
+
   // Dữ liệu teams
   const teams = [
     { label: 'TEAM SƠN', value: 'SON' },
@@ -174,8 +178,7 @@ export default function HomePage() {
   ];
 
   // Dữ liệu nhân viên (mẫu)
-   // Dữ liệu nhân viên (mẫu)
-   const employees = [
+  const employees = [
     {
       employee_id: 1739255931642,
       employee_code: 3037,
@@ -194,8 +197,6 @@ export default function HomePage() {
       team_id: "SON",
       position_team: "mkt"
     },
-  
- 
     {
       employee_id: 1739263402531,
       employee_code: 8193,
@@ -250,7 +251,6 @@ export default function HomePage() {
       team_id: "CHI",
       position_team: "mkt"
     },
- 
     {
       employee_id: 1739299175410,
       employee_code: 7932,
@@ -269,41 +269,37 @@ export default function HomePage() {
       team_id: "SON",
       position_team: "mkt"
     },
- 
-   
-   
-  
   ];
 
   // Dữ liệu đơn hàng mẫu
   const orders = [
-    { orderDate: "2025-01-01", mkt: "tùngmkt", profit: 100 },
-    { orderDate: "2025-01-01", mkt: "10", profit: 100 },
-    { orderDate: "2025-01-02", mkt: "3", profit: 150 },
-    { orderDate: "2025-01-03", mkt: "4", profit: 200 },
-    { orderDate: "2025-01-04", mkt: "5", profit: 250 },
-    { orderDate: "2025-01-05", mkt: "1", profit: 300 },
-    { orderDate: "2025-01-06", mkt: "2", profit: 350 },
-    { orderDate: "2025-01-07", mkt: "6", profit: 400 },
-    { orderDate: "2025-02-17", mkt: "1", profit: 900 },
-    { orderDate: "2025-02-17", mkt: "2", profit: 1000 },
-    { orderDate: "2025-02-17", mkt: "3", profit: 800 },
-    { orderDate: "2025-02-17", mkt: "4", profit: 400 },
-    { orderDate: "2024-12-17", mkt: "4", profit: 400 },
+    { orderDate: "2025-01-01", mkt: "tùngmkt", profit: 100, paymentStatus: "CHƯA THANH TOÁN" },
+    { orderDate: "2025-01-01", mkt: "10", profit: 100, paymentStatus: "ĐÃ THANH TOÁN" },
+    { orderDate: "2025-01-02", mkt: "3", profit: 150, paymentStatus: "CHƯA THANH TOÁN" },
+    { orderDate: "2025-01-03", mkt: "4", profit: 200, paymentStatus: "ĐÃ THANH TOÁN" },
+    { orderDate: "2025-01-04", mkt: "5", profit: 250, paymentStatus: "ĐÃ THANH TOÁN" },
+    { orderDate: "2025-01-05", mkt: "1", profit: 300, paymentStatus: "CHƯA THANH TOÁN" },
+    { orderDate: "2025-01-06", mkt: "2", profit: 350, paymentStatus: "ĐÃ THANH TOÁN" },
+    { orderDate: "2025-01-07", mkt: "6", profit: 400, paymentStatus: "CHƯA THANH TOÁN" },
+    { orderDate: "2025-02-17", mkt: "1", profit: 900, paymentStatus: "ĐÃ THANH TOÁN" },
+    { orderDate: "2025-02-17", mkt: "2", profit: 1000, paymentStatus: "ĐÃ THANH TOÁN" },
+    { orderDate: "2025-02-17", mkt: "3", profit: 800, paymentStatus: "CHƯA THANH TOÁN" },
+    { orderDate: "2025-02-17", mkt: "4", profit: 400, paymentStatus: "ĐÃ THANH TOÁN" },
+    { orderDate: "2024-12-17", mkt: "4", profit: 400, paymentStatus: "ĐÃ THANH TOÁN" },
   ];
 
   // Dữ liệu chi phí ads (adsMoney)
   const adsMoneyData = [
-    { date: "2025-02-17", excessMoney: 100, teamnv: "LE", adsMoney: 100, name: "1" },
-    { date: "2025-02-17", excessMoney: 200, teamnv: "QUAN", adsMoney: 200, name: "2" },
-    { date: "2025-02-17", excessMoney: 250, teamnv: "SON", adsMoney: 400, name: "3" },
-    { date: "2025-02-17", excessMoney: 100, teamnv: "CHI", adsMoney: 300, name: "4" },
-    { date: "2024-12-17", excessMoney: 100, teamnv: "CHI", adsMoney: 300, name: "4" },
-    { date: "2025-02-17", excessMoney: 100, teamnv: "LE", adsMoney: 100, name: "4" },
-    { date: "2025-01-02", excessMoney: 100, teamnv: "LE", adsMoney: 200, name: "3" },
-    { date: "2025-01-05", excessMoney: 100, teamnv: "QUAN", adsMoney: 300, name: "1" },
-    { date: "2025-01-01", excessMoney: 100, teamnv: "SON", adsMoney: 400, name: "10" },
-    { date: "2025-01-06", excessMoney: 100, teamnv: "CHI", adsMoney: 200, name: "2" },
+    { date: "2025-02-17", excessMoney: 100, teamnv: "LE", adsMoney: 5000000, name: "1" },
+    { date: "2025-02-17", excessMoney: 200, teamnv: "QUAN", adsMoney: 200000, name: "2" },
+    { date: "2025-02-17", excessMoney: 250, teamnv: "SON", adsMoney: 400000, name: "3" },
+    { date: "2025-02-17", excessMoney: 100, teamnv: "CHI", adsMoney: 3000000, name: "4" },
+    { date: "2024-12-17", excessMoney: 100, teamnv: "CHI", adsMoney: 300000, name: "4" },
+    { date: "2025-02-17", excessMoney: 100, teamnv: "LE", adsMoney: 100000, name: "4" },
+    { date: "2025-01-02", excessMoney: 100, teamnv: "LE", adsMoney: 2000000, name: "3" },
+    { date: "2025-01-05", excessMoney: 100, teamnv: "QUAN", adsMoney: 300000, name: "1" },
+    { date: "2025-01-01", excessMoney: 100, teamnv: "SON", adsMoney: 400000, name: "10" },
+    { date: "2025-01-06", excessMoney: 100, teamnv: "CHI", adsMoney: 200000, name: "2" },
   ];
 
   // Lọc đơn hàng theo preset hoặc theo ngày được chọn
@@ -326,8 +322,12 @@ export default function HomePage() {
   // === Biểu đồ doanh số theo nhân viên (Grouped Double Bar Chart) ===
   const mktEmployees = employees.filter(emp => emp.position_team === "mkt");
   const employeeChartDataNew = mktEmployees.map(emp => {
-    const sales = filteredOrders.filter(order => order.mkt === emp.name).reduce((sum, order) => sum + order.profit, 0);
-    const adsCost = filteredAds.filter(ad => ad.name === emp.name).reduce((sum, ad) => sum + ad.adsMoney, 0);
+    const sales = filteredOrders
+      .filter(order => order.mkt === emp.name)
+      .reduce((sum, order) => sum + order.profit, 0);
+    const adsCost = filteredAds
+      .filter(ad => ad.name === emp.name)
+      .reduce((sum, ad) => sum + ad.adsMoney, 0);
     return { name: emp.name, profit: sales, adsCost };
   });
 
@@ -335,11 +335,15 @@ export default function HomePage() {
   const teamChartDataNew = teams.map(team => {
     const teamEmps = employees.filter(emp => emp.position_team === "mkt" && emp.team_id === team.value);
     const sales = teamEmps.reduce((acc, emp) => {
-      const empSales = filteredOrders.filter(order => order.mkt === emp.name).reduce((sum, order) => sum + order.profit, 0);
+      const empSales = filteredOrders
+        .filter(order => order.mkt === emp.name)
+        .reduce((sum, order) => sum + order.profit, 0);
       return acc + empSales;
     }, 0);
     const adsCost = teamEmps.reduce((acc, emp) => {
-      const empAds = filteredAds.filter(ad => ad.name === emp.name).reduce((sum, ad) => sum + ad.adsMoney, 0);
+      const empAds = filteredAds
+        .filter(ad => ad.name === emp.name)
+        .reduce((sum, ad) => sum + ad.adsMoney, 0);
       return acc + empAds;
     }, 0);
     return { name: team.label, profit: sales, adsCost };
@@ -363,15 +367,23 @@ export default function HomePage() {
       currentDate.setDate(currentDate.getDate() + 1);
     }
     dailyChartDataNew = dateArray.map(date => {
-      const sales = filteredOrders.filter(order => order.orderDate === date).reduce((sum, order) => sum + order.profit, 0);
-      const adsCost = filteredAds.filter(ad => ad.date === date).reduce((sum, ad) => sum + ad.adsMoney, 0);
+      const sales = filteredOrders
+        .filter(order => order.orderDate === date)
+        .reduce((sum, order) => sum + order.profit, 0);
+      const adsCost = filteredAds
+        .filter(ad => ad.date === date)
+        .reduce((sum, ad) => sum + ad.adsMoney, 0);
       return { name: date, profit: sales, adsCost };
     });
   } else {
     const last30Days = getLast30Days();
     dailyChartDataNew = last30Days.map(date => {
-      const sales = orders.filter(order => order.orderDate === date).reduce((sum, order) => sum + order.profit, 0);
-      const adsCost = adsMoneyData.filter(ad => ad.date === date).reduce((sum, ad) => sum + ad.adsMoney, 0);
+      const sales = orders
+        .filter(order => order.orderDate === date)
+        .reduce((sum, order) => sum + order.profit, 0);
+      const adsCost = adsMoneyData
+        .filter(ad => ad.date === date)
+        .reduce((sum, ad) => sum + ad.adsMoney, 0);
       return { name: date, profit: sales, adsCost };
     });
   }
@@ -387,7 +399,9 @@ export default function HomePage() {
   const averageTeamChartData = teams.map(team => {
     const teamEmps = employees.filter(emp => emp.position_team === "mkt" && emp.team_id === team.value);
     const teamProfit = teamEmps.reduce((acc, emp) => {
-      const empSales = filteredOrders.filter(order => order.mkt === emp.name).reduce((sum, order) => sum + order.profit, 0);
+      const empSales = filteredOrders
+        .filter(order => order.mkt === emp.name)
+        .reduce((sum, order) => sum + order.profit, 0);
       return acc + empSales;
     }, 0);
     const avgProfit = teamEmps.length > 0 ? teamProfit / teamEmps.length : 0;
@@ -401,21 +415,121 @@ export default function HomePage() {
     const leaderEmps = teamEmps.filter(emp => emp.position === "lead");
     const othersEmps = teamEmps.filter(emp => emp.position !== "lead");
     const leaderSales = leaderEmps.reduce((acc, emp) => {
-      const empSales = filteredOrders.filter(order => order.mkt === emp.name).reduce((sum, order) => sum + order.profit, 0);
+      const empSales = filteredOrders
+        .filter(order => order.mkt === emp.name)
+        .reduce((sum, order) => sum + order.profit, 0);
       return acc + empSales;
     }, 0);
     const othersSales = othersEmps.reduce((acc, emp) => {
-      const empSales = filteredOrders.filter(order => order.mkt === emp.name).reduce((sum, order) => sum + order.profit, 0);
+      const empSales = filteredOrders
+        .filter(order => order.mkt === emp.name)
+        .reduce((sum, order) => sum + order.profit, 0);
       return acc + empSales;
     }, 0);
     const leaderPercent = othersSales !== 0 ? ((leaderSales / othersSales) * 100).toFixed(2) : (leaderSales > 0 ? 100 : 0);
     return { team: team.label, leader: leaderSales, others: othersSales, leaderPercent };
   });
 
-  // Component cho biểu đồ nhóm so sánh Leader vs Others (đã được định nghĩa ở trên: GroupedBarChartComponent)
+  // === Tính dữ liệu cho Báo cáo marketing ===
+  // Lấy tất cả nhân viên có position_team = "mkt" (đã có biến mktEmployees)
+  const marketingReportData = mktEmployees.map((emp, index) => {
+    const paid = filteredOrders
+      .filter(order => order.mkt === emp.name && order.paymentStatus === "ĐÃ THANH TOÁN")
+      .reduce((sum, order) => sum + order.profit, 0);
+    const unpaid = filteredOrders
+      .filter(order => order.mkt === emp.name && order.paymentStatus === "CHƯA THANH TOÁN")
+      .reduce((sum, order) => sum + order.profit, 0);
+    const total = paid + unpaid;
+    const tienVND = total * exchangeRate;
+    const totalAds = filteredAds
+      .filter(ad => ad.name === emp.name)
+      .reduce((sum, ad) => sum + ad.adsMoney, 0);
+    const adsPercent = tienVND ? ((totalAds / tienVND) * 100).toFixed(2) : "0.00";
+    return { key: index, name: emp.name, paid, unpaid, total, tienVND, totalAds, adsPercent };
+  });
+  // Sắp xếp theo cột "Tiền VNĐ" giảm dần
+  marketingReportData.sort((a, b) => b.tienVND - a.tienVND);
+
+  // Định nghĩa các cột cho bảng báo cáo marketing
+  const marketingColumns = [
+    {
+      title: "Tên",
+      dataIndex: "name",
+      key: "name",
+      render: (text) => {
+        // Tìm nhân viên có name trùng với text
+        const emp = employees.find((item) => item.name === text);
+        // Nếu nhân viên có position là "lead" thì áp dụng nền màu vàng (hoặc màu vàng nhạt)
+        const style =
+          emp && emp.position === "lead"
+            ? { backgroundColor: "#58DC82", padding: "4px 8px", borderRadius: "4px" }
+            : {};
+        return <div style={style}>{text}</div>;
+      },
+    },
+    {
+      title: "Đã thanh toán",
+      dataIndex: "paid",
+      key: "paid",
+      render: (value) => value.toLocaleString()
+    },
+    {
+      title: "Chưa thanh toán",
+      dataIndex: "unpaid",
+      key: "unpaid",
+      render: (value) => value.toLocaleString()
+    },
+    {
+      title: "Tổng",
+      dataIndex: "total",
+      key: "total",
+      render: (value) => value.toLocaleString()
+    },
+    {
+      title: "Tiền VNĐ",
+      dataIndex: "tienVND",
+      key: "tienVND",
+      render: (value) => value.toLocaleString()
+    },
+    {
+      title: "Tổng chi phí ads",
+      dataIndex: "totalAds",
+      key: "totalAds",
+      render: (value) => value.toLocaleString()
+    },
+    {
+      title: "% chi phí ads",
+      dataIndex: "adsPercent",
+      key: "adsPercent",
+      render: (value) => {
+        const percent = Number(value);
+        let bgColor = "";
+        if (percent < 30) {
+          bgColor = "#54DA1F"; // nền xanh lá (màu xanh nhạt)
+        } else if (percent >= 30 && percent <= 35) {
+          bgColor = "#FC6D6E"; // nền vàng nhạt
+        } else {
+          bgColor = "#EC2527"; // nền đỏ nhạt
+        }
+        return (
+          <div
+            style={{
+              backgroundColor: bgColor,
+              padding: "4px 8px",
+              borderRadius: "4px",
+              textAlign: "center",
+              fontWeight: "bold"
+            }}
+          >
+            {percent.toFixed(2)}%
+          </div>
+        );
+      }
+    },
+  ];  
 
   // Component hiển thị Grouped Double Bar Chart cho các biểu đồ có 2 series: profit và adsCost
-  const GroupedDoubleBarChartComponent = dynamic(
+  const GroupedDoubleBarChartComponentLocal = dynamic(
     () =>
       Promise.resolve(({ data }) => {
         const { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend } = require('recharts');
@@ -436,8 +550,6 @@ export default function HomePage() {
 
   return (
     <div style={{ padding: "2rem" }}>
-      
-      
       {/* Bộ lọc */}
       <div style={{ marginBottom: "1rem" }}>
         <label htmlFor="dateFilter" style={{ marginRight: "0.5rem" }}>Chọn ngày:</label>
@@ -472,10 +584,27 @@ export default function HomePage() {
           <Option value="threeMonthsAgo">3 Tháng trước</Option>
         </Select>
       </div>
-      
+
+      {/* Ô nhập Tỉ giá VNĐ và nút Sửa giá trị */}
+      <div style={{ marginBottom: "1rem" }}>
+        <label htmlFor="exchangeRate" style={{ marginRight: "0.5rem" }}>Tỉ giá VNĐ:</label>
+        <Input
+          type="number"
+          id="exchangeRate"
+          value={exchangeRateInput}
+          onChange={(e) => setExchangeRateInput(Number(e.target.value))}
+          style={{ width: "200px", marginRight: "1rem" }}
+        />
+        <Button type="primary" onClick={() => setExchangeRate(exchangeRateInput)}>
+          Sửa giá trị
+        </Button>
+      </div>
+{/* Báo cáo Marketing */}
+<h2 style={{ marginTop: "2rem" }}>Báo cáo marketing</h2>
+      <Table columns={marketingColumns} dataSource={marketingReportData} pagination={false} />
       <Row gutter={[16, 16]}>
         <Col xs={24} md={12}>
-          <h2>Doanh số &amp; chi phí  Ads theo Team</h2>
+          <h2>Doanh số &amp; chi phí Ads theo Team</h2>
           <GroupedDoubleBarChartComponent data={teamChartDataNew} />
         </Col>
         <Col xs={24} md={12}>
@@ -483,26 +612,30 @@ export default function HomePage() {
           <PieChartComponent data={teamPieData} />
         </Col>
       </Row>
-      
+
       <Row style={{ marginTop: "2rem" }}>
         <Col span={24}>
           <h2>Doanh số &amp; chi phí Ads theo Nhân viên</h2>
           <GroupedDoubleBarChartComponent data={employeeChartDataNew} />
         </Col>
       </Row>
-      
+
       <h2 style={{ marginTop: "2rem" }}>
-        {isFilterApplied ? "Doanh số & chi phí Ads hàng ngày (theo bộ lọc)" : "Doanh số & chi phí Ads hàng ngày (30 ngày gần nhất)"}
+        {isFilterApplied
+          ? "Doanh số & chi phí Ads hàng ngày (theo bộ lọc)"
+          : "Doanh số & chi phí Ads hàng ngày (30 ngày gần nhất)"}
       </h2>
-      <GroupedDoubleBarChartComponent data={dailyChartDataNew} />
-      
+      <GroupedDoubleBarChartComponentLocal data={dailyChartDataNew} />
+
       <h2 style={{ marginTop: "2rem" }}>Doanh số trung bình theo Nhân viên theo Team</h2>
       <BarChartComponent data={averageTeamChartData} />
-      
+
       <h2 style={{ marginTop: "2rem" }}>
         So sánh doanh số: Leader vs Các nhân viên khác trong Team
       </h2>
       <GroupedBarChartComponent data={leaderComparisonChartData} />
+
+      
     </div>
   );
 }

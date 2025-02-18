@@ -23,7 +23,7 @@ const { Option } = Select;
 const Dashboard = () => {
   const currentUser = useSelector((state) => state.user.currentUser);
   const employees = useSelector((state) => state.employees.employees);
-
+const [period, setPeriod] = useState("month");
   const [form] = Form.useForm();
   const [sampleOrders, setSampleOrders] = useState([]);
   const [records, setRecords] = useState([]);
@@ -95,6 +95,33 @@ const Dashboard = () => {
     },
   ];
 
+const filterSampleOrdersByPeriod = (order) => {
+    const orderDate = moment(order.orderDate, "YYYY-MM-DD");
+    const now = moment();
+    if (period === "week") {
+      // 1 Tuần Gần Nhất: từ 7 ngày trước đến hiện tại
+      return orderDate.isSameOrAfter(now.clone().subtract(7, "days"), "day");
+    } else if (period === "month") {
+      // Tháng Này: từ đầu tháng đến hiện tại
+      return orderDate.isSame(now, "month") && orderDate.isSameOrAfter(now.clone().startOf("month"));
+    } else if (period === "lastMonth") {
+      // Tháng Trước: toàn bộ tháng trước
+      const lastMonth = now.clone().subtract(1, "months");
+      return orderDate.isSame(lastMonth, "month");
+    } else if (period === "twoMonthsAgo") {
+      // 2 Tháng Trước: toàn bộ tháng cách đây 2 tháng
+      const twoMonthsAgo = now.clone().subtract(2, "months");
+      return orderDate.isSame(twoMonthsAgo, "month");
+    }
+    return true;
+  };
+ // Tính tổng doanh số cho một nhân viên dựa trên sampleOrders đã được lọc theo thời gian
+  const computeTotalSales = (employeeName) => {
+    const totalProfit = sampleOrders
+      .filter((p) => p.mkt === employeeName && filterSampleOrdersByPeriod(p))
+      .reduce((sum, p) => sum + p.profit, 0)*17000;
+      return totalProfit.toLocaleString('vi-VN');
+  };
   /*** Hàm nhóm record theo userId ***/
   const groupRecordsByUser = (records) => {
     return records.reduce((acc, record) => {
@@ -247,10 +274,32 @@ const Dashboard = () => {
         const totalSalesForSelectedDate = computeTotalSalesForDate(record.date, record.name);
         const total = record.oldMoney + record.request1 + record.request2;
         if (totalSalesForSelectedDate === 0) return 'N/A';
-        const percent = ((total - record.excessMoney) / totalSalesForSelectedDate) * 100;
-        return `${percent.toFixed(2)}%`;
+        const percent = Number(((total - record.excessMoney) / totalSalesForSelectedDate) * 100);
+        
+        let bgColor = "";
+        if (percent < 30) {
+          bgColor = "#54DA1F"; // nền xanh lá (màu xanh nhạt)
+        } else if (percent >= 30 && percent <= 35) {
+          bgColor = "#FC6D6E"; // nền vàng nhạt
+        } else {
+          bgColor = "#EC2527"; // nền đỏ nhạt
+        }
+        return (
+          <div
+            style={{
+              backgroundColor: bgColor,
+              padding: "4px 8px",
+              borderRadius: "4px",
+              textAlign: "center",
+              fontWeight: "bold"
+            }}
+          >
+            {percent.toFixed(2)}%
+          </div>
+        );
       }
     },
+
     {
       title: 'Hành động',
       key: 'action',
@@ -360,18 +409,18 @@ const Dashboard = () => {
       {/* Bộ lọc */}
       <Row gutter={[16, 16]} style={{ marginBottom: 16 }}>
         <Col xs={24} sm={12} md={8}>
-          <div>
-            <span style={{ marginRight: 8 }}>Bộ lọc theo khoảng thời gian: </span>
-            <Select
-              defaultValue="7"
-              style={{ width: '100%' }}
-              onChange={(value) => setFilterOption(value)}
-            >
-              <Option value="1">1 ngày</Option>
-              <Option value="7">1 tuần</Option>
-              <Option value="30">1 tháng</Option>
-            </Select>
-          </div>
+          <div style={{ marginBottom: 16 }}>
+                  <Select
+                    value={period}
+                    onChange={(value) => setPeriod(value)}
+                    style={{ width: 250 }}
+                  >
+                    <Option value="week">1 Tuần Gần Nhất</Option>
+                    <Option value="month">Tháng Này</Option>
+                    <Option value="lastMonth">Tháng Trước</Option>
+                    <Option value="twoMonthsAgo">2 Tháng Trước</Option>
+                  </Select>
+                </div>
         </Col>
         {currentUser.position === 'managerMKT' && (
           <Col xs={24} sm={12} md={8}>
@@ -407,6 +456,9 @@ const Dashboard = () => {
             <Row gutter={[16, 16]} key={userId} style={{ marginBottom: 24 }}>
               <Col xs={24}>
                 <h4>Nhân viên: {userRecords?.[0]?.name}</h4>
+                <div style={{ fontWeight: "bold", marginBottom: 8 }}>
+            Tổng doanh số: {computeTotalSales(currentUser.name)}
+          </div>
               </Col>
               <Col xs={24}>
                 <Table
@@ -419,7 +471,10 @@ const Dashboard = () => {
               </Col>
             </Row>
           ))
-      ) : (
+      ) : (<>
+        <div style={{ fontWeight: "bold", marginBottom: 8 }}>
+            Tổng doanh số: {computeTotalSales(currentUser.name)}
+          </div>
         <Row gutter={[16, 16]}>
           <Col xs={24}>
             <Table
@@ -430,7 +485,7 @@ const Dashboard = () => {
               scroll={{ x: true }}
             />
           </Col>
-        </Row>
+        </Row></>
       )}
     </div>
   );
