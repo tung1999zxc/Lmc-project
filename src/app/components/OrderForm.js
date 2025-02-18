@@ -16,7 +16,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import moment from 'moment';
 
 
-const OrderForm = ({ visible, onCancel, onSubmit, initialValues }) => {
+const OrderForm = ({ visible, onCancel, onSubmit, initialValues ,namesalexuly }) => {
   const [form] = Form.useForm();
   const { Option } = Select;
   const currentUser = useSelector((state) => state.user.currentUser);
@@ -26,6 +26,7 @@ const OrderForm = ({ visible, onCancel, onSubmit, initialValues }) => {
   const employees = useSelector((state) => state.employees.employees);
   // Danh sách options
   const [pageName, setPageName] = useState("");
+  
   const [employeeNamepage, setEmployeeNamepage] = useState("");
   const mktOptions = employees
   .filter(order => order.position_team === 'mkt')
@@ -110,9 +111,10 @@ const OrderForm = ({ visible, onCancel, onSubmit, initialValues }) => {
       });
     } else {
       form.resetFields();
-    }
+    };
+    
   }, [initialValues, form]);
-
+  
   // Khi submit form, chuyển các giá trị ngày về chuỗi định dạng 'YYYY-MM-DD'
   const onFinish = (values) => {
     const submitValues = {
@@ -186,6 +188,15 @@ const OrderForm = ({ visible, onCancel, onSubmit, initialValues }) => {
             <Form.Item label="TÊN PAGE" name="pageName" hidden={currentUser.position === 'kho1'||currentUser.position === 'kho2'}>
               <Input />
             </Form.Item>
+            <Form.Item label="SALE Xử lý" name="salexuly" hidden={currentUser.position === 'kho1'||currentUser.position === 'kho2'}>
+  <Select>
+    {salexulyOptions.map((employee) => (
+      <Option key={employee} value={employee}>
+        {employee}
+      </Option>
+    ))}
+  </Select>
+</Form.Item>  
             <Form.Item label="SẢN PHẨM" name="product" hidden={currentUser.position === 'kho1'||currentUser.position === 'kho2'}>
               <Select>
                 {productOptions.map((product) => (
@@ -320,7 +331,7 @@ const OrderForm = ({ visible, onCancel, onSubmit, initialValues }) => {
                 </Form.Item>
                 <Form.Item label="MKT" name="mkt">
                 <Input 
-          placeholder="Tên nhân viên" 
+          
           value={employeeNamepage} 
           readOnly 
         /> 
@@ -345,23 +356,25 @@ const OrderForm = ({ visible, onCancel, onSubmit, initialValues }) => {
                 </Form.Item>
                 
                 <Form.Item   label="SALE" name="sale">
-                  <Select  disabled= {initialValues} showSearch defaultValue={currentUser.name}>
+                  <Select  disabled= {currentUser.position ==='salenhapdon'||currentUser.position ==='salexuly'} showSearch defaultValue={currentUser.name}>
                   
-  <Option value={currentUser.name}>
-  {currentUser.name}
-  </Option>
+                  {saleOptions.map((employee) => (
+      <Option key={employee} value={employee}>
+        {employee}
+      </Option>
+    ))}
 
                   </Select>
                 </Form.Item>
-                <Form.Item label="Chọn SALE Xử lý" name="salexuly">
-                  <Select showSearch>
-                    {salexulyOptions.map((sale) => (
-                      <Option key={sale} value={sale}>
-                        {sale}
-                      </Option> 
-                    ))}
-                  </Select>
-                </Form.Item>
+                <Form.Item  label="SALE Xử lý" name="salexuly" initialValue={namesalexuly}>
+  <Select disabled={currentUser.position ==='salenhapdon'||currentUser.position ==='salexuly'}>
+    {salexulyOptions.map((employee) => (
+      <Option key={employee} value={employee}>
+        {employee}
+      </Option>
+    ))}
+  </Select>
+</Form.Item>  
                
               </Col>
               <Col span={8}>

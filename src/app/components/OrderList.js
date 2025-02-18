@@ -32,10 +32,12 @@ const OrderList = () => {
   const [formVisible, setFormVisible] = useState(false);
   const [dateRange, setDateRange] = useState(undefined);
   const [searchText, setSearchText] = useState("");
+  const [namesalexuly, setnamesalexuly] = useState("");
   const [selectedFilter, setSelectedFilter] = useState("");
   const [selectedSale, setSelectedSale] = useState(undefined);
   const [selectedMKT, setSelectedMKT] = useState(undefined);
-  
+ 
+
   const leadTeamMembers = employees
   .filter(employee => employee.team_id === currentUser.team_id)
   .map(employee => employee.name);
@@ -51,6 +53,9 @@ const OrderList = () => {
  
   const saleOptions = employees
   .filter(order => order.position_team === 'sale')
+  .map(order => order.name);
+  const salexulyOptions = employees
+  .filter(order => order.position === 'salexuly')
   .map(order => order.name);
   // Giả lập quyền của người dùng: NVKHO = true nếu người dùng là kho, NVMKT = true nếu là MKT
  
@@ -72,6 +77,53 @@ const OrderList = () => {
       localStorage.setItem("orders", JSON.stringify(orders));
     }
   }, [orders]);
+  useEffect(() => {
+    // Hàm chuyển đổi ngày theo giờ địa phương sang chuỗi "YYYY-MM-DD"
+    const getLocalDateString = (date) => {
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, "0");
+      const day = String(date.getDate()).padStart(2, "0");
+      return `${year}-${month}-${day}`;
+    };
+  
+    // Lấy ngày hôm nay theo giờ địa phương (để khớp với order.orderDate)
+    const todayStr = getLocalDateString(new Date());
+    console.log("Today String:", todayStr);
+  
+    // Lọc các đơn hàng có orderDate là todayStr và saleReport === "DONE"
+    const filteredOrders = orders.filter(
+      (order) => order.orderDate === todayStr 
+    );
+    console.log("Filtered Orders:", filteredOrders);
+  
+    // Nếu không có đơn hàng nào trong ngày, reset state và thoát
+    if (filteredOrders.length === 0) {
+      setnamesalexuly("");
+      return;
+    }
+  
+    // Tính số đơn hàng đã xử lý theo từng nhân viên (salexulyOptions là mảng tên nhân viên)
+    const employeeOrderCounts = salexulyOptions.map((employee) => ({
+      name: employee,
+      count: filteredOrders.filter((order) => order.salexuly === employee).length,
+    }));
+    console.log("Employee Order Counts:", employeeOrderCounts);
+  
+    // Tìm số đơn hàng ít nhất
+    const minCount = Math.min(...employeeOrderCounts.map((emp) => emp.count));
+    console.log("Min Count:", minCount);
+  
+    // Tìm nhân viên đầu tiên có số đơn bằng minCount
+    const selectedEmployee = employeeOrderCounts.find(
+      (emp) => emp.count === minCount
+    );
+    console.log("Selected Employee:", selectedEmployee);
+  
+    // Nếu tìm được, cập nhật state namesalexuly
+    if (selectedEmployee) {
+      setnamesalexuly(selectedEmployee.name);
+    }
+  }, [orders, salexulyOptions]);
 
   // Lọc đơn hàng theo ngày, từ khóa tìm kiếm và các bộ lọc khác
   const filteredOrders = useMemo(() => {
@@ -89,7 +141,7 @@ const OrderList = () => {
     } else if (currentUser.position === "salexuly") {
      
       roleFilteredOrders = roleFilteredOrders.filter(
-        (order) => order.salexuly === currentUser.name
+        (order) =>( order.salexuly === currentUser.name && order.saleReport  === 'DONE')
       );
     } else if (currentUser.position_team === "kho") {
       roleFilteredOrders = roleFilteredOrders.filter(
@@ -250,6 +302,7 @@ const OrderList = () => {
     { title: "Hàng nặng/nhẹ", dataIndex: "mass", key: "quantity" },
     { title: "MKT", dataIndex: "mkt", key: "mkt" },
     { title: "SALE", dataIndex: "sale", key: "sale" },
+    { title: "SALE xử lý", dataIndex: "salexuly", key: "salexuly" },
     { title: "DOANH SỐ", dataIndex: "revenue", key: "revenue" },
     { title: "DOANH THU", dataIndex: "profit", key: "profit" },
     { title: "SĐT", dataIndex: "phone", key: "phone" },
@@ -414,10 +467,12 @@ const OrderList = () => {
   return (
     <div style={{ padding: 24 }}>
       <div style={{ marginBottom: 16 }}>
-        <Button type="primary" onClick={handleAddNew} disabled= {currentUser.position_team ==='mkt'||currentUser.position_team ==='kho'}>
+        <Button type="primary" onClick={handleAddNew} disabled= {currentUser.position_team ==='mkt'||currentUser.position_team ==='kho'||currentUser.position ==='salexuly'||currentUser.position ==='salexacnhan'}>
           Thêm đơn hàng mới
         </Button>
       </div>
+
+ 
 
       <Row gutter={[16, 16]} style={{ marginBottom: 24 }}>
         <Col span={6}>
@@ -495,6 +550,7 @@ const OrderList = () => {
         onCancel={() => setFormVisible(false)}
         onSubmit={handleSubmit}
         initialValues={orders.find((order) => order.id === currentEditId)}
+        namesalexuly={namesalexuly}
       />
     </div>
   );
