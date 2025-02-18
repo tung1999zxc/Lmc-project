@@ -29,7 +29,7 @@ export default function EmployeeManagement() {
     { label: 'Nhân viên Sale nhập đơn', value: 'salenhapdon' },
     { label: 'Nhân viên Sale xác nhận đơn', value: 'salexacnhan' },
     { label: 'Nhân viên Sale xử lý đơn', value: 'salexuly' },
-    { label: 'Nhân viên Sale Full', value: 'salefull' },
+    { label: 'Nhân viên Sale Online', value: 'salefull' },
     { label: 'Nhân viên kho', value: 'kho1' },
     { label: 'Nhân viên kho2', value: 'kho2' }
   ];
@@ -42,11 +42,11 @@ export default function EmployeeManagement() {
     { label: 'TEAM SƠN', value: 'SON' }, 
     { label: 'TEAM QUÂN', value: 'QUAN' }, 
     { label: 'TEAM CHI', value: 'CHI' }, 
+    { label: 'TEAM PHONG', value: 'PHONG' },   
+    { label: 'TEAM TUẤN ANH', value: 'TUANANH' }, 
+    { label: 'TEAM DIỆN', value: 'DIEN' }, 
     { label: 'TEAM LẺ', value: 'LE' }, 
-    { label: 'Team5', value: 5 },   
-    { label: 'Team6', value: 6 }, 
-    { label: 'Team7', value: 7 }, 
-    { label: 'Team8', value: 8 }, 
+    
   ];
 
   const getPositionLabel = (value) => {

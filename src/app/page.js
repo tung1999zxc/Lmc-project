@@ -29,7 +29,7 @@ const PieChartComponent = dynamic(
   () =>
     Promise.resolve(({ data }) => {
       const { PieChart, Pie, Cell, Tooltip, Legend } = require('recharts');
-      const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#AA336A', '#5A2D82'];
+      const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#AA336A', '#5A2D82','#144523'];
       return (
         <PieChart width={600} height={300}>
           <Pie
@@ -174,7 +174,10 @@ export default function HomePage() {
     { label: 'TEAM SƠN', value: 'SON' },
     { label: 'TEAM QUÂN', value: 'QUAN' },
     { label: 'TEAM CHI', value: 'CHI' },
-    { label: 'TEAM LẺ', value: 'LE' },
+    { label: 'TEAM PHONG', value: 'PHONG' },   
+    { label: 'TEAM TUẤN ANH', value: 'TUANANH' }, 
+    { label: 'TEAM DIỆN', value: 'DIEN' }, 
+    { label: 'TEAM LẺ', value: 'LE' }, 
   ];
 
   // Dữ liệu nhân viên (mẫu)

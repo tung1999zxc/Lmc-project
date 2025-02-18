@@ -69,7 +69,7 @@ const GroupedDoubleBarChartComponent = dynamic(
           <Bar dataKey="adsCost" fill="#FF8042" />
         </BarChart>
       );
-    }),
+    }), 
   { ssr: false, loading: () => <p>Loading Grouped Chart...</p> }
 );
 
@@ -277,19 +277,45 @@ export default function HomePage() {
 
   // Dữ liệu đơn hàng mẫu
   const orders = [
-    { orderDate: "2025-01-01", mkt: "tùngmkt", profit: 100 },
-    { orderDate: "2025-01-01", mkt: "10", profit: 100 },
-    { orderDate: "2025-01-02", mkt: "3", profit: 150 },
-    { orderDate: "2025-01-03", mkt: "4", profit: 200 },
-    { orderDate: "2025-01-04", mkt: "5", profit: 250 },
-    { orderDate: "2025-01-05", mkt: "1", profit: 300 },
-    { orderDate: "2025-01-06", mkt: "2", profit: 350 },
-    { orderDate: "2025-01-07", mkt: "6", profit: 400 },
-    { orderDate: "2025-02-17", mkt: "1", profit: 900 },
-    { orderDate: "2025-02-17", mkt: "2", profit: 1000 },
-    { orderDate: "2025-02-17", mkt: "3", profit: 800 },
-    { orderDate: "2025-02-17", mkt: "4", profit: 400 },
-    { orderDate: "2024-12-17", mkt: "4", profit: 400 },
+    { orderDate: "2025-01-01", mkt: "tùngmkt", profit: 100 ,paymentStatus
+      : 
+      "CHƯA THANH TOÁN"},
+    { orderDate: "2025-01-01", mkt: "10", profit: 100,paymentStatus
+      : 
+      "ĐÃ THANH TOÁN" },
+    { orderDate: "2025-01-02", mkt: "3", profit: 150 ,paymentStatus
+      : 
+      "CHƯA THANH TOÁN"},
+    { orderDate: "2025-01-03", mkt: "4", profit: 200,paymentStatus
+      : 
+      "ĐÃ THANH TOÁN" },
+    { orderDate: "2025-01-04", mkt: "5", profit: 250,paymentStatus
+      : 
+      "ĐÃ THANH TOÁN" },
+    { orderDate: "2025-01-05", mkt: "1", profit: 300,paymentStatus
+      : 
+      "CHƯA THANH TOÁN" },
+    { orderDate: "2025-01-06", mkt: "2", profit: 350,paymentStatus
+      : 
+      "ĐÃ THANH TOÁN" },
+    { orderDate: "2025-01-07", mkt: "6", profit: 400 ,paymentStatus
+      : 
+      "CHƯA THANH TOÁN"},
+    { orderDate: "2025-02-17", mkt: "1", profit: 900,paymentStatus
+      : 
+      "ĐÃ THANH TOÁN" },
+    { orderDate: "2025-02-17", mkt: "2", profit: 1000,paymentStatus
+      : 
+      "ĐÃ THANH TOÁN" },
+    { orderDate: "2025-02-17", mkt: "3", profit: 800,paymentStatus
+      : 
+      "CHƯA THANH TOÁN" },
+    { orderDate: "2025-02-17", mkt: "4", profit: 400 ,paymentStatus
+      : 
+      "ĐÃ THANH TOÁN"},
+    { orderDate: "2024-12-17", mkt: "4", profit: 400 ,paymentStatus
+      : 
+      "ĐÃ THANH TOÁN" },
   ];
 
   // Dữ liệu chi phí ads (adsMoney)

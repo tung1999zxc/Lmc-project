@@ -88,13 +88,34 @@ const [period, setPeriod] = useState("month");
     },
     {
       id: 4,
+      name: `TEAM PHONG `,
+      members: employees
+        .filter(employee => employee.team_id === 'PHONG')
+        .map(employee => employee.employee_code)
+    },
+    {
+      id: 5,
+      name: `TEAM TUẤN ANH `,
+      members: employees
+        .filter(employee => employee.team_id === 'TUANANH')
+        .map(employee => employee.employee_code)
+    },
+    {
+      id: 6,
+      name: `TEAM DIỆN `,
+      members: employees
+        .filter(employee => employee.team_id === 'DIEN')
+        .map(employee => employee.employee_code)
+    },
+    {
+      id: 7,
       name: `TEAM LẺ `,
       members: employees
         .filter(employee => employee.team_id === 'LE')
         .map(employee => employee.employee_code)
     },
   ];
-
+  
 const filterSampleOrdersByPeriod = (order) => {
     const orderDate = moment(order.orderDate, "YYYY-MM-DD");
     const now = moment();
