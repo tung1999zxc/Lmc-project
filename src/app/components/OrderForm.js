@@ -231,6 +231,15 @@ const OrderForm = ({ visible, onCancel, onSubmit, initialValues }) => {
                 ))}
               </Select>
             </Form.Item>
+            <Form.Item label="Chọn SALE Xử lý" name="salexuly" hidden={currentUser.position === 'kho1'||currentUser.position === 'kho2'}>
+                  <Select showSearch>
+                    {saleOptions.map((sale) => (
+                      <Option key={sale} value={sale}>
+                        {sale}
+                      </Option>
+                    ))}
+                  </Select>
+                </Form.Item>
             <Form.Item label="THANH TOÁN" name="paymentStatus" hidden={currentUser.position === 'kho1'||currentUser.position === 'kho2'}>
               <Select>
                 {thanhToanOptions.map((status) => (
@@ -283,7 +292,7 @@ const OrderForm = ({ visible, onCancel, onSubmit, initialValues }) => {
                         {mkt}
                       </Option>
                     ))}
-                  </Select>
+                  </Select> 
                 </Form.Item>
                
               </Col>
@@ -306,26 +315,28 @@ const OrderForm = ({ visible, onCancel, onSubmit, initialValues }) => {
                 
                 <Form.Item label="SALE" name="sale">
                   <Select showSearch>
+                  {saleOptions.map((sale, idx) => (
+  <Option key={`${sale}-${idx}`} value={sale}>
+    {sale}
+  </Option>
+))}
+                  </Select>
+                </Form.Item>
+                <Form.Item label="Chọn SALE Xử lý" name="salexuly">
+                  <Select showSearch>
                     {saleOptions.map((sale) => (
                       <Option key={sale} value={sale}>
                         {sale}
-                      </Option>
+                      </Option> 
                     ))}
                   </Select>
                 </Form.Item>
-                <Form.Item label="DOANH SỐ" name="revenue">
-                  <Input type="number" />
-                </Form.Item>
+               
               </Col>
               <Col span={8}>
-              <Form.Item label="THANH TOÁN" name="paymentStatus">
-                  <Select>
-                    {thanhToanOptions.map((status) => (
-                      <Option key={status} value={status}>
-                        {status}
-                      </Option>
-                    ))}
-                  </Select>
+              
+                <Form.Item label="DOANH SỐ" name="revenue">
+                  <Input type="number" />
                 </Form.Item>
                 <Form.Item label="SỐ ĐIỆN THOẠI" name="phone">
                   <Input type="tel" />
@@ -349,6 +360,7 @@ const OrderForm = ({ visible, onCancel, onSubmit, initialValues }) => {
             </Row>
             <Row gutter={16}>
               <Col span={8}>
+              
                 <Form.Item label="TT SALE XỬ LÍ ĐƠN" name="processStatus">
                   <Select>
                     {handleTTXLOptions.map((status) => (
@@ -371,7 +383,15 @@ const OrderForm = ({ visible, onCancel, onSubmit, initialValues }) => {
                 </Form.Item>
               </Col>
               <Col span={8}>
-                
+              <Form.Item label="THANH TOÁN" name="paymentStatus">
+                  <Select>
+                    {thanhToanOptions.map((status) => (
+                      <Option key={status} value={status}>
+                        {status}
+                      </Option>
+                    ))}
+                  </Select>
+                </Form.Item>
                 
               </Col>
               

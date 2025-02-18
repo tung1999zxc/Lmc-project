@@ -371,6 +371,7 @@ const OrderList = () => {
       mass: values.mass || "",
       mkt: values.mkt || "",
       sale: values.sale || "",
+      salexuly: values.salexuly || "",
       phone: values.phone || "",
       address: values.address || "",
       note: values.note || "",
