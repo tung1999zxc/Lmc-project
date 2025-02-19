@@ -41,7 +41,7 @@ const Dashboard = () => {
 
   // Lưu record vào localStorage mỗi khi records thay đổi
   useEffect(() => {
-    if (typeof window !== "undefined") {
+    if (typeof window !== "undefined"&& records && records.length > 0) {
       localStorage.setItem("records2", JSON.stringify(records));
     }
   }, [records]);

@@ -132,7 +132,7 @@
         );
       } else if (currentUser.position === "salenhapdon") {
         roleFilteredOrders = roleFilteredOrders.filter(
-          (order) => order.employee_code_order === currentUser.employee_code
+          (order) => order.sale === currentUser.name
         );
       } else if (currentUser.position === "salexuly") {
       
@@ -272,6 +272,23 @@
         key: "orderDate",
         render: (text) => dayjs(text).format("DD/MM/YYYY")
       },
+      { title: "TÊN KHÁCH", dataIndex: "customerName", key: "customerName" },
+      { title: "TÊN PAGE", dataIndex: "pageName", key: "pageName" },
+      {
+        title: "SẢN PHẨM",
+        key: "products",
+        render: (_, record) => (
+          <>
+            {record.products && record.products.map((item, index) => (
+              <div key={index} style={{ whiteSpace: "nowrap" }}>
+                <strong>{item.product} </strong> - SL : <strong>{item.quantity}</strong>
+              </div>
+            ))}
+          </>
+        ),
+      },
+      { title: "DOANH SỐ", dataIndex: "revenue", key: "revenue" },
+
       {
         title: "THANH TOÁN",
         dataIndex: "paymentStatus",
@@ -280,6 +297,8 @@
           <Tag color={text === "ĐÃ THANH TOÁN" ? "green" : "red"}>{text}</Tag>
         )
       },
+      { title: "GHI CHÚ SALE", dataIndex: "note", key: "note" },
+
       {
         title: "TÌNH TRẠNG GH",
         dataIndex: "deliveryStatus",
@@ -288,24 +307,7 @@
           <Tag color={text === "GIAO THÀNH CÔNG" ? "blue" : "orange"}>{text}</Tag>
         )
       },
-      { title: "SALE BÁO", dataIndex: "saleReport", key: "saleReport" },
       { title: "MÃ VẬN ĐƠN", dataIndex: "trackingCode", key: "trackingCode" },
-      { title: "TÊN KHÁCH", dataIndex: "customerName", key: "customerName" },
-      { title: "TÊN PAGE", dataIndex: "pageName", key: "pageName" },
-      { title: "SẢN PHẨM", dataIndex: "product", key: "product" },
-      { title: "Phân loại QUÀ/SIZE/MÀU", dataIndex: "category", key: "category" },
-      { title: "SL SP", dataIndex: "quantity", key: "quantity" },
-      { title: "Hàng nặng/nhẹ", dataIndex: "mass", key: "quantity" },
-      { title: "MKT", dataIndex: "mkt", key: "mkt" },
-      { title: "SALE", dataIndex: "sale", key: "sale" },
-      { title: "SALE xử lý", dataIndex: "salexuly", key: "salexuly" },
-      { title: "DOANH SỐ", dataIndex: "revenue", key: "revenue" },
-      { title: "DOANH THU", dataIndex: "profit", key: "profit" },
-      { title: "SĐT", dataIndex: "phone", key: "phone" },
-      { title: "ĐỊA CHỈ", dataIndex: "address", key: "address" },
-      { title: "GHI CHÚ SALE", dataIndex: "note", key: "note" },
-      { title: "GHI CHÚ KHO", dataIndex: "noteKHO", key: "noteKHO" },
-      { title: "TT XỬ LÍ", dataIndex: "processStatus", key: "processStatus" },
       {
         title: "NGÀY GỬI",
         dataIndex: "shippingDate1",
@@ -317,7 +319,21 @@
         dataIndex: "shippingDate2",
         key: "shippingDate2",
         render: (text) => text && dayjs(text).format("DD/MM/YYYY")
-      }
+      },
+      { title: "SALE BÁO", dataIndex: "saleReport", key: "saleReport" },
+      { title: "GHI CHÚ KHO", dataIndex: "noteKHO", key: "noteKHO" },
+   
+      { title: "Phân loại QUÀ/SIZE/MÀU", dataIndex: "category", key: "category" },
+      { title: "TT XỬ LÍ", dataIndex: "processStatus", key: "processStatus" },
+      
+      // { title: "Hàng nặng/nhẹ", dataIndex: "mass", key: "quantity" },
+      { title: "MKT", dataIndex: "mkt", key: "mkt" },
+      { title: "SALE", dataIndex: "sale", key: "sale" },
+      { title: "SALE xử lý", dataIndex: "salexuly", key: "salexuly" },
+      { title: "SĐT", dataIndex: "phone", key: "phone" },
+      { title: "ĐỊA CHỈ", dataIndex: "address", key: "address" },
+      { title: "DOANH THU", dataIndex: "profit", key: "profit" },
+      
     ];
 
     // Các cột cho MKT (ví dụ)
@@ -338,8 +354,20 @@
       },
       { title: "TÊN KHÁCH", dataIndex: "customerName", key: "customerName" },
       { title: "TÊN PAGE", dataIndex: "pageName", key: "pageName" },
-      { title: "SẢN PHẨM", dataIndex: "product", key: "product" },
-      { title: "SL SP", dataIndex: "quantity", key: "quantity" },
+      {
+        title: "SẢN PHẨM",
+        key: "products",
+        render: (_, record) => (
+          <>
+            {record.products && record.products.map((item, index) => (
+              <div key={index} style={{ whiteSpace: "nowrap" }}>
+               <strong>{item.product} </strong> - Số Lượng : <strong>{item.quantity}</strong>
+              </div>
+            ))}
+          </>
+        ),
+      },
+      
       { title: "MKT", dataIndex: "mkt", key: "mkt" },
       { title: "DOANH SỐ", dataIndex: "revenue", key: "revenue" },
       { title: "DOANH THU", dataIndex: "profit", key: "profit" },
@@ -373,9 +401,21 @@
       },
       { title: "MÃ VẬN ĐƠN", dataIndex: "trackingCode", key: "trackingCode" },
       { title: "TÊN KHÁCH", dataIndex: "customerName", key: "customerName" },
-      { title: "SẢN PHẨM", dataIndex: "product", key: "product" },
+      {
+        title: "SẢN PHẨM",
+        key: "products",
+        render: (_, record) => (
+          <>
+            {record.products && record.products.map((item, index) => (
+              <div key={index} style={{ whiteSpace: "nowrap" }}>
+               <strong>{item.product} </strong> - Số Lượng : <strong>{item.quantity}</strong>
+              </div>
+            ))}
+          </>
+        ),
+      },
       { title: "Phân loại QUÀ/SIZE/MÀU", dataIndex: "category", key: "category" },
-      { title: "SL SP", dataIndex: "quantity", key: "quantity" },
+      
       { title: "SĐT", dataIndex: "phone", key: "phone" },
       { title: "ĐỊA CHỈ", dataIndex: "address", key: "address" },
       { title: "GHI CHÚ SALE", dataIndex: "note", key: "note" },
@@ -416,19 +456,23 @@
     const handleSubmit = (values) => {
       const revenue = Number(values.revenue) || 0;
       const profit = revenue === 0 ? 0 : Math.max(revenue - 5, 0);
-          const newOrder = {
-            ...values,
-            id: currentEditId || Date.now().toString(),
-            stt: currentEditId 
-      ? orders.find(order => order.id === currentEditId)?.stt 
-      : orders.length + 1,
-            quantity: values.quantity || 0, 
-            revenue: revenue,
-            profit: profit,
-        customerName: values. customerName || "",
+    
+      // Lấy mảng sản phẩm từ values, nếu không có thì là mảng rỗng
+      const products = values.products || [];
+    
+      const newOrder = {
+        ...values,
+        id: currentEditId || Date.now().toString(),
+        stt: currentEditId
+          ? orders.find((order) => order.id === currentEditId)?.stt
+          : orders.length + 1,
+        revenue: revenue,
+        profit: profit,
+        // Thay thế product và quantity riêng lẻ bởi mảng products
+        products: products,
+        customerName: values.customerName || "",
         pageName: values.pageName || "",
-        product: values.product || "",
-        category: values.category || "",  
+        category: values.category || "",
         mass: values.mass || "",
         mkt: values.mkt || "",
         sale: values.sale || "",
@@ -445,9 +489,9 @@
         orderDate: values.orderDate || "",
         shippingDate1: values.shippingDate1 || "",
         shippingDate2: values.shippingDate2 || "",
-        employee_code_order: currentUser.employee_code
+        employee_code_order: currentUser.employee_code,
       };
-
+    
       setOrders((prev) => {
         const updatedOrders = currentEditId
           ? prev.map((order) => (order.id === currentEditId ? newOrder : order))
@@ -457,6 +501,7 @@
       setFormVisible(false);
       message.success(currentEditId ? "Cập nhật thành công" : "Thêm mới thành công");
     };
+    
   
   // lọc theo quyền
     

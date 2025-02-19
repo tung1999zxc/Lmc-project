@@ -9,14 +9,14 @@ import {
   Row,
   Col,
   Modal,
+  Space,
 } from "antd";
+import { MinusCircleOutlined, PlusOutlined } from "@ant-design/icons";
 import dayjs from "dayjs";
-import { useDispatch, useSelector } from 'react-redux';
+import moment from "moment";
+import { useDispatch, useSelector } from "react-redux";
 
-import moment from 'moment';
-
-
-const OrderForm = ({ visible, onCancel, onSubmit, initialValues ,namesalexuly }) => {
+const OrderForm = ({ visible, onCancel, onSubmit, initialValues, namesalexuly }) => {
   const [form] = Form.useForm();
   const { Option } = Select;
   const currentUser = useSelector((state) => state.user.currentUser);
@@ -26,11 +26,10 @@ const OrderForm = ({ visible, onCancel, onSubmit, initialValues ,namesalexuly })
   const employees = useSelector((state) => state.employees.employees);
   // Danh sách options
   const [pageName, setPageName] = useState("");
-  
   const [employeeNamepage, setEmployeeNamepage] = useState("");
   const mktOptions = employees
-  .filter(order => order.position_team === 'mkt')
-  .map(order => order.name);
+    .filter((order) => order.position_team === "mkt")
+    .map((order) => order.name);
 
   const pageMapping = dataPagename.reduce((acc, item) => {
     const page = item.pageName.trim();
@@ -45,9 +44,7 @@ const OrderForm = ({ visible, onCancel, onSubmit, initialValues ,namesalexuly })
     form.setFieldsValue({ mkt: mappedEmployee });
   };
 
-
-    // Nếu có mapping, tự động cập nhật tên nhân viên tương ứng
-   
+  // Nếu có mapping, tự động cập nhật tên nhân viên tương ứng
   const handleTTXLOptions = [
     "THIẾU/SAI",
     "TÌM HÀNG",
@@ -64,33 +61,21 @@ const OrderForm = ({ visible, onCancel, onSubmit, initialValues ,namesalexuly })
   ];
 
   const saleOptions = employees
-  .filter(order => order.position_team === 'sale')
-  .map(order => order.name);
-  const pageNameOptions = dataPagename
-  .map(order => order.pageName);
+    .filter((order) => order.position_team === "sale")
+    .map((order) => order.name);
+  const pageNameOptions = dataPagename.map((order) => order.pageName);
   const salexulyOptions = employees
-  .filter(order => order.position === 'salexuly')
-  .map(order => order.name);
+    .filter((order) => order.position === "salexuly")
+    .map((order) => order.name);
 
-  const saleBaoOptions = [
-    "DONE",
-    "HỦY",
-    "ĐỢI XN",
-    "NGUY CƠ",
-    "BÙNG",
-    "ĐANG UP",
-    "CHECK",
-  ];
-  const massOptions = [
-    "Nặng",
-    "Nhẹ"];
-
+  const saleBaoOptions = ["DONE", "HỦY", "ĐỢI XN", "NGUY CƠ", "BÙNG", "ĐANG UP", "CHECK"];
+  const massOptions = ["Nặng", "Nhẹ"];
   const thanhToanOptions = ["ĐÃ THANH TOÁN", "CHƯA THANH TOÁN"];
   const tinhTrangGHOptions = ["ĐÃ GỬI HÀNG", "GIAO THÀNH CÔNG"];
+
   // Khi có initialValues (dữ liệu cũ) thì chuyển các trường ngày về đối tượng dayjs
   useEffect(() => {
     if (typeof window !== "undefined") {
-      
       const productNames = localStorage.getItem("productNames");
       if (productNames) {
         setProductOptions(JSON.parse(productNames));
@@ -101,6 +86,7 @@ const OrderForm = ({ visible, onCancel, onSubmit, initialValues ,namesalexuly })
       }
     }
   }, []);
+
   useEffect(() => {
     if (initialValues) {
       form.setFieldsValue({
@@ -111,10 +97,9 @@ const OrderForm = ({ visible, onCancel, onSubmit, initialValues ,namesalexuly })
       });
     } else {
       form.resetFields();
-    };
-    
+    }
   }, [initialValues, form]);
-  
+
   // Khi submit form, chuyển các giá trị ngày về chuỗi định dạng 'YYYY-MM-DD'
   const onFinish = (values) => {
     const submitValues = {
@@ -136,10 +121,10 @@ const OrderForm = ({ visible, onCancel, onSubmit, initialValues ,namesalexuly })
       width={1000}
       style={{ top: 20 }}
     >
-      {currentUser.position === 'kho1'||currentUser.position === 'kho2' ? (
+      {currentUser.position === "kho1" || currentUser.position === "kho2" ? (
         <>
           <Form form={form} layout="vertical" onFinish={onFinish}>
-            {/* Các trường dành cho nhân viên 1 (luôn hiển thị) */}
+            {/* Các trường dành cho nhân viên kho */}
             <Row gutter={16}>
               <Col span={8}>
                 <Form.Item label="TÌNH TRẠNG GIAO HÀNG" name="deliveryStatus">
@@ -153,7 +138,6 @@ const OrderForm = ({ visible, onCancel, onSubmit, initialValues ,namesalexuly })
                 </Form.Item>
               </Col>
               <Col span={8}>
-                {/* Trường "MÃ VẬN ĐƠN" nếu cần ẩn hoàn toàn, bạn có thể sử dụng hidden */}
                 <Form.Item label="MÃ VẬN ĐƠN" name="trackingCode" hidden={false}>
                   <Input />
                 </Form.Item>
@@ -175,62 +159,87 @@ const OrderForm = ({ visible, onCancel, onSubmit, initialValues ,namesalexuly })
               </Col>
             </Row>
 
-            {/* Các trường còn lại – nếu isEmployee1 là true, ẩn hoàn toàn (không chiếm diện tích) */}
-            <Form.Item label="NGÀY ĐẶT" name="orderDate" hidden={currentUser.position === 'kho1'||currentUser.position === 'kho2'}>
+            {/* Các trường ẩn khi là kho */}
+            <Form.Item label="NGÀY ĐẶT" name="orderDate" hidden={true}>
               <DatePicker style={{ width: "100%" }} />
             </Form.Item>
-            <Form.Item label="STT" name="stt" hidden={currentUser.position === 'kho1'||currentUser.position === 'kho2'}>
+            <Form.Item label="STT" name="stt" hidden={true}>
               <Input type="number" />
             </Form.Item>
-            <Form.Item label="TÊN KHÁCH" name="customerName" hidden={currentUser.position === 'kho1'||currentUser.position === 'kho2'}>
+            <Form.Item label="TÊN KHÁCH" name="customerName" hidden={true}>
               <Input />
             </Form.Item>
-            <Form.Item label="TÊN PAGE" name="pageName" hidden={currentUser.position === 'kho1'||currentUser.position === 'kho2'}>
+            <Form.Item label="TÊN PAGE" name="pageName" hidden={true}>
               <Input />
             </Form.Item>
-            <Form.Item label="SALE Xử lý" name="salexuly" hidden={currentUser.position === 'kho1'||currentUser.position === 'kho2'}>
-  <Select>
-    {salexulyOptions.map((employee) => (
-      <Option key={employee} value={employee}>
-        {employee}
-      </Option>
-    ))}
-  </Select>
-</Form.Item>  
-            <Form.Item label="SẢN PHẨM" name="product" hidden={currentUser.position === 'kho1'||currentUser.position === 'kho2'}>
+            <Form.Item label="SALE Xử lý" name="salexuly" hidden={true}>
               <Select>
-                {productOptions.map((product) => (
-                  <Option key={product} value={product}>
-                    {product}
+                {salexulyOptions.map((employee) => (
+                  <Option key={employee} value={employee}>
+                    {employee}
                   </Option>
                 ))}
               </Select>
             </Form.Item>
-            <Form.Item label="DOANH SỐ" name="profit" hidden={currentUser.position === 'kho1'||currentUser.position === 'kho2'}>
+            
+           
+            <Form.Item label="DOANH SỐ" name="profit" hidden={true}>
               <Input type="number" />
             </Form.Item>
-            <Form.Item label="SỐ ĐIỆN THOẠI" name="phone" hidden={currentUser.position === 'kho1'||currentUser.position === 'kho2'}>
+            <Form.Item label="SỐ ĐIỆN THOẠI" name="phone" hidden={true}>
               <Input type="tel" />
             </Form.Item>
-            <Form.Item label="ĐỊA CHỈ" name="address" hidden={currentUser.position === 'kho1'||currentUser.position === 'kho2'}>
+            <Form.Item label="ĐỊA CHỈ" name="address" hidden={true}>
               <Input.TextArea rows={3} />
             </Form.Item>
-            <Form.Item label="GHI CHÚ SALE" name="note" hidden={currentUser.position === 'kho1'||currentUser.position === 'kho2'}>
+            <Form.Item label="GHI CHÚ SALE" name="note" hidden={true}>
               <Input.TextArea rows={3} />
             </Form.Item>
-            <Form.Item label="GHI CHÚ KHO" name="noteKHO" hidden={currentUser.position === 'kho1'||currentUser.position === 'kho2'}>
+            <Form.Item label="GHI CHÚ KHO" name="noteKHO" hidden={true}>
               <Input.TextArea rows={3} />
             </Form.Item>
-            <Form.Item label="Phân loại" name="category" hidden={currentUser.position === 'kho1'||currentUser.position === 'kho2'}>
+            <Form.Item label="Phân loại" name="category" hidden={true}>
               <Input />
             </Form.Item>
-            <Form.Item label="Hàng nặng/nhẹ" name="mass" hidden={currentUser.position === 'kho1'||currentUser.position === 'kho2'}>
+            {/* <Form.Item label="Hàng nặng/nhẹ" name="mass" hidden={true}>
               <Input />
-            </Form.Item>
-            <Form.Item label="SỐ LƯỢNG SP" name="quantity" hidden={currentUser.position === 'kho1'||currentUser.position === 'kho2'}>
-              <Input type="number" />
-            </Form.Item>
-            <Form.Item label="MKT" name="mkt" hidden={currentUser.position === 'kho1'||currentUser.position === 'kho2'}>
+            </Form.Item> */}
+            <Form.List name="products" hidden={true}>
+                  {(fields, { }) => (
+                    <>
+                      {fields.map((field) => (
+                        <Space key={field.key} align="baseline">
+                          <Form.Item hidden={true}
+                            {...field}
+                            name={[field.name, "product"]}
+                            fieldKey={[field.fieldKey, "product"]}
+                            rules={[{ required: true, message: "Chọn sản phẩm" }]}
+                          >
+                            <Select placeholder="Chọn sản phẩm" style={{ width: 200 }} showSearch>
+                              {productOptions.map((product) => (
+                                <Option key={product} value={product}>
+                                  {product}
+                                </Option>
+                              ))}
+                            </Select>
+                          </Form.Item>
+                          <Form.Item hidden={true}  
+                            {...field}
+                            name={[field.name, "quantity"]}
+                            fieldKey={[field.fieldKey, "quantity"]}
+                            rules={[{ required: true, message: "Nhập số lượng" }]}
+                          >
+                            <Input type="number" placeholder="Số lượng" style={{ width: 100 }} />
+                          </Form.Item>
+                          
+                        </Space>
+                      ))}
+                     
+                    </>
+                  )}
+                </Form.List>
+              
+            <Form.Item label="MKT" name="mkt" hidden={true}>
               <Select showSearch>
                 {mktOptions.map((mkt) => (
                   <Option key={mkt} value={mkt}>
@@ -239,7 +248,7 @@ const OrderForm = ({ visible, onCancel, onSubmit, initialValues ,namesalexuly })
                 ))}
               </Select>
             </Form.Item>
-            <Form.Item label="SALE" name="sale" hidden={currentUser.position === 'kho1'||currentUser.position === 'kho2'}>
+            <Form.Item label="SALE" name="sale" hidden={true}>
               <Select showSearch>
                 {saleOptions.map((sale) => (
                   <Option key={sale} value={sale}>
@@ -248,10 +257,10 @@ const OrderForm = ({ visible, onCancel, onSubmit, initialValues ,namesalexuly })
                 ))}
               </Select>
             </Form.Item>
-            <Form.Item label="DOANH SỐ" name="revenue" hidden={currentUser.position === 'kho1'||currentUser.position === 'kho2'}>
+            <Form.Item label="DOANH SỐ" name="revenue" hidden={true}>
               <Input type="number" />
             </Form.Item>
-            <Form.Item label="TT SALE XỬ LÍ ĐƠN" name="processStatus" hidden={currentUser.position === 'kho1'||currentUser.position === 'kho2'}>
+            <Form.Item label="TT SALE XỬ LÍ ĐƠN" name="processStatus" hidden={true}>
               <Select>
                 {handleTTXLOptions.map((status) => (
                   <Option key={status} value={status}>
@@ -260,7 +269,7 @@ const OrderForm = ({ visible, onCancel, onSubmit, initialValues ,namesalexuly })
                 ))}
               </Select>
             </Form.Item>
-            <Form.Item label="SALE BÁO" name="saleReport" hidden={currentUser.position === 'kho1'||currentUser.position === 'kho2'}>
+            <Form.Item label="SALE BÁO" name="saleReport" hidden={true}>
               <Select>
                 {saleBaoOptions.map((report) => (
                   <Option key={report} value={report}>
@@ -269,16 +278,16 @@ const OrderForm = ({ visible, onCancel, onSubmit, initialValues ,namesalexuly })
                 ))}
               </Select>
             </Form.Item>
-            <Form.Item label="Chọn SALE Xử lý" name="salexuly" hidden={currentUser.position === 'kho1'||currentUser.position === 'kho2'}>
-                  <Select showSearch>
-                    {salexulyOptions.map((sale) => (
-                      <Option key={sale} value={sale}>
-                        {sale}
-                      </Option>
-                    ))}
-                  </Select>
-                </Form.Item>
-            <Form.Item label="THANH TOÁN" name="paymentStatus" hidden={currentUser.position === 'kho1'||currentUser.position === 'kho2'}>
+            <Form.Item label="Chọn SALE Xử lý" name="salexuly" hidden={true}>
+              <Select showSearch>
+                {salexulyOptions.map((sale) => (
+                  <Option key={sale} value={sale}>
+                    {sale}
+                  </Option>
+                ))}
+              </Select>
+            </Form.Item>
+            <Form.Item label="THANH TOÁN" name="paymentStatus" hidden={true}>
               <Select>
                 {thanhToanOptions.map((status) => (
                   <Option key={status} value={status}>
@@ -287,28 +296,27 @@ const OrderForm = ({ visible, onCancel, onSubmit, initialValues ,namesalexuly })
                 ))}
               </Select>
             </Form.Item>
-
             <Form.Item style={{ marginTop: 24, textAlign: "right" }}>
               <Button style={{ marginRight: 8 }} onClick={onCancel}>
                 Hủy
               </Button>
-              {(!currentUser.position_team ==='kho' || initialValues) && (
+              {(currentUser.position_team !== "kho" || initialValues) && (
                 <Button type="primary" htmlType="submit">
                   {initialValues ? "Cập nhật" : "Thêm mới"}
                 </Button>
               )}
             </Form.Item>
-          </Form> 
+          </Form>
         </>
       ) : (
         <>
           <Form form={form} layout="vertical" onFinish={onFinish}>
             <Row gutter={16}>
               <Col span={8}>
-                <Form.Item  initialValue={moment()} label="NGÀY ĐẶT" name="orderDate">
+                <Form.Item initialValue={moment()} label="NGÀY ĐẶT" name="orderDate">
                   <DatePicker style={{ width: "100%" }} />
                 </Form.Item>
-                <Form.Item label="Hàng nặng/nhẹ" name="mass">
+                {/* <Form.Item label="Hàng nặng/nhẹ" name="mass">
                   <Select showSearch>
                     {massOptions.map((mas) => (
                       <Option key={mas} value={mas}>
@@ -316,95 +324,116 @@ const OrderForm = ({ visible, onCancel, onSubmit, initialValues ,namesalexuly })
                       </Option>
                     ))}
                   </Select>
-                </Form.Item>
+                </Form.Item> */}
                 <Form.Item label="TÊN KHÁCH" name="customerName">
                   <Input />
                 </Form.Item>
                 <Form.Item label="TÊN PAGE" name="pageName">
-                <Select disabled={currentUser.position ==='salexuly'} showSearch onChange={handlePageNameChange} >
+                  <Select
+                    disabled={currentUser.position === "salexuly" || currentUser.position === "salexacnhan"}
+                    showSearch
+                    onChange={handlePageNameChange}
+                  >
                     {pageNameOptions.map((pageName) => (
-                      <Option key={pageName} value={pageName} >
+                      <Option key={pageName} value={pageName}>
                         {pageName}
-                      </Option >
-                    ))}
-                  </Select> 
-                </Form.Item>
-                <Form.Item label="MKT" name="mkt">
-                <Input 
-          
-          value={employeeNamepage} 
-          readOnly 
-        /> 
-                </Form.Item>
-               
-              </Col>
-              <Col span={8}>
-              <Form.Item showSearch label="SẢN PHẨM" name="product">
-                  <Select showSearch>
-                    {productOptions.map((product) => (
-                      <Option key={product} value={product}>
-                        {product}
                       </Option>
                     ))}
                   </Select>
-                </Form.Item>
-                <Form.Item label="SỐ LƯỢNG SP" name="quantity">
-                  <Input type="number" />
-                </Form.Item>
-                <Form.Item label="Phân loại QUÀ/SIZE/MÀU" name="category">
-                <Input />
-                </Form.Item>
-                
-                <Form.Item   label="SALE" name="sale">
-                  <Select  disabled= {currentUser.position ==='salenhapdon'||currentUser.position ==='salexuly'} showSearch defaultValue={currentUser.name}>
-                  
-                  {saleOptions.map((employee) => (
-      <Option key={employee} value={employee}>
-        {employee}
-      </Option>
-    ))}
-
-                  </Select>
-                </Form.Item>
-                <Form.Item  label="SALE Xử lý" name="salexuly" initialValue={namesalexuly}>
-  <Select disabled={currentUser.position ==='salexuly'}>
-    {salexulyOptions.map((employee) => (
-      <Option key={employee} value={employee}>
-        {employee}
-      </Option>
-    ))}
-  </Select>
-</Form.Item>  
-               
-              </Col>
-              <Col span={8}>
-              
-                <Form.Item label="DOANH SỐ" name="revenue">
-                  <Input type="number" />
                 </Form.Item>
                 <Form.Item label="SỐ ĐIỆN THOẠI" name="phone">
                   <Input type="tel" />
                 </Form.Item>
                 <Form.Item label="ĐỊA CHỈ" name="address">
-                  <Input.TextArea rows={3} />
+                  <Input.TextArea rows={2} />
                 </Form.Item>
-                <Form.Item label="GHI CHÚ SALE" name="note">
-  <Input.TextArea
-    rows={3}
-    onFocus={(e) => {
-      // Nếu ô ghi chú đang trống, thêm prefix là tên người dùng
-      if (!e.target.value) {
-        const prefix = `${currentUser.name}: `;
-        form.setFieldsValue({ note: prefix });
-      }
-    }}
-  />
-</Form.Item>
               </Col>
-            </Row>
-            <Row gutter={16}>
               <Col span={8}>
-              
+                {/* Thay đổi: dùng Form.List cho SẢN PHẨM và SỐ LƯỢNG SP */}
+                <p style={{ marginBottom: 3, marginTop: 5  }}>SẢN PHẨM</p>
+                <Form.List name="products">
+                  {(fields, { add, remove }) => (
+                    <>
+                      {fields.map((field) => (
+                        <Space key={field.key} align="baseline">
+                          <Form.Item
+                            {...field}
+                            name={[field.name, "product"]}
+                            fieldKey={[field.fieldKey, "product"]}
+                            rules={[{ required: true, message: "Chọn sản phẩm" }]}
+                          >
+                            <Select placeholder="Chọn sản phẩm" style={{ width: 200 }} showSearch>
+                              {productOptions.map((product) => (
+                                <Option key={product} value={product}>
+                                  {product}
+                                </Option>
+                              ))}
+                            </Select>
+                          </Form.Item>
+                          <Form.Item
+                            {...field}
+                            name={[field.name, "quantity"]}
+                            fieldKey={[field.fieldKey, "quantity"]}
+                            rules={[{ required: true, message: "Nhập số lượng" }]}
+                          >
+                            <Input type="number" placeholder="Số lượng" style={{ width: 80 }} />
+                          </Form.Item>
+                          <MinusCircleOutlined onClick={() => remove(field.name)} />
+                        </Space>
+                      ))}
+                      <Form.Item>
+                        <Button type="" onClick={() => add()} block icon={<PlusOutlined />}>
+                          Thêm sản phẩm
+                        </Button>
+                      </Form.Item>
+                    </>
+                  )}
+                </Form.List>
+
+                <Form.Item label="Phân loại QUÀ/SIZE/MÀU" name="category">
+                  <Input />
+                </Form.Item>
+                <Form.Item label="DOANH SỐ" name="revenue">
+                  <Input type="number" />
+                </Form.Item>
+                <Form.Item label="SALE CHAT" name="sale" initialValue={currentUser.name}>
+                  <Select
+                    disabled={currentUser.position === "salexuly" || currentUser.position === "salexacnhan"}
+                    showSearch
+                  >
+                    {saleOptions.map((employee) => (
+                      <Option key={employee} value={employee}>
+                        {employee}
+                      </Option>
+                    ))}
+                  </Select>
+                </Form.Item>
+                <Form.Item label="VẬN ĐƠN" name="salexuly" initialValue={namesalexuly}>
+                  <Select disabled={currentUser.position === "salexuly" || currentUser.position === "salexacnhan"}>
+                    {salexulyOptions.map((employee) => (
+                      <Option key={employee} value={employee}>
+                        {employee}
+                      </Option>
+                    ))}
+                  </Select>
+                </Form.Item>
+               
+              </Col>
+              <Col span={8}>
+                
+                
+                
+                <Form.Item label="GHI CHÚ SALE" name="note">
+                  <Input.TextArea
+                    rows={3}
+                    onFocus={(e) => {
+                      if (!e.target.value) {
+                        const prefix = `${currentUser.name}: `;
+                        form.setFieldsValue({ note: prefix });
+                      }
+                    }}
+                  />
+                </Form.Item>
                 <Form.Item label="TT SALE XỬ LÍ ĐƠN" name="processStatus">
                   <Select>
                     {handleTTXLOptions.map((status) => (
@@ -414,9 +443,7 @@ const OrderForm = ({ visible, onCancel, onSubmit, initialValues ,namesalexuly })
                     ))}
                   </Select>
                 </Form.Item>
-              </Col>
-              <Col span={8}>
-                <Form.Item label="SALE BÁO" name="saleReport">
+                <Form.Item label="ĐƠN" name="saleReport">
                   <Select>
                     {saleBaoOptions.map((report) => (
                       <Option key={report} value={report}>
@@ -425,9 +452,7 @@ const OrderForm = ({ visible, onCancel, onSubmit, initialValues ,namesalexuly })
                     ))}
                   </Select>
                 </Form.Item>
-              </Col>
-              <Col span={8}>
-              <Form.Item label="THANH TOÁN" name="paymentStatus">
+                <Form.Item label="THANH TOÁN" name="paymentStatus">
                   <Select>
                     {thanhToanOptions.map((status) => (
                       <Option key={status} value={status}>
@@ -436,11 +461,13 @@ const OrderForm = ({ visible, onCancel, onSubmit, initialValues ,namesalexuly })
                     ))}
                   </Select>
                 </Form.Item>
-                
+                <Form.Item label="MKT" name="mkt">
+                  <Input value={employeeNamepage} readOnly />
+                </Form.Item>  
               </Col>
-              
             </Row>
-            <Form.Item label="TÌNH TRẠNG GIAO HÀNG" name="deliveryStatus" hidden={currentUser.position_team ==='sale'}>
+            
+            <Form.Item label="TÌNH TRẠNG GIAO HÀNG" name="deliveryStatus" hidden={currentUser.position_team === "sale"}>
               <Select>
                 {tinhTrangGHOptions.map((status) => (
                   <Option key={status} value={status}>
@@ -449,23 +476,23 @@ const OrderForm = ({ visible, onCancel, onSubmit, initialValues ,namesalexuly })
                 ))}
               </Select>
             </Form.Item>
-            <Form.Item label="MÃ VẬN ĐƠN" name="trackingCode" hidden={currentUser.position_team ==='sale'}>
+            <Form.Item label="MÃ VẬN ĐƠN" name="trackingCode" hidden={currentUser.position_team === "sale"}>
               <Input />
             </Form.Item>
-            <Form.Item label="NGÀY GỬI" name="shippingDate1" hidden={currentUser.position_team ==='sale'}>
+            <Form.Item label="NGÀY GỬI" name="shippingDate1" hidden={currentUser.position_team === "sale"}>
               <DatePicker style={{ width: "100%" }} />
             </Form.Item>
-            <Form.Item label="NGÀY NHẬN" name="shippingDate2" hidden={currentUser.position_team ==='sale'}>
+            <Form.Item label="NGÀY NHẬN" name="shippingDate2" hidden={currentUser.position_team === "sale"}>
               <DatePicker style={{ width: "100%" }} />
             </Form.Item>
-            <Form.Item label="GHI CHÚ KHO" name="noteKHO" hidden={currentUser.position_team ==='sale'}>
+            <Form.Item label="GHI CHÚ KHO" name="noteKHO" hidden={currentUser.position_team === "sale"}>
               <Input.TextArea rows={3} />
             </Form.Item>
             <Form.Item style={{ marginTop: 24, textAlign: "right" }}>
               <Button style={{ marginRight: 8 }} onClick={onCancel}>
                 Hủy
               </Button>
-              {(currentUser.position_team ==='sale' || initialValues) && (
+              {(currentUser.position_team === "sale" || initialValues) && (
                 <Button type="primary" htmlType="submit">
                   {initialValues ? "Cập nhật" : "Thêm mới"}
                 </Button>

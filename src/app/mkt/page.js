@@ -48,7 +48,7 @@ const [period, setPeriod] = useState("month");
   }, []);
 
   useEffect(() => {
-    if (typeof window !== "undefined") {
+    if (typeof window !== "undefined" && records && records.length > 0) {
       localStorage.setItem("records", JSON.stringify(records));
     }
   }, [records]);
