@@ -97,11 +97,7 @@
       console.log("Filtered Orders:", filteredOrders);
     
       // Nếu không có đơn hàng nào trong ngày, reset state và thoát
-      if (filteredOrders.length === 0) {
-        setnamesalexuly("");
-        return;
-      }
-    
+     
       // Tính số đơn hàng đã xử lý theo từng nhân viên (salexulyOptions là mảng tên nhân viên)
       const employeeOrderCounts = salexulyOptions.map((employee) => ({
         name: employee,
