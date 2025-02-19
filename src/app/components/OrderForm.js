@@ -321,7 +321,7 @@ const OrderForm = ({ visible, onCancel, onSubmit, initialValues ,namesalexuly })
                   <Input />
                 </Form.Item>
                 <Form.Item label="TÊN PAGE" name="pageName">
-                <Select showSearch onChange={handlePageNameChange} >
+                <Select disabled={currentUser.position ==='salexuly'} showSearch onChange={handlePageNameChange} >
                     {pageNameOptions.map((pageName) => (
                       <Option key={pageName} value={pageName} >
                         {pageName}
@@ -367,7 +367,7 @@ const OrderForm = ({ visible, onCancel, onSubmit, initialValues ,namesalexuly })
                   </Select>
                 </Form.Item>
                 <Form.Item  label="SALE Xử lý" name="salexuly" initialValue={namesalexuly}>
-  <Select disabled={currentUser.position ==='salenhapdon'||currentUser.position ==='salexuly'}>
+  <Select disabled={currentUser.position ==='salexuly'}>
     {salexulyOptions.map((employee) => (
       <Option key={employee} value={employee}>
         {employee}
