@@ -23,15 +23,15 @@ const { Option } = Select;
 const Dashboard = () => {
   const currentUser = useSelector((state) => state.user.currentUser);
   const employees = useSelector((state) => state.employees.employees);
-const [period, setPeriod] = useState("month");
+  const [period, setPeriod] = useState("month");
   const [form] = Form.useForm();
   const [sampleOrders, setSampleOrders] = useState([]);
   const [records, setRecords] = useState([]);
   const [editingRecord, setEditingRecord] = useState(null);
   // Bộ lọc theo khoảng thời gian (mặc định 7 ngày)
-  const [filterOption, setFilterOption] = useState("7");
-  const [selectedDate, setSelectedDate] = useState();
+  // const [filterOption, setFilterOption] = useState("7"); // Đã loại bỏ
   // Nếu là manager, có thêm bộ lọc để chọn team (default "all" hiển thị tất cả các team)
+  const [selectedDate, setSelectedDate] = useState();
   const [selectedTeam, setSelectedTeam] = useState("all");
 
   useEffect(() => {
@@ -116,7 +116,7 @@ const [period, setPeriod] = useState("month");
     },
   ];
   
-const filterSampleOrdersByPeriod = (order) => {
+  const filterSampleOrdersByPeriod = (order) => {
     const orderDate = moment(order.orderDate, "YYYY-MM-DD");
     const now = moment();
     if (period === "week") {
@@ -136,13 +136,33 @@ const filterSampleOrdersByPeriod = (order) => {
     }
     return true;
   };
- // Tính tổng doanh số cho một nhân viên dựa trên sampleOrders đã được lọc theo thời gian
+
+  // Hàm lọc records theo khoảng thời gian dựa trên period state
+  const filterRecordsByPeriod = (record) => {
+    const recordDate = moment(record.date, "YYYY-MM-DD");
+    const now = moment();
+    if (period === "week") {
+      return recordDate.isSameOrAfter(now.clone().subtract(7, "days"), "day");
+    } else if (period === "month") {
+      return recordDate.isSame(now, "month") && recordDate.isSameOrAfter(now.clone().startOf("month"));
+    } else if (period === "lastMonth") {
+      const lastMonth = now.clone().subtract(1, "months");
+      return recordDate.isSame(lastMonth, "month");
+    } else if (period === "twoMonthsAgo") {
+      const twoMonthsAgo = now.clone().subtract(2, "months");
+      return recordDate.isSame(twoMonthsAgo, "month");
+    }
+    return true;
+  };
+
+  // Tính tổng doanh số cho một nhân viên dựa trên sampleOrders đã được lọc theo thời gian
   const computeTotalSales = (employeeName) => {
     const totalProfit = sampleOrders
       .filter((p) => p.mkt === employeeName && filterSampleOrdersByPeriod(p))
-      .reduce((sum, p) => sum + p.profit, 0)*17000;
-      return totalProfit.toLocaleString('vi-VN');
+      .reduce((sum, p) => sum + p.profit, 0) * 17000;
+    return totalProfit.toLocaleString('vi-VN');
   };
+
   /*** Hàm nhóm record theo userId ***/
   const groupRecordsByUser = (records) => {
     return records.reduce((acc, record) => {
@@ -217,13 +237,8 @@ const filterSampleOrdersByPeriod = (order) => {
   /*** Lọc dữ liệu theo khoảng thời gian và theo quyền ***/
   const getFilteredRecords = () => {
     let filtered = [...records];
-    // Lọc theo khoảng thời gian: so sánh với ngày hiện tại
-    const days = parseInt(filterOption, 10);
-    const now = moment();
-    filtered = filtered.filter(record => {
-      const diffDays = now.diff(moment(record.date, 'YYYY-MM-DD'), 'days');
-      return diffDays < days;
-    });
+    // Lọc theo khoảng thời gian dựa trên period đã chọn
+    filtered = filtered.filter(record => filterRecordsByPeriod(record));
 
     // Lọc theo quyền:
     if (currentUser.position === 'mkt') {
@@ -478,8 +493,8 @@ const filterSampleOrdersByPeriod = (order) => {
               <Col xs={24}>
                 <h4>Nhân viên: {userRecords?.[0]?.name}</h4>
                 <div style={{ fontWeight: "bold", marginBottom: 8 }}>
-            Tổng doanh số: {computeTotalSales(currentUser.name)}
-          </div>
+                  Tổng doanh số: {computeTotalSales(userRecords[0].name)}
+                </div>
               </Col>
               <Col xs={24}>
                 <Table
@@ -492,21 +507,23 @@ const filterSampleOrdersByPeriod = (order) => {
               </Col>
             </Row>
           ))
-      ) : (<>
-        <div style={{ fontWeight: "bold", marginBottom: 8 }}>
+      ) : (
+        <>
+          <div style={{ fontWeight: "bold", marginBottom: 8 }}>
             Tổng doanh số: {computeTotalSales(currentUser.name)}
           </div>
-        <Row gutter={[16, 16]}>
-          <Col xs={24}>
-            <Table
-              dataSource={filteredRecords}
-              columns={columns}
-              rowKey="id"
-              pagination={false}
-              scroll={{ x: true }}
-            />
-          </Col>
-        </Row></>
+          <Row gutter={[16, 16]}>
+            <Col xs={24}>
+              <Table
+                dataSource={filteredRecords}
+                columns={columns}
+                rowKey="id"
+                pagination={false}
+                scroll={{ x: true }}
+              />
+            </Col>
+          </Row>
+        </>
       )}
     </div>
   );
