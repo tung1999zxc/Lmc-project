@@ -221,21 +221,19 @@
           case "waiting_done":
             filterMatch = order.saleReport !== "DONE";
             break;
-          case "same_sale":
-            filterMatch = selectedSale ? order.sale === selectedSale : true;
-            break;
-          case "same_mkt":
-            filterMatch = selectedMKT ? order.mkt === selectedMKT : true;
-            break;
+          
           default:
             filterMatch = true;
         }
-    
-        return dateMatch && searchMatch && filterMatch;
+        const saleMatch = selectedSale ? (order.sale === selectedSale||order.salexuly === selectedSale) : true;
+        const mktMatch = selectedMKT ? order.mkt === selectedMKT : true;
+        
+        return dateMatch && searchMatch && filterMatch && saleMatch && mktMatch;
       });
       return roleFilteredOrders.sort((a, b) => {
         return dayjs(b.orderDate).valueOf() - dayjs(a.orderDate).valueOf();
       });
+      
     }, [
       orders,
       dateRange,
@@ -549,14 +547,13 @@
                 { value: "duplicate_name", label: "Trùng tên khách" },
                 { value: "duplicate_phone", label: "Trùng số điện thoại" },
                 { value: "waiting_approval", label: "Đợi xác nhận" },
-                { value: "same_sale", label: "Cùng Sale" },
-                { value: "same_mkt", label: "Cùng MKT" }
+              
               ]}
               onChange={(value) => setSelectedFilter(value)}
             />
           </Col>
           <Col span={3}>
-            <Select
+            <Select disabled={currentUser.position === 'mkt' ||currentUser.position === 'salenhapdon'||currentUser.position === 'salexuly'}
               placeholder="Chọn Sale"
               options={saleOptions.map((s) => ({ value: s, label: s }))}
               onChange={(value) => setSelectedSale(value)}
@@ -565,7 +562,7 @@
             />
           </Col>
           <Col span={3}>
-            <Select
+            <Select disabled={currentUser.position === 'mkt' ||currentUser.position === 'salenhapdon'||currentUser.position === 'salexuly'}
               placeholder="Chọn MKT"
               options={mktOptions.map((m) => ({ value: m, label: m }))}
               onChange={(value) => setSelectedMKT(value)}
