@@ -53,10 +53,10 @@ const Dashboard = () => {
     }
   }, [records]);
 
-  if (currentUser.position === 'admin'){
-    // Nếu admin thì trả về gì đó (theo code ban đầu của bạn)
-    return (currentUser.position_team = ['sale', 'mkt']);
-  };
+  // if (currentUser.position === 'admin'){
+  //   // Nếu admin thì trả về gì đó (theo code ban đầu của bạn)
+  //   return (currentUser.position_team = ['sale', 'mkt']);
+  // };
 
   // Với vai trò lead, lấy danh sách mã nhân viên cùng team của lead
   const leadTeamMembers = employees
@@ -262,7 +262,7 @@ const Dashboard = () => {
       filtered = filtered.filter(record => record.userId === currentUser.employee_code);
     } else if (currentUser.position === 'lead') {
       filtered = filtered.filter(record => leadTeamMembers.includes(record.userId));
-    } else if (currentUser.position === 'managerMKT') {
+    } else if (currentUser.position === 'managerMKT' ||currentUser.position === 'admin') {
       // Nếu manager chọn một team cụ thể thì lọc theo team đó,
       // còn nếu chọn "all" thì không lọc thêm.
       if (selectedTeam && selectedTeam !== 'all') {
@@ -358,7 +358,7 @@ const Dashboard = () => {
       key: 'action',
       render: (_, record) => {
         // Với lead và manager: chỉ cho phép sửa/xóa nếu record thuộc về chính họ, ngược lại chỉ xem
-        if (currentUser.position === 'lead' || currentUser.position === 'managerMKT') {
+        if (currentUser.position === 'lead' || currentUser.position === 'managerMKT'||currentUser.position === 'admin ') {
           if (record.userId === currentUser.employee_code) {
             return (
               <>
@@ -477,7 +477,7 @@ const Dashboard = () => {
       <Row gutter={[16, 16]} style={{ marginBottom: 16 }}>
         <Col xs={24} sm={12} md={8}>
           <div style={{ marginBottom: 16 }}>
-          <span style={{ marginRight: 8 }}>Chọn thời gian </span>
+          <span style={{ marginRight: 8 }}>Chọn thời gian </span><br/>
                   <Select
                     value={period}
                     onChange={(value) => setPeriod(value)}
@@ -491,7 +491,7 @@ const Dashboard = () => {
                   </Select>
                 </div>
         </Col>
-        {currentUser.position === 'managerMKT' && (
+        {(currentUser.position === 'managerMKT'|| currentUser.position === 'admin' )&& (
           <Col xs={24} sm={12} md={8}>
             <div>
               <span style={{ marginRight: 8 }}>Chọn team: </span>
@@ -513,7 +513,7 @@ const Dashboard = () => {
       </Row>
 
       {/* Render bảng dữ liệu */}
-      {currentUser.position === 'managerMKT' || currentUser.position === 'lead' ? (
+      {currentUser.position === 'managerMKT'||currentUser.position === 'admin' || currentUser.position === 'lead' ? (
         Object.entries(groupRecordsByUser(filteredRecords))
           .sort(([userIdA], [userIdB]) => {
             const currentUserKey = String(currentUser.employee_code);
