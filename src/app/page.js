@@ -604,7 +604,7 @@ export default function HomePage() {
       </div>
 {/* Báo cáo Marketing */}
 <h2 style={{ marginTop: "2rem" }}>Báo cáo marketing</h2>
-      <Table columns={marketingColumns} dataSource={marketingReportData} pagination={false} />
+      <Table bordered columns={marketingColumns} dataSource={marketingReportData} pagination={false} />
       <Row gutter={[16, 16]}>
         <Col xs={24} md={12}>
           <h2>Doanh số &amp; chi phí Ads theo Team</h2>
