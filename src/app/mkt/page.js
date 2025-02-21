@@ -437,26 +437,30 @@ const Dashboard = () => {
             
              
               <Col xs={24} sm={12} md={3} lg={6}>
-              <h4 hidden={editingRecord}>Tiền thừa hôm qua</h4>
-                <Form.Item name="oldMoney" hidden={editingRecord}>
+              <h4 >{editingRecord? 'Tiền thừa hôm kia':'Tiền thừa hôm qua'}</h4>
+                <Form.Item name="oldMoney">
                   <InputNumber placeholder="Tiền cũ" style={{ width: '100%' }} />
-                </Form.Item>
-                <h4 hidden={!editingRecord}>Tiền thừa </h4>
-              <Form.Item name="excessMoney" hidden={!editingRecord}>
-          <InputNumber placeholder="Tiền thừa" style={{ width: '100%' }} />
+                
         </Form.Item>
               </Col>
               <Col xs={24} sm={12} md={3} lg={6}>
-              <h4 hidden={editingRecord}>Xin buổi sáng</h4>
-                <Form.Item name="request1" hidden={editingRecord} >
+              <h4 >Xin buổi sáng</h4>
+                <Form.Item name="request1"  >
                   <InputNumber placeholder="Xin lần 1" style={{ width: '100%' }} />
                 </Form.Item>
               </Col>
               <Col xs={24} sm={12} md={3} lg={6}>
-              <h4 hidden={editingRecord} >Xin buổi chiều</h4>
-                <Form.Item name="request2" hidden={editingRecord}>
+              <h4  >Xin buổi chiều</h4>
+                <Form.Item name="request2" >
                   <InputNumber placeholder="Xin lần 2" style={{ width: '100%' }} />
                 </Form.Item>
+              </Col>
+              <Col xs={24} sm={12} md={3} lg={6}>
+              
+                <h4 hidden={!editingRecord}>Tiền thừa hôm qua</h4>
+              <Form.Item name="excessMoney" hidden={!editingRecord}>
+          <InputNumber placeholder="Tiền thừa" style={{ width: '100%' }} />
+        </Form.Item>
               </Col>
 
               <Col xs={24} sm={12} md={3} lg={6}>
