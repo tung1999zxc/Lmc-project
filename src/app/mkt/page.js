@@ -307,7 +307,17 @@ const Dashboard = () => {
         return (total - record.excessMoney).toLocaleString('vi-VN');
       }
     },
+   
     {
+      title: 'Xin buổi sáng',
+      key: 'excessMoney',
+      render: (_, record) => record.request1.toLocaleString('vi-VN')
+    },
+    {
+      title: 'Xin Buổi chiều',
+      key: 'excessMoney',
+      render: (_, record) => record.request2.toLocaleString('vi-VN')
+    }, {
       title: 'Tiền thừa',
       key: 'excessMoney',
       render: (_, record) => record.excessMoney.toLocaleString('vi-VN')
