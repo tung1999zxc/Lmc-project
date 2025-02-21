@@ -2,10 +2,10 @@
 import { Table } from "antd";
 import { useEffect, useState } from "react";
 import dayjs from "dayjs";
-
+import { useSelector } from "react-redux"; 
 const OrdersTable = () => {
   const [sampleOrders, setSampleOrders] = useState([]);
-
+  const currentUser = useSelector((state) => state.user.currentUser);
   // Khi component mount, đọc dữ liệu đơn từ localStorage (chỉ chạy trên client)
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -90,10 +90,41 @@ const OrdersTable = () => {
       title: "Tỉ lệ xác nhận đơn",
       dataIndex: "confirmRate",
       key: "confirmRate",
-    },
+      
+        render: (_, record) => {
+          let rate = record.confirmRate;
+          // Nếu rate là chuỗi (ví dụ "80.00%"), chuyển đổi thành số
+          if (typeof rate !== "number") {
+            rate = parseFloat(rate);
+          }
+          let bgColor = "";
+          if (rate < 80) {
+            bgColor = "#EC2527";
+          } else if (rate >= 80 && rate <= 95) {
+            bgColor = "#FF9501";
+          } else {
+            bgColor = "#54DA1F";
+          }
+          return (
+            <div
+              style={{
+                backgroundColor: bgColor,
+                padding: "4px 8px",
+                borderRadius: "4px",
+                textAlign: "center",
+                fontWeight: "bold"
+              }}
+            >
+              {rate.toFixed(2)}%
+            </div>
+          );
+        }
+      },
   ];
 
-  return <Table dataSource={sortedDataSource} columns={columns} bordered />;
+  return <Table
+    
+   dataSource={sortedDataSource} columns={columns} bordered />;
 };
 
 export default OrdersTable;

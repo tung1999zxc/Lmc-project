@@ -1,264 +1,249 @@
 'use client'
-import { useState, useEffect } from "react";
-import { Table, InputNumber, Popconfirm, Button, DatePicker, Select, Space, Form, Modal } from "antd";
-import { EditOutlined, DeleteOutlined } from "@ant-design/icons";
+import { useState } from "react";
+import { Table, Select, Space } from "antd";
 import dayjs from "dayjs";
 import { useSelector } from "react-redux";
 
 const Dashboard = () => {
   const currentUser = useSelector((state) => state.user.currentUser);
-  // Giả sử thông tin người dùng hiện tại được lấy từ hệ thống xác thực
-  const [data, setData] = useState([]);
-  
-  const [selectedDate, setSelectedDate] = useState(null);
-  const [orderCount, setOrderCount] = useState(null);
-  const [collectedAmount, setCollectedAmount] = useState(null);
+
+  // Dữ liệu orders mẫu; bạn có thể thay thế bằng dữ liệu thật từ API hay nguồn khác.
+  const [orders, setOrders] = useState([
+    { id: 1, salexuly: "salexuly1", date: "2025-02-20", paymentStatus: "ĐÃ THANH TOÁN", revenue: 100 },
+    { id: 2, salexuly: "salexuly2", date: "2025-02-20", paymentStatus: "CHƯA THANH TOÁN", revenue: 50 },
+    { id: 3, salexuly: "salexuly", date: "2025-02-19", paymentStatus: "ĐÃ THANH TOÁN", revenue: 200 },
+    // ... thêm dữ liệu nếu cần
+  ]);
+
+  // Bộ lọc thời gian: all, day, week, month, previousMonth, twoMonthsAgo, threeMonthsAgo
   const [filterRange, setFilterRange] = useState("all");
-  const [editingKey, setEditingKey] = useState(null);
-  const [form] = Form.useForm();
 
-  // Lấy dữ liệu từ localStorage khi component mount
-  useEffect(() => {
-    const savedData = localStorage.getItem("orderRecords");
-    if (savedData) setData(JSON.parse(savedData));
-  }, []);
- const orders = [{
-    "orderDate": "2025-02-20",
-    
-    "salexuly": "salexuly",
-   
-    "paymentStatus"
-: 
-"ĐÃ THANH TOÁN",
-    
-"revenue"
-: 
-0,
-    "profit": 0,
-    
-  },{
-    
-    "orderDate": "2025-02-20",
-   
-    "salexuly": "sale xuly2",
-    "profit": 20,
-    'revenue'
-: 
-10,
-   
-    
-    "paymentStatus": "CHƯA THANH TOÁN",
-    
-  }];
-  // Thêm bản ghi mới
-  const handleAddRecord = () => {
-    if (!selectedDate || !orderCount || !collectedAmount) return;
-    const newRecord = {
-      key: Date.now(),
-      date: selectedDate.format("YYYY-MM-DD"),
-      orderCount,
-      collectedAmount,
-      user: currentUser.name,
-    };
-    const newData = [...data, newRecord];
-    setData(newData);
-    localStorage.setItem("orderRecords", JSON.stringify(newData));
-    setSelectedDate(null);
-    setOrderCount(null);
-    setCollectedAmount(null);
-  };
-
-  // Xóa bản ghi
-  const handleDelete = (key) => {
-    const newData = data.filter((item) => item.key !== key);
-    setData(newData);
-    localStorage.setItem("orderRecords", JSON.stringify(newData));
-  };
-
-  // Mở modal chỉnh sửa và điền giá trị hiện tại vào form
-  const handleEdit = (record) => {
-    form.setFieldsValue({
-      date: dayjs(record.date, "YYYY-MM-DD"),
-      orderCount: record.orderCount,
-      collectedAmount: record.collectedAmount,
+  // Lọc orders theo bộ lọc thời gian được chọn
+  const getFilteredOrders = () => {
+    const today = dayjs();
+    return orders.filter(order => {
+      const orderDate = dayjs(order.date);
+      switch(filterRange) {
+        case "all":
+          return true;
+        case "day":
+          return orderDate.isSame(today, "day");
+        case "week":
+          return orderDate.isAfter(today.subtract(7, "day"));
+        case "month":
+          return orderDate.isAfter(today.startOf("month"));
+        case "previousMonth": {
+          const prevMonth = today.subtract(1, "month");
+          return orderDate.isAfter(prevMonth.startOf("month")) && orderDate.isBefore(prevMonth.endOf("month"));
+        }
+        case "twoMonthsAgo": {
+          const twoMonthsAgo = today.subtract(2, "month");
+          return orderDate.isAfter(twoMonthsAgo.startOf("month")) && orderDate.isBefore(twoMonthsAgo.endOf("month"));
+        }
+        case "threeMonthsAgo": {
+          const threeMonthsAgo = today.subtract(3, "month");
+          return orderDate.isAfter(threeMonthsAgo.startOf("month")) && orderDate.isBefore(threeMonthsAgo.endOf("month"));
+        }
+        default:
+          return true;
+      }
     });
-    setEditingKey(record.key);
   };
 
-  // Lưu bản ghi sau khi chỉnh sửa
-  const handleSave = async () => {
-    try {
-      const values = await form.validateFields();
-      const newData = data.map((item) =>
-        item.key === editingKey
-          ? { ...item, ...values, date: values.date.format("YYYY-MM-DD") }
-          : item
-      );
-      setData(newData);
-      localStorage.setItem("orderRecords", JSON.stringify(newData));
-      setEditingKey(null);
-      form.resetFields();
-    } catch (error) {
-      console.error("Validate Failed:", error);
+  // Lấy danh sách ngày (unique date) từ orders đã lọc, có thể theo từng nhân viên nếu cần
+  const getUniqueDatesForUser = (user) => {
+    let filtered = getFilteredOrders();
+    if (user) {
+      filtered = filtered.filter(order => order.salexuly === user);
     }
+    const uniqueDates = [...new Set(filtered.map(order => order.date))];
+    // Sắp xếp ngày giảm dần (mới nhất ở đầu)
+    return uniqueDates.sort((a, b) => dayjs(b).unix() - dayjs(a).unix());
   };
 
-  const handleCancelEdit = () => {
-    setEditingKey(null);
-    form.resetFields();
-  };
-
-  // Bộ lọc dữ liệu theo user và khoảng thời gian
-  const getFilteredData = () => {
-    let filteredData = data;
-    // Nếu không phải quản lý hoặc lead, chỉ hiển thị dữ liệu của chính người đó
-    if (
-      currentUser.position !== "managerMKT" &&
-      currentUser.position !== "managerSALE" &&
-      currentUser.position !== "admin" &&
-      currentUser.position !== "leadSALE"
-    ) {
-      filteredData = filteredData.filter((item) => item.user === currentUser.name);
+  // Hàm tính các chỉ số cho 1 ngày (có thể lọc theo user)
+  const computeMetricsByDate = (date, user = null) => {
+    let ordersForDate = orders.filter(order => order.date === date);
+    if (user) {
+      ordersForDate = ordersForDate.filter(order => order.salexuly === user);
     }
-    if (filterRange !== "all") {
-      const today = dayjs();
-      filteredData = filteredData.filter((item) => {
-        const itemDate = dayjs(item.date);
-        if (filterRange === "day") return itemDate.isSame(today, "day");
-        if (filterRange === "week") return itemDate.isAfter(today.subtract(7, "day"));
-        if (filterRange === "month") return itemDate.isAfter(today.subtract(1, "month"));
-        return true;
-      });
-    }
-    return filteredData;
+    const sharedOrders = ordersForDate.length;
+    const completedOrders = ordersForDate.filter(order => order.paymentStatus === "ĐÃ THANH TOÁN").length;
+    const totalRevenue = ordersForDate.reduce((acc, order) => acc + Number(order.revenue || 0), 0);
+    const paidRevenue = ordersForDate
+      .filter(order => order.paymentStatus === "ĐÃ THANH TOÁN")
+      .reduce((acc, order) => acc + Number(order.revenue || 0), 0);
+    const unpaidRevenue = ordersForDate
+      .filter(order => order.paymentStatus === "CHƯA THANH TOÁN")
+      .reduce((acc, order) => acc + Number(order.revenue || 0), 0);
+    const paymentRate = totalRevenue ? (paidRevenue / totalRevenue) : 0;
+    return { sharedOrders, completedOrders, totalRevenue, paidRevenue, unpaidRevenue, paymentRate };
   };
 
-  const columns = [
+  // Cấu hình các cột cho bảng
+  const columns = (user) => [
     { title: "Ngày", dataIndex: "date", key: "date" },
-    { title: "Số lượng đơn đòi được", dataIndex: "orderCount", key: "orderCount" },
-    { title: "Số tiền đòi về", dataIndex: "collectedAmount", key: "collectedAmount" },
-    {
-      title: "Thao tác",
-      key: "actions",
+    { 
+      title: "Số đơn được chia", 
+      key: "sharedOrders",
       render: (_, record) => {
-        if (
-          currentUser.position === "managerMKT" ||
-          currentUser.position === "managerSALE" ||
-          currentUser.position === "admin" ||
-          currentUser.position === "leadSALE"
-        ) {
-          if (record.user === currentUser.name) {
-            return (
-              <>
-                <Button icon={<EditOutlined />} onClick={() => handleEdit(record)} />
-                <Popconfirm title="Xóa bản ghi?" onConfirm={() => handleDelete(record.key)}>
-                  <Button danger icon={<DeleteOutlined />} />
-                </Popconfirm>
-              </>
-            );
-          } else {
-            return <span>Chỉ xem</span>;
-          }
+        const { sharedOrders } = computeMetricsByDate(record.date, user);
+        return sharedOrders;
+      }
+    },
+    { 
+      title: "Số lượng đơn đòi được", 
+      key: "completedOrders",
+      render: (_, record) => {
+        const { completedOrders } = computeMetricsByDate(record.date, user);
+        return completedOrders;
+      }
+    },
+    { 
+      title: "Tổng doanh số", 
+      key: "totalRevenue",
+      render: (_, record) => {
+        const { totalRevenue } = computeMetricsByDate(record.date, user);
+        return totalRevenue;
+      }
+    },
+    { 
+      title: "Đã thanh toán", 
+      key: "paidRevenue",
+      render: (_, record) => {
+        const { paidRevenue } = computeMetricsByDate(record.date, user);
+        return paidRevenue;
+      }
+    },
+    { 
+      title: "Chưa thanh toán", 
+      key: "unpaidRevenue",
+      render: (_, record) => {
+        const { unpaidRevenue } = computeMetricsByDate(record.date, user);
+        return unpaidRevenue;
+      }
+    },
+    { 
+      title: "Tỉ lệ thanh toán", 
+      key: "paymentRate",
+      render: (_, record) => {
+        const { paymentRate } = computeMetricsByDate(record.date, user);
+        const percent = Number((paymentRate * 100));
+        let bgColor = "";
+        if (percent < 80) {
+          bgColor = "#EC2527"; // nền xanh lá (màu xanh nhạt)
+        } else if (percent >= 80 && percent <= 95) {
+          bgColor = "##FF9501"; // nền vàng nhạt
+        } else {
+          bgColor = " #54DA1F"; // nền đỏ nhạt
         }
         return (
-          <Space>
-            <Button icon={<EditOutlined />} onClick={() => handleEdit(record)} />
-            <Popconfirm title="Xóa bản ghi?" onConfirm={() => handleDelete(record.key)}>
-              <Button danger icon={<DeleteOutlined />} />
-            </Popconfirm>
-          </Space>
+          <div
+            style={{
+              backgroundColor: bgColor,
+              padding: "4px 8px",
+              borderRadius: "4px",
+              textAlign: "center",
+              fontWeight: "bold"
+            }}
+          >
+            {percent.toFixed(2)}%
+          </div>
         );
-      },
+      }
     },
   ];
+ // Xác định màu nền dựa trên %ADS
+ 
+  // Hiển thị dòng tổng hợp (header) cho các chỉ số, có thể theo từng nhân viên
+  const renderSummary = (user = null) => {
+    let filtered = getFilteredOrders();
+    if (user) {
+      filtered = filtered.filter(order => order.salexuly === user);
+    }
+    const totalRevenueSum = filtered.reduce(
+      (acc, order) => acc + Number(order.revenue || 0),
+      0
+    );
+    const paidRevenueSum = filtered
+      .filter(order => order.paymentStatus === "ĐÃ THANH TOÁN")
+      .reduce((acc, order) => acc + Number(order.revenue || 0), 0);
+    const unpaidRevenueSum = filtered
+      .filter(order => order.paymentStatus === "CHƯA THANH TOÁN")
+      .reduce((acc, order) => acc + Number(order.revenue || 0), 0);
+    const summaryRate = totalRevenueSum ? paidRevenueSum / totalRevenueSum : 0;
+    
+    // Chuyển sang % để so sánh
+    const ratePercentage = summaryRate * 100;
+    
+    let bgColor = "";
+    if (ratePercentage < 80) {
+      bgColor = "#EC2527"; // nếu <80%
+    } else if (ratePercentage >= 80 && ratePercentage <= 95) {
+      bgColor = "#FF9501"; // nếu từ 80% đến 95%
+    } else {
+      bgColor = "#54DA1F"; // nếu >95%
+    }
+    
+    return (
+      <div
+        style={{
+          backgroundColor: bgColor,
+          padding: "4px 8px",
+          borderRadius: "4px"
+        }}
+      >
+        {user ? `NV: ${user}` : ""} <br />
+        Chưa thanh toán: <strong>{unpaidRevenueSum}</strong> - Đã thanh toán: <strong>{paidRevenueSum}</strong> - % Thanh Toán Đạt: <strong>{ratePercentage.toFixed(2)}%</strong>
+      </div>
+    );
+  };
+  
 
   return (
     <div>
-      <h3>Nhập báo cáo</h3>
-      <Space style={{ marginBottom: 16 }}>
-        <DatePicker value={selectedDate} onChange={setSelectedDate} />
-        <InputNumber
-          style={{ width: "200px" }}
-          value={orderCount}
-          onChange={setOrderCount}
-          placeholder="Số lượng đơn đòi được"
-        />
-        <InputNumber
-          style={{ width: "200px" }}
-          value={collectedAmount}
-          onChange={setCollectedAmount}
-          placeholder="Số tiền đòi về"
-        />
-        <Button type="primary" onClick={handleAddRecord}>
-          Thêm
-        </Button>
-      </Space>
+      {/* Bộ lọc theo khoảng thời gian */}
       <div style={{ marginBottom: 16 }}>
         <span style={{ marginRight: 8 }}>Bộ lọc theo khoảng thời gian: </span>
-        <Select value={filterRange} onChange={setFilterRange} style={{ width: 200 }}>
+        <Select value={filterRange} onChange={setFilterRange} style={{ width: 250 }}>
           <Select.Option value="all">Tất cả</Select.Option>
           <Select.Option value="day">1 Ngày</Select.Option>
           <Select.Option value="week">1 Tuần</Select.Option>
-          <Select.Option value="month">1 Tháng</Select.Option>
+          <Select.Option value="month">1 Tháng (từ đầu tháng)</Select.Option>
+          <Select.Option value="previousMonth">Tháng trước</Select.Option>
+          <Select.Option value="twoMonthsAgo">2 tháng trước</Select.Option>
+          <Select.Option value="threeMonthsAgo">3 tháng trước</Select.Option>
         </Select>
       </div>
-      {currentUser.position === "managerMKT" ||
-      currentUser.position === "managerSALE" ||
-      currentUser.position === "admin" ||
-      currentUser.position === "leadSALE" ? (
-        [...new Set(getFilteredData().map((item) => item.user))].map((user) => (
+      {(currentUser.position === "managerMKT" ||
+        currentUser.position === "managerSALE" ||
+        currentUser.position === "admin" ||
+        currentUser.position === "leadSALE") ? (
+        // Nếu là quản lý, hiển thị bảng cho từng nhân viên
+        [...new Set(getFilteredOrders().map(order => order.salexuly))].map(user => (
           <div key={user} style={{ marginBottom: 24 }}>
-            <h3>Nv: {user}</h3>
+            {renderSummary(user)}
+            
             <Table
-              dataSource={getFilteredData().filter((item) => item.user === user)}
-              columns={columns}
-              rowKey="key"
+              dataSource={getUniqueDatesForUser(user).map(date => ({ key: date, date }))}
+              columns={columns(user)}
               pagination={{ pageSize: 10 }}
               bordered
             />
           </div>
         ))
       ) : (
-        <Table
-          dataSource={getFilteredData().filter((item) => item.user === currentUser.name)}
-          columns={columns}
-          rowKey="key"
-          pagination={{ pageSize: 10 }}
-          bordered
-        />
+        // Nếu không phải quản lý, chỉ hiển thị dữ liệu của người dùng hiện tại
+        <>
+          {renderSummary(currentUser.name)}
+          <Table
+            dataSource={getUniqueDatesForUser(currentUser.name).map(date => ({ key: date, date }))}
+            columns={columns(currentUser.name)}
+            pagination={{ pageSize: 10 }}
+            bordered
+          />
+        </>
       )}
-      <Modal
-        title="Chỉnh sửa báo cáo"
-        visible={editingKey !== null}
-        onOk={handleSave}
-        onCancel={handleCancelEdit}
-        okText="Lưu"
-        cancelText="Hủy"
-      >
-        <Form form={form} layout="vertical">
-          <Form.Item
-            name="date"
-            label="Ngày"
-            rules={[{ required: true, message: "Vui lòng chọn ngày" }]}
-          >
-            <DatePicker style={{ width: "100%" }} />
-          </Form.Item>
-          <Form.Item
-            name="orderCount"
-            label="Số lượng đơn đòi được"
-            rules={[{ required: true, message: "Vui lòng nhập số lượng đơn" }]}
-          >
-            <InputNumber style={{ width: "100%" }} />
-          </Form.Item>
-          <Form.Item
-            name="collectedAmount"
-            label="Số tiền đòi về"
-            rules={[{ required: true, message: "Vui lòng nhập số tiền đòi về" }]}
-          >
-            <InputNumber style={{ width: "100%" }} />
-          </Form.Item>
-        </Form>
-      </Modal>
     </div>
   );
 };

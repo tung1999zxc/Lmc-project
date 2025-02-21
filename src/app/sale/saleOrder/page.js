@@ -194,7 +194,34 @@ const Dashboard = () => {
       title: "Tỉ lệ chốt",
       dataIndex: "ratio",
       key: "ratio",
-      render: (ratio) => `${(ratio * 100).toFixed(2)}%`,
+      render: (_, record) => {
+        let rate = record.ratio * 100;
+        // Nếu rate là chuỗi (ví dụ "80.00%"), chuyển đổi thành số
+        if (typeof rate !== "number") {
+          rate = parseFloat(rate);
+        }
+        let bgColor = "";
+        if (rate < 10) {
+          bgColor = "#EC2527";
+        } else if (rate >= 10 && rate <= 15) {
+          bgColor = "#FF9501";
+        } else {
+          bgColor = "#54DA1F";
+        }
+        return (
+          <div
+            style={{
+              backgroundColor: bgColor,
+              padding: "4px 8px",
+              borderRadius: "4px",
+              textAlign: "center",
+              fontWeight: "bold"
+            }}
+          >
+            {rate.toFixed(2)}%
+          </div>
+        );
+      }
     },
     {
       title: "Hành động",
@@ -202,7 +229,7 @@ const Dashboard = () => {
       render: (_, record) => {
         // Với lead hoặc manager: chỉ cho phép sửa/xóa nếu record thuộc về chính họ
         if (
-          currentUser.position === "leadSALE" ||
+          currentUser.position === "leadSALE" ||currentUser.position === "admin"||currentUser.position === "managerMKT"||
           currentUser.position === "managerSALE"
         ) {
           if (record.employeeId === currentUser.employee_code) {
@@ -243,6 +270,9 @@ const Dashboard = () => {
   // Lọc dữ liệu record dựa trên vai trò của người dùng và bộ lọc thời gian
   const filteredRecords = records.filter((record) => {
     // Nếu người dùng là nhân viên thì chỉ hiển thị dữ liệu của họ
+    if (currentUser.position === "salexacnhan"||currentUser.position === "salexuly"||currentUser.position === "mkt"||currentUser.position === "kho1") {
+      return false;
+    }
     if (
       (currentUser.position === "salenhapdon" ||
         currentUser.position === "salefull") &&
@@ -250,9 +280,7 @@ const Dashboard = () => {
     ) {
       return false;
     }
-    if (currentUser.position_team !== "sale") {
-      return false;
-    }
+   
     const recordDate = moment(record.date);
     const now = moment();
     if (period === "week") {
@@ -354,12 +382,12 @@ const Dashboard = () => {
       </div>
 
       {/* Render bảng và hiển thị tổng doanh số theo bộ lọc */}
-      {currentUser.position === "managerSALE" ||
+      {currentUser.position === "managerSALE" ||currentUser.position === "admin"||currentUser.position === "managerMKT"||
       currentUser.position === "leadSALE" ? (
         Object.entries(groupRecordsByUser(filteredRecords)).map(
           ([employeeName, userRecords]) => (
             <div key={employeeName} style={{ marginBottom: 24 }}>
-              <h4>{employeeName}</h4>
+              <h4>NV: {employeeName}</h4>
               <div style={{ fontWeight: "bold", marginBottom: 8 }}>
                 Tổng doanh số: {computeTotalSales(employeeName)}
               </div>

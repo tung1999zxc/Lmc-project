@@ -34,6 +34,7 @@ export default function EmployeeManagement() {
     { label: 'Nhân viên kho2', value: 'kho2' }
   ];
   const position_team = [
+    { label: 'ADMIN', value: 'admin' }, 
     { label: 'SALE', value: 'sale' }, 
     { label: 'MKT', value: 'mkt' },
     { label: 'Kho', value: 'kho' }
