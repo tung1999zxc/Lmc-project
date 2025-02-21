@@ -465,7 +465,7 @@ export default function HomePage() {
         // Nếu nhân viên có position là "lead" thì áp dụng nền màu vàng (hoặc màu vàng nhạt)
         const style =
           emp && emp.position === "lead"
-            ? { backgroundColor: "#58DC82", padding: "4px 8px", borderRadius: "4px" }
+            ? { backgroundColor: "#2A8B9A", padding: "4px 8px", borderRadius: "4px" }
             : {};
         return <div style={style}>{text}</div>;
       },
@@ -510,7 +510,7 @@ export default function HomePage() {
         if (percent < 30) {
           bgColor = "#54DA1F"; // nền xanh lá (màu xanh nhạt)
         } else if (percent >= 30 && percent <= 35) {
-          bgColor = "#FC6D6E"; // nền vàng nhạt
+          bgColor = "#FF9501"; // nền vàng nhạt
         } else {
           bgColor = "#EC2527"; // nền đỏ nhạt
         }

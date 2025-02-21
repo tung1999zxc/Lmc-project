@@ -218,7 +218,7 @@
           case "done":
             filterMatch = order.saleReport === "DONE";
             break;
-          case "waiting_done":
+          case "waiting_done":  
             filterMatch = order.saleReport !== "DONE";
             break;
           

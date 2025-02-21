@@ -159,7 +159,7 @@ const InventoryPage = () => {
       title: 'SL sản phẩm đơn chưa DONE',
       key: 'ordersNotDone',
       render: (_, record) => {
-        // Lấy tổng số lượng của các đơn hàng chưa DONE có chứa sản phẩm này
+        // Lấy tổng số lượng của các đơn hàng chưa DONE chứa sản phẩm này
         const ordersNotDone = orders
           .filter((order) => order.saleReport !== 'DONE')
           .reduce((acc, order) => {
@@ -175,10 +175,10 @@ const InventoryPage = () => {
       },
     },
     {
-      title: 'SL sản phẩm đơn Done',
+      title: 'SL sản phẩm đơn Done /nhưng chưa gửi ',
       key: 'ordersDone',
       render: (_, record) => {
-        // Lấy tổng số lượng của các đơn hàng DONE có chứa sản phẩm này
+        // Lấy tổng số lượng của các đơn hàng DONE chứa sản phẩm này
         const ordersDone = orders
           .filter((order) => order.saleReport === 'DONE')
           .reduce((acc, order) => {
@@ -190,14 +190,111 @@ const InventoryPage = () => {
             }
             return acc;
           }, 0);
-        return ordersDone;
+          const deliveredQty = orders
+          .filter(
+            (order) =>
+              order.deliveryStatus === 'ĐÃ GỬI HÀNG' ||
+              order.deliveryStatus === 'GIAO THÀNH CÔNG'
+          )
+          .reduce((acc, order) => {
+            if (order.products && order.products.length > 0) {
+              const orderQty = order.products
+                .filter((item) => item.product === record.name)
+                .reduce((sum, item) => sum + Number(item.quantity), 0);
+              return acc + orderQty;
+            }
+            return acc;
+          }, 0);
+        return ordersDone - deliveredQty;
+      },
+    },
+    // {
+    //   title: 'Tồn kho đơn đã Done',
+    //   key: 'inventoryDone',
+    //   render: (_, record) => {
+    //     const ordersDoneQty = orders
+    //       .filter((order) => order.saleReport === 'DONE')
+    //       .reduce((acc, order) => {
+    //         if (order.products && order.products.length > 0) {
+    //           const orderQty = order.products
+    //             .filter((item) => item.product === record.name)
+    //             .reduce((sum, item) => sum + Number(item.quantity), 0);
+    //           return acc + orderQty;
+    //         }
+    //         return acc;
+    //       }, 0);
+    //     return getTotalImportedQty(record) - ordersDoneQty;
+    //   },
+    // },
+    {
+      title: 'SL đã gửi hàng/ Giao thành công',
+      key: 'Totaldagui',
+      render: (_, record) => {
+        // Lấy tổng số lượng của các đơn hàng có trạng thái 'ĐÃ GỬI HÀNG' hoặc 'GIAO THÀNH CÔNG'
+        const deliveredQty = orders
+          .filter(
+            (order) =>
+              order.deliveryStatus === 'ĐÃ GỬI HÀNG' ||
+              order.deliveryStatus === 'GIAO THÀNH CÔNG'
+          )
+          .reduce((acc, order) => {
+            if (order.products && order.products.length > 0) {
+              const orderQty = order.products
+                .filter((item) => item.product === record.name)
+                .reduce((sum, item) => sum + Number(item.quantity), 0);
+              return acc + orderQty;
+            }
+            return acc;
+          }, 0);
+        return deliveredQty;
       },
     },
     {
-      title: 'Tồn kho đơn đã Done',
-      key: 'inventoryDone',
+      title: 'Tồn kho tổng',
+      key: 'inventoryTotal',
       render: (_, record) => {
-        const ordersDoneQty = orders
+        // Tồn kho tổng = SL nhập hàng - SL đã gửi hàng/ Giao thành công
+        const totalImported = getTotalImportedQty(record);
+        const deliveredQty = orders
+          .filter(
+            (order) =>
+              order.deliveryStatus === 'ĐÃ GỬI HÀNG' ||
+              order.deliveryStatus === 'GIAO THÀNH CÔNG'
+          )
+          .reduce((acc, order) => {
+            if (order.products && order.products.length > 0) {
+              const orderQty = order.products
+                .filter((item) => item.product === record.name)
+                .reduce((sum, item) => sum + Number(item.quantity), 0);
+              return acc + orderQty;
+            }
+            return acc;
+          }, 0);
+        return totalImported - deliveredQty;
+      },
+    },
+    {
+      title: 'SL Âm',
+      key: 'SLAM',
+      render: (_, record) => {
+        // Tính các giá trị cần thiết
+        const totalImported = getTotalImportedQty(record);
+        
+        // SL sản phẩm đơn chưa DONE
+        const ordersNotDone = orders
+          .filter((order) => order.saleReport !== 'DONE')
+          .reduce((acc, order) => {
+            if (order.products && order.products.length > 0) {
+              const orderQty = order.products
+                .filter((item) => item.product === record.name)
+                .reduce((sum, item) => sum + Number(item.quantity), 0);
+              return acc + orderQty;
+            }
+            return acc;
+          }, 0);
+        
+        // SL sản phẩm đơn Done
+        const ordersDone = orders
           .filter((order) => order.saleReport === 'DONE')
           .reduce((acc, order) => {
             if (order.products && order.products.length > 0) {
@@ -208,26 +305,31 @@ const InventoryPage = () => {
             }
             return acc;
           }, 0);
-        return getTotalImportedQty(record) - ordersDoneQty;
-      },
-    },
-    {
-      title: 'Tồn kho tổng',
-      key: 'inventoryTotal',
-      render: (_, record) => {
-        // Lấy tổng số lượng các đơn hàng có trạng thái 'ĐÃ GỬI HÀNG' hoặc 'GIAO THÀNH CÔNG'
-        const ordersDoneQty = orders
-        .filter((order) => order.deliveryStatus === 'ĐÃ GỬI HÀNG'||order.deliveryStatus === 'GIAO THÀNH CÔNG')
-        .reduce((acc, order) => {
-          if (order.products && order.products.length > 0) {
-            const orderQty = order.products
-              .filter((item) => item.product === record.name)
-              .reduce((sum, item) => sum + Number(item.quantity), 0);
-            return acc + orderQty;
-          }
-          return acc;
-        }, 0);
-      return getTotalImportedQty(record) - ordersDoneQty;
+        
+        // SL đã gửi hàng/ Giao thành công
+        const deliveredQty = orders
+          .filter(
+            (order) =>
+              order.deliveryStatus === 'ĐÃ GỬI HÀNG' ||
+              order.deliveryStatus === 'GIAO THÀNH CÔNG'
+          )
+          .reduce((acc, order) => {
+            if (order.products && order.products.length > 0) {
+              const orderQty = order.products
+                .filter((item) => item.product === record.name)
+                .reduce((sum, item) => sum + Number(item.quantity), 0);
+              return acc + orderQty;
+            }
+            return acc;
+          }, 0);
+        
+        // Tồn kho tổng (theo cột đã định nghĩa): SL nhập hàng - SL đã gửi hàng
+        const inventoryTotal = totalImported - deliveredQty;
+        
+        // Công thức: SL Âm = Tồn kho tổng - ordersNotDone - ordersDone - SL đã gửi hàng/ Giao thành công
+        const slAm = inventoryTotal - ordersNotDone - ordersDone + deliveredQty;
+        
+        return slAm;
       },
     },
     {
@@ -246,7 +348,7 @@ const InventoryPage = () => {
       ),
     },
   ];
-
+  
   return (
     <div style={{ padding: 24 }}>
       <h1>Quản lý sản phẩm</h1>

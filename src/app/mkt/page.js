@@ -17,7 +17,7 @@ import {
 import moment from 'moment';
 import { EditOutlined, DeleteOutlined } from '@ant-design/icons';
 import { useDispatch, useSelector } from 'react-redux';
-
+import dayjs from "dayjs";
 const { Option } = Select;
 
 const Dashboard = () => {
@@ -122,6 +122,9 @@ const Dashboard = () => {
     if (period === "week") {
       // 1 Tuần Gần Nhất: từ 7 ngày trước đến hiện tại
       return orderDate.isSameOrAfter(now.clone().subtract(7, "days"), "day");
+    } else if (period === "day") {
+      // Ngày hiện tại: so sánh theo ngày
+      return orderDate.isSame(moment(), "day");
     } else if (period === "month") {
       // Tháng Này: từ đầu tháng đến hiện tại
       return orderDate.isSame(now, "month") && orderDate.isSameOrAfter(now.clone().startOf("month"));
@@ -143,7 +146,10 @@ const Dashboard = () => {
     const now = moment();
     if (period === "week") {
       return recordDate.isSameOrAfter(now.clone().subtract(7, "days"), "day");
-    } else if (period === "month") {
+    }else if (period === "day") {
+      // Ngày hiện tại: so sánh theo định dạng "YYYY-MM-DD"
+      return recordDate.format("YYYY-MM-DD") === now.format("YYYY-MM-DD");}
+     else if (period === "month") {
       return recordDate.isSame(now, "month") && recordDate.isSameOrAfter(now.clone().startOf("month"));
     } else if (period === "lastMonth") {
       const lastMonth = now.clone().subtract(1, "months");
@@ -160,9 +166,20 @@ const Dashboard = () => {
     const totalProfit = sampleOrders
       .filter((p) => p.mkt === employeeName && filterSampleOrdersByPeriod(p))
       .reduce((sum, p) => sum + p.profit, 0) * 17000;
-    return totalProfit.toLocaleString('vi-VN');
+    return totalProfit;
   };
-
+  const computeTotalADS = (employeeName) => {
+    const totalADS = records
+      .filter((p) => p.name === employeeName && filterRecordsByPeriod(p))
+      .reduce((sum, p) => sum + p.adsMoney, 0);
+    return totalADS;
+  };
+  
+  const computePercentADS = (employeeName) => {
+    const totalSales = computeTotalSales(employeeName);
+    const totalADS = computeTotalADS(employeeName);
+    return totalSales > 0 ? ((totalADS / totalSales) * 100).toFixed(2) : "N/A";
+  };
   /*** Hàm nhóm record theo userId ***/
   const groupRecordsByUser = (records) => {
     return records.reduce((acc, record) => {
@@ -270,7 +287,7 @@ const Dashboard = () => {
     return date
       ? sampleOrders
           .filter(p => p.orderDate === date && p.mkt === recordname)
-          .reduce((sum, p) => sum + p.profit, 0)
+          .reduce((sum, p) => (sum + p.profit)*17000, 0)
       : 0;
   };
 
@@ -287,20 +304,20 @@ const Dashboard = () => {
       key: 'totalReceived',
       render: (_, record) => {
         const total = record.oldMoney + record.request1 + record.request2;
-        return total - record.excessMoney;
+        return (total - record.excessMoney).toLocaleString('vi-VN');
       }
     },
     {
       title: 'Tiền thừa',
       key: 'excessMoney',
-      render: (_, record) => record.excessMoney
+      render: (_, record) => record.excessMoney.toLocaleString('vi-VN')
     },
     {
       title: 'Doanh số',
       key: 'sales',
       render: (_, record) => {
         const totalSalesForSelectedDate = computeTotalSalesForDate(record.date, record.name);
-        return totalSalesForSelectedDate;
+        return totalSalesForSelectedDate.toLocaleString('vi-VN');
       },
     },
     {
@@ -316,7 +333,7 @@ const Dashboard = () => {
         if (percent < 30) {
           bgColor = "#54DA1F"; // nền xanh lá (màu xanh nhạt)
         } else if (percent >= 30 && percent <= 35) {
-          bgColor = "#FC6D6E"; // nền vàng nhạt
+          bgColor = "##FF9501"; // nền vàng nhạt
         } else {
           bgColor = "#EC2527"; // nền đỏ nhạt
         }
@@ -367,8 +384,15 @@ const Dashboard = () => {
       }
     }
   ];
-
-  return (
+ // Xác định màu nền dựa trên %ADS
+ const getBgColor = (employeeName) => {
+  const p = parseFloat(computePercentADS(employeeName));
+  if (isNaN(p)) return "transparent";
+  if (p < 30) return "#54DA1F"; // màu xanh (blue)
+  if (p >= 30 && p <= 35) return "##FF9501"; // màu cam (orange)
+  return "#FF0000"; // màu đỏ (red)
+};
+  return (  
     <div style={{ padding: 24 }}>
       {/* Tiêu đề "Nhập thông tin" */}
       <Row gutter={[16, 16]}>
@@ -387,7 +411,8 @@ const Dashboard = () => {
           >
             <Row gutter={16}>
               <Col xs={24} sm={12} md={3} lg={6}>
-                <Form.Item
+              <h4>NGÀY</h4>
+                <Form.Item initialValue={moment()}
                   name="date"
                   rules={[{ required: true, message: 'Vui lòng chọn ngày' }]}
                 >
@@ -398,26 +423,32 @@ const Dashboard = () => {
                   />
                 </Form.Item>
               </Col>
+              
+            
+             
               <Col xs={24} sm={12} md={3} lg={6}>
-                <Form.Item name="oldMoney">
+              <h4 hidden={editingRecord}>Tiền thừa hôm qua</h4>
+                <Form.Item name="oldMoney" hidden={editingRecord}>
                   <InputNumber placeholder="Tiền cũ" style={{ width: '100%' }} />
                 </Form.Item>
+                <h4 hidden={!editingRecord}>Tiền thừa </h4>
+              <Form.Item name="excessMoney" hidden={!editingRecord}>
+          <InputNumber placeholder="Tiền thừa" style={{ width: '100%' }} />
+        </Form.Item>
               </Col>
               <Col xs={24} sm={12} md={3} lg={6}>
-                <Form.Item name="request1">
+              <h4 hidden={editingRecord}>Xin buổi sáng</h4>
+                <Form.Item name="request1" hidden={editingRecord} >
                   <InputNumber placeholder="Xin lần 1" style={{ width: '100%' }} />
                 </Form.Item>
               </Col>
               <Col xs={24} sm={12} md={3} lg={6}>
-                <Form.Item name="request2">
+              <h4 hidden={editingRecord} >Xin buổi chiều</h4>
+                <Form.Item name="request2" hidden={editingRecord}>
                   <InputNumber placeholder="Xin lần 2" style={{ width: '100%' }} />
                 </Form.Item>
               </Col>
-              <Col xs={24} sm={12} md={3} lg={6}>
-                <Form.Item name="excessMoney">
-                  <InputNumber placeholder="Tiền thừa" style={{ width: '100%' }} />
-                </Form.Item>
-              </Col>
+
               <Col xs={24} sm={12} md={3} lg={6}>
                 <Form.Item>
                   <Button
@@ -438,7 +469,7 @@ const Dashboard = () => {
       {/* Tiêu đề "Danh sách giao dịch" */}
       <Row gutter={[16, 16]}>
         <Col xs={24}>
-          <h2>Danh sách giao dịch</h2>
+          <h2>Bảng thông tin Nhân viên </h2>
         </Col>
       </Row>
 
@@ -446,11 +477,13 @@ const Dashboard = () => {
       <Row gutter={[16, 16]} style={{ marginBottom: 16 }}>
         <Col xs={24} sm={12} md={8}>
           <div style={{ marginBottom: 16 }}>
+          <span style={{ marginRight: 8 }}>Chọn thời gian </span>
                   <Select
                     value={period}
                     onChange={(value) => setPeriod(value)}
                     style={{ width: 250 }}
                   >
+                    <Option value="day">Hôm nay</Option>
                     <Option value="week">1 Tuần Gần Nhất</Option>
                     <Option value="month">Tháng Này</Option>
                     <Option value="lastMonth">Tháng Trước</Option>
@@ -492,16 +525,30 @@ const Dashboard = () => {
             <Row gutter={[16, 16]} key={userId} style={{ marginBottom: 24 }}>
               <Col xs={24}>
                 <h4>Nhân viên: {userRecords?.[0]?.name}</h4>
-                <div style={{ fontWeight: "bold", marginBottom: 8 }}>
-                  Tổng doanh số: {computeTotalSales(userRecords[0].name)}
-                </div>
+                <div
+        style={{
+          fontWeight: "bold",
+          marginBottom: 8,
+          padding: "4px 8px",
+          borderRadius: "4px",
+          backgroundColor: getBgColor(userRecords[0].name),
+          color: "#111111",
+        }}
+      >
+        Tổng doanh số: {computeTotalSales(userRecords[0].name).toLocaleString("vi-VN")} | Chi phí Ads:{" "}
+        {computeTotalADS(userRecords[0].name).toLocaleString("vi-VN")} | %ADS: {computePercentADS(userRecords[0].name)}%
+      </div>
+                
+                
               </Col>
               <Col xs={24}>
                 <Table
-                  dataSource={userRecords}
+                 dataSource={userRecords.sort((a, b) => {
+                    return dayjs(b.date).valueOf() - dayjs(a.date).valueOf();
+                  })}
                   columns={columns}
                   rowKey="id"
-                  pagination={false}
+                  pagination={{ pageSize: 5 }}
                   scroll={{ x: true }}
                 />
               </Col>
@@ -509,17 +556,32 @@ const Dashboard = () => {
           ))
       ) : (
         <>
-          <div style={{ fontWeight: "bold", marginBottom: 8 }}>
-            Tổng doanh số: {computeTotalSales(currentUser.name)}
-          </div>
+          
+            <div
+        style={{
+          fontWeight: "bold",
+          marginBottom: 8,
+          padding: "4px 8px",
+          borderRadius: "4px",
+          backgroundColor: getBgColor(currentUser.name),
+          color: "#111111",
+        }}
+      >
+        Tổng doanh số: {computeTotalSales(currentUser.name).toLocaleString("vi-VN")} | Chi phí Ads:{" "}
+        {computeTotalADS(currentUser.name).toLocaleString("vi-VN")} | %ADS: {computePercentADS(currentUser.name)}%
+      </div>
+          
           <Row gutter={[16, 16]}>
             <Col xs={24}>
               <Table
-                dataSource={filteredRecords}
+                dataSource={filteredRecords.sort((a, b) => {
+                  return dayjs(b.date).valueOf() - dayjs(a.date).valueOf();
+                })}
                 columns={columns}
                 rowKey="id"
-                pagination={false}
+                
                 scroll={{ x: true }}
+                pagination={{ pageSize: 30 }}
               />
             </Col>
           </Row>

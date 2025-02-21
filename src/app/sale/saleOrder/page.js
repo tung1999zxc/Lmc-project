@@ -115,7 +115,10 @@ const Dashboard = () => {
     if (period === "week") {
       // 1 Tuần Gần Nhất: từ 7 ngày trước đến hiện tại
       return orderDate.isSameOrAfter(now.clone().subtract(7, "days"), "day");
-    } else if (period === "month") {
+    } else if (period === "day") {
+          // Ngày hiện tại: so sánh theo ngày
+          return orderDate.isSame(moment(), "day");
+        } else if (period === "month") {
       // Tháng Này: từ đầu tháng đến hiện tại
       return orderDate.isSame(now, "month") && orderDate.isSameOrAfter(now.clone().startOf("month"));
     } else if (period === "lastMonth") {
@@ -137,6 +140,7 @@ const Dashboard = () => {
       .reduce((sum, p) => sum + p.profit, 0)*17000;
       return totalProfit.toLocaleString('vi-VN');
   };
+
 
   // Hàm tính doanh số cá nhân theo ngày của một record
   const computeTotalSalesForDate = (date, employeeName) => {
@@ -254,7 +258,10 @@ const Dashboard = () => {
     if (period === "week") {
       // 1 Tuần Gần Nhất: từ 7 ngày trước đến hiện tại
       return recordDate.isSameOrAfter(now.clone().subtract(7, "days"), "day");
-    } else if (period === "month") {
+    }
+    else if (period === "day") {
+      // Ngày hiện tại: so sánh theo định dạng "YYYY-MM-DD"
+      return recordDate.format("YYYY-MM-DD") === now.format("YYYY-MM-DD");} else if (period === "month") {
       // Tháng Này: từ đầu tháng đến hiện tại
       return (
         recordDate.isSame(now, "month") &&
@@ -338,6 +345,7 @@ const Dashboard = () => {
           onChange={(value) => setPeriod(value)}
           style={{ width: 250 }}
         >
+          <Option value="day">Hôm nay</Option>
           <Option value="week">1 Tuần Gần Nhất</Option>
           <Option value="month">Tháng Này</Option>
           <Option value="lastMonth">Tháng Trước</Option>
@@ -372,9 +380,9 @@ const Dashboard = () => {
           <Table
             columns={columns}
             dataSource={filteredRecords}
-            pagination={{ pageSize: 5 }}
-          />
-        </>
+            pagination={{ pageSize: 30 }}
+          />  
+        </>   
       )}
     </div>
   );

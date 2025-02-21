@@ -9,6 +9,7 @@ const Dashboard = () => {
   const currentUser = useSelector((state) => state.user.currentUser);
   // Giả sử thông tin người dùng hiện tại được lấy từ hệ thống xác thực
   const [data, setData] = useState([]);
+  
   const [selectedDate, setSelectedDate] = useState(null);
   const [orderCount, setOrderCount] = useState(null);
   const [collectedAmount, setCollectedAmount] = useState(null);
@@ -21,7 +22,34 @@ const Dashboard = () => {
     const savedData = localStorage.getItem("orderRecords");
     if (savedData) setData(JSON.parse(savedData));
   }, []);
-
+ const orders = [{
+    "orderDate": "2025-02-20",
+    
+    "salexuly": "salexuly",
+   
+    "paymentStatus"
+: 
+"ĐÃ THANH TOÁN",
+    
+"revenue"
+: 
+0,
+    "profit": 0,
+    
+  },{
+    
+    "orderDate": "2025-02-20",
+   
+    "salexuly": "sale xuly2",
+    "profit": 20,
+    'revenue'
+: 
+10,
+   
+    
+    "paymentStatus": "CHƯA THANH TOÁN",
+    
+  }];
   // Thêm bản ghi mới
   const handleAddRecord = () => {
     if (!selectedDate || !orderCount || !collectedAmount) return;
