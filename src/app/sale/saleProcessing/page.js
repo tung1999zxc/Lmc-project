@@ -1,28 +1,30 @@
 'use client'
-import { useState } from "react";
-import { Table, Select, Space } from "antd";
+import { useState, useEffect } from "react";
+import { Table, Select } from "antd";
 import dayjs from "dayjs";
 import { useSelector } from "react-redux";
 
 const Dashboard = () => {
   const currentUser = useSelector((state) => state.user.currentUser);
+  const [filterRange, setFilterRange] = useState("all");
+  const [orders, setOrders] = useState([]);
 
   // Dữ liệu orders mẫu; bạn có thể thay thế bằng dữ liệu thật từ API hay nguồn khác.
-  const [orders, setOrders] = useState([
-    { id: 1, salexuly: "salexuly1", date: "2025-02-20", paymentStatus: "ĐÃ THANH TOÁN", revenue: 100 },
-    { id: 2, salexuly: "salexuly2", date: "2025-02-20", paymentStatus: "CHƯA THANH TOÁN", revenue: 50 },
-    { id: 3, salexuly: "salexuly", date: "2025-02-19", paymentStatus: "ĐÃ THANH TOÁN", revenue: 200 },
-    // ... thêm dữ liệu nếu cần
-  ]);
-
-  // Bộ lọc thời gian: all, day, week, month, previousMonth, twoMonthsAgo, threeMonthsAgo
-  const [filterRange, setFilterRange] = useState("all");
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const savedOrders = localStorage.getItem("orders");
+      if (savedOrders) {
+        setOrders(JSON.parse(savedOrders));
+      }
+    }
+  }, []);
 
   // Lọc orders theo bộ lọc thời gian được chọn
   const getFilteredOrders = () => {
     const today = dayjs();
     return orders.filter(order => {
-      const orderDate = dayjs(order.date);
+      // Sử dụng order.orderDate thay vì order.date
+      const orderDate = dayjs(order.orderDate);
       switch(filterRange) {
         case "all":
           return true;
@@ -56,14 +58,14 @@ const Dashboard = () => {
     if (user) {
       filtered = filtered.filter(order => order.salexuly === user);
     }
-    const uniqueDates = [...new Set(filtered.map(order => order.date))];
+    const uniqueDates = [...new Set(filtered.map(order => order.orderDate))];
     // Sắp xếp ngày giảm dần (mới nhất ở đầu)
     return uniqueDates.sort((a, b) => dayjs(b).unix() - dayjs(a).unix());
   };
 
   // Hàm tính các chỉ số cho 1 ngày (có thể lọc theo user)
   const computeMetricsByDate = (date, user = null) => {
-    let ordersForDate = orders.filter(order => order.date === date);
+    let ordersForDate = orders.filter(order => order.orderDate === date);
     if (user) {
       ordersForDate = ordersForDate.filter(order => order.salexuly === user);
     }
@@ -82,12 +84,12 @@ const Dashboard = () => {
 
   // Cấu hình các cột cho bảng
   const columns = (user) => [
-    { title: "Ngày", dataIndex: "date", key: "date" },
+    { title: "Ngày", dataIndex: "orderDate", key: "orderDate" },
     { 
       title: "Số đơn được chia", 
       key: "sharedOrders",
       render: (_, record) => {
-        const { sharedOrders } = computeMetricsByDate(record.date, user);
+        const { sharedOrders } = computeMetricsByDate(record.orderDate, user);
         return sharedOrders;
       }
     },
@@ -95,7 +97,7 @@ const Dashboard = () => {
       title: "Số lượng đơn đòi được", 
       key: "completedOrders",
       render: (_, record) => {
-        const { completedOrders } = computeMetricsByDate(record.date, user);
+        const { completedOrders } = computeMetricsByDate(record.orderDate, user);
         return completedOrders;
       }
     },
@@ -103,7 +105,7 @@ const Dashboard = () => {
       title: "Tổng doanh số", 
       key: "totalRevenue",
       render: (_, record) => {
-        const { totalRevenue } = computeMetricsByDate(record.date, user);
+        const { totalRevenue } = computeMetricsByDate(record.orderDate, user);
         return totalRevenue;
       }
     },
@@ -111,7 +113,7 @@ const Dashboard = () => {
       title: "Đã thanh toán", 
       key: "paidRevenue",
       render: (_, record) => {
-        const { paidRevenue } = computeMetricsByDate(record.date, user);
+        const { paidRevenue } = computeMetricsByDate(record.orderDate, user);
         return paidRevenue;
       }
     },
@@ -119,7 +121,7 @@ const Dashboard = () => {
       title: "Chưa thanh toán", 
       key: "unpaidRevenue",
       render: (_, record) => {
-        const { unpaidRevenue } = computeMetricsByDate(record.date, user);
+        const { unpaidRevenue } = computeMetricsByDate(record.orderDate, user);
         return unpaidRevenue;
       }
     },
@@ -127,15 +129,15 @@ const Dashboard = () => {
       title: "Tỉ lệ thanh toán", 
       key: "paymentRate",
       render: (_, record) => {
-        const { paymentRate } = computeMetricsByDate(record.date, user);
+        const { paymentRate } = computeMetricsByDate(record.orderDate, user);
         const percent = Number((paymentRate * 100));
         let bgColor = "";
         if (percent < 80) {
-          bgColor = "#EC2527"; // nền xanh lá (màu xanh nhạt)
+          bgColor = "#EC2527";
         } else if (percent >= 80 && percent <= 95) {
-          bgColor = "##FF9501"; // nền vàng nhạt
+          bgColor = "#FF9501";
         } else {
-          bgColor = " #54DA1F"; // nền đỏ nhạt
+          bgColor = "#54DA1F";
         }
         return (
           <div
@@ -153,8 +155,7 @@ const Dashboard = () => {
       }
     },
   ];
- // Xác định màu nền dựa trên %ADS
- 
+
   // Hiển thị dòng tổng hợp (header) cho các chỉ số, có thể theo từng nhân viên
   const renderSummary = (user = null) => {
     let filtered = getFilteredOrders();
@@ -172,17 +173,15 @@ const Dashboard = () => {
       .filter(order => order.paymentStatus === "CHƯA THANH TOÁN")
       .reduce((acc, order) => acc + Number(order.revenue || 0), 0);
     const summaryRate = totalRevenueSum ? paidRevenueSum / totalRevenueSum : 0;
-    
-    // Chuyển sang % để so sánh
     const ratePercentage = summaryRate * 100;
     
     let bgColor = "";
     if (ratePercentage < 80) {
-      bgColor = "#EC2527"; // nếu <80%
+      bgColor = "#EC2527";
     } else if (ratePercentage >= 80 && ratePercentage <= 95) {
-      bgColor = "#FF9501"; // nếu từ 80% đến 95%
+      bgColor = "#FF9501";
     } else {
-      bgColor = "#54DA1F"; // nếu >95%
+      bgColor = "#54DA1F";
     }
     
     return (
@@ -198,7 +197,6 @@ const Dashboard = () => {
       </div>
     );
   };
-  
 
   return (
     <div>
@@ -223,11 +221,10 @@ const Dashboard = () => {
         [...new Set(getFilteredOrders().map(order => order.salexuly))].map(user => (
           <div key={user} style={{ marginBottom: 24 }}>
             {renderSummary(user)}
-            
             <Table
-              dataSource={getUniqueDatesForUser(user).map(date => ({ key: date, date }))}
+              dataSource={getUniqueDatesForUser(user).map(orderDate => ({ key: orderDate, orderDate }))}
               columns={columns(user)}
-              pagination={{ pageSize: 10 }}
+              pagination={{ pageSize: 5 }}
               bordered
             />
           </div>
@@ -237,9 +234,9 @@ const Dashboard = () => {
         <>
           {renderSummary(currentUser.name)}
           <Table
-            dataSource={getUniqueDatesForUser(currentUser.name).map(date => ({ key: date, date }))}
+            dataSource={getUniqueDatesForUser(currentUser.name).map(orderDate => ({ key: orderDate, orderDate }))}
             columns={columns(currentUser.name)}
-            pagination={{ pageSize: 10 }}
+            pagination={{ pageSize: 30 }}
             bordered
           />
         </>

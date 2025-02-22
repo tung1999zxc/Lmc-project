@@ -122,7 +122,7 @@ const OrdersTable = () => {
       },
   ];
 
-  return <Table
+  return <Table  
     
    dataSource={sortedDataSource} columns={columns} bordered />;
 };
