@@ -1,11 +1,26 @@
-// pages/index.js
 'use client'
-import React, { useState } from 'react';
+import React, { useState,useEffect  } from 'react';
 import dynamic from 'next/dynamic';
-import { Select, Row, Col, Table, Button, Input } from 'antd';
+import { Select, Row, Col, Table, Button, Input, Tabs } from 'antd';
+import { useDispatch, useSelector } from 'react-redux';
 const { Option } = Select;
-
+const Dashboard = () => {
+const employees = useSelector((state) => state.employees.employees);
+const [orders, setOrders] = useState([]);
+const [adsMoneyData, setAdsMoneyData] = useState([]);
 // Component biểu đồ Bar (Recharts) cho biểu đồ đơn (có 1 series)
+useEffect(() => {
+  if (typeof window !== "undefined") {
+    const savedRecords = localStorage.getItem("records");
+    if (savedRecords) {
+      setAdsMoneyData(JSON.parse(savedRecords));
+    }
+    const savedOrders = localStorage.getItem("orders");
+    if (savedOrders) {
+      setOrders(JSON.parse(savedOrders));
+    }
+  }
+}, []);
 const BarChartComponent = dynamic(
   () =>
     Promise.resolve(({ data }) => {
@@ -29,7 +44,7 @@ const PieChartComponent = dynamic(
   () =>
     Promise.resolve(({ data }) => {
       const { PieChart, Pie, Cell, Tooltip, Legend } = require('recharts');
-      const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#AA336A', '#5A2D82','#144523'];
+      const COLORS = ['#AA336A', ' #FFBB28', '#00C49F', '#FF8042', '#0088FA', '#5A2D82','#144523'];
       return (
         <PieChart width={600} height={300}>
           <Pie
@@ -149,7 +164,7 @@ function filterByPreset(dataArray, preset) {
 // Hàm trả về mảng 30 ngày gần nhất (YYYY-MM-DD)
 function getLast30Days() {
   const days = [];
-  for (let i = 29; i >= 0; i--) {
+  for (let i = 7; i >= 0; i--) {
     const d = new Date();
     d.setDate(d.getDate() - i);
     days.push(d.toISOString().split('T')[0]);
@@ -157,7 +172,7 @@ function getLast30Days() {
   return days;
 }
 
-export default function HomePage() {
+
   // Ngày hiện tại định dạng YYYY-MM-DD
   const today = new Date().toISOString().split('T')[0];
 
@@ -181,129 +196,7 @@ export default function HomePage() {
   ];
 
   // Dữ liệu nhân viên (mẫu)
-  const employees = [
-    {
-      employee_id: 1739255931642,
-      employee_code: 3037,
-      username: "1",
-      name: "tùngmkt",
-      position: "mkt",
-      team_id: "SON",
-      position_team: "mkt"
-    },
-    {
-      employee_id: 1739255931642,
-      employee_code: 3037,
-      username: "1",
-      name: "10",
-      position: "lead",
-      team_id: "SON",
-      position_team: "mkt"
-    },
-    {
-      employee_id: 1739263402531,
-      employee_code: 8193,
-      username: "3",
-      name: "3",
-      position: "lead",
-      team_id: "LE",
-      position_team: "mkt"
-    },
-    {
-      employee_id: 1739263446863,
-      employee_code: 7112,
-      username: "4",
-      name: "4",
-      position: "lead",
-      team_id: "LE",
-      position_team: "mkt"
-    },
-    {
-      employee_id: 1739263478258,
-      employee_code: 7476,
-      username: "5",
-      name: "5",
-      position: "managerMKT",
-      team_id: "QUAN",
-      position_team: "mkt"
-    },
-    {
-      employee_id: 1739266882157,
-      employee_code: 5922,
-      username: "1",
-      name: "1",
-      position: "mkt",
-      team_id: "QUAN",
-      position_team: "mkt"
-    },
-    {
-      employee_id: 1739266895672,
-      employee_code: 1130,
-      username: "2",
-      name: "2",
-      position: "mkt",
-      team_id: "CHI",
-      position_team: "mkt"
-    },
-    {
-      employee_id: 1739267146254,
-      employee_code: 9839,
-      username: "1",
-      name: "6",
-      position: "managerMKT",
-      team_id: "CHI",
-      position_team: "mkt"
-    },
-    {
-      employee_id: 1739299175410,
-      employee_code: 7932,
-      username: "1",
-      name: "1",
-      position: "mkt",
-      team_id: "LE",
-      position_team: "mkt"
-    },
-    {
-      employee_id: 1739299366892,
-      employee_code: 4191,
-      username: "1",
-      name: "1",
-      position: "mkt",
-      team_id: "SON",
-      position_team: "mkt"
-    },
-  ];
-
-  // Dữ liệu đơn hàng mẫu
-  const orders = [
-    { orderDate: "2025-01-01", mkt: "tùngmkt", profit: 100, paymentStatus: "CHƯA THANH TOÁN" },
-    { orderDate: "2025-01-01", mkt: "10", profit: 100, paymentStatus: "ĐÃ THANH TOÁN" },
-    { orderDate: "2025-01-02", mkt: "3", profit: 150, paymentStatus: "CHƯA THANH TOÁN" },
-    { orderDate: "2025-01-03", mkt: "4", profit: 200, paymentStatus: "ĐÃ THANH TOÁN" },
-    { orderDate: "2025-01-04", mkt: "5", profit: 250, paymentStatus: "ĐÃ THANH TOÁN" },
-    { orderDate: "2025-01-05", mkt: "1", profit: 300, paymentStatus: "CHƯA THANH TOÁN" },
-    { orderDate: "2025-01-06", mkt: "2", profit: 350, paymentStatus: "ĐÃ THANH TOÁN" },
-    { orderDate: "2025-01-07", mkt: "6", profit: 400, paymentStatus: "CHƯA THANH TOÁN" },
-    { orderDate: "2025-02-17", mkt: "1", profit: 900, paymentStatus: "ĐÃ THANH TOÁN" },
-    { orderDate: "2025-02-17", mkt: "2", profit: 1000, paymentStatus: "ĐÃ THANH TOÁN" },
-    { orderDate: "2025-02-17", mkt: "3", profit: 800, paymentStatus: "CHƯA THANH TOÁN" },
-    { orderDate: "2025-02-17", mkt: "4", profit: 400, paymentStatus: "ĐÃ THANH TOÁN" },
-    { orderDate: "2024-12-17", mkt: "4", profit: 400, paymentStatus: "ĐÃ THANH TOÁN" },
-  ];
-
-  // Dữ liệu chi phí ads (adsMoney)
-  const adsMoneyData = [
-    { date: "2025-02-17", excessMoney: 100, teamnv: "LE", adsMoney: 5000000, name: "1" },
-    { date: "2025-02-17", excessMoney: 200, teamnv: "QUAN", adsMoney: 200000, name: "2" },
-    { date: "2025-02-17", excessMoney: 250, teamnv: "SON", adsMoney: 400000, name: "3" },
-    { date: "2025-02-17", excessMoney: 100, teamnv: "CHI", adsMoney: 3000000, name: "4" },
-    { date: "2024-12-17", excessMoney: 100, teamnv: "CHI", adsMoney: 300000, name: "4" },
-    { date: "2025-02-17", excessMoney: 100, teamnv: "LE", adsMoney: 100000, name: "4" },
-    { date: "2025-01-02", excessMoney: 100, teamnv: "LE", adsMoney: 2000000, name: "3" },
-    { date: "2025-01-05", excessMoney: 100, teamnv: "QUAN", adsMoney: 300000, name: "1" },
-    { date: "2025-01-01", excessMoney: 100, teamnv: "SON", adsMoney: 400000, name: "10" },
-    { date: "2025-01-06", excessMoney: 100, teamnv: "CHI", adsMoney: 200000, name: "2" },
-  ];
+ 
 
   // Lọc đơn hàng theo preset hoặc theo ngày được chọn
   let filteredOrders = orders;
@@ -433,8 +326,7 @@ export default function HomePage() {
     return { team: team.label, leader: leaderSales, others: othersSales, leaderPercent };
   });
 
-  // === Tính dữ liệu cho Báo cáo marketing ===
-  // Lấy tất cả nhân viên có position_team = "mkt" (đã có biến mktEmployees)
+  // === Báo cáo Marketing ===
   const marketingReportData = mktEmployees.map((emp, index) => {
     const paid = filteredOrders
       .filter(order => order.mkt === emp.name && order.paymentStatus === "ĐÃ THANH TOÁN")
@@ -453,16 +345,13 @@ export default function HomePage() {
   // Sắp xếp theo cột "Tiền VNĐ" giảm dần
   marketingReportData.sort((a, b) => b.tienVND - a.tienVND);
 
-  // Định nghĩa các cột cho bảng báo cáo marketing
   const marketingColumns = [
     {
       title: "Tên",
       dataIndex: "name",
       key: "name",
       render: (text) => {
-        // Tìm nhân viên có name trùng với text
         const emp = employees.find((item) => item.name === text);
-        // Nếu nhân viên có position là "lead" thì áp dụng nền màu vàng (hoặc màu vàng nhạt)
         const style =
           emp && emp.position === "lead"
             ? { backgroundColor: "#2A8B9A", padding: "4px 8px", borderRadius: "4px" }
@@ -508,11 +397,11 @@ export default function HomePage() {
         const percent = Number(value);
         let bgColor = "";
         if (percent < 30) {
-          bgColor = "#54DA1F"; // nền xanh lá (màu xanh nhạt)
+          bgColor = "#54DA1F";
         } else if (percent >= 30 && percent <= 35) {
-          bgColor = "#FF9501"; // nền vàng nhạt
+          bgColor = "#FF9501";
         } else {
-          bgColor = "#EC2527"; // nền đỏ nhạt
+          bgColor = "#EC2527";
         }
         return (
           <div
@@ -529,32 +418,322 @@ export default function HomePage() {
         );
       }
     },
-  ];  
+  ];
 
-  // Component hiển thị Grouped Double Bar Chart cho các biểu đồ có 2 series: profit và adsCost
-  const GroupedDoubleBarChartComponentLocal = dynamic(
-    () =>
-      Promise.resolve(({ data }) => {
-        const { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend } = require('recharts');
-        return (
-          <BarChart width={600} height={300} data={data}>
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="name" />
-            <YAxis />
-            <Tooltip />
-            <Legend />
-            <Bar dataKey="profit" fill="#8884d8" />
-            <Bar dataKey="adsCost" fill="#FF8042" />
-          </BarChart>
-        );
-      }),
-    { ssr: false, loading: () => <p>Loading Grouped Chart...</p> }
-  );
+  // =================== Các bảng báo cáo SALE ===================
 
+  // Báo cáo sale: lấy các nhân viên có position_team === "sale"
+  const saleEmployees = employees.filter(emp => emp.position_team === "sale");
+  const saleReportData = saleEmployees.map((emp, index) => {
+    let paid = 0, unpaid = 0;
+    if (emp.position === "salenhapdon" || emp.position === "salefull") {
+      paid = filteredOrders
+        .filter(order => order.sale === emp.name && order.paymentStatus === "ĐÃ THANH TOÁN")
+        .reduce((sum, order) => sum + order.profit, 0);
+      unpaid = filteredOrders
+        .filter(order => order.sale === emp.name && order.paymentStatus === "CHƯA THANH TOÁN")
+        .reduce((sum, order) => sum + order.profit, 0);
+    } else if (emp.position === "salexuly") {
+      paid = filteredOrders
+        .filter(order => order.salexuly === emp.name && order.paymentStatus === "ĐÃ THANH TOÁN")
+        .reduce((sum, order) => sum + order.profit, 0);
+      unpaid = filteredOrders
+        .filter(order => order.salexuly === emp.name && order.paymentStatus === "CHƯA THANH TOÁN")
+        .reduce((sum, order) => sum + order.profit, 0);
+    }
+    const total = paid + unpaid;
+    const tienVND = total * exchangeRate;
+    const percent = total > 0 ? (paid / total) * 100 : 0;
+    return { key: index, name: emp.name, paid, unpaid, total, tienVND, percent };
+  });
+
+  const saleColumns = [
+    { title: "Tên", dataIndex: "name", key: "name" },
+    { title: "Đã thanh toán", dataIndex: "paid", key: "paid", render: (value) => value.toLocaleString() },
+    { title: "Chưa thanh toán", dataIndex: "unpaid", key: "unpaid", render: (value) => value.toLocaleString() },
+    { title: "Tổng", dataIndex: "total", key: "total", render: (value) => value.toLocaleString() },
+    { title: "Tiền VNĐ", dataIndex: "tienVND", key: "tienVND", render: (value) => value.toLocaleString() },
+    { title: "% đòi tiền", dataIndex: "percent", key: "percent",   render: (percent) => {
+      let bgColor;
+      if (percent > 95 ) {
+        bgColor = "#54DA1F"; // nền xanh lá (màu xanh nhạt)
+      } else if (percent >= 80 && percent <= 95) {
+        bgColor = "#FF9501"; // nền vàng nhạt (đã sửa lỗi ## thành #)
+      } else {
+        bgColor = "#EC2527"; // nền đỏ nhạt
+      }
+      return (
+        <div
+          style={{
+            backgroundColor: bgColor,
+            padding: "4px 8px",
+            borderRadius: "4px",
+            textAlign: "center",
+            fontWeight: "bold"
+          }}
+        >
+          {percent.toFixed(2)}%
+        </div>
+      );
+    }
+  }
+  ];
+
+  // Báo cáo doanh số ngày cho SALE
+  let saleDailyDates = [];
+  if ((selectedPreset || (selectedDate && selectedDate !== today)) && filteredOrders.length > 0) {
+    let minDate = new Date(filteredOrders[0].orderDate);
+    let maxDate = new Date(filteredOrders[0].orderDate);
+    filteredOrders.forEach(order => {
+      const d = new Date(order.orderDate);
+      if (d < minDate) minDate = d;
+      if (d > maxDate) maxDate = d;
+    });
+    let currentDate = new Date(minDate);
+    while (currentDate <= maxDate) {
+      saleDailyDates.push(currentDate.toISOString().split('T')[0]);
+      currentDate.setDate(currentDate.getDate() + 1);
+    }
+  } else {
+    saleDailyDates = getLast30Days();
+  }
+
+  const saleDailyData = saleDailyDates.map(date => {
+    let sangSom = 0, hanhChinh = 0, toi = 0;
+    filteredOrders.forEach(order => {
+      if (order.orderDate === date) {
+        let emp = saleEmployees.find(e => e.name === order.sale);
+        if (emp) {
+          if (emp.position_team2 === "onlinesang") {
+            sangSom += order.profit;
+          }
+          if (emp.position_team2 === "hanhchinh") {
+            hanhChinh += order.profit;
+          }
+          if (emp.position_team2 === "onlinetoi") {
+            toi += order.profit;
+          }
+        }
+       
+      }
+    });
+    const total = sangSom + hanhChinh + toi;
+    const percentSang = total > 0 ? (sangSom / total) * 100 : 0;
+    const percentHanh = total > 0 ? (hanhChinh / total) * 100 : 0;
+    const percentToi = total > 0 ? (toi / total) * 100 : 0;
+    return { key: date, date, sangSom, hanhChinh, toi, total, percentSang, percentHanh, percentToi };
+  });
+
+  const dailySaleColumns = [
+    { title: "Ngày", dataIndex: "date", key: "date" },
+    { title: "Sáng sớm", dataIndex: "sangSom", key: "sangSom", render: (value) => value.toLocaleString() },
+    { title: "Hành chính", dataIndex: "hanhChinh", key: "hanhChinh", render: (value) => value.toLocaleString() },
+    { title: "Tối", dataIndex: "toi", key: "toi", render: (value) => value.toLocaleString() },
+    { title: "Tổng", dataIndex: "total", key: "total", render: (value) => value.toLocaleString() },
+    { title: "% Ds ca Sáng sớm", dataIndex: "percentSang", key: "percentSang",   render: (percent) => {
+      let bgColor;
+      if (percent >50 ) {
+        bgColor = "#54DA1F"; // nền xanh lá (màu xanh nhạt)
+      } else if (percent >= 30 && percent <= 50) {
+        bgColor = "#FF9501"; // nền vàng nhạt (đã sửa lỗi ## thành #)
+      } else {
+        bgColor = "#EC2527"; // nền đỏ nhạt
+      }
+      return (
+        <div
+          style={{
+            backgroundColor: bgColor,
+            padding: "4px 8px",
+            borderRadius: "4px",
+            textAlign: "center",
+            fontWeight: "bold"
+          }}
+        >
+          {percent.toFixed(2)}%
+        </div>
+      );
+    }
+  },
+    { title: "% Ds ca Hành chính", dataIndex: "percentHanh", key: "percentHanh",   render: (percent) => {
+      let bgColor;
+      if (percent >50 ) {
+        bgColor = "#54DA1F"; // nền xanh lá (màu xanh nhạt)
+      } else if (percent >= 30 && percent <= 50) {
+        bgColor = "#FF9501"; // nền vàng nhạt (đã sửa lỗi ## thành #)
+      } else {
+        bgColor = "#EC2527"; // nền đỏ nhạt
+      }
+      return (
+        <div
+          style={{
+            backgroundColor: bgColor,
+            padding: "4px 8px",
+            borderRadius: "4px",
+            textAlign: "center",
+            fontWeight: "bold"
+          }}
+        >
+          {percent.toFixed(2)}%
+        </div>
+      );
+    }
+  },
+    { title: "% Ds ca Tối", dataIndex: "percentToi", key: "percentToi",   render: (percent) => {
+      let bgColor;
+      if (percent >50 ) {
+        bgColor = "#54DA1F"; // nền xanh lá (màu xanh nhạt)
+      } else if (percent >= 30 && percent <= 50) {
+        bgColor = "#FF9501"; // nền vàng nhạt (đã sửa lỗi ## thành #)
+      } else {
+        bgColor = "#EC2527"; // nền đỏ nhạt
+      }
+      return (
+        <div
+          style={{
+            backgroundColor: bgColor,
+            padding: "4px 8px",
+            borderRadius: "4px",
+            textAlign: "center",
+            fontWeight: "bold"
+          }}
+        >
+          {percent.toFixed(2)}%
+        </div>
+      );
+    }
+  }
+  ];
+
+  // Thống kê để dục chuyển khoản
+  const giaoThanhCongKW = filteredOrders
+    .filter(order => order.paymentStatus === "CHƯA THANH TOÁN" && order.deliveryStatus === "GIAO THÀNH CÔNG")
+    .reduce((sum, order) => sum + order.profit, 0);
+  const daGuiHangKW = filteredOrders
+    .filter(order => order.paymentStatus === "CHƯA THANH TOÁN" && order.deliveryStatus === "ĐÃ GỦI HÀNG")
+    .reduce((sum, order) => sum + order.profit, 0);
+
+  const transferData = [
+    { key: "KW", currency: "KW", giaoThanhCong: giaoThanhCongKW, daGuiHang: daGuiHangKW },
+    { key: "VND", currency: "VND", giaoThanhCong: giaoThanhCongKW * 17000, daGuiHang: daGuiHangKW * 17000 }
+  ];
+
+  const transferColumns = [
+    { title: "Tiền tệ", dataIndex: "currency", key: "currency" },
+    { title: "Giao thành công", dataIndex: "giaoThanhCong", key: "giaoThanhCong", render: (value) => value.toLocaleString() },
+    { title: "Đã gửi hàng", dataIndex: "daGuiHang", key: "daGuiHang", render: (value) => value.toLocaleString() }
+  ];
+
+  // Bảng Tổng
+  const daThanhToanKW = filteredOrders
+    .filter(order => order.paymentStatus === "ĐÃ THANH TOÁN")
+    .reduce((sum, order) => sum + order.profit, 0);
+  const chuaThanhToanKW = filteredOrders
+    .filter(order => order.paymentStatus === "CHƯA THANH TOÁN")
+    .reduce((sum, order) => sum + order.profit, 0);
+  const tongKW = daThanhToanKW + chuaThanhToanKW;
+  const thanhToanDat = tongKW > 0 ? (daThanhToanKW / tongKW) * 100 : 0;
+  const totalAdsKW = filteredAds.reduce((sum, ad) => sum + ad.adsMoney, 0);
+  const percentAds = tongKW > 0 ? Number(((totalAdsKW / (tongKW*17000)) * 100).toFixed(2)) : 0;
+
+  const totalData = [
+    {
+      key: "KW",
+      daThanhToan: daThanhToanKW,
+      chuaThanhToan: chuaThanhToanKW,
+      tong: tongKW,
+      thanhToanDat: thanhToanDat,
+      totalAds: totalAdsKW,
+      percentAds: percentAds
+    },
+    {
+      key: "VND",
+      daThanhToan: daThanhToanKW * 17000,
+      chuaThanhToan: chuaThanhToanKW * 17000,
+      tong: tongKW * 17000,
+      thanhToanDat: thanhToanDat,
+      totalAds: totalAdsKW ,
+      percentAds: percentAds
+    }
+  ];
+
+  const totalColumns = [
+    { title: "Đã thanh toán", dataIndex: "daThanhToan", key: "daThanhToán", render: (value) => value.toLocaleString() },
+    { title: "Chưa thanh toán", dataIndex: "chuaThanhToan", key: "chuaThanhToán", render: (value) => value.toLocaleString() },
+    { title: "Tổng", dataIndex: "tong", key: "tong", render: (value) => value.toLocaleString() },
+    { title: "Thanh toán đạt", dataIndex: "thanhToanDat", key: "thanhToanDat",   render: (percent) => {
+      let bgColor;
+      if (percent >80 ) {
+        bgColor = "#54DA1F"; // nền xanh lá (màu xanh nhạt)
+      } else if (percent >= 50 && percent <= 80) {
+        bgColor = "#FF9501"; // nền vàng nhạt (đã sửa lỗi ## thành #)
+      } else {
+        bgColor = "#EC2527"; // nền đỏ nhạt
+      }
+      return (
+        <div
+          style={{
+            backgroundColor: bgColor,
+            padding: "4px 8px",
+            borderRadius: "4px",
+            textAlign: "center",
+            fontWeight: "bold"
+          }}
+        >
+          {percent.toFixed(2)}%
+        </div>
+      );
+    }
+  },
+    { title: "Tổng chi phí ads", dataIndex: "totalAds", key: "totalAds", render: (value) => value.toLocaleString() },
+    { title: "% chi phí ads", dataIndex: "percentAds", key: "percentAds",   render: (percent) => {
+      let bgColor;
+      if (percent < 30) {
+        bgColor = "#54DA1F"; // nền xanh lá (màu xanh nhạt)
+      } else if (percent >= 30 && percent <= 35) {
+        bgColor = "#FF9501"; // nền vàng nhạt (đã sửa lỗi ## thành #)
+      } else {
+        bgColor = "#EC2527"; // nền đỏ nhạt
+      }
+      return (
+        <div
+          style={{
+            backgroundColor: bgColor,
+            padding: "4px 8px",
+            borderRadius: "4px",
+            textAlign: "center",
+            fontWeight: "bold"
+          }}
+        >
+          {percent.toFixed(2)}%
+        </div>
+      );
+    }
+  }   
+  ];
+  const totalSangSom = saleDailyData.reduce((sum, item) => sum + item.sangSom, 0);
+  const totalHanhChinh = saleDailyData.reduce((sum, item) => sum + item.hanhChinh, 0);
+  const totalToi = saleDailyData.reduce((sum, item) => sum + item.toi, 0);
+  const totalSale = totalSangSom + totalHanhChinh + totalToi;
+  
+  const salePieData = totalSale > 0 ? [
+    { name: "Sáng sớm", profit: Number(((totalSangSom / totalSale) * 100).toFixed(2)) },
+    { name: "Hành chính", profit: Number(((totalHanhChinh / totalSale) * 100).toFixed(2)) },
+    { name: "Tối", profit: Number(((totalToi / totalSale) * 100).toFixed(2)) }
+  ] : [
+    { name: "Sáng sớm", profit: 0 },
+    { name: "Hành chính", profit: 0 },
+    { name: "Tối", profit: 0 }
+  ];
   return (
-    <div style={{ padding: "2rem" }}>
+    <div  style={{
+      transform: "scale(0.95)",
+      transformOrigin: "top left",
+      width: "105%" // Để bù lại không gian khi scale
+    }}>
       {/* Bộ lọc */}
-      <div style={{ marginBottom: "1rem" }}>
+      <Row gutter={[16, 16]}  >
+  <Col xs={24} md={12}>
+  <div style={{ marginBottom: "1rem" }}>
         <label htmlFor="dateFilter" style={{ marginRight: "0.5rem" }}>Chọn ngày:</label>
         <input
           type="date"
@@ -588,7 +767,7 @@ export default function HomePage() {
         </Select>
       </div>
 
-      {/* Ô nhập Tỉ giá VNĐ và nút Sửa giá trị */}
+      {/* Ô nhập Tỉ giá VNĐ */}
       <div style={{ marginBottom: "1rem" }}>
         <label htmlFor="exchangeRate" style={{ marginRight: "0.5rem" }}>Tỉ giá VNĐ:</label>
         <Input
@@ -602,43 +781,99 @@ export default function HomePage() {
           Sửa giá trị
         </Button>
       </div>
-{/* Báo cáo Marketing */}
-<h2 style={{ marginTop: "2rem" }}>Báo cáo marketing</h2>
-      <Table borderedcolumns={marketingColumns} dataSource={marketingReportData} pagination={false} />
-      <Row gutter={[16, 16]}>
-        <Col xs={24} md={12}>
-          <h2>Doanh số &amp; chi phí Ads theo Team</h2>
-          <GroupedDoubleBarChartComponent data={teamChartDataNew} />
-        </Col>
-        <Col xs={24} md={12}>
-          <h2>Phần trăm doanh số theo Team</h2>
-          <PieChartComponent data={teamPieData} />
-        </Col>
-      </Row>
-
-      <Row style={{ marginTop: "2rem" }}>
-        <Col span={24}>
-          <h2>Doanh số &amp; chi phí Ads theo Nhân viên</h2>
-          <GroupedDoubleBarChartComponent data={employeeChartDataNew} />
-        </Col>
-      </Row>
-
-      <h2 style={{ marginTop: "2rem" }}>
-        {isFilterApplied
-          ? "Doanh số & chi phí Ads hàng ngày (theo bộ lọc)"
-          : "Doanh số & chi phí Ads hàng ngày (30 ngày gần nhất)"}
-      </h2>
-      <GroupedDoubleBarChartComponentLocal data={dailyChartDataNew} />
-
-      <h2 style={{ marginTop: "2rem" }}>Doanh số trung bình theo Nhân viên theo Team</h2>
-      <BarChartComponent data={averageTeamChartData} />
-
-      <h2 style={{ marginTop: "2rem" }}>
-        So sánh doanh số: Leader vs Các nhân viên khác trong Team
-      </h2>
-      <GroupedBarChartComponent data={leaderComparisonChartData} />
-
+  </Col>
+  
+  <Col xs={24} md={10}>
+  <h2 style={{ marginTop: "2rem" }}>Tổng</h2>
+  <Table columns={totalColumns} dataSource={totalData} pagination={false} />
+  </Col>
+</Row>
       
+
+      {/* Tabs: MKT và SALE */}
+      <Tabs defaultActiveKey="MKT">
+        <Tabs.TabPane tab="MKT" key="MKT">
+          {/* Báo cáo Marketing và các biểu đồ cũ */}
+          <Row gutter={[16, 16]} style={{ marginTop: "2rem" }}>
+  <Col xs={24} md={12}>
+    <h2>Báo cáo marketing</h2>
+    <Table columns={marketingColumns} dataSource={marketingReportData} pagination={false} />
+  </Col>
+  {/* <Col xs={24} md={1}></Col> */}
+  <Col xs={24} md={10}>
+    <h3>Doanh số &amp; chi phí Ads theo Nhân viên</h3>
+    <GroupedDoubleBarChartComponent data={employeeChartDataNew} />
+    <h3 style={{ marginTop: "2rem" }}>
+            {isFilterApplied
+              ? "Doanh số & chi phí Ads hàng ngày (theo bộ lọc)"
+              : "Doanh số & chi phí Ads hàng ngày (30 ngày gần nhất)"}
+          </h3>
+          <GroupedDoubleBarChartComponent data={dailyChartDataNew} />
+  </Col>
+</Row>
+          <Row gutter={[16, 16]}>
+            <Col xs={24} md={12}>
+              <h3>Doanh số &amp; chi phí Ads theo Team</h3>
+              <GroupedDoubleBarChartComponent data={teamChartDataNew} />
+            </Col>
+            <Col xs={24} md={12}>
+              <h3>Phần trăm doanh số theo Team</h3>
+              <PieChartComponent data={teamPieData} />
+            </Col>
+          </Row>
+          <Row gutter={[16, 16]}>
+            <Col xs={24} md={12}>
+            <h3 style={{ marginTop: "2rem" }}>Doanh số trung bình theo Nhân viên theo Team</h3>
+            <BarChartComponent data={averageTeamChartData} />
+            </Col>
+            <Col xs={24} md={12}>
+            <h3 style={{ marginTop: "2rem" }}>
+            So sánh doanh số: Leader vs Các nhân viên khác trong Team
+          </h3>
+          <GroupedBarChartComponent data={leaderComparisonChartData} />
+            </Col>
+          </Row>
+          
+          
+          
+          
+        </Tabs.TabPane>
+        <Tabs.TabPane tab="SALE" key="SALE">
+          {/* Các bảng báo cáo SALE */}
+          <Row gutter={[16, 16]}>
+  <Col xs={24} md={14}>
+    <h2 style={{ marginTop: "2rem" }}>Báo cáo Doanh Số Nhân Viên</h2>
+    <Table columns={saleColumns} dataSource={saleReportData} pagination={false} />
+  </Col>
+  <Col xs={24} md={10}>
+  <br/>
+    <h2 style={{ marginTop: "2rem" }}>Thống kê để dục chuyển khoản</h2>
+    <Table columns={transferColumns} dataSource={transferData} pagination={false} />
+  </Col>
+</Row>
+
+
+<Row gutter={[16, 16]}>
+  <Col xs={24} md={15}>
+    <h2 style={{ marginTop: "2rem" }}>Báo cáo doanh số ngày</h2>
+    <Table 
+      columns={dailySaleColumns} 
+      dataSource={[...saleDailyData].sort((a, b) => new Date(b.date) - new Date(a.date))} 
+      pagination={10} 
+    />
+  </Col>
+  <Col xs={24} md={7}>
+              
+    <PieChartComponent data={salePieData} />
+  </Col>
+</Row>
+
+
+         
+
+          
+        </Tabs.TabPane>
+      </Tabs>
     </div>
   );
-}
+};export default Dashboard;

@@ -119,8 +119,7 @@ const OrderList = () => {
     } else if (currentUser.position === "salexuly") {
       roleFilteredOrders = roleFilteredOrders.filter(
         (order) =>
-          order.salexuly === currentUser.name &&
-          order.saleReport === "DONE"
+          order.salexuly === currentUser.name 
       );
     } else if (currentUser.position_team === "kho") {
       roleFilteredOrders = roleFilteredOrders.filter(
@@ -290,11 +289,16 @@ const OrderList = () => {
       key: "orderDate",
       render: (text) => dayjs(text).format("DD/MM/YYYY")
     },
-    {
-      title: "STT",
-      dataIndex: "stt",
-      key: "STT"
-    },
+    
+    ...((currentUser.position === 'leadSALE' || currentUser.position == 'salexuly' || currentUser.position == 'managerSALE' || currentUser.position == 'admin')
+      ? [
+        {
+          title: "STT",
+          dataIndex: "stt",
+          key: "STT"
+        },
+        ]
+      : []),
     { title: "TÊN KHÁCH", dataIndex: "customerName", key: "customerName" },
     { title: "TÊN PAGE", dataIndex: "pageName", key: "pageName" },
     {
@@ -313,19 +317,25 @@ const OrderList = () => {
       )
     },
     { title: "Phân loại QUÀ/SIZE/MÀU", dataIndex: "category", key: "category" },
-    {
-      title: "Công ty đóng hàng",
-      key: "isShipping",
-      dataIndex: "isShipping",
-      render: (_, record) => (
-        <Checkbox
-          checked={record.isShipping}
-          onChange={(e) =>
-            handleShippingChange(record.id, e.target.checked)
-          }
-        />
-      )
-    },
+    
+
+    ...(currentUser.position !== 'salexuly'
+      ? [
+        {
+          title: "Công ty đóng hàng",
+          key: "isShipping",
+          dataIndex: "isShipping",
+          render: (_, record) => (
+            <Checkbox
+              checked={record.isShipping}
+              onChange={(e) =>
+                handleShippingChange(record.id, e.target.checked)
+              }
+            />
+          )
+        },
+        ]
+      : []),
     { title: "DOANH SỐ", dataIndex: "revenue", key: "revenue" },
     { title: "SALE", dataIndex: "sale", key: "sale" },
     { title: "VẬN ĐƠN", dataIndex: "salexuly", key: "salexuly" },

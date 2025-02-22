@@ -26,7 +26,11 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
   return (
     <html lang="en" >
       <body><Provider store={store}>
-        <Layout style={{ minHeight: '100vh' }} >
+        <Layout style={{
+      transform: "scale(0.85)",
+      transformOrigin: "top left",
+      width: "120%" // Để bù lại không gian khi scale
+    }}  >
           <Sider collapsible collapsed={collapsed} onCollapse={(value) => setCollapsed(value)} style={{paddingLeft: '-20px'}}>
             <div className="logo" style={{ color: 'white', textAlign: 'center', padding: '20px' }}>
             

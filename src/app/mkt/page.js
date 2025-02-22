@@ -171,14 +171,14 @@ const Dashboard = () => {
   const computeTotalADS = (employeeName) => {
     const totalADS = records
       .filter((p) => p.name === employeeName && filterRecordsByPeriod(p))
-      .reduce((sum, p) => sum + p.adsMoney, 0);
+      .reduce((sum, p) => sum + p.adsMoney2, 0);
     return totalADS;
   };
   
   const computePercentADS = (employeeName) => {
     const totalSales = computeTotalSales(employeeName);
     const totalADS = computeTotalADS(employeeName);
-    return totalSales > 0 ? ((totalADS / totalSales) * 100).toFixed(2) : "N/A";
+    return totalSales > 0 ? ((totalADS / totalSales) * 100).toFixed(2) : 0;
   };
   /*** Hàm nhóm record theo userId ***/
   const groupRecordsByUser = (records) => {
@@ -214,7 +214,8 @@ const Dashboard = () => {
       request2,
       excessMoney,
       teamnv: currentUser.team_id,
-      adsMoney: oldMoney + request1 + request2 - excessMoney,
+      adsMoney: request1 + request2 ,
+      adsMoney2: oldMoney + request1 + request2 - excessMoney,
       name: currentUser.name,
       userId: currentUser.employee_code // gán mã nhân viên của người nhập
     };
@@ -241,7 +242,8 @@ const Dashboard = () => {
       request1: record.request1,
       request2: record.request2,
       excessMoney: record.excessMoney,
-      adsMoney: record.oldMoney + record.request1 + record.request2 - record.excessMoney,
+      adsMoney:  record.request1 + record.request2 ,
+      adsMoney2: record.oldMoney + record.request1 + record.request2 - record.excessMoney,
     });
   };
 
@@ -336,7 +338,7 @@ const Dashboard = () => {
       render: (_, record) => {
         const totalSalesForSelectedDate = computeTotalSalesForDate(record.date, record.name);
         const total = record.oldMoney + record.request1 + record.request2;
-        if (totalSalesForSelectedDate === 0) return 'N/A';
+        if (totalSalesForSelectedDate === 0) return 0;
         const percent = Number(((total - record.excessMoney) / totalSalesForSelectedDate) * 100);
         
         let bgColor = "";
@@ -439,27 +441,27 @@ const Dashboard = () => {
               <Col xs={24} sm={12} md={3} lg={6}>
               <h4 >{editingRecord? 'Tiền thừa hôm kia':'Tiền thừa hôm qua'}</h4>
                 <Form.Item name="oldMoney">
-                  <InputNumber placeholder="Tiền cũ" style={{ width: '100%' }} />
+                  <InputNumber  style={{ width: '100%' }} />
                 
         </Form.Item>
               </Col>
               <Col xs={24} sm={12} md={3} lg={6}>
               <h4 >Xin buổi sáng</h4>
                 <Form.Item name="request1"  >
-                  <InputNumber placeholder="Xin lần 1" style={{ width: '100%' }} />
+                  <InputNumber  style={{ width: '100%' }} />
                 </Form.Item>
               </Col>
               <Col xs={24} sm={12} md={3} lg={6}>
               <h4  >Xin buổi chiều</h4>
                 <Form.Item name="request2" >
-                  <InputNumber placeholder="Xin lần 2" style={{ width: '100%' }} />
+                  <InputNumber  style={{ width: '100%' }} />
                 </Form.Item>
               </Col>
               <Col xs={24} sm={12} md={3} lg={6}>
               
                 <h4 hidden={!editingRecord}>Tiền thừa hôm qua</h4>
               <Form.Item name="excessMoney" hidden={!editingRecord}>
-          <InputNumber placeholder="Tiền thừa" style={{ width: '100%' }} />
+          <InputNumber  style={{ width: '100%' }} />
         </Form.Item>
               </Col>
 

@@ -39,6 +39,12 @@ export default function EmployeeManagement() {
     { label: 'MKT', value: 'mkt' },
     { label: 'Kho', value: 'kho' }
   ];
+  const position_team2 = [
+    { label: 'Online Sáng', value: 'onlinesang' }, 
+    { label: 'Online Tối', value: 'onlinetoi' }, 
+    { label: 'Hành chính', value: 'hanhchinh' },
+    
+  ];
   const teams = [
     { label: 'TEAM SƠN', value: 'SON' }, 
     { label: 'TEAM QUÂN', value: 'QUAN' }, 
@@ -64,6 +70,10 @@ export default function EmployeeManagement() {
     const pt = position_team.find(pt => pt.value === ptValue);
     return pt ? pt.label : ptValue;
   };
+  const getPositionTeamLabel2 = (ptValue) => {
+    const pt = position_team2.find(pt => pt.value === ptValue);
+    return pt ? pt.label : ptValue;
+  };
 
   const columns = [
     { title: 'Mã NV', dataIndex: 'employee_code' },
@@ -83,6 +93,11 @@ export default function EmployeeManagement() {
       title: 'Bộ phận', 
       dataIndex: 'position_team', 
       render: (value) => getPositionTeamLabel(value)
+    },
+    { 
+      title: 'Ca làm việc', 
+      dataIndex: 'position_team2', 
+      render: (value) => getPositionTeamLabel2(value)
     },
     {
       title: 'Thao tác',
@@ -109,7 +124,7 @@ export default function EmployeeManagement() {
 
   const handleSubmit = (values) => {
     setLoading(true);
-    setTimeout(() => {
+    
       const newEmployee = {
         employee_id: Date.now(),
         employee_code: Math.floor(1000 + Math.random() * 9000),
@@ -117,13 +132,14 @@ export default function EmployeeManagement() {
         name: values.name,
         position: values.position,
         team_id: values.team_id,
-        position_team: values.position_team
+        position_team: values.position_team,
+        position_team2: values.position_team2
       };
       dispatch(addEmployee(newEmployee));
       message.success('Tạo tài khoản thành công');
       createForm.resetFields();
       setLoading(false);
-    }, 1000);
+    
   };
 
   const handleEdit = (employee) => {
@@ -134,20 +150,22 @@ export default function EmployeeManagement() {
       name: employee.name,
       position: employee.position,
       team_id: employee.team_id,
-      position_team: employee.position_team
+      position_team: employee.position_team,
+      position_team2: employee.position_team2
     });
   };
 
   const handleUpdate = (values) => {
     setLoading(true);
-    setTimeout(() => {
+   
       const updatedEmployee = {
         ...selectedEmployee,
         username: values.username,
         name: values.name,
         position: values.position,
         team_id: values.team_id,
-        position_team: values.position_team
+        position_team: values.position_team,
+        position_team2: values.position_team2
       };
       dispatch(updateEmployee(updatedEmployee));
       message.success('Cập nhật nhân viên thành công');
@@ -155,7 +173,7 @@ export default function EmployeeManagement() {
       setSelectedEmployee(null);
       editForm.resetFields();
       setLoading(false);
-    }, 1000);
+    
   };
 
   const handleDelete = (employee_id) => {
@@ -223,6 +241,13 @@ export default function EmployeeManagement() {
         >
           <Select options={position_team.map(p => ({ label: p.label, value: p.value }))} />
         </Form.Item>
+        <Form.Item
+          label="Bộ phận"
+          name="position_team2"
+         
+        >
+          <Select options={position_team2.map(p => ({ label: p.label, value: p.value }))} />
+        </Form.Item>
 
         <Form.Item>
           <Button type="primary" htmlType="submit" loading={loading}>
@@ -288,6 +313,13 @@ export default function EmployeeManagement() {
                 rules={[{ required: true, message: 'Vui lòng chọn bộ phận' }]}
               >
                 <Select options={position_team.map(p => ({ label: p.label, value: p.value }))} />
+              </Form.Item>
+              <Form.Item
+                label="Ca Làm Việc"
+                name="position_team2"
+              
+              >
+                <Select options={position_team2.map(p => ({ label: p.label, value: p.value }))} />
               </Form.Item>
 
               <Form.Item>

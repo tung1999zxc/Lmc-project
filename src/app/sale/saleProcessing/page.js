@@ -185,16 +185,17 @@ const Dashboard = () => {
     }
     
     return (
-      <div
+     <>
+      <h3>{user ? `NV:${user}` : ""} </h3> <br /> <div
         style={{
           backgroundColor: bgColor,
           padding: "4px 8px",
           borderRadius: "4px"
         }}
       >
-        {user ? `NV: ${user}` : ""} <br />
+       
         Chưa thanh toán: <strong>{unpaidRevenueSum}</strong> - Đã thanh toán: <strong>{paidRevenueSum}</strong> - % Thanh Toán Đạt: <strong>{ratePercentage.toFixed(2)}%</strong>
-      </div>
+      </div></>
     );
   };
 
@@ -219,7 +220,7 @@ const Dashboard = () => {
         currentUser.position === "leadSALE") ? (
         // Nếu là quản lý, hiển thị bảng cho từng nhân viên
         [...new Set(getFilteredOrders().map(order => order.salexuly))].map(user => (
-          <div key={user} style={{ marginBottom: 24 }}>
+          <div key={user} style={{ marginBottom: 10 }}>
             {renderSummary(user)}
             <Table
               dataSource={getUniqueDatesForUser(user).map(orderDate => ({ key: orderDate, orderDate }))}
