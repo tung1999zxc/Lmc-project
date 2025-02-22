@@ -10,10 +10,12 @@ import {
   Space,
   DatePicker,
   Popover,
+  Select,Popconfirm
 } from 'antd';
 import moment from 'moment';
-
+import { EditOutlined, DeleteOutlined,PlusOutlined  } from "@ant-design/icons";
 const { Search } = Input;
+const { Option } = Select;
 
 const InventoryPage = () => {
   // State lưu danh sách đơn hàng và sản phẩm
@@ -31,6 +33,10 @@ const InventoryPage = () => {
   const [addImportModalVisible, setAddImportModalVisible] = useState(false);
   const [addingImportProduct, setAddingImportProduct] = useState(null);
   const [addImportForm] = Form.useForm();
+
+  // State dùng cho preview hình ảnh khi nhấp vào
+  const [previewVisible, setPreviewVisible] = useState(false);
+  const [previewImage, setPreviewImage] = useState(null);
 
   // Lấy dữ liệu từ localStorage khi component mount
   useEffect(() => {
@@ -68,6 +74,9 @@ const InventoryPage = () => {
     const newProduct = {
       key: Date.now(), // sử dụng timestamp làm key duy nhất
       name: values.name,
+     
+      image: values.image, // lưu URL hình ảnh
+      description: values.description,
       imports: [
         {
           importedQty: values.importedQty,
@@ -82,14 +91,14 @@ const InventoryPage = () => {
   // Modal Sửa: Chỉnh sửa tên sản phẩm (ví dụ)
   const handleEditProduct = (record) => {
     setEditingProduct(record);
-    editForm.setFieldsValue({ name: record.name });
+    editForm.setFieldsValue({ name: record.name, description: record.description});
     setEditModalVisible(true);
   };
 
   const handleEditProductFinish = (values) => {
     setProducts(
       products.map((product) =>
-        product.key === editingProduct.key ? { ...product, name: values.name } : product
+        product.key === editingProduct.key ? { ...product, name: values.name ,description: values.description} : product
       )
     );
     setEditModalVisible(false);
@@ -119,6 +128,17 @@ const InventoryPage = () => {
     setAddingImportProduct(null);
   };
 
+  // Hàm xóa sản phẩm
+  const handleDeleteProduct = (record) => {
+    
+      
+        setProducts((prevProducts) =>
+          prevProducts.filter((product) => product.key !== record.key)
+        );
+     
+  };
+  
+
   // Lọc sản phẩm theo tên dựa trên searchText
   const filteredProducts = products.filter((product) =>
     product.name.toLowerCase().includes(searchText.toLowerCase())
@@ -126,11 +146,18 @@ const InventoryPage = () => {
 
   // Các cột của bảng
   const columns = [
+    
     {
       title: 'Tên sản phẩm',
       dataIndex: 'name',
       key: 'name',
+      render: (text, record) => (
+        <Popover content={record.description || "Chưa có kịch bản sản phẩm"} title="Kịch bản sản phẩm" trigger="hover">
+          <span>{text}</span>
+        </Popover>
+      ),
     },
+  
     {
       title: 'SL nhập hàng',
       key: 'importedQty',
@@ -155,11 +182,15 @@ const InventoryPage = () => {
         );
       },
     },
+    // {
+    //   title: 'Phân loại hàng',
+    //   dataIndex: 'category',
+    //   key: 'category',
+    // },
     {
       title: 'SL sản phẩm đơn chưa DONE',
       key: 'ordersNotDone',
       render: (_, record) => {
-        // Lấy tổng số lượng của các đơn hàng chưa DONE chứa sản phẩm này
         const ordersNotDone = orders
           .filter((order) => order.saleReport !== 'DONE')
           .reduce((acc, order) => {
@@ -178,7 +209,6 @@ const InventoryPage = () => {
       title: 'SL sản phẩm đơn Done /nhưng chưa gửi ',
       key: 'ordersDone',
       render: (_, record) => {
-        // Lấy tổng số lượng của các đơn hàng DONE chứa sản phẩm này
         const ordersDone = orders
           .filter((order) => order.saleReport === 'DONE')
           .reduce((acc, order) => {
@@ -190,7 +220,7 @@ const InventoryPage = () => {
             }
             return acc;
           }, 0);
-          const deliveredQty = orders
+        const deliveredQty = orders
           .filter(
             (order) =>
               order.deliveryStatus === 'ĐÃ GỬI HÀNG' ||
@@ -208,29 +238,10 @@ const InventoryPage = () => {
         return ordersDone - deliveredQty;
       },
     },
-    // {
-    //   title: 'Tồn kho đơn đã Done',
-    //   key: 'inventoryDone',
-    //   render: (_, record) => {
-    //     const ordersDoneQty = orders
-    //       .filter((order) => order.saleReport === 'DONE')
-    //       .reduce((acc, order) => {
-    //         if (order.products && order.products.length > 0) {
-    //           const orderQty = order.products
-    //             .filter((item) => item.product === record.name)
-    //             .reduce((sum, item) => sum + Number(item.quantity), 0);
-    //           return acc + orderQty;
-    //         }
-    //         return acc;
-    //       }, 0);
-    //     return getTotalImportedQty(record) - ordersDoneQty;
-    //   },
-    // },
     {
       title: 'SL đã gửi hàng/ Giao thành công',
       key: 'Totaldagui',
       render: (_, record) => {
-        // Lấy tổng số lượng của các đơn hàng có trạng thái 'ĐÃ GỬI HÀNG' hoặc 'GIAO THÀNH CÔNG'
         const deliveredQty = orders
           .filter(
             (order) =>
@@ -253,7 +264,6 @@ const InventoryPage = () => {
       title: 'Tồn kho tổng',
       key: 'inventoryTotal',
       render: (_, record) => {
-        // Tồn kho tổng = SL nhập hàng - SL đã gửi hàng/ Giao thành công
         const totalImported = getTotalImportedQty(record);
         const deliveredQty = orders
           .filter(
@@ -277,10 +287,7 @@ const InventoryPage = () => {
       title: 'SL Âm',
       key: 'SLAM',
       render: (_, record) => {
-        // Tính các giá trị cần thiết
         const totalImported = getTotalImportedQty(record);
-        
-        // SL sản phẩm đơn chưa DONE
         const ordersNotDone = orders
           .filter((order) => order.saleReport !== 'DONE')
           .reduce((acc, order) => {
@@ -292,8 +299,6 @@ const InventoryPage = () => {
             }
             return acc;
           }, 0);
-        
-        // SL sản phẩm đơn Done
         const ordersDone = orders
           .filter((order) => order.saleReport === 'DONE')
           .reduce((acc, order) => {
@@ -305,8 +310,6 @@ const InventoryPage = () => {
             }
             return acc;
           }, 0);
-        
-        // SL đã gửi hàng/ Giao thành công
         const deliveredQty = orders
           .filter(
             (order) =>
@@ -322,14 +325,29 @@ const InventoryPage = () => {
             }
             return acc;
           }, 0);
-        
-        // Tồn kho tổng (theo cột đã định nghĩa): SL nhập hàng - SL đã gửi hàng
         const inventoryTotal = totalImported - deliveredQty;
-        
-        // Công thức: SL Âm = Tồn kho tổng - ordersNotDone - ordersDone - SL đã gửi hàng/ Giao thành công
         const slAm = inventoryTotal - ordersNotDone - ordersDone + deliveredQty;
-        
-        return slAm;
+        let bgColor = "";
+        if (slAm <= 0) {
+          bgColor = "#EC2527";
+        } else if (slAm >  0 && slAm < 10) {
+          bgColor = "#FF9501";
+        } else {
+          bgColor = "#54DA1F";
+        }
+        return (
+          <div
+            style={{
+              backgroundColor: bgColor,
+              padding: "4px 8px",
+              borderRadius: "4px",
+              textAlign: "center",
+              fontWeight: "bold"
+            }}
+          >
+            {slAm}
+          </div>
+        );
       },
     },
     {
@@ -337,15 +355,36 @@ const InventoryPage = () => {
       key: 'actions',
       render: (_, record) => (
         <Space>
-          {/* Bạn có thể bật thêm nút Sửa nếu cần */}
-          {/* <Button type="link" onClick={() => handleEditProduct(record)}>
-            Sửa
-          </Button> */}
-          <Button type="link" onClick={() => handleAddImport(record)}>
-            Nhập thêm Sl
-          </Button>
+          {/* Bạn có thể mở modal sửa nếu cần */}
+        
+           <Button icon={<PlusOutlined  />} onClick={() => handleAddImport(record)} />
+           <Button icon={<EditOutlined />} onClick={() => handleEditProduct(record)} />
+          <Popconfirm title="Xóa bản ghi?" onConfirm={() => handleDeleteProduct(record)}>
+                  <Button danger icon={<DeleteOutlined />} />
+                </Popconfirm>
+            
+          
         </Space>
       ),
+    },
+    {
+      title: 'Hình ảnh',
+      key: 'image',
+      render: (_, record) => {
+        return record.image ? (
+          <img
+            src={record.image}
+            alt={record.name}
+            style={{ width: 80, height: 'auto', cursor: 'pointer' }}
+            onClick={() => {
+              setPreviewImage(record.image);
+              setPreviewVisible(true);
+            }}
+          />
+        ) : (
+          'Không có hình ảnh'
+        );
+      },
     },
   ];
   
@@ -367,12 +406,42 @@ const InventoryPage = () => {
         </Form.Item>
         <Form.Item
           name="importedQty"
-          rules={[
-            { required: true, message: 'Vui lòng nhập số lượng nhập hàng' },
-          ]}
+          rules={[{ required: true, message: 'Vui lòng nhập số lượng nhập hàng' }]}
         >
           <InputNumber placeholder="SL nhập hàng" min={0} />
         </Form.Item>
+        {/* <Form.Item
+          name="category"
+          rules={[{ required: true, message: 'Vui lòng chọn phân loại hàng' }]}
+        >
+          <Select placeholder="Phân loại hàng" style={{ width: 150 }}>
+            <Option value="electronics">Electronics</Option>
+            <Option value="clothing">Clothing</Option>
+            <Option value="food">Food</Option>
+         
+          </Select>
+        </Form.Item> */}
+        
+        <Form.Item
+          name="description"
+          rules={[{ required: true, message: 'Vui lòng nhập kịch bản sản phẩm' }]}
+        >
+          <Input.TextArea rows={1} placeholder="Kịch bản sản phẩm" />
+        </Form.Item>
+        <Form.Item
+          name="image"
+          valuePropName="fileList"
+          getValueFromEvent={(e) => {
+            if (e && e.target && e.target.files && e.target.files[0]) {
+              return URL.createObjectURL(e.target.files[0]);
+            }
+            return null;
+          }}
+          rules={[{ required: true, message: 'Vui lòng tải hình ảnh sản phẩm' }]}
+        >
+          <Input type="file" accept="image/*" />
+        </Form.Item>
+        
         <Form.Item>
           <Button type="primary" htmlType="submit">
             Thêm sản phẩm
@@ -405,6 +474,13 @@ const InventoryPage = () => {
           >
             <Input />
           </Form.Item>
+          <Form.Item
+          label="Kịch bản sản phẩm  "
+          name="description"
+          rules={[{ required: true, message: 'Vui lòng nhập kịch bản sản phẩm' }]}
+        >
+          <Input.TextArea rows={2} placeholder="Kịch bản sản phẩm" />
+        </Form.Item>
           <Form.Item>
             <Button type="primary" htmlType="submit">
               Lưu
@@ -443,6 +519,15 @@ const InventoryPage = () => {
             </Button>
           </Form.Item>
         </Form>
+      </Modal>
+
+      {/* Modal phóng to hình ảnh khi nhấp */}
+      <Modal
+        visible={previewVisible}
+        footer={null}
+        onCancel={() => setPreviewVisible(false)}
+      >
+        <img src={previewImage} alt="Preview" style={{ width: '100%' }} />
       </Modal>
     </div>
   );
