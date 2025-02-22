@@ -178,7 +178,7 @@ function getLast30Days() {
 
   // State cho bộ lọc: selectedDate mặc định là ngày hiện tại, và preset
   const [selectedDate, setSelectedDate] = useState(today);
-  const [selectedPreset, setSelectedPreset] = useState('');
+  const [selectedPreset, setSelectedPreset] = useState('currentMonth');
 
   // State cho tỉ giá VNĐ và ô nhập giá trị
   const [exchangeRate, setExchangeRate] = useState(17000);
@@ -614,7 +614,7 @@ function getLast30Days() {
 
   const transferData = [
     { key: "KW", currency: "KW", giaoThanhCong: giaoThanhCongKW, daGuiHang: daGuiHangKW },
-    { key: "VND", currency: "VND", giaoThanhCong: giaoThanhCongKW * 17000, daGuiHang: daGuiHangKW * 17000 }
+    { key: "VND", currency: "VND", giaoThanhCong: giaoThanhCongKW * exchangeRate, daGuiHang: daGuiHangKW * exchangeRate }
   ];
 
   const transferColumns = [
@@ -633,7 +633,7 @@ function getLast30Days() {
   const tongKW = daThanhToanKW + chuaThanhToanKW;
   const thanhToanDat = tongKW > 0 ? (daThanhToanKW / tongKW) * 100 : 0;
   const totalAdsKW = filteredAds.reduce((sum, ad) => sum + ad.adsMoney, 0);
-  const percentAds = tongKW > 0 ? Number(((totalAdsKW / (tongKW*17000)) * 100).toFixed(2)) : 0;
+  const percentAds = tongKW > 0 ? Number(((totalAdsKW / (tongKW*exchangeRate)) * 100).toFixed(2)) : 0;
 
   const totalData = [
     {
@@ -647,9 +647,9 @@ function getLast30Days() {
     },
     {
       key: "VND",
-      daThanhToan: daThanhToanKW * 17000,
-      chuaThanhToan: chuaThanhToanKW * 17000,
-      tong: tongKW * 17000,
+      daThanhToan: daThanhToanKW * exchangeRate,
+      chuaThanhToan: chuaThanhToanKW * exchangeRate,
+      tong: tongKW * exchangeRate,
       thanhToanDat: thanhToanDat,
       totalAds: totalAdsKW ,
       percentAds: percentAds
