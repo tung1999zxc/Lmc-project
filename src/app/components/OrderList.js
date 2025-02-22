@@ -78,6 +78,10 @@ const OrderList = () => {
 
   // Tính toán chọn nhân viên salexuly dựa trên số đơn hàng của hôm nay
   useEffect(() => {
+    if (currentUser.position ==="salefull") {
+      setnamesalexuly(currentUser.name);
+      return
+    }
     const getLocalDateString = (date) => {
       const year = date.getFullYear();
       const month = String(date.getMonth() + 1).padStart(2, "0");

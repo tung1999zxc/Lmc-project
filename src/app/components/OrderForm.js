@@ -409,7 +409,7 @@ const OrderForm = ({ visible, onCancel, onSubmit, initialValues, namesalexuly })
                   </Select>
                 </Form.Item>
                 <Form.Item label="VẬN ĐƠN" name="salexuly" initialValue={namesalexuly}>
-                  <Select disabled={currentUser.position === "salexuly" || currentUser.position === "salexacnhan"}>
+                  <Select disabled={currentUser.position === "salexuly" || currentUser.position === "salexacnhan" ||currentUser.position === "salefull" }>
                     {salexulyOptions.map((employee) => (
                       <Option key={employee} value={employee}>
                         {employee}
