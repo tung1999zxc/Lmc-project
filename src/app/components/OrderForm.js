@@ -390,7 +390,7 @@ const OrderForm = ({ visible, onCancel, onSubmit, initialValues, namesalexuly })
                   )}
                 </Form.List>
 
-                <Form.Item label="Phân loại QUÀ/SIZE/MÀU" name="category">
+                <Form.Item label="QUÀ/SIZE/MÀU" name="category">
                   <Input />
                 </Form.Item>
                 <Form.Item label="DOANH SỐ" name="revenue">

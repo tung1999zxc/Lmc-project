@@ -39,7 +39,7 @@ const OrderList = () => {
   const [selectedFilters, setSelectedFilters] = useState([]);
   const [selectedSale, setSelectedSale] = useState(undefined);
   const [selectedMKT, setSelectedMKT] = useState(undefined);
-
+  const [selectedColumns, setSelectedColumns] = useState([]);
   // Danh sách thành viên team (dùng cho vai trò lead)
   const leadTeamMembers = employees
     .filter((employee) => employee.team_id === currentUser.team_id)
@@ -258,7 +258,13 @@ const OrderList = () => {
     );
     message.success("Cập nhật trạng thái đóng hàng thành công");
   };
-
+  const handleColumnSelect = (columnKey, checked) => {
+    if (checked) {
+      setSelectedColumns((prev) => [...prev, columnKey]);
+    } else {
+      setSelectedColumns((prev) => prev.filter((key) => key !== columnKey));
+    }
+  };
   // Các cột cho bảng (cho các vai trò khác nhau)
   const columns = [
     {
@@ -266,14 +272,8 @@ const OrderList = () => {
       key: "action",
       render: (_, record) => (
         <Space>
-          <Button
-            icon={<EditOutlined />}
-            onClick={() => handleEdit(record)}
-          />
-          <Popconfirm
-            title="Xóa đơn hàng?"
-            onConfirm={() => handleDelete(record.id)}
-          >
+          <Button icon={<EditOutlined />} onClick={() => handleEdit(record)} />
+          <Popconfirm title="Xóa đơn hàng?" onConfirm={() => handleDelete(record.id)}>
             <Button
               danger
               disabled={
@@ -288,25 +288,62 @@ const OrderList = () => {
       )
     },
     {
-      title: "NGÀY ĐẶT",
+      // Ví dụ với cột "NGÀY ĐẶT": thêm checkbox trong tiêu đề
+      title: (
+        <Checkbox
+          checked={selectedColumns.includes("orderDate")}
+          onChange={(e) => handleColumnSelect("orderDate", e.target.checked)}
+        >
+          NGÀY ĐẶT
+        </Checkbox>
+      ),
       dataIndex: "orderDate",
       key: "orderDate",
       render: (text) => dayjs(text).format("DD/MM/YYYY")
     },
-    
-    ...((currentUser.position === 'leadSALE' || currentUser.position == 'salexuly' || currentUser.position == 'managerSALE' || currentUser.position == 'admin')
+    // Ví dụ cho một cột khác có checkbox trong tiêu đề
+        
+    ...((currentUser.position === 'leadSALE' || currentUser.position === 'salexuly' || currentUser.position === 'managerSALE' || currentUser.position === 'admin')
       ? [
         {
-          title: "STT",
-          dataIndex: "stt",
-          key: "STT"
+          title: (
+            <Checkbox
+              checked={selectedColumns.includes("stt")}
+              onChange={(e) => handleColumnSelect("stt", e.target.checked)}
+            >
+              STT
+            </Checkbox>
+          ),
+          dataIndex: "stt",       
+          key: "stt"
         },
         ]
       : []),
-    { title: "TÊN KHÁCH", dataIndex: "customerName", key: "customerName" },
+  
+
+    {
+      title: (
+        <Checkbox
+          checked={selectedColumns.includes("customerName")}
+          onChange={(e) => handleColumnSelect("customerName", e.target.checked)}
+        >
+          TÊN KHÁCH
+        </Checkbox>
+      ),
+      dataIndex: "customerName",
+      key: "customerName"
+    },
     { title: "TÊN PAGE", dataIndex: "pageName", key: "pageName" },
     {
-      title: "SẢN PHẨM",
+      title: (
+        <Checkbox
+          checked={selectedColumns.includes("products")}
+          onChange={(e) => handleColumnSelect("products", e.target.checked)}
+        >
+          SẢN PHẨM
+        </Checkbox>
+      ),
+  
       key: "products",
       render: (_, record) => (
         <>
@@ -320,7 +357,7 @@ const OrderList = () => {
         </>
       )
     },
-    { title: "Phân loại QUÀ/SIZE/MÀU", dataIndex: "category", key: "category" },
+    { title: "QUÀ/SIZE/MÀU", dataIndex: "category", key: "category" },
     
 
     ...(currentUser.position !== 'salexuly'
@@ -381,7 +418,10 @@ const OrderList = () => {
     
     { title: "DOANH THU", dataIndex: "profit", key: "profit" }
   ];
-
+// Lọc ra các cột đã được tick để hiển thị ở bảng phụ
+const selectedTableColumns = columns.filter((col) =>
+  selectedColumns.includes(col.key)
+);
   const columnsMKT = [
     {
       title: "NGÀY ĐẶT",
@@ -474,7 +514,7 @@ const OrderList = () => {
         </>
       )
     },
-    { title: "Phân loại QUÀ/SIZE/MÀU", dataIndex: "category", key: "category" },
+    { title: "QUÀ/SIZE/MÀU", dataIndex: "category", key: "category" },
     { title: "SĐT", dataIndex: "phone", key: "phone" },
     { title: "ĐỊA CHỈ", dataIndex: "address", key: "address" },
     { title: "GHI CHÚ SALE", dataIndex: "note", key: "note" },
@@ -647,7 +687,23 @@ const OrderList = () => {
         </Col>
       </Row>
 
-      <Table
+      
+<Row gutter={16} wrap={false} style={{ display: "flex", alignItems: "flex-start" }}>
+        <Col flex="none">
+        {(currentUser.position === "leadSALE" ||
+  currentUser.position === "managerSALE"
+ ) && (
+  <Table
+    columns={selectedTableColumns}
+    dataSource={[...filteredOrders].sort((a, b) => b.stt - a.stt)}
+    rowKey="id"
+    bordered
+    pagination={{ pageSize: 10 }}
+  />
+)}
+        </Col>
+        <Col flex="auto">
+        <Table
         columns={
           currentUser.position_team === "kho"
             ? columnsKHO
@@ -661,7 +717,8 @@ const OrderList = () => {
         bordered
         pagination={{ pageSize: 10 }}
       />
-
+        </Col>
+      </Row>
       <OrderForm
         visible={formVisible}
         onCancel={() => setFormVisible(false)}
