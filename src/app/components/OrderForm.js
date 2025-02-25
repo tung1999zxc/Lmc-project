@@ -1,5 +1,6 @@
 "use client";
 import React, { useState, useEffect } from "react";
+import axios from "axios"; 
 import {
   Form,
   Input,
@@ -21,12 +22,43 @@ const OrderForm = ({ visible, onCancel, onSubmit, initialValues, namesalexuly })
   const { Option } = Select;
   const currentUser = useSelector((state) => state.user.currentUser);
   // Giả sử: nếu mã nhân viên là 1 thì isEmployee1 = true
-  const [productOptions, setProductOptions] = useState([]);
+  
   const [dataPagename, setdataPagename] = useState([]);
-  const employees = useSelector((state) => state.employees.employees);
+    const [employees, setEmployees] = useState([]);
+  
+
   // Danh sách options
-  const [pageName, setPageName] = useState("");
+  const [products, setProducts] = useState([]);
   const [employeeNamepage, setEmployeeNamepage] = useState("");
+
+   const fetchProducts = async () => {
+    try {
+      const response = await axios.get('/api/products');
+      setProducts(response.data.data);
+    } catch (error) {
+      console.error(error);
+      message.error("Lỗi khi lấy danh sách sản phẩm");
+    }
+  };
+
+  const fetchEmployees = async () => {
+      
+      try {
+        const response = await axios.get('/api/employees');
+        // response.data.data chứa danh sách nhân viên theo API đã viết
+        setEmployees(response.data.data);
+      } catch (error) {
+        console.error('Lỗi khi lấy danh sách nhân viên:', error);
+        message.error('Lỗi khi lấy danh sách nhân viên');
+      } finally {
+       
+      }
+    };
+   useEffect(() => {
+    fetchProducts();
+    fetchNamePage();
+    fetchEmployees();
+  }, []);
   const mktOptions = employees
     .filter((order) => order.position_team === "mkt")
     .map((order) => order.name);
@@ -72,21 +104,17 @@ const OrderForm = ({ visible, onCancel, onSubmit, initialValues, namesalexuly })
   const massOptions = ["Nặng", "Nhẹ"];
   const thanhToanOptions = ["ĐÃ THANH TOÁN", "CHƯA THANH TOÁN"];
   const tinhTrangGHOptions = ["ĐÃ GỬI HÀNG", "GIAO THÀNH CÔNG"];
-
-  // Khi có initialValues (dữ liệu cũ) thì chuyển các trường ngày về đối tượng dayjs
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      const productNames = localStorage.getItem("productNames");
-      if (productNames) {
-        setProductOptions(JSON.parse(productNames));
-      }
-      const productNames2 = localStorage.getItem("orders3");
-      if (productNames2) {
-        setdataPagename(JSON.parse(productNames2));
-      }
+const fetchNamePage = async () => {
+    try {
+      const response = await axios.get('/api/pageName');
+      setdataPagename(response.data.data); // Danh sách đơn hàng
+    } catch (error) {
+      console.error('Lỗi khi lấy đơn hàng:', error);
     }
-  }, []);
-
+  };
+  // Khi có initialValues (dữ liệu cũ) thì chuyển các trường ngày về đối tượng dayjs
+ 
+const productOptions = products.map((p) => p.name);
   useEffect(() => {
     if (initialValues) {
       form.setFieldsValue({

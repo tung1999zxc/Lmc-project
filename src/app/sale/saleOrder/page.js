@@ -8,10 +8,12 @@ import {
   Table,
   Popconfirm,
   Select,
+  message
 } from "antd";
 import moment from "moment";
 import { EditOutlined, DeleteOutlined } from "@ant-design/icons";
 import { useDispatch, useSelector } from "react-redux";
+import axios from "axios";
 
 const { Option } = Select;
 
@@ -26,75 +28,88 @@ const Dashboard = () => {
   // editingKey dùng để xác định record nào đang được chỉnh sửa
   const [editingKey, setEditingKey] = useState(null);
 
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      const savedRecords = localStorage.getItem("records2");
-      if (savedRecords) {
-        setRecords(JSON.parse(savedRecords));
-      }
-      const savedOrders = localStorage.getItem("orders");
-      if (savedOrders) {
-        setSampleOrders(JSON.parse(savedOrders));
-      }
+
+
+  const fetchOrders = async () => {
+    try {
+      const response = await axios.get("/api/orders");
+      setSampleOrders(response.data.data);
+    } catch (error) {
+      console.error(error);
+      message.error("Lỗi khi lấy đơn hàng");
     }
+  };
+  useEffect(() => {
+    fetchRecords();
+    fetchOrders();
   }, []);
 
-  // Lưu record vào localStorage mỗi khi records thay đổi
-  useEffect(() => {
-    if (typeof window !== "undefined"&& records && records.length > 0) {
-      localStorage.setItem("records2", JSON.stringify(records));
-    }
-  }, [records]);
+ 
 
+  const fetchRecords = async () => {
+    try {
+      const response = await axios.get('/api/recordsSale');
+      setRecords(response.data.data);
+    } catch (error) {
+      console.error(error);
+      message.error("Lỗi khi lấy danh sách");
+    }
+  };
+  
   // Xử lý submit form: Nếu đang chỉnh sửa thì cập nhật record, ngược lại thêm mới
-  const onFinish = (values) => {
+  const onFinish = async (values) => {
     const newMess = values.newMess;
     const closedOrders = values.closedOrders;
     const ratio = newMess > 0 ? closedOrders / newMess : 0;
     const formattedDate = values.date.format("YYYY-MM-DD");
-    if (editingKey !== null) {
-      // Cập nhật record đã có
-      const updatedRecords = records.map((record) => {
-        if (record.key === editingKey) {
-          return {
-            ...record,
-            date: formattedDate,
-            newMess: newMess,
-            closedOrders: closedOrders,
-            dailySales: values.dailySales,
-            totalRemarketing: values.totalRemarketing,
-            ratio: ratio,
-          };
-        }
-        return record;
-      });
-      setRecords(updatedRecords);
-      setEditingKey(null);
-    } else {
-      // Tạo record mới
-      const record = {
-        key: records.length + 1,
-        date: formattedDate,
-        newMess: newMess,
-        closedOrders: closedOrders,
-        totalRemarketing: values.totalRemarketing,
-        ratio: ratio,
-        employeeId: currentUser.employee_code,
-        employeeName: currentUser.name,
-      };
-      setRecords([...records, record]);
-    }
-    form.resetFields();
-  };
+    const recordData = {
+      id: editingKey !== null ? editingKey : Date.now(),
+      date: formattedDate,
+      newMess,
+      closedOrders,
+      dailySales: values.dailySales,
+      totalRemarketing: values.totalRemarketing,
+      ratio,
+      employeeId: currentUser.employee_code,
+      employeeName: currentUser.name,
+    };
+  
+    try {
+      if (editingKey !== null) {
+        // Cập nhật record
+        const response = await axios.put(`/api/recordsSale/${editingKey}`, recordData);
+        message.success(response.data.message || "Cập nhật thành công");
+        setEditingKey(null);
+        fetchRecords();
+        form.resetFields();
 
-  // Hàm xử lý xóa record khỏi danh sách
-  const handleDelete = (key) => {
-    setRecords(records.filter((record) => record.key !== key));
-    if (editingKey === key) {
+
+      } else {
+        // Thêm mới record
+        const response = await axios.post('/api/recordsSale', recordData);
+        message.success(response.data.message || "Thêm mới thành công");
+        form.resetFields();
+        fetchRecords();
+      }
+      
+    } catch (error) {
+      console.error(error);
+      message.error("Lỗi khi lưu dữ liệu");
       setEditingKey(null);
-      form.resetFields();
     }
   };
+  // Hàm xử lý xóa record khỏi danh sách
+const handleDelete = async (key) => {
+  try {
+    const response = await axios.delete(`/api/recordsSale/${key}`);
+    message.success(response.data.message || "Xóa thành công");
+    fetchRecords();
+  } catch (error) {
+    console.error(error);
+    message.error("Lỗi khi xóa record");
+  }
+};
+
 
   // Hàm xử lý sửa: nạp dữ liệu record vào form và thiết lập editingKey
   const handleEdit = (record) => {
@@ -105,7 +120,7 @@ const Dashboard = () => {
       dailySales: record.dailySales,
       totalRemarketing: record.totalRemarketing,
     });
-    setEditingKey(record.key);
+    setEditingKey(record.id);
   };
 
   // Hàm lọc các đơn hàng dựa theo bộ lọc thời gian đã chọn
@@ -241,7 +256,7 @@ const Dashboard = () => {
                 />
                 <Popconfirm
                   title="Xóa bản ghi?"
-                  onConfirm={() => handleDelete(record.key)}
+                  onConfirm={() => handleDelete(record.id)}
                 >
                   <Button danger icon={<DeleteOutlined />} />
                 </Popconfirm>
@@ -257,7 +272,7 @@ const Dashboard = () => {
             <Button icon={<EditOutlined />} onClick={() => handleEdit(record)} />
             <Popconfirm
               title="Xóa bản ghi?"
-              onConfirm={() => handleDelete(record.key)}
+              onConfirm={() => handleDelete(record.id)}
             >
               <Button danger icon={<DeleteOutlined />} />
             </Popconfirm>

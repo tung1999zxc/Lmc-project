@@ -3,18 +3,24 @@ import { Table } from "antd";
 import { useEffect, useState } from "react";
 import dayjs from "dayjs";
 import { useSelector } from "react-redux"; 
+import axios from "axios"; 
 const OrdersTable = () => {
   const [sampleOrders, setSampleOrders] = useState([]);
   const currentUser = useSelector((state) => state.user.currentUser);
   // Khi component mount, đọc dữ liệu đơn từ localStorage (chỉ chạy trên client)
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      const savedOrders = localStorage.getItem("orders");
-      if (savedOrders) {
-        setSampleOrders(JSON.parse(savedOrders));
-      }
-    }
+useEffect(() => {
+    fetchOrders();
   }, []);
+
+  const fetchOrders = async () => {
+    try {
+      const response = await axios.get("/api/orders");
+      setSampleOrders(response.data.data);
+    } catch (error) {
+      console.error(error);
+      message.error("Lỗi khi lấy đơn hàng");
+    }
+  };
 
   // Lấy ngày hiện tại và xác định cutoff (30 ngày gần nhất)
   const today = dayjs();

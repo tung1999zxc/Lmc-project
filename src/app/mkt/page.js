@@ -19,39 +19,58 @@ import { EditOutlined, DeleteOutlined } from '@ant-design/icons';
 import { useDispatch, useSelector } from 'react-redux';
 import dayjs from "dayjs";
 const { Option } = Select;
-
+import axios from "axios";
+import { fetchEmployees, fetchOrders } from "../store/dataSlice";
 const Dashboard = () => {
   const currentUser = useSelector((state) => state.user.currentUser);
-  const employees = useSelector((state) => state.employees.employees);
+  
   const [period, setPeriod] = useState("month");
   const [form] = Form.useForm();
-  const [sampleOrders, setSampleOrders] = useState([]);
+  
+  const [safeOrders, setSafeOrders] = useState([]);
   const [records, setRecords] = useState([]);
+  const [safeEmployees, setSafeEmployees] = useState([]);
   const [editingRecord, setEditingRecord] = useState(null);
   // Bộ lọc theo khoảng thời gian (mặc định 7 ngày)
   // const [filterOption, setFilterOption] = useState("7"); // Đã loại bỏ
   // Nếu là manager, có thêm bộ lọc để chọn team (default "all" hiển thị tất cả các team)
-  const [selectedDate, setSelectedDate] = useState();
+ 
   const [selectedTeam, setSelectedTeam] = useState("all");
 
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      const savedRecords = localStorage.getItem("records");
-      if (savedRecords) {
-        setRecords(JSON.parse(savedRecords));
+   const fetchEmployees = async () => {
+      
+      try {
+        const response = await axios.get('/api/employees');
+        // response.data.data chứa danh sách nhân viên theo API đã viết
+        setSafeEmployees(response.data.data);
+      } catch (error) {
+        console.error('Lỗi khi lấy danh sách nhân viên:', error);
+        message.error('Lỗi khi lấy danh sách nhân viên');
+      } finally {
+       
       }
-      const savedOrders = localStorage.getItem("orders");
-      if (savedOrders) {
-        setSampleOrders(JSON.parse(savedOrders));
-      }
-    }
+    };
+   useEffect(() => {
+    fetchOrders();
   }, []);
 
-  useEffect(() => {
-    if (typeof window !== "undefined" && records && records.length > 0) {
-      localStorage.setItem("records", JSON.stringify(records));
+  const fetchOrders = async () => {
+    try {
+      const response = await axios.get("/api/orders");
+      setSafeOrders(response.data.data);
+    } catch (error) {
+      console.error(error);
+      message.error("Lỗi khi lấy đơn hàng");
     }
-  }, [records]);
+  };
+
+console.log(safeEmployees);
+  useEffect(() => {
+    fetchRecords();
+   fetchEmployees();
+   fetchOrders();
+  }, []);
+  
 
   // if (currentUser.position === 'admin'){
   //   // Nếu admin thì trả về gì đó (theo code ban đầu của bạn)
@@ -59,7 +78,7 @@ const Dashboard = () => {
   // };
 
   // Với vai trò lead, lấy danh sách mã nhân viên cùng team của lead
-  const leadTeamMembers = employees
+  const leadTeamMembers = safeEmployees
     .filter(employee => employee.team_id === currentUser.team_id)
     .map(employee => employee.employee_code);
 
@@ -68,49 +87,49 @@ const Dashboard = () => {
     {
       id: 1,
       name: `TEAM SƠN `,
-      members: employees
+      members: safeEmployees
         .filter(employee => employee.team_id === 'SON')
         .map(employee => employee.employee_code)
     },
     {
       id: 2,
       name: `TEAM QUÂN `,
-      members: employees
+      members: safeEmployees
         .filter(employee => employee.team_id === 'QUAN')
         .map(employee => employee.employee_code)
     },
     {
       id: 3,
       name: `TEAM CHI `,
-      members: employees
+      members: safeEmployees
         .filter(employee => employee.team_id === 'CHI')
         .map(employee => employee.employee_code)
     },
     {
       id: 4,
       name: `TEAM PHONG `,
-      members: employees
+      members: safeEmployees
         .filter(employee => employee.team_id === 'PHONG')
         .map(employee => employee.employee_code)
     },
     {
       id: 5,
       name: `TEAM TUẤN ANH `,
-      members: employees
+      members: safeEmployees
         .filter(employee => employee.team_id === 'TUANANH')
         .map(employee => employee.employee_code)
     },
     {
       id: 6,
       name: `TEAM DIỆN `,
-      members: employees
+      members: safeEmployees
         .filter(employee => employee.team_id === 'DIEN')
         .map(employee => employee.employee_code)
     },
     {
       id: 7,
       name: `TEAM LẺ `,
-      members: employees
+      members: safeEmployees
         .filter(employee => employee.team_id === 'LE')
         .map(employee => employee.employee_code)
     },
@@ -163,10 +182,10 @@ const Dashboard = () => {
 
   // Tính tổng doanh số cho một nhân viên dựa trên sampleOrders đã được lọc theo thời gian
   const computeTotalSales = (employeeName) => {
-    const totalProfit = sampleOrders
+    const totalProfit = safeOrders
       .filter((p) => p.mkt === employeeName && filterSampleOrdersByPeriod(p))
       .reduce((sum, p) => sum + p.profit, 0) * 17000;
-    return totalProfit;
+    return totalProfit * 0.95;
   };
   const computeTotalADS = (employeeName) => {
     const totalADS = records
@@ -202,9 +221,17 @@ const Dashboard = () => {
     });
     return grouped;
   };
-
+  const fetchRecords = async () => {
+    try {
+      const response = await axios.get('/api/recordsMKT');
+      setRecords(response.data.data);
+    } catch (error) {
+      console.error(error);
+      message.error("Lỗi khi lấy danh sách");
+    }
+  };
   /*** Xử lý submit form (Thêm mới hoặc cập nhật) ***/
-  const onFinish = (values) => {
+  const onFinish = async (values) => {
     const { date, oldMoney = 0, request1 = 0, request2 = 0, excessMoney = 0, sales = 0 } = values;
     const newRecord = {
       id: editingRecord ? editingRecord.id : Date.now(),
@@ -214,23 +241,31 @@ const Dashboard = () => {
       request2,
       excessMoney,
       teamnv: currentUser.team_id,
-      adsMoney: request1 + request2 ,
+      adsMoney: request1 + request2,
       adsMoney2: oldMoney + request1 + request2 - excessMoney,
       name: currentUser.name,
-      userId: currentUser.employee_code // gán mã nhân viên của người nhập
+      userId: currentUser.employee_code, // gán mã nhân viên của người nhập
     };
-
-    if (editingRecord) {
-      setRecords(prevRecords =>
-        prevRecords.map(record => record.id === editingRecord.id ? newRecord : record)
-      );
+  
+    try {
+      if (editingRecord) {
+        const response = await axios.put(`/api/recordsMKT/${editingRecord.id}`, newRecord);
+        message.success(response.data.message || 'Cập nhật thành công');
+      } else {
+        const response = await axios.post('/api/recordsMKT', newRecord);
+        message.success(response.data.message || 'Thêm mới thành công');
+      }
+      fetchRecords();
       setEditingRecord(null);
-      message.success('Cập nhật thành công');
-    } else {
-      setRecords(prevRecords => [...prevRecords, newRecord]);
-      message.success('Thêm mới thành công');
+      form.resetFields();
+    } catch (error) {
+      console.error(error);
+      if (editingRecord) {
+        message.error("Lỗi khi cập nhật");
+      } else {
+        message.error("Lỗi khi thêm mới");
+      }
     }
-    form.resetFields();
   };
 
   /*** Xử lý sửa record ***/
@@ -248,11 +283,17 @@ const Dashboard = () => {
   };
 
   /*** Xử lý xóa record ***/
-  const onDelete = (record) => {
-    setRecords(prevRecords => prevRecords.filter(r => r.id !== record.id));
-    message.success('Xóa thành công');
+ 
+  const onDelete = async (record) => {
+    try {
+      const response = await axios.delete(`/api/recordsMKT/${record.id}`);
+      message.success(response.data.message);
+      fetchRecords();
+    } catch (error) {
+      console.error(error);
+      message.error("Lỗi khi xóa");
+    }
   };
-
   /*** Lọc dữ liệu theo khoảng thời gian và theo quyền ***/
   const getFilteredRecords = () => {
     let filtered = [...records];
@@ -287,7 +328,7 @@ const Dashboard = () => {
 
   const computeTotalSalesForDate = (date, recordname) => {
     return date
-      ? sampleOrders
+      ? safeOrders
           .filter(p => p.orderDate === date && p.mkt === recordname)
           .reduce((sum, p) => (sum + p.profit)*17000, 0)
       : 0;
@@ -472,6 +513,7 @@ const Dashboard = () => {
                     type="primary"
                     htmlType="submit"
                     style={{ width: '100%' }}
+                    
                   >
                     {editingRecord ? 'Cập nhật' : 'Thêm mới'}
                   </Button>
@@ -606,5 +648,5 @@ const Dashboard = () => {
     </div>
   );
 };
-
+  
 export default Dashboard;

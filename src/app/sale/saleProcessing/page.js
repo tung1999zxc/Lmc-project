@@ -3,21 +3,27 @@ import { useState, useEffect } from "react";
 import { Table, Select } from "antd";
 import dayjs from "dayjs";
 import { useSelector } from "react-redux";
-
+import axios from "axios"; 
 const Dashboard = () => {
   const currentUser = useSelector((state) => state.user.currentUser);
   const [filterRange, setFilterRange] = useState("all");
   const [orders, setOrders] = useState([]);
 
   // Dữ liệu orders mẫu; bạn có thể thay thế bằng dữ liệu thật từ API hay nguồn khác.
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      const savedOrders = localStorage.getItem("orders");
-      if (savedOrders) {
-        setOrders(JSON.parse(savedOrders));
-      }
+  const fetchOrders = async () => {
+    try {
+      const response = await axios.get("/api/orders");
+      setOrders(response.data.data);
+    } catch (error) {
+      console.error(error);
+      message.error("Lỗi khi lấy đơn hàng");
     }
+  };
+  useEffect(() => {
+    
+    fetchOrders();
   }, []);
+
 
   // Lọc orders theo bộ lọc thời gian được chọn
   const getFilteredOrders = () => {

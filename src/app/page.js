@@ -5,22 +5,48 @@ import { Select, Row, Col, Table, Button, Input, Tabs } from 'antd';
 import { useDispatch, useSelector } from 'react-redux';
 const { Option } = Select;
 const Dashboard = () => {
-const employees = useSelector((state) => state.employees.employees);
+
+const [employees, setEmployees] = useState([]);
 const [orders, setOrders] = useState([]);
-const [adsMoneyData, setAdsMoneyData] = useState([]);
+const [adsMoneyData, setAdsMoneyData] = useState([]);//mkt
 // Component biểu đồ Bar (Recharts) cho biểu đồ đơn (có 1 series)
-useEffect(() => {
-  if (typeof window !== "undefined") {
-    const savedRecords = localStorage.getItem("records");
-    if (savedRecords) {
-      setAdsMoneyData(JSON.parse(savedRecords));
+
+  const fetchOrders = async () => {
+    try {
+      const response = await axios.get("/api/orders");
+      setOrders(response.data.data);
+    } catch (error) {
+      console.error(error);
+      message.error("Lỗi khi lấy đơn hàng");
     }
-    const savedOrders = localStorage.getItem("orders");
-    if (savedOrders) {
-      setOrders(JSON.parse(savedOrders));
+  };
+  const fetchRecords = async () => {
+    try {
+      const response = await axios.get('/api/recordsMKT');
+      setAdsMoneyData(response.data.data);
+    } catch (error) {
+      console.error(error);
+      message.error("Lỗi khi lấy danh sách");
     }
-  }
-}, []);
+  };
+const fetchEmployees = async () => {
+      
+      try {
+        const response = await axios.get('/api/employees');
+        // response.data.data chứa danh sách nhân viên theo API đã viết
+        setEmployees(response.data.data);
+      } catch (error) {
+        console.error('Lỗi khi lấy danh sách nhân viên:', error);
+        message.error('Lỗi khi lấy danh sách nhân viên');
+      } finally {
+       
+      }
+    };
+   useEffect(() => {
+    fetchOrders();
+   fetchRecords();
+    fetchEmployees();
+  }, []);
 const BarChartComponent = dynamic(
   () =>
     Promise.resolve(({ data }) => {
@@ -224,7 +250,7 @@ function getLast30Days() {
     const adsCost = filteredAds
       .filter(ad => ad.name === emp.name)
       .reduce((sum, ad) => sum + ad.adsMoney, 0);
-    return { name: emp.name, profit: sales, adsCost };
+    return { name: emp.name, profit: sales*17000, adsCost };
   });
 
   // === Biểu đồ doanh số theo team (Grouped Double Bar Chart) ===
@@ -242,7 +268,7 @@ function getLast30Days() {
         .reduce((sum, ad) => sum + ad.adsMoney, 0);
       return acc + empAds;
     }, 0);
-    return { name: team.label, profit: sales, adsCost };
+    return { name: team.label, profit: sales*17000, adsCost };
   });
 
   // === Biểu đồ doanh số hàng ngày (Grouped Double Bar Chart) ===
@@ -269,7 +295,7 @@ function getLast30Days() {
       const adsCost = filteredAds
         .filter(ad => ad.date === date)
         .reduce((sum, ad) => sum + ad.adsMoney, 0);
-      return { name: date, profit: sales, adsCost };
+      return { name: date, profit: sales*17000, adsCost };
     });
   } else {
     const last30Days = getLast30Days();
@@ -280,7 +306,7 @@ function getLast30Days() {
       const adsCost = adsMoneyData
         .filter(ad => ad.date === date)
         .reduce((sum, ad) => sum + ad.adsMoney, 0);
-      return { name: date, profit: sales, adsCost };
+      return { name: date, profit: sales*17000, adsCost };
     });
   }
 
@@ -301,29 +327,42 @@ function getLast30Days() {
       return acc + empSales;
     }, 0);
     const avgProfit = teamEmps.length > 0 ? teamProfit / teamEmps.length : 0;
-    return { name: team.label, profit: avgProfit };
+    return { name: team.label, profit: avgProfit*17000 };
   });
 
   // === Biểu đồ so sánh doanh số giữa leader và các nhân viên khác trong team (Grouped Bar Chart) ===
   // Công thức: leaderPercent = (leaderSales / othersSales) * 100
   const leaderComparisonChartData = teams.map(team => {
     const teamEmps = employees.filter(emp => emp.position_team === "mkt" && emp.team_id === team.value);
-    const leaderEmps = teamEmps.filter(emp => emp.position === "lead");
-    const othersEmps = teamEmps.filter(emp => emp.position !== "lead");
-    const leaderSales = leaderEmps.reduce((acc, emp) => {
+    const othersEmps = teamEmps.filter(emp => emp.position !== "lead" && emp.position !== "managerMKT");
+
+    const leaderSales0 =   teamEmps.reduce((acc, emp) => {
       const empSales = filteredOrders
         .filter(order => order.mkt === emp.name)
         .reduce((sum, order) => sum + order.profit, 0);
       return acc + empSales;
     }, 0);
-    const othersSales = othersEmps.reduce((acc, emp) => {
+    const adsCost = teamEmps.reduce((acc, emp) => {
+      const empAds = filteredAds
+        .filter(ad => ad.name === emp.name)
+        .reduce((sum, ad) => sum + ad.adsMoney, 0);
+      return acc + empAds;
+    }, 0);
+    const adsCost2 = othersEmps.reduce((acc, emp) => {
+      const empAds = filteredAds
+        .filter(ad => ad.name === emp.name)
+        .reduce((sum, ad) => sum + ad.adsMoney, 0);
+      return acc + empAds;
+    }, 0);
+    const othersSales0 = othersEmps.reduce((acc, emp) => {
       const empSales = filteredOrders
         .filter(order => order.mkt === emp.name)
         .reduce((sum, order) => sum + order.profit, 0);
       return acc + empSales;
     }, 0);
-    const leaderPercent = othersSales !== 0 ? ((leaderSales / othersSales) * 100).toFixed(2) : (leaderSales > 0 ? 100 : 0);
-    return { team: team.label, leader: leaderSales, others: othersSales, leaderPercent };
+    const leaderSales = leaderSales0 !== 0 ? ((adsCost / (leaderSales0*17000)) * 100).toFixed(2):0;
+    const othersSales = othersSales0 !== 0 ? ((adsCost2 / (othersSales0*17000)) * 100).toFixed(2):0 ;
+    return { team: team.label, leader: leaderSales, others: othersSales };
   });
 
   // === Báo cáo Marketing ===
@@ -353,7 +392,7 @@ function getLast30Days() {
       render: (text) => {
         const emp = employees.find((item) => item.name === text);
         const style =
-          emp && emp.position === "lead"
+          emp && emp.position === "lead" || emp.position === "managerMKT"
             ? { backgroundColor: "#2A8B9A", padding: "4px 8px", borderRadius: "4px" }
             : {};
         return <div style={style}>{text}</div>;
@@ -725,11 +764,13 @@ function getLast30Days() {
     { name: "Tối", profit: 0 }
   ];
   return (
-    <div  style={{
-      transform: "scale(0.95)",
-      transformOrigin: "top left",
-      width: "105%" // Để bù lại không gian khi scale
-    }}>
+    <div  
+    // style={{
+    //   transform: "scale(0.95)",
+    //   transformOrigin: "top left",
+    //   width: "105%" // Để bù lại không gian khi scale
+    // }}
+    >
       {/* Bộ lọc */}
       <Row gutter={[16, 16]}  >
   <Col xs={24} md={12}>
@@ -828,7 +869,7 @@ function getLast30Days() {
             </Col>
             <Col xs={24} md={12}>
             <h3 style={{ marginTop: "2rem" }}>
-            So sánh doanh số: Leader vs Các nhân viên khác trong Team
+            So sánh %ADS : Gồm Leader vs Các nhân viên khác trong Team
           </h3>
           <GroupedBarChartComponent data={leaderComparisonChartData} />
             </Col>
@@ -842,29 +883,31 @@ function getLast30Days() {
           {/* Các bảng báo cáo SALE */}
           <Row gutter={[16, 16]}>
   <Col xs={24} md={14}>
-    <h2 style={{ marginTop: "2rem" }}>Báo cáo Doanh Số Nhân Viên</h2>
-    <Table columns={saleColumns} dataSource={saleReportData} pagination={false} />
+  <h2 style={{ marginTop: "2rem" }}>Thống kê để dục chuyển khoản</h2>
+  <Table columns={transferColumns} dataSource={transferData} pagination={false} />
+  <h2 style={{ marginTop: "2rem" }}>Báo cáo doanh số ngày</h2>
+    <Table 
+      columns={dailySaleColumns} 
+      dataSource={[...saleDailyData].sort((a, b) => new Date(b.date) - new Date(a.date))} 
+      pagination={7} 
+    /> 
+    <PieChartComponent data={salePieData} />
   </Col>
   <Col xs={24} md={10}>
   <br/>
-    <h2 style={{ marginTop: "2rem" }}>Thống kê để dục chuyển khoản</h2>
-    <Table columns={transferColumns} dataSource={transferData} pagination={false} />
+  <h2 style={{ marginTop: "2rem" }}>Báo cáo Doanh Số Nhân Viên</h2>
+  <Table columns={saleColumns} dataSource={saleReportData} pagination={false} />
   </Col>
 </Row>
 
 
 <Row gutter={[16, 16]}>
   <Col xs={24} md={15}>
-    <h2 style={{ marginTop: "2rem" }}>Báo cáo doanh số ngày</h2>
-    <Table 
-      columns={dailySaleColumns} 
-      dataSource={[...saleDailyData].sort((a, b) => new Date(b.date) - new Date(a.date))} 
-      pagination={10} 
-    />
+   
   </Col>
   <Col xs={24} md={7}>
               
-    <PieChartComponent data={salePieData} />
+    
   </Col>
 </Row>
 

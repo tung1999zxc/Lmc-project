@@ -12,7 +12,7 @@ import {
   Popover,
   Select,
   Popconfirm,
-  Upload
+  Upload,message
 } from 'antd';
 import moment from 'moment';
 import {
@@ -21,6 +21,8 @@ import {
   PlusOutlined,
   UploadOutlined
 } from '@ant-design/icons';
+import axios from "axios";
+
 
 const { Search } = Input;
 const { Option } = Select;
@@ -59,10 +61,7 @@ const InventoryPage = () => {
       if (savedOrders) {
         setOrders(JSON.parse(savedOrders));
       }
-      const productsData = localStorage.getItem('products');
-      if (productsData) {
-        setProducts(JSON.parse(productsData));
-      }
+     
     }
   }, []);
 
@@ -73,6 +72,9 @@ const InventoryPage = () => {
       localStorage.setItem('productNames', JSON.stringify(productNames));
     }
   }, [products]);
+  useEffect(() => {
+    fetchProducts();
+  }, []);
 
   const getTotalImportedQty = (product) => {
     if (product.imports && product.imports.length > 0) {
@@ -80,7 +82,16 @@ const InventoryPage = () => {
     }
     return 0;
   };
-
+  const fetchProducts = async () => {
+    try {
+      const response = await axios.get('/api/products');
+      setProducts(response.data.data);
+    } catch (error) {
+      console.error(error);
+      message.error("Lỗi khi lấy danh sách sản phẩm");
+    }
+  };
+  
   // Khi thêm sản phẩm mới, chuyển các file ảnh sang base64 trước lưu
   const onFinish = async (values) => {
     const fileList = values.images || []; // Sửa ở đây
@@ -93,6 +104,7 @@ const InventoryPage = () => {
       name: values.name,
       images: base64Images,
       description: values.description,
+      importedQty: values.importedQty,
       imports: [
         {
           importedQty: values.importedQty,
@@ -103,63 +115,93 @@ const InventoryPage = () => {
 
     // Gọi API để lưu vào MongoDB nếu cần (API backend cần được xây dựng riêng)
     try {
-      await fetch('/api/products', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(newProduct)
-      });
+      const response = await axios.post('/api/products', newProduct);
+      message.success(response.data.message);
+      fetchProducts();
+      form.resetFields();
     } catch (error) {
-      console.error('Lỗi khi lưu vào MongoDB:', error);
+      console.error(error);
+      message.error("Lỗi khi thêm sản phẩm");
     }
 
-    setProducts([...products, newProduct]);
-    form.resetFields();
+  
   };
 
   const handleEditProduct = (record) => {
     setEditingProduct(record);
-    editForm.setFieldsValue({ name: record.name, description: record.description });
+    editForm.setFieldsValue({ name: record.name, description: record.description ,images : record.images});
     setEditModalVisible(true);
   };
 
-  const handleEditProductFinish = (values) => {
-    setProducts(
-      products.map((product) =>
-        product.key === editingProduct.key
-          ? { ...product, name: values.name, description: values.description }
-          : product
-      )
-    );
-    setEditModalVisible(false);
-    setEditingProduct(null);
+  const handleEditProductFinish = async (values) => {
+    try {
+      // Đảm bảo values.images là một mảng
+     
+  
+      const updatedProduct = {
+        name: values.name,
+        description: values.description,
+      
+      };
+  
+      const response = await axios.put(`/api/products/${editingProduct.key}`, updatedProduct);
+      message.success(response.data.message || "Cập nhật sản phẩm thành công");
+      fetchProducts();
+      setEditModalVisible(false);
+      setEditingProduct(null);
+    } catch (error) {
+      console.error(error.response?.data?.error || error.message);
+      message.error("Lỗi khi cập nhật sản phẩm");
+    }
   };
+  
 
-  const handleAddImport = (record) => {
-    setAddingImportProduct(record);
-    addImportForm.resetFields();
-    setAddImportModalVisible(true);
-  };
-
-  const handleAddImportFinish = (values) => {
+  const handleAddImportFinish = async (values) => {
     const newImport = {
       importedQty: values.importedQty,
       importDate: values.importDate.format('YYYY-MM-DD'),
     };
-    setProducts(
-      products.map((product) =>
-        product.key === addingImportProduct.key
-          ? { ...product, imports: [...(product.imports || []), newImport] }
-          : product
-      )
-    );
-    setAddImportModalVisible(false);
-    setAddingImportProduct(null);
+  
+    try {
+      // Tìm sản phẩm cần cập nhật
+      const productToUpdate = products.find(
+        (product) => product.key === addingImportProduct.key
+      );
+      if (!productToUpdate) {
+        message.error("Sản phẩm không tồn tại");
+        return;
+      }
+  
+      // Tạo mảng imports mới
+      const updatedImports = [...(productToUpdate.imports || []), newImport];
+  
+      // Gọi API PUT để cập nhật trường imports của sản phẩm
+      const response = await axios.put(
+        `/api/products/${productToUpdate.key}`,
+        { imports: updatedImports }
+      );
+  
+      message.success(response.data.message || "Cập nhật số lượng nhập thành công");
+      // Làm mới danh sách sản phẩm từ API
+      fetchProducts();
+    } catch (error) {
+      console.error(error.response?.data?.error || error.message);
+      message.error("Lỗi khi cập nhật số lượng nhập hàng");
+    } finally {
+      setAddImportModalVisible(false);
+      setAddingImportProduct(null);
+    }
   };
 
-  const handleDeleteProduct = (record) => {
-    setProducts((prevProducts) =>
-      prevProducts.filter((product) => product.key !== record.key)
-    );
+  const handleDeleteProduct = async (key) => {
+    try {
+      const response = await axios.delete(`/api/products/${key.key}`);
+      message.success(response.data.message);
+      fetchProducts();
+    } catch (error) {
+      console.error(error);
+      message.error("Lỗi khi xóa sản phẩm");
+    }
   };
 
   const filteredProducts = products.filter((product) =>
@@ -479,6 +521,8 @@ const InventoryPage = () => {
           >
             <Input.TextArea rows={2} placeholder="Kịch bản sản phẩm" />
           </Form.Item>
+          
+    
           <Form.Item>
             <Button type="primary" htmlType="submit">
               Lưu
@@ -508,7 +552,7 @@ const InventoryPage = () => {
             label="Ngày nhập"
             rules={[{ required: true, message: 'Vui lòng chọn ngày nhập' }]}
           >
-            <DatePicker style={{ width: '100%' }} />
+            <DatePicker initialValue={moment()} style={{ width: '100%' }} />
           </Form.Item>
           <Form.Item>
             <Button type="primary" htmlType="submit">

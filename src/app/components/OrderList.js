@@ -19,14 +19,14 @@ import dayjs from "dayjs";
 import OrderForm from "./OrderForm";
 import isBetween from "dayjs/plugin/isBetween";
 import { useSelector } from "react-redux";
-
+import axios from "axios";
 // Gọi dayjs.extend bên ngoài component để không gọi lại mỗi lần render
 dayjs.extend(isBetween);
 
 const OrderList = () => {
   // Lấy thông tin người dùng và danh sách nhân viên từ Redux
   const currentUser = useSelector((state) => state.user.currentUser);
-  const employees = useSelector((state) => state.employees.employees);
+  
 
   // Các state quản lý đơn hàng, form, filter, …
   const [orders, setOrders] = useState([]);
@@ -36,10 +36,29 @@ const OrderList = () => {
   const [searchText, setSearchText] = useState("");
   const [namesalexuly, setnamesalexuly] = useState("");
   // Cho phép chọn nhiều filter
+  const [employees, setEmployees] = useState([]);
   const [selectedFilters, setSelectedFilters] = useState([]);
   const [selectedSale, setSelectedSale] = useState(undefined);
   const [selectedMKT, setSelectedMKT] = useState(undefined);
   const [selectedColumns, setSelectedColumns] = useState([]);
+
+  const fetchEmployees = async () => {
+      
+      try {
+        const response = await axios.get('/api/employees');
+        // response.data.data chứa danh sách nhân viên theo API đã viết
+        setEmployees(response.data.data);
+      } catch (error) {
+        console.error('Lỗi khi lấy danh sách nhân viên:', error);
+        message.error('Lỗi khi lấy danh sách nhân viên');
+      } finally {
+       
+      }
+    };
+   useEffect(() => {
+    fetchOrders();
+    fetchEmployees();
+  }, []);
   // Danh sách thành viên team (dùng cho vai trò lead)
   const leadTeamMembers = employees
     .filter((employee) => employee.team_id === currentUser.team_id)
@@ -60,21 +79,29 @@ const OrderList = () => {
     .map((emp) => emp.name);
 
   // Lấy đơn hàng từ localStorage khi component mount
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      const savedOrders = localStorage.getItem("orders");
-      if (savedOrders) {
-        setOrders(JSON.parse(savedOrders));
-      }
+  // useEffect(() => {
+  //   if (typeof window !== "undefined") {
+  //     const savedOrders = localStorage.getItem("orders");
+  //     if (savedOrders) {
+  //       setOrders(JSON.parse(savedOrders));
+  //     }
+  //   }
+  // }, []);
+  
+
+  const fetchOrders = async () => {
+    try {
+      const response = await axios.get("/api/orders");
+      setOrders(response.data.data);
+    } catch (error) {
+      console.error(error);
+      message.error("Lỗi khi lấy đơn hàng");
     }
-  }, []);
+  };
+  
 
   // Lưu đơn hàng vào localStorage mỗi khi orders thay đổi
-  useEffect(() => {
-    if (typeof window !== "undefined" && orders && orders.length > 0) {
-      localStorage.setItem("orders", JSON.stringify(orders));
-    }
-  }, [orders]);
+ 
 
   // Tính toán chọn nhân viên salexuly dựa trên số đơn hàng của hôm nay
   useEffect(() => {
@@ -250,13 +277,18 @@ const OrderList = () => {
   ]);
 
   // Hàm cập nhật checkbox "Công ty đóng hàng"
-  const handleShippingChange = (orderId, checked) => {
-    setOrders((prevOrders) =>
-      prevOrders.map((order) =>
-        order.id === orderId ? { ...order, isShipping: checked } : order
-      )
-    );
-    message.success("Cập nhật trạng thái đóng hàng thành công");
+  const handleShippingChange = async (orderId, checked) => {
+    try {
+      const response = await axios.patch(`/api/orders/${orderId}/shipping`, {
+        isShipping: checked,
+      });
+      message.success(response.data.message);
+      // Sau khi cập nhật thành công, bạn có thể làm mới danh sách đơn hàng từ API
+      fetchOrders();
+    } catch (error) {
+      console.error(error.response?.data?.error || error.message);
+      message.error("Lỗi khi cập nhật trạng thái đóng hàng");
+    }
   };
   const handleColumnSelect = (columnKey, checked) => {
     if (checked) {
@@ -273,7 +305,7 @@ const OrderList = () => {
       render: (_, record) => (
         <Space>
           <Button icon={<EditOutlined />} onClick={() => handleEdit(record)} />
-          <Popconfirm title="Xóa đơn hàng?" onConfirm={() => handleDelete(record.id)}>
+          <Popconfirm title="Xóa đơn hàng?" onConfirm={() => handleDeleteOrder(record.id)}>
             <Button
               danger
               disabled={
@@ -544,12 +576,18 @@ const selectedTableColumns = columns.filter((col) =>
     setFormVisible(true);
   };
 
-  const handleDelete = (id) => {
-    setOrders((prev) => prev.filter((order) => order.id !== id));
-    message.success("Xóa đơn hàng thành công");
+  const handleDeleteOrder = async (id) => {
+    try {
+      const response = await axios.delete(`/api/orders/${id}`);
+      message.success(response.data.message || "Xóa đơn hàng thành công");
+      fetchOrders();
+    } catch (error) {
+      console.error(error);
+      message.error("Lỗi khi xóa đơn hàng");
+    }
   };
-
-  const handleSubmit = (values) => {
+  
+  const handleSubmit = async (values) => {
     const revenue = Number(values.revenue) || 0;
     const profit = revenue === 0 ? 0 : Math.max(revenue - 5, 0);
     const products = values.products || [];
@@ -588,15 +626,23 @@ const selectedTableColumns = columns.filter((col) =>
       employee_code_order: currentUser.employee_code,
     };
 
-    setOrders((prev) =>
-      currentEditId
-        ? prev.map((order) => (order.id === currentEditId ? newOrder : order))
-        : [...prev, newOrder]
-    );
-    setFormVisible(false);
-    message.success(
-      currentEditId ? "Cập nhật thành công" : "Thêm mới thành công"
-    );
+    try {
+      if (currentEditId) {
+        const response = await axios.put(`/api/orders/${currentEditId}`, newOrder);
+        message.success(response.data.message || "Cập nhật thành công");
+        fetchOrders();
+      setFormVisible(false);
+      } else {
+        const response = await axios.post("/api/orders", newOrder);
+        message.success(response.data.message || "Thêm mới thành công");
+        fetchOrders();
+      setFormVisible(false);
+      }
+      
+    } catch (error) {
+      console.error(error);
+      message.error("Lỗi khi lưu đơn hàng");
+    }
   };
 
   return (
