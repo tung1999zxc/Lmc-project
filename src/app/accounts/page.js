@@ -18,6 +18,14 @@
       if (!currentUser.name) {
         router.push("/login");
       }
+      // if (
+      //   currentUser.position !== 'admin' &&
+      //   currentUser.position !== 'managerMKT' &&
+      //   currentUser.position !== 'managerSALE'
+      // ) {
+      //   router.push("/");
+      // }
+
     }, []);
   
     const [editModalVisible, setEditModalVisible] = useState(false);
@@ -131,7 +139,7 @@
         key: 'actions',
         render: (_, record) => (
           <div>
-            <Button
+            <Button 
               type="link"
               icon={<EditOutlined />}
               onClick={() => handleEdit(record)}
@@ -189,6 +197,7 @@
       const updatedEmployee = {
         ...selectedEmployee,
         username: values.username,
+        password: values.password,
         name: values.name,
         position: values.position,
         team_id: values.team_id,
