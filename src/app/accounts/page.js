@@ -91,6 +91,9 @@
       fetchEmployees();
     }, []);
 
+  // Nếu currentUser không phải admin/manager, chỉ hiển thị nhân viên có employee_code trùng với currentUser.employee_code
+  
+
     const getPositionLabel = (value) => {
       const pos = positions.find(p => p.value === value);
       return pos ? pos.label : value;
@@ -137,23 +140,47 @@
       {
         title: 'Thao tác',
         key: 'actions',
-        render: (_, record) => (
-          <div>
-            <Button 
-              type="link"
-              icon={<EditOutlined />}
-              onClick={() => handleEdit(record)}
-            />
-            <Popconfirm
-              title="Bạn chắc chắn muốn xóa?"
-              onConfirm={() => handleDelete(record.employee_id)}
-              okText="Xóa"
-              cancelText="Hủy"
-            >
-              <Button type="link" danger icon={<DeleteOutlined />} />
-            </Popconfirm>
-          </div>
-        )
+        render: (_, record) => {
+          // Nếu currentUser có vai trò admin, managerMKT, managerSALE → hiển thị đầy đủ nút chỉnh sửa và xóa
+          if (
+            currentUser.position === 'admin' ||
+            currentUser.position === 'managerMKT' ||
+            currentUser.position === 'managerSALE'
+          ) {
+            return (
+              <div>
+                <Button
+                  type="link"
+                  icon={<EditOutlined />}
+                  onClick={() => handleEdit(record)}
+                />
+                <Popconfirm
+                  title="Bạn chắc chắn muốn xóa?"
+                  onConfirm={() => handleDelete(record.employee_id)}
+                  okText="Xóa"
+                  cancelText="Hủy"
+                >
+                  <Button type="link" danger icon={<DeleteOutlined />} />
+                </Popconfirm>
+              </div>
+            );
+          } else {
+            // Nếu không phải các vị trí đặc quyền, chỉ cho phép chỉnh sửa nếu tài khoản trùng với currentUser
+            if (record.employee_code === currentUser.employee_code) {
+              return (
+                <div>
+                  <Button
+                    type="link"
+                    icon={<EditOutlined />}
+                    onClick={() => handleEdit(record)}
+                  />
+                </div>
+              );
+            } else {
+              return <span>Chỉ xem</span>;
+            }
+          }
+        }
       }
     ];
 
@@ -213,6 +240,7 @@
         );
         console.log('Update response:', response.data.message);
         message.success('Cập nhật nhân viên thành công');
+        editForm.resetFields();
         // Làm mới danh sách nhân viên sau khi cập nhật
         await fetchEmployees();
       } catch (error) {
@@ -246,7 +274,7 @@
       <Modal
         title="Chỉnh sửa nhân viên"
         visible={editModalVisible}
-        onCancel={() => setEditModalVisible(false)}
+        onCancel={() => {setEditModalVisible(false);editForm.resetFields();}}
         footer={null}
       >
         <Form
@@ -384,7 +412,11 @@
                 </Form.Item>
 
                 <Form.Item>
-                  <Button type="primary" htmlType="submit" loading={loading}>
+                  <Button  disabled ={
+            currentUser.position !== 'admin' &&
+            currentUser.position !== 'managerMKT' &&
+            currentUser.position !== 'managerSALE'
+          } type="primary" htmlType="submit" loading={loading}>
                     Tạo tài khoản
                   </Button>
                 </Form.Item>
