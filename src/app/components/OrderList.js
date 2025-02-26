@@ -671,7 +671,7 @@ const selectedTableColumns = columns.filter((col) =>
       </div>
 
       <Row gutter={[16, 16]} style={{ marginBottom: 24 }}>
-        <Col span={6}>
+        <Col span={4}>
           <RangePicker
             allowClear
             format="DD/MM/YYYY"
@@ -679,7 +679,7 @@ const selectedTableColumns = columns.filter((col) =>
             style={{ width: "100%" }}
           />
         </Col>
-        <Col span={6}>
+        <Col span={4}>
           <Search
             placeholder="Tìm kiếm..."
             allowClear
@@ -687,7 +687,7 @@ const selectedTableColumns = columns.filter((col) =>
             onChange={(e) => setSearchText(e.target.value)}
           />
         </Col>
-        <Col span={6}>
+        <Col span={5}>
           <Select
             mode="multiple"
             style={{ width: "100%" }}
@@ -711,8 +711,8 @@ const selectedTableColumns = columns.filter((col) =>
             onChange={(values) => setSelectedFilters(values)}
           />
         </Col>
-        <Col span={3}>
-          <Select
+        <Col span={4}>
+          <Select style={{ width: "100%" }}
             disabled={
               currentUser.position === "mkt" ||
               currentUser.position === "salenhapdon" ||
@@ -725,8 +725,8 @@ const selectedTableColumns = columns.filter((col) =>
             showSearch
           />
         </Col>
-        <Col span={3}>
-          <Select
+        <Col span={4}>
+          <Select style={{ width: "100%" }}
             disabled={
               currentUser.position === "mkt" ||
               currentUser.position === "salenhapdon" ||

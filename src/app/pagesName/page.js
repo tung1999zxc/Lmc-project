@@ -151,22 +151,22 @@ const EmployeePageTable = () => {
   return (
     <div style={{ padding: 20 }}>
       <Space style={{ marginBottom: 20 }}>
-        <Input
+        <Input style={{ width: 300 }}
           placeholder="Nhập tên page"
           value={pageName}
           onChange={(e) => setPageName(e.target.value)}
         />
-        <Select
+        <Select showSearch
           placeholder="Chọn nhân viên"
           value={selectedEmployee}
           onChange={setSelectedEmployee}
-          style={{ width: 150 }}
+          style={{ width: 300 }}
         >
           {mktOptions.map((emp) => (
             <Option key={emp} value={emp}>{emp}</Option>
           ))}
         </Select>
-        <Button type="primary" onClick={isEditing ? handleSaveEdit : handleAdd}>
+        <Button style={{ width: 200 }} type="primary" onClick={isEditing ? handleSaveEdit : handleAdd}>
           {isEditing ? "Lưu" : "Thêm"}
         </Button>
       </Space>
