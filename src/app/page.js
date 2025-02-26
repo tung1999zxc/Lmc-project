@@ -773,6 +773,7 @@ function getLast30Days() {
     { name: "Tối", profit: 0 }
   ];
   return (
+    
     <div  
     // style={{
     //   transform: "scale(0.95)",
@@ -781,6 +782,7 @@ function getLast30Days() {
     // }}
     >
       {/* Bộ lọc */}
+      {(currentUser.position === "admin" || currentUser.position === "managerMKT"||currentUser.position === "leadSALE" || currentUser.position === "managerSALE"  ) && (
       <Row gutter={[16, 16]}  >
   <Col xs={24} md={12}>
   <div style={{ marginBottom: "1rem" }}>
@@ -837,52 +839,93 @@ function getLast30Days() {
   <h2 style={{ marginTop: "2rem" }}>Tổng</h2>
   <Table columns={totalColumns} dataSource={totalData} pagination={false} />
   </Col>
-</Row>
+</Row>)}
       
-
-      {/* Tabs: MKT và SALE */}
-      <Tabs defaultActiveKey="MKT">
-        <Tabs.TabPane tab="MKT" key="MKT">
-          {/* Báo cáo Marketing và các biểu đồ cũ */}
-          <Row gutter={[16, 16]} style={{ marginTop: "2rem" }}>
-  <Col xs={24} md={12}>
-    <h2>Báo cáo marketing</h2>
-    <Table columns={marketingColumns} dataSource={marketingReportData} pagination={false} />
-  </Col>
-  {/* <Col xs={24} md={1}></Col> */}
-  <Col xs={24} md={10}>
-    <h3>Doanh số &amp; chi phí Ads theo Nhân viên</h3>
-    <GroupedDoubleBarChartComponent data={employeeChartDataNew} />
-    <h3 style={{ marginTop: "2rem" }}>
-            {isFilterApplied
-              ? "Doanh số & chi phí Ads hàng ngày (theo bộ lọc)"
-              : "Doanh số & chi phí Ads hàng ngày (30 ngày gần nhất)"}
-          </h3>
-          <GroupedDoubleBarChartComponent data={dailyChartDataNew} />
-          <h3>Doanh số &amp; chi phí Ads theo Team</h3>
-              <GroupedDoubleBarChartComponent data={teamChartDataNew} />
-              <h3>Phần trăm doanh số theo Team</h3>
-              <PieChartComponent data={teamPieData} />
-  </Col>
+{(currentUser.position === "admin" || currentUser.position === "managerMKT") ? (
+  <Tabs defaultActiveKey="MKT">
+  <Tabs.TabPane tab="MKT" key="MKT">
+    {/* Báo cáo Marketing và các biểu đồ cũ */}
+    <Row gutter={[16, 16]} style={{ marginTop: "2rem" }}>
+<Col xs={24} md={12}>
+<h2>Báo cáo marketing</h2>
+<Table columns={marketingColumns} dataSource={marketingReportData} pagination={false} />
+</Col>
+{/* <Col xs={24} md={1}></Col> */}
+<Col xs={24} md={10}>
+<h3>Doanh số &amp; chi phí Ads theo Nhân viên</h3>
+<GroupedDoubleBarChartComponent data={employeeChartDataNew} />
+<h3 style={{ marginTop: "2rem" }}>
+      {isFilterApplied
+        ? "Doanh số & chi phí Ads hàng ngày (theo bộ lọc)"
+        : "Doanh số & chi phí Ads hàng ngày (30 ngày gần nhất)"}
+    </h3>
+    <GroupedDoubleBarChartComponent data={dailyChartDataNew} />
+    <h3>Doanh số &amp; chi phí Ads theo Team</h3>
+        <GroupedDoubleBarChartComponent data={teamChartDataNew} />
+        <h3>Phần trăm doanh số theo Team</h3>
+        <PieChartComponent data={teamPieData} />
+</Col>
 </Row>
-          
-          <Row gutter={[16, 16]}>
-            <Col xs={24} md={12}>
-            <h3 style={{ marginTop: "2rem" }}>Doanh số trung bình theo Nhân viên theo Team</h3>
-            <BarChartComponent data={averageTeamChartData} />
-            </Col>
-            <Col xs={24} md={12}>
-            <h3 style={{ marginTop: "2rem" }}>
-            So sánh %ADS : Gồm Leader vs Các nhân viên khác trong Team
-          </h3>
-          <GroupedBarChartComponent data={leaderComparisonChartData} />
-            </Col>
-          </Row>
-          
-          
-          
-          
-        </Tabs.TabPane>
+    
+    <Row gutter={[16, 16]}>
+      <Col xs={24} md={12}>
+      <h3 style={{ marginTop: "2rem" }}>Doanh số trung bình theo Nhân viên theo Team</h3>
+      <BarChartComponent data={averageTeamChartData} />
+      </Col>
+      <Col xs={24} md={12}>
+      <h3 style={{ marginTop: "2rem" }}>
+      So sánh %ADS : Gồm Leader vs Các nhân viên khác trong Team
+    </h3>
+    <GroupedBarChartComponent data={leaderComparisonChartData} />
+      </Col>
+    </Row>
+    
+    
+    
+    
+  </Tabs.TabPane>
+  <Tabs.TabPane tab="SALE" key="SALE">
+    {/* Các bảng báo cáo SALE */}
+    <Row gutter={[16, 16]}>
+<Col xs={24} md={14}>
+<h2 style={{ marginTop: "2rem" }}>Thống kê để giục chuyển khoản</h2>
+<Table columns={transferColumns} dataSource={transferData} pagination={false} />
+<h2 style={{ marginTop: "2rem" }}>Báo cáo doanh số ngày</h2>
+<Table 
+columns={dailySaleColumns} 
+dataSource={[...saleDailyData].sort((a, b) => new Date(b.date) - new Date(a.date))} 
+pagination={7} 
+/> 
+<PieChartComponent data={salePieData} />
+</Col>
+<Col xs={24} md={10}>
+<br/>
+<h2 style={{ marginTop: "2rem" }}>Báo cáo Doanh Số Nhân Viên</h2>
+<Table columns={saleColumns} dataSource={saleReportData} pagination={false} />
+</Col>
+</Row>
+
+
+<Row gutter={[16, 16]}>
+<Col xs={24} md={15}>
+
+</Col>
+<Col xs={24} md={7}>
+        
+
+</Col>
+</Row>
+
+
+   
+
+    
+  </Tabs.TabPane>
+</Tabs>
+) : 
+(currentUser.position === "leadSALE" || currentUser.position === "managerSALE") ? (
+  <Tabs >
+        
         <Tabs.TabPane tab="SALE" key="SALE">
           {/* Các bảng báo cáo SALE */}
           <Row gutter={[16, 16]}>
@@ -905,15 +948,6 @@ function getLast30Days() {
 </Row>
 
 
-<Row gutter={[16, 16]}>
-  <Col xs={24} md={15}>
-   
-  </Col>
-  <Col xs={24} md={7}>
-              
-    
-  </Col>
-</Row>
 
 
          
@@ -921,6 +955,8 @@ function getLast30Days() {
           
         </Tabs.TabPane>
       </Tabs>
+): null}
+    
     </div>
   );
 };export default Dashboard;

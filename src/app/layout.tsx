@@ -72,6 +72,7 @@ function InnerDashboardLayout({ children }: { children: ReactNode }) {
         <Sider collapsible collapsed={collapsed} onCollapse={(value) => setCollapsed(value)}>
           <div className="logo" style={{ color: "white", textAlign: "center", padding: "20px" }} />
           <SidebarMenu />
+          <div className="logo" style={{ color: "white", textAlign: "center", height: "400px" }} />
         </Sider>
 
         <Layout>
@@ -86,7 +87,8 @@ function InnerDashboardLayout({ children }: { children: ReactNode }) {
               height: "64px",
             }}
           >
-            {/* <CurrentUserSelector /> */}<div></div>
+            {/* <CurrentUserSelector /> */}
+            <div></div>
             <div style={{ fontSize: "1.5em", fontWeight: "bold", color: "#fff" }}>
               <Button type="primary" icon={<LogoutOutlined />} danger onClick={handleLogout}>
                 Đăng Xuất
