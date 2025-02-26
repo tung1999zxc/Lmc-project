@@ -269,7 +269,9 @@
         message.error('Xóa nhân viên thất bại');
       }
     };
-
+    const filteredEmployees = employees.filter(
+      (emp) => emp.username.toLowerCase() !== "admin"
+    );
     const EditModal = () => (
       <Modal
         title="Chỉnh sửa nhân viên"
@@ -428,7 +430,7 @@
             <Card title="Danh sách nhân viên">
               <Table 
                 columns={columns}
-                dataSource={employees}
+                dataSource={filteredEmployees}
                 rowKey="employee_id"
                 pagination={{ pageSize: 10 }}
               />

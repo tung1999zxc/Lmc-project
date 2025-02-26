@@ -34,9 +34,11 @@ export async function POST(req) {
       );
     }
     
-    // Thành công: trả về thông báo và dữ liệu người dùng (bạn có thể thêm token, cookie,...)
+    // Loại bỏ trường mật khẩu trước khi trả về
+    const { password: _, ...safeEmployee } = employee;
+    
     return new Response(
-      JSON.stringify({ message: 'Đăng nhập thành công', data: employee }),
+      JSON.stringify({ message: 'Đăng nhập thành công', data: safeEmployee }),
       { status: 200 }
     );
   } catch (error) {

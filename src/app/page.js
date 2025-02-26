@@ -859,18 +859,13 @@ function getLast30Days() {
               : "Doanh số & chi phí Ads hàng ngày (30 ngày gần nhất)"}
           </h3>
           <GroupedDoubleBarChartComponent data={dailyChartDataNew} />
-  </Col>
-</Row>
-          <Row gutter={[16, 16]}>
-            <Col xs={24} md={12}>
-              <h3>Doanh số &amp; chi phí Ads theo Team</h3>
+          <h3>Doanh số &amp; chi phí Ads theo Team</h3>
               <GroupedDoubleBarChartComponent data={teamChartDataNew} />
-            </Col>
-            <Col xs={24} md={12}>
               <h3>Phần trăm doanh số theo Team</h3>
               <PieChartComponent data={teamPieData} />
-            </Col>
-          </Row>
+  </Col>
+</Row>
+          
           <Row gutter={[16, 16]}>
             <Col xs={24} md={12}>
             <h3 style={{ marginTop: "2rem" }}>Doanh số trung bình theo Nhân viên theo Team</h3>

@@ -70,7 +70,7 @@ const OrderForm = ({ visible, onCancel, onSubmit, initialValues, namesalexuly })
   }, {});
 
   const handlePageNameChange = (value) => {
-    setPageName(value);
+    
     const mappedEmployee = pageMapping[value] || "";
     setEmployeeNamepage(mappedEmployee);
     form.setFieldsValue({ mkt: mappedEmployee });
