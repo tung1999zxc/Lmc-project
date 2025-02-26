@@ -1,15 +1,37 @@
 // components/CurrentUserSelector.js
+'use client'
+
 import React from 'react';
 import { Select } from 'antd';
 import { useDispatch, useSelector } from 'react-redux';
 import { setCurrentUser } from '../store/userSlice';
+import { useState,useEffect } from "react";
+import axios from "axios";
 
 const { Option } = Select;
 
 const CurrentUserSelector = () => {
+  const [employees, setEmployees] = useState([]);
+  const fetchEmployees = async () => {
+      
+      try {
+        const response = await axios.get('/api/employees');
+        // response.data.data chứa danh sách nhân viên theo API đã viết
+        setEmployees(response.data.data);
+      } catch (error) {
+        console.error('Lỗi khi lấy danh sách nhân viên:', error);
+        message.error('Lỗi khi lấy danh sách nhân viên');
+      } finally {
+       
+      }
+    };
+useEffect(() => {
+    
+   fetchEmployees();
+  }, []);
   const dispatch = useDispatch();
   // Lấy danh sách nhân viên từ store (giả sử slice employee lưu vào state.employees.employees)
-  const employees = useSelector((state) => state.employees.employees);
+
   
   // Hàm xử lý khi chọn nhân viên trong Select
   const handleChange = (selectedEmployeeCode) => {
