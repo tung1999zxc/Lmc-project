@@ -887,7 +887,7 @@ function getLast30Days() {
           {/* Các bảng báo cáo SALE */}
           <Row gutter={[16, 16]}>
   <Col xs={24} md={14}>
-  <h2 style={{ marginTop: "2rem" }}>Thống kê để dục chuyển khoản</h2>
+  <h2 style={{ marginTop: "2rem" }}>Thống kê để giục chuyển khoản</h2>
   <Table columns={transferColumns} dataSource={transferData} pagination={false} />
   <h2 style={{ marginTop: "2rem" }}>Báo cáo doanh số ngày</h2>
     <Table 
