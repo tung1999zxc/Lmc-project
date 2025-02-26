@@ -1,10 +1,10 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect, ReactNode } from "react";
 import { Layout, Button } from "antd";
 import { LogoutOutlined } from "@ant-design/icons";
 import { useRouter } from "next/navigation";
-import { Provider, useDispatch } from "react-redux";
+import { Provider, useDispatch, useSelector } from "react-redux";
 import { store } from "./store/store";
 import { setCurrentUser } from "./store/userSlice";
 
@@ -14,13 +14,22 @@ import CurrentUserSelector from "./components/CurrentUserSelector";
 const { Header, Content, Sider } = Layout;
 
 /**
- * Tách riêng "InnerDashboardLayout" - component thật sự dùng Redux
- * Để chắc chắn nó nằm trong Provider
+ * ✅ Định nghĩa kiểu `children` để tránh lỗi TypeScript
  */
-function InnerDashboardLayout({ children }) {
+function InnerDashboardLayout({ children }: { children: ReactNode }) {
   const [collapsed, setCollapsed] = useState(false);
-  const dispatch = useDispatch(); // Đã có Provider bao ngoài
+  const dispatch = useDispatch();
   const router = useRouter();
+
+  // Lấy thông tin người dùng từ Redux store
+  const currentUser = useSelector((state: any) => state.user.currentUser);
+
+  // Kiểm tra nếu chưa đăng nhập, chuyển hướng về trang login
+  useEffect(() => {
+    if (!currentUser || !currentUser.username) {
+      router.push("/login");
+    }
+  }, [currentUser, router]);
 
   // Hàm logout
   const handleLogout = () => {
@@ -39,7 +48,6 @@ function InnerDashboardLayout({ children }) {
 
   return (
     <>
-      {/* Hình nền góc trên phải */}
       <div
         style={{
           position: "fixed",
@@ -54,28 +62,15 @@ function InnerDashboardLayout({ children }) {
           zIndex: 1,
         }}
       />
-
       <Layout
         style={{
           transform: "scale(0.85)",
           transformOrigin: "top left",
-          width: "120%", // Để bù lại không gian khi scale
+          width: "120%",
         }}
       >
-        <Sider
-          collapsible
-          collapsed={collapsed}
-          onCollapse={(value) => setCollapsed(value)}
-          style={{ paddingLeft: "-20px" }}
-        >
-          <div
-            className="logo"
-            style={{
-              color: "white",
-              textAlign: "center",
-              padding: "20px",
-            }}
-          />
+        <Sider collapsible collapsed={collapsed} onCollapse={(value) => setCollapsed(value)}>
+          <div className="logo" style={{ color: "white", textAlign: "center", padding: "20px" }} />
           <SidebarMenu />
         </Sider>
 
@@ -91,15 +86,13 @@ function InnerDashboardLayout({ children }) {
               height: "64px",
             }}
           >
-            {/* <CurrentUserSelector /> */}
-<div></div>
+            <CurrentUserSelector />
             <div style={{ fontSize: "1.5em", fontWeight: "bold", color: "#fff" }}>
               <Button type="primary" icon={<LogoutOutlined />} danger onClick={handleLogout}>
                 Đăng Xuất
               </Button>
             </div>
           </Header>
-
           <Content style={{ margin: "16px" }}>{children}</Content>
         </Layout>
       </Layout>
@@ -108,14 +101,12 @@ function InnerDashboardLayout({ children }) {
 }
 
 /**
- * DashboardLayout: Bọc <Provider> ngoài InnerDashboardLayout
- * để InnerDashboardLayout có thể dùng useDispatch, useSelector
+ * ✅ Bọc `<Provider>` bên ngoài để tránh lỗi Redux
  */
-export default function DashboardLayout({ children }) {
+export default function DashboardLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="en">
       <body>
-        {/* Đặt Provider ở đây để toàn bộ InnerDashboardLayout nằm trong Provider */}
         <Provider store={store}>
           <InnerDashboardLayout>{children}</InnerDashboardLayout>
         </Provider>
