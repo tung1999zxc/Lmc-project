@@ -310,9 +310,12 @@ const OrderList = () => {
     {
       title: "Thao Tác",
       key: "action",
-      render: (_, record) => (
+      render: (_, record) => {        
+        const disableEdit =
+      currentUser.position === "salenhapdon" && record.saleReport === "DONE";
+      return (
         <Space>
-          <Button icon={<EditOutlined />} onClick={() => handleEdit(record)} />
+          <Button disabled={disableEdit} icon={<EditOutlined />} onClick={() => handleEdit(record)} />
           <Popconfirm title="Xóa đơn hàng?" onConfirm={() => handleDeleteOrder(record.id)}>
             <Button
               danger
@@ -324,8 +327,8 @@ const OrderList = () => {
               icon={<DeleteOutlined />}
             />
           </Popconfirm>
-        </Space>
-      )
+        </Space>)
+      }
     },
     {
       // Ví dụ với cột "NGÀY ĐẶT": thêm checkbox trong tiêu đề

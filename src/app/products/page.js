@@ -425,15 +425,23 @@ const InventoryPage = () => {
     {
       title: 'Hành động',
       key: 'actions',
-      render: (_, record) => (
-        <Space>
-          <Button icon={<PlusOutlined />} onClick={() => handleAddImport(record)} />
-          <Button icon={<EditOutlined />} onClick={() => handleEditProduct(record)} />
-          <Popconfirm title="Xóa bản ghi?" onConfirm={() => handleDeleteProduct(record)}>
-            <Button danger icon={<DeleteOutlined />} />
-          </Popconfirm>
-        </Space>
-      ),
+      render: (_, record) =>{
+        if (
+          currentUser.position === 'admin' ||
+          currentUser.position === 'leadSALE' ||
+          currentUser.position === 'managerSALE'
+        ) {
+          return ( <Space>
+            <Button icon={<PlusOutlined />} onClick={() => handleAddImport(record)} />
+            <Button icon={<EditOutlined />} onClick={() => handleEditProduct(record)} />
+            <Popconfirm title="Xóa bản ghi?" onConfirm={() => handleDeleteProduct(record)}>
+              <Button danger icon={<DeleteOutlined />} />
+            </Popconfirm>
+          </Space>);
+        } else return <span>Chỉ xem</span>;
+        
+      }
+      
     },
     {
       title: 'Hình ảnh',
@@ -502,7 +510,9 @@ const InventoryPage = () => {
           </Upload>
         </Form.Item>
         <Form.Item>
-          <Button type="primary" htmlType="submit">
+          <Button disabled={currentUser.position !== 'admin' &&
+          currentUser.position !== 'leadSALE' &&
+          currentUser.position !== 'managerSALE'} type="primary" htmlType="submit">
             Thêm sản phẩm
           </Button>
         </Form.Item>

@@ -23,7 +23,7 @@ export async function GET(req) {
 
 export async function POST(req) {
   try {
-    const { pageName, employee } = await req.json();
+    const { pageName, employee,employee_code } = await req.json();
 
     if (!pageName || !employee) {
       return new Response(
@@ -37,6 +37,7 @@ export async function POST(req) {
       key: Date.now(), // Dùng timestamp làm định danh duy nhất
       pageName,
       employee,
+      employee_code,
       createdAt: new Date()
     };
 

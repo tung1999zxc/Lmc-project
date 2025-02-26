@@ -70,6 +70,7 @@ const EmployeePageTable = () => {
         const response = await axios.post('/api/pageName', {
           pageName,
           employee: selectedEmployee,
+          employee_code:currentUser.employee_code,
         });
         message.success(response.data.message);
         // Làm mới danh sách đơn hàng sau khi thêm
@@ -129,8 +130,16 @@ const EmployeePageTable = () => {
     {
       title: "Thao Tác",
       key: "action",
-      render: (_, record) => (
-        <Space>
+      render: (_, record) =>{
+                // Nếu currentUser có vai trò admin, managerMKT, managerSALE → hiển thị đầy đủ nút chỉnh sửa và xóa
+                if (
+                  currentUser.position === 'admin' ||
+                  currentUser.position === 'managerMKT' ||
+                  currentUser.position === 'managerSALE'
+                ) {
+                  return (
+                    <div>
+                    <Space>
           <Button
             type="primary"
             icon={<EditOutlined />}
@@ -144,7 +153,34 @@ const EmployeePageTable = () => {
                   <Button danger icon={<DeleteOutlined />} />
                 </Popconfirm>
         </Space>
-      ),
+                    </div>
+                  );
+                } else {
+                  // Nếu không phải các vị trí đặc quyền, chỉ cho phép chỉnh sửa nếu tài khoản trùng với currentUser
+                  if (record.employee_code === currentUser.employee_code) {
+                    return (
+                      <div>
+                       <Space>
+          <Button
+            type="primary"
+            icon={<EditOutlined />}
+            onClick={() => handleEdit(record)}
+          />
+          
+           <Popconfirm
+                  title="Xóa bản ghi?"
+                  onConfirm={() => handleDelete(record.key)}
+                >
+                  <Button danger icon={<DeleteOutlined />} />
+                </Popconfirm>
+        </Space>
+                      </div>
+                    );
+                  } else {
+                    return <span>Chỉ xem</span>;
+                  }
+                }
+              } 
     },
   ];
 
