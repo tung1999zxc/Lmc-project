@@ -470,13 +470,13 @@ const InventoryPage = () => {
         </Form.Item>
         <Form.Item
           name="importedQty"
-          rules={[{ required: true, message: 'Vui lòng nhập số lượng nhập hàng' }]}
+          // rules={[{ required: true, message: 'Vui lòng nhập số lượng nhập hàng' }]}
         >
           <InputNumber placeholder="SL nhập hàng" min={0} />
         </Form.Item>
         <Form.Item
           name="description"
-          rules={[{ required: true, message: 'Vui lòng nhập kịch bản sản phẩm' }]}
+          // rules={[{ required: true, message: 'Vui lòng nhập kịch bản sản phẩm' }]}
         >
           <Input.TextArea rows={1} placeholder="Kịch bản sản phẩm" />
         </Form.Item>
@@ -484,7 +484,7 @@ const InventoryPage = () => {
           name="images"
           valuePropName="fileList"
           getValueFromEvent={e => e && e.fileList}
-          rules={[{ required: true, message: 'Vui lòng tải hình ảnh sản phẩm' }]}
+          // rules={[{ required: true, message: 'Vui lòng tải hình ảnh sản phẩm' }]}
         >
           <Upload
             listType="picture"
