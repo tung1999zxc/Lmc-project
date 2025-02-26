@@ -87,13 +87,14 @@ function InnerDashboardLayout({ children }: { children: ReactNode }) {
               height: "64px",
             }}
           >
-            {/* <CurrentUserSelector /> */}
-            <div></div>
-            <div style={{ fontSize: "1.5em", fontWeight: "bold", color: "#fff" }}>
-              <Button type="primary" icon={<LogoutOutlined />} danger onClick={handleLogout}>
+            {/* <CurrentUserSelector />
+            <div></div> */}
+            <div style={{ fontSize: "1.2em", fontWeight: "bold", color: "#fff" }}>
+              {currentUser.name}
+            </div>
+            <Button type="primary" icon={<LogoutOutlined />} danger onClick={handleLogout}>
                 Đăng Xuất
               </Button>
-            </div>
           </Header>
           <Content style={{ margin: "16px" }}>{children}</Content>
         </Layout>
