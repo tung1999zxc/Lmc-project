@@ -84,7 +84,7 @@ const InventoryPage = () => {
   useEffect(() => {
     fetchProducts();
   }, []);
-
+  
   const getTotalImportedQty = (product) => {
     if (product.imports && product.imports.length > 0) {
       return product.imports.reduce((acc, cur) => acc + cur.importedQty, 0);
@@ -164,7 +164,14 @@ const InventoryPage = () => {
     }
   };
   
-
+  const handleAddImport = (record) => {
+    // Lưu sản phẩm cần cập nhật vào state
+    setAddingImportProduct(record);
+    // Reset form nhập hàng (nếu bạn muốn đảm bảo form trống khi mở modal)
+    addImportForm.resetFields();
+    // Hiển thị modal thêm nhập
+    setAddImportModalVisible(true);
+  };
   const handleAddImportFinish = async (values) => {
     const newImport = {
       importedQty: values.importedQty,
