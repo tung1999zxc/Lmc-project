@@ -22,7 +22,7 @@ import {
   UploadOutlined
 } from '@ant-design/icons';
 import axios from "axios";
-
+import { useDispatch, useSelector } from 'react-redux';
 
 const { Search } = Input;
 const { Option } = Select;
@@ -36,8 +36,17 @@ const getBase64 = (file) => {
     reader.onerror = error => reject(error);
   });
 };
+import { useRouter } from 'next/navigation';
 
 const InventoryPage = () => {
+  const router = useRouter(); 
+  const currentUser = useSelector((state) => state.user.currentUser);
+  useEffect(() => {
+    if (!currentUser.name) {
+      router.push("/login");
+    }
+  }, []);
+
   const [orders, setOrders] = useState([]);
   const [products, setProducts] = useState([]);
   const [form] = Form.useForm();

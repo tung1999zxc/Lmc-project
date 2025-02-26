@@ -20,10 +20,18 @@ import { useDispatch, useSelector } from 'react-redux';
 import dayjs from "dayjs";
 const { Option } = Select;
 import axios from "axios";
+import { useRouter } from 'next/navigation';
 import { fetchEmployees, fetchOrders } from "../store/dataSlice";
 const Dashboard = () => {
   const currentUser = useSelector((state) => state.user.currentUser);
+  const router = useRouter(); 
   
+  useEffect(() => {
+    if (!currentUser.name) {
+      router.push("/login");
+    }
+  }, []);
+
   const [period, setPeriod] = useState("month");
   const [form] = Form.useForm();
   

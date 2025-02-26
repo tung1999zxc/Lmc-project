@@ -4,11 +4,19 @@ import { Table, Select } from "antd";
 import dayjs from "dayjs";
 import { useSelector } from "react-redux";
 import axios from "axios"; 
+import { useRouter } from 'next/navigation';
+
 const Dashboard = () => {
-  const currentUser = useSelector((state) => state.user.currentUser);
   const [filterRange, setFilterRange] = useState("all");
   const [orders, setOrders] = useState([]);
-
+  const router = useRouter(); 
+  
+  const currentUser = useSelector((state) => state.user.currentUser);
+  useEffect(() => {
+    if (!currentUser.name) {
+      router.push("/login");
+    }
+  }, []);
   // Dữ liệu orders mẫu; bạn có thể thay thế bằng dữ liệu thật từ API hay nguồn khác.
   const fetchOrders = async () => {
     try {

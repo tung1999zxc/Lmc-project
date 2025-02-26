@@ -5,12 +5,20 @@ import { Select, Row, Col, Table, Button, Input, Tabs ,message} from 'antd';
 import { useDispatch, useSelector } from 'react-redux';
 import axios from "axios"; 
 const { Option } = Select;
+import { useRouter } from 'next/navigation';
 const Dashboard = () => {
 
 const [employees, setEmployees] = useState([]);
 const [orders, setOrders] = useState([]);
 const [adsMoneyData, setAdsMoneyData] = useState([]);//mkt
 // Component biểu đồ Bar (Recharts) cho biểu đồ đơn (có 1 series)
+const router = useRouter(); 
+  const currentUser = useSelector((state) => state.user.currentUser);
+  useEffect(() => {
+    if (!currentUser.name) {
+      router.push("/login");
+    }
+  }, []);
 
   const fetchOrders = async () => {
     try {

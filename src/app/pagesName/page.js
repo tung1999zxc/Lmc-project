@@ -6,8 +6,17 @@ import { useDispatch, useSelector } from 'react-redux';
 import axios from "axios";
 
 const { Option } = Select;
+import { useRouter } from 'next/navigation';
 
 const EmployeePageTable = () => {
+  const router = useRouter(); 
+  const currentUser = useSelector((state) => state.user.currentUser);
+  useEffect(() => {
+    if (!currentUser.name) {
+      router.push("/login");
+    }
+  }, []);
+
   const [pageName, setPageName] = useState("");
   const [selectedEmployee, setSelectedEmployee] = useState(null);
   const [data, setData] = useState([]);

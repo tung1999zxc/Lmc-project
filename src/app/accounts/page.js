@@ -6,12 +6,20 @@
   } from 'antd';
   import { EditOutlined, DeleteOutlined } from '@ant-design/icons';
   import { useSelector, useDispatch } from 'react-redux';
-  import { addEmployee, updateEmployee, deleteEmployee } from '../store/employeeSlice';
+  
   import axios from 'axios';
+  import { useRouter } from 'next/navigation';
   export default function EmployeeManagement() {
-    const dispatch = useDispatch();
+    
     // const employees = useSelector((state) => state.employees.employees);
-
+    const router = useRouter(); 
+    const currentUser = useSelector((state) => state.user.currentUser);
+    useEffect(() => {
+      if (!currentUser.name) {
+        router.push("/login");
+      }
+    }, []);
+  
     const [editModalVisible, setEditModalVisible] = useState(false);
     const [loading, setLoading] = useState(false);
     const [selectedEmployee, setSelectedEmployee] = useState(null);

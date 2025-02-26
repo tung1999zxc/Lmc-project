@@ -17,7 +17,14 @@ import axios from "axios";
 
 const { Option } = Select;
 
+import { useRouter } from 'next/navigation';
 const Dashboard = () => {
+    const router = useRouter(); 
+    useEffect(() => {
+      if (!currentUser.name) {
+        router.push("/login");
+      }
+    }, []);
   const currentUser = useSelector((state) => state.user.currentUser);
   // Giả sử thông tin người dùng hiện tại được lấy từ hệ thống xác thực
   const [sampleOrders, setSampleOrders] = useState([]);

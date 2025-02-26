@@ -4,11 +4,20 @@ import { useEffect, useState } from "react";
 import dayjs from "dayjs";
 import { useSelector } from "react-redux"; 
 import axios from "axios"; 
+import { useRouter } from 'next/navigation';
 const OrdersTable = () => {
   const [sampleOrders, setSampleOrders] = useState([]);
   const currentUser = useSelector((state) => state.user.currentUser);
   // Khi component mount, đọc dữ liệu đơn từ localStorage (chỉ chạy trên client)
-useEffect(() => {
+  const router = useRouter(); 
+  
+  useEffect(() => {
+    if (!currentUser.name) {
+      router.push("/login");
+    }
+  }, []);
+
+  useEffect(() => {
     fetchOrders();
   }, []);
 

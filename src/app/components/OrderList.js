@@ -22,11 +22,19 @@ import { useSelector } from "react-redux";
 import axios from "axios";
 // Gọi dayjs.extend bên ngoài component để không gọi lại mỗi lần render
 dayjs.extend(isBetween);
+import { useRouter } from 'next/navigation';
 
 const OrderList = () => {
   // Lấy thông tin người dùng và danh sách nhân viên từ Redux
   const currentUser = useSelector((state) => state.user.currentUser);
+  const router = useRouter(); 
   
+  useEffect(() => {
+    if (!currentUser.name) {
+      router.push("/login");
+    }
+  }, []);
+
 
   // Các state quản lý đơn hàng, form, filter, …
   const [orders, setOrders] = useState([]);
