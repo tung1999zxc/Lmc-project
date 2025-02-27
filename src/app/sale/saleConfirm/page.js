@@ -137,9 +137,17 @@ const OrdersTable = () => {
       },
   ];
 
-  return <Table  
-    
-   dataSource={sortedDataSource} columns={columns} bordered />;
+  return (
+    <>
+      {(currentUser.position === "admin" ||
+        currentUser.position === "managerMKT" ||
+        currentUser.position === "leadSALE" ||
+        currentUser.position === "managerSALE" ||
+        currentUser.position === "salexacnhan") && (
+        <Table dataSource={sortedDataSource} columns={columns} bordered />
+      )}
+    </>
+  );
 };
 
 export default OrdersTable;

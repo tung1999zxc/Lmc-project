@@ -63,7 +63,7 @@ const EmployeePageTable = () => {
   }, [employees, currentUser.team_id]); 
 
   const filteredData = useMemo(() => {
-    if (currentUser.position === "admin") {
+    if (currentUser.position === "admin" ||currentUser.position === "managerMKT" || currentUser.position_team==="sale") {
       return data;
     } else if (currentUser.position === "lead") {
       // Hiển thị các bản ghi có employee thuộc leadTeamMembers
@@ -150,9 +150,9 @@ const EmployeePageTable = () => {
       render: (_, record) =>{
                 // Nếu currentUser có vai trò admin, managerMKT, managerSALE → hiển thị đầy đủ nút chỉnh sửa và xóa
                 if (
-                  currentUser.position === 'admin' ||
-                  currentUser.position === 'managerMKT' ||
-                  currentUser.position === 'managerSALE'
+                  currentUser.position === 'admin' 
+                  
+                  
                 ) {
                   return (
                     <div>

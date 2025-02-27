@@ -425,6 +425,7 @@ const OrderList = () => {
     { title: "VẬN ĐƠN", dataIndex: "salexuly", key: "salexuly" },
     { title: "MKT", dataIndex: "mkt", key: "mkt" },
     { title: "ĐƠN", dataIndex: "saleReport", key: "saleReport" },
+    { title: "ĐỊA CHỈ", dataIndex: "address", key: "address" },
     {
       title: "THANH TOÁN",
       dataIndex: "paymentStatus",
