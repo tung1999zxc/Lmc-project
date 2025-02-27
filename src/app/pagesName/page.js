@@ -1,5 +1,5 @@
 'use client'
-import { useState,useEffect } from "react";
+import { useState,useEffect,useMemo } from "react";
 import { Table, Input, Select, Button, Space, Popconfirm , message, Modal } from "antd";
 import { EditOutlined, DeleteOutlined } from "@ant-design/icons";
 import { useDispatch, useSelector } from 'react-redux';
@@ -56,6 +56,23 @@ const EmployeePageTable = () => {
   };
   // Lưu đơn hàng vào localStorage mỗi khi orders thay đổi (chỉ chạy trên client)
  
+  const leadTeamMembers = useMemo(() => {
+    return employees
+      .filter((employee) => employee.team_id === currentUser.team_id)
+      .map((employee) => employee.name);
+  }, [employees, currentUser.team_id]); 
+
+  const filteredData = useMemo(() => {
+    if (currentUser.position === "admin") {
+      return data;
+    } else if (currentUser.position === "lead") {
+      // Hiển thị các bản ghi có employee thuộc leadTeamMembers
+      return data.filter((record) => leadTeamMembers.includes(record.employee));
+    } else {
+      // Các nhân viên khác chỉ xem bản ghi của chính mình
+      return data.filter((record) => record.employee === currentUser.name);
+    }
+  }, [data, currentUser, leadTeamMembers]); 
 
   const mktOptions = employees
   .filter(order => order.position_team === 'mkt')
@@ -157,7 +174,7 @@ const EmployeePageTable = () => {
                   );
                 } else {
                   // Nếu không phải các vị trí đặc quyền, chỉ cho phép chỉnh sửa nếu tài khoản trùng với currentUser
-                  if (record.employee_code === currentUser.employee_code) {
+                  if (record.employee === currentUser.name) {
                     return (
                       <div>
                        <Space>
@@ -209,7 +226,7 @@ const EmployeePageTable = () => {
 
       <Table
         columns={columns}
-        dataSource={data.sort((a, b) => (a.employee?.localeCompare(b.employee) || 0))}
+        dataSource={filteredData .sort((a, b) => (a.employee?.localeCompare(b.employee) || 0))}
         pagination={false}
       />
     </div>  
