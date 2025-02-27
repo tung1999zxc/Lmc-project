@@ -63,18 +63,22 @@ const OrderForm = ({ visible, onCancel, onSubmit, initialValues, namesalexuly })
     .filter((order) => order.position_team === "mkt")
     .map((order) => order.name);
 
-  const pageMapping = dataPagename.reduce((acc, item) => {
-    const page = item.pageName.trim();
-    acc[page] = item.employee;
-    return acc;
-  }, {});
+  // Tạo mapping từ tên page (đã trim) sang nhân viên phụ trách (mkt)
+const pageMapping = dataPagename.reduce((acc, item) => {
+  const key = item.pageName.trim();
+  // Nếu có nhiều mục với cùng pageName, bạn có thể quyết định xem lấy mục nào (ở đây lấy mục cuối cùng)
+  acc[key] = item.employee;
+  return acc;
+}, {});
 
-  const handlePageNameChange = (value) => {
-    
-    const mappedEmployee = pageMapping[value] || "";
-    setEmployeeNamepage(mappedEmployee);
-    form.setFieldsValue({ mkt: mappedEmployee });
-  };
+// Hàm xử lý khi người dùng chọn tên page từ Select
+const handlePageNameChange = (value) => {
+  // Đảm bảo value được trim để khớp với mapping
+  const trimmedValue = value.trim();
+  const mappedEmployee = pageMapping[trimmedValue] || "";
+  setEmployeeNamepage(mappedEmployee);
+  form.setFieldsValue({ mkt: mappedEmployee });
+};
 
   // Nếu có mapping, tự động cập nhật tên nhân viên tương ứng
   const handleTTXLOptions = [
@@ -357,18 +361,21 @@ const productOptions = products.map((p) => p.name);
                   <Input />
                 </Form.Item>
                 <Form.Item label="TÊN PAGE" name="pageName">
-                  <Select
-                    disabled={currentUser.position === "salexuly" || currentUser.position === "salexacnhan"}
-                    showSearch
-                    onChange={handlePageNameChange}
-                  >
-                    {pageNameOptions.map((pageName) => (
-                      <Option key={pageName} value={pageName}>
-                        {pageName}
-                      </Option>
-                    ))}
-                  </Select>
-                </Form.Item>
+  <Select
+    disabled={currentUser.position === "salexuly" || currentUser.position === "salexacnhan"}
+    showSearch
+    onChange={handlePageNameChange}
+  >
+    {dataPagename.map((item, index) => {
+  const trimmedPageName = item.pageName.trim();
+  return (
+    <Option key={`${trimmedPageName}-${index}`} value={trimmedPageName}>
+      {trimmedPageName}
+    </Option>
+  );
+})}
+  </Select>
+</Form.Item>
                 <Form.Item label="SỐ ĐIỆN THOẠI" name="phone">
                   <Input type="tel" />
                 </Form.Item>
@@ -418,7 +425,7 @@ const productOptions = products.map((p) => p.name);
                   )}
                 </Form.List>
 
-                <Form.Item label="QUÀ/SIZE/MÀU" name="category">
+                <Form.Item label="QUÀ" name="category">
                   <Input />
                 </Form.Item>
                 <Form.Item label="DOANH SỐ" name="revenue">

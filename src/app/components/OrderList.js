@@ -66,11 +66,14 @@ const OrderList = () => {
    useEffect(() => {
     fetchOrders();
     fetchEmployees();
+    
   }, []);
+
   // Danh sách thành viên team (dùng cho vai trò lead)
   const leadTeamMembers = employees
     .filter((employee) => employee.team_id === currentUser.team_id)
     .map((employee) => employee.name);
+
 
   const { RangePicker } = DatePicker;
   const { Search } = Input;
@@ -400,9 +403,9 @@ const OrderList = () => {
         </>
       )
     },
-    { title: "QUÀ/SIZE/MÀU", dataIndex: "category", key: "category" },
+    { title: "QUÀ", dataIndex: "category", key: "category" },
     
-
+    
     ...(currentUser.position !== 'salexuly'
       ? [
         {
@@ -421,10 +424,12 @@ const OrderList = () => {
         ]
       : []),
     { title: "DOANH SỐ", dataIndex: "revenue", key: "revenue" },
+    { title: "DOANH THU", dataIndex: "profit", key: "profit" },
     { title: "SALE", dataIndex: "sale", key: "sale" },
     { title: "VẬN ĐƠN", dataIndex: "salexuly", key: "salexuly" },
     { title: "MKT", dataIndex: "mkt", key: "mkt" },
     { title: "ĐƠN", dataIndex: "saleReport", key: "saleReport" },
+    { title: "SĐT", dataIndex: "phone", key: "phone" },
     { title: "ĐỊA CHỈ", dataIndex: "address", key: "address" },
     {
       title: "THANH TOÁN",
@@ -460,7 +465,7 @@ const OrderList = () => {
     { title: "TT XỬ LÍ", dataIndex: "processStatus", key: "processStatus" },
     // Thêm cột "Công ty đóng hàng" với Checkbox
     
-    { title: "DOANH THU", dataIndex: "profit", key: "profit" }
+   
   ];
 // Lọc ra các cột đã được tick để hiển thị ở bảng phụ
 const selectedTableColumns = columns.filter((col) =>
@@ -558,7 +563,7 @@ const selectedTableColumns = columns.filter((col) =>
         </>
       )
     },
-    { title: "QUÀ/SIZE/MÀU", dataIndex: "category", key: "category" },
+    { title: "QUÀ", dataIndex: "category", key: "category" },
     { title: "SĐT", dataIndex: "phone", key: "phone" },
     { title: "ĐỊA CHỈ", dataIndex: "address", key: "address" },
     { title: "GHI CHÚ SALE", dataIndex: "note", key: "note" },
@@ -603,16 +608,28 @@ const selectedTableColumns = columns.filter((col) =>
     const revenue = Number(values.revenue) || 0;
     const profit = revenue === 0 ? 0 : Math.max(revenue - 5, 0);
     const products = values.products || [];
+    
+    let stt;
+    if (currentEditId) {
+      // Nếu đang chỉnh sửa, giữ nguyên stt cũ
+      stt = orders.find((order) => order.id === currentEditId)?.stt;
+    } else {
+      try {
+        // Lấy số thứ tự mới từ API
+        const counterResponse = await axios.post("/api/orders/nextStt");
+        stt = counterResponse.data.nextStt;
+        console.log(stt);
+      } catch (error) {
+        console.error("Lỗi khi lấy số thứ tự mới:", error);
+        message.error("Lỗi khi lấy số thứ tự mới");
+        return;
+      }
+    }
+  
     const newOrder = {
       ...values,
       id: currentEditId || Date.now().toString(),
-      stt: currentEditId
-        ? orders.find((order) => order.id === currentEditId)?.stt
-        : orders.filter(
-            (order) =>
-              dayjs(order.orderDate).format("YYYY-MM") ===
-              dayjs(values.orderDate).format("YYYY-MM")
-          ).length + 1,
+      stt, // Sử dụng stt lấy từ API
       revenue,
       profit,
       products,
@@ -637,26 +654,23 @@ const selectedTableColumns = columns.filter((col) =>
       shippingDate2: values.shippingDate2 || "",
       employee_code_order: currentUser.employee_code,
     };
-
+  
     try {
       if (currentEditId) {
         const response = await axios.put(`/api/orders/${currentEditId}`, newOrder);
         message.success(response.data.message || "Cập nhật thành công");
-        fetchOrders();
-      setFormVisible(false);
       } else {
         const response = await axios.post("/api/orders", newOrder);
         message.success(response.data.message || "Thêm mới thành công");
-        fetchOrders();
-      setFormVisible(false);
       }
-      
+      fetchOrders();
+      setFormVisible(false);
     } catch (error) {
       console.error(error);
       message.error("Lỗi khi lưu đơn hàng");
     }
   };
-
+  
   return (
     <div style={{ padding: 24 }}>
       <div style={{ marginBottom: 16 }}>
