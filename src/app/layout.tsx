@@ -66,7 +66,7 @@ function InnerDashboardLayout({ children }: { children: ReactNode }) {
         style={{
           transform: "scale(0.85)",
           transformOrigin: "top left",
-          width: "120%",
+          width: "118%",
         }}
       >
         <Sider collapsible collapsed={collapsed} onCollapse={(value) => setCollapsed(value)}>
@@ -87,8 +87,8 @@ function InnerDashboardLayout({ children }: { children: ReactNode }) {
               height: "64px",
             }}
           >
-            {/* <CurrentUserSelector />
-            <div></div> */}
+            {/* <CurrentUserSelector /> */}
+            
             <div style={{ fontSize: "1.2em", fontWeight: "bold", color: "#fff" }}>
               {currentUser.name}
             </div>
