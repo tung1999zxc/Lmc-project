@@ -240,14 +240,15 @@ console.log(safeEmployees);
   };
   /*** Xử lý submit form (Thêm mới hoặc cập nhật) ***/
   const onFinish = async (values) => {
-    const { date, oldMoney = 0, request1 = 0, request2 = 0, excessMoney = 0, sales = 0 } = values;
+    const { date, oldMoney = 0, request1 = 0, request2 = 0,totalReceived=0, excessMoney = 0, sales = 0 } = values;
     const newRecord = {
       id: editingRecord ? editingRecord.id : Date.now(),
       date: date.format('YYYY-MM-DD'),
       oldMoney,
       request1,
       request2,
-      excessMoney,
+      excessMoney: oldMoney + request1 + request2 -totalReceived,
+      totalReceived,
       teamnv: currentUser.team_id,
       adsMoney: request1 + request2,
       adsMoney2: oldMoney + request1 + request2 - excessMoney,
@@ -284,6 +285,7 @@ console.log(safeEmployees);
       oldMoney: record.oldMoney,
       request1: record.request1,
       request2: record.request2,
+      totalReceived: record.totalReceived,
       excessMoney: record.excessMoney,
       adsMoney:  record.request1 + record.request2 ,
       adsMoney2: record.oldMoney + record.request1 + record.request2 - record.excessMoney,
@@ -351,27 +353,28 @@ console.log(safeEmployees);
       render: (date) => moment(date, 'YYYY-MM-DD').format('DD/MM/YYYY'),
     },
     {
-      title: 'Tiền ADS',
+      title: 'Tiền ADS THỰC TẾ',
       key: 'totalReceived',
-      render: (_, record) => {
-        const total = record.oldMoney + record.request1 + record.request2;
-        return (total - record.excessMoney).toLocaleString('vi-VN');
-      }
+      render: (_, record) => record.totalReceived?record.totalReceived.toLocaleString('vi-VN'):0
     },
    
     {
       title: 'Xin buổi sáng',
-      key: 'excessMoney',
+      key: 'excessMoney1',
       render: (_, record) => record.request1.toLocaleString('vi-VN')
     },
     {
-      title: 'Xin Buổi chiều',
-      key: 'excessMoney',
+      title: 'Xin buổi chiều',
+      key: 'excessMoney2',
       render: (_, record) => record.request2.toLocaleString('vi-VN')
     }, {
-      title: 'Tiền thừa',
-      key: 'excessMoney',
-      render: (_, record) => record.excessMoney.toLocaleString('vi-VN')
+      title: 'Tiền dư',
+      key: 'excessMoney3',
+      
+      render: (_, record) => {
+        const total = record.oldMoney + record.request1 + record.request2;
+        return (total - record.totalReceived)?(total - record.totalReceived).toLocaleString('vi-VN'):0;
+      }
     },
     {
       title: 'Doanh số',
@@ -479,7 +482,7 @@ console.log(safeEmployees);
                 >
                   <DatePicker
                     placeholder="Ngày"
-                    onChange={(date) => setSelectedDate(date)}
+                   
                     style={{ width: '100%' }}
                   />
                 </Form.Item>
@@ -488,9 +491,9 @@ console.log(safeEmployees);
             
              
               <Col xs={24} sm={12} md={3} lg={6}>
-              <h4 >{editingRecord? 'Tiền thừa hôm kia':'Tiền thừa hôm qua'}</h4>
+              <h4 >{editingRecord? 'Tiền dư hôm kia':'Tiền dư'}</h4>
                 <Form.Item name="oldMoney">
-                  <InputNumber  style={{ width: '100%' }} />
+                  <InputNumber  disabled={editingRecord} style={{ width: '100%' }} />
                 
         </Form.Item>
               </Col>
@@ -508,8 +511,8 @@ console.log(safeEmployees);
               </Col>
               <Col xs={24} sm={12} md={3} lg={6}>
               
-                <h4 hidden={!editingRecord}>Tiền thừa hôm qua</h4>
-              <Form.Item name="excessMoney" hidden={!editingRecord}>
+                <h4 hidden={!editingRecord}>Tiền ADS THỰC TẾ HÔM QUA</h4>
+              <Form.Item name="totalReceived" hidden={!editingRecord}>
           <InputNumber  style={{ width: '100%' }} />
         </Form.Item>
               </Col>
