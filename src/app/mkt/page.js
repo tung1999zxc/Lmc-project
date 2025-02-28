@@ -12,8 +12,10 @@ import {
   message,
   Modal,
   Row,
+  notification ,
   Col
 } from 'antd';
+
 import moment from 'moment';
 import { EditOutlined, DeleteOutlined } from '@ant-design/icons';
 import { useDispatch, useSelector } from 'react-redux';
@@ -301,6 +303,7 @@ console.log(safeEmployees);
     try {
       const response = await axios.put(`/api/recordsMKT/${record.id}`, record);
       message.success(response.data.message || "Lưu thành công");
+      alert('Thao tác thành công!');  
       fetchRecords();
     } catch (error) {
       console.error(error);
@@ -524,7 +527,9 @@ const adminSummaryColumns = [
   const onDelete = async (record) => {
     try {
       const response = await axios.delete(`/api/recordsMKT/${record.id}`);
-      message.success(response.data.message);
+      
+      let key = "loading";
+        message.loading({ content: "Đang xử lý...", key, duration: 2 });
       fetchRecords();
     } catch (error) {
       console.error(error);
