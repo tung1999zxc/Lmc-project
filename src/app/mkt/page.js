@@ -756,6 +756,7 @@ const adminSummaryColumns = [
               <Col xs={24} sm={12} md={8} lg={10}>
 
               </Col>
+              {(currentUser.position === 'managerMKT'|| currentUser.position === 'admin') && (
               <Col xs={24} sm={12} md={3} lg={6}>
               <Table style={{ width: '33.33%' }}
    
@@ -764,7 +765,8 @@ const adminSummaryColumns = [
     pagination={false}
     bordered
   />
-              </Col>
+              </Col>)}
+
             </Row>
           </Form>
         </Col>
