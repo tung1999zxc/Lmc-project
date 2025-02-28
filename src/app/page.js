@@ -107,9 +107,10 @@ const PieChartComponent = dynamic(
 const GroupedDoubleBarChartComponent = dynamic(
   () =>
     Promise.resolve(({ data }) => {
-      const { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend } = require('recharts');
+      const {ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend } = require('recharts');
       return (
-        <BarChart width={600} height={300} data={data}>
+        <ResponsiveContainer width="100%" height={400}>
+        <BarChart  data={data}>
           <CartesianGrid strokeDasharray="3 3" />
           <XAxis dataKey="name" />
           <YAxis />
@@ -117,7 +118,26 @@ const GroupedDoubleBarChartComponent = dynamic(
           <Legend />
           <Bar dataKey="profit" fill="#8884d8" />
           <Bar dataKey="adsCost" fill="#FF8042" />
-        </BarChart>
+        </BarChart></ResponsiveContainer>
+      );
+    }),
+  { ssr: false, loading: () => <p>Loading Grouped Chart...</p> }
+);
+const GroupedDoubleBarChartComponent2 = dynamic(
+  () =>
+    Promise.resolve(({ data }) => {
+      const {ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend } = require('recharts');
+      return (
+        <ResponsiveContainer width="100%" height={400}>
+        <BarChart  data={data}>
+          <CartesianGrid strokeDasharray="3 3" />
+          <XAxis dataKey="name" />
+          <YAxis />
+          <Tooltip />
+          <Legend />
+          <Bar dataKey="profit" fill="#8884d8" />
+         
+        </BarChart></ResponsiveContainer>
       );
     }),
   { ssr: false, loading: () => <p>Loading Grouped Chart...</p> }
@@ -163,6 +183,11 @@ function filterByPreset(dataArray, preset) {
       start = new Date(now.getFullYear(), now.getMonth(), now.getDate());
       end = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999);
       break;
+      case "yesterday":
+        // Hôm qua: từ 00:00:00 đến 23:59:59 của ngày hôm qua
+        start = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1);
+        end = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1, 23, 59, 59, 999);
+        break;
     case "week":
       // 7 ngày gần nhất: từ ngày 7 ngày trước (00:00:00) đến hôm nay (23:59:59)
       start = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 7);
@@ -258,8 +283,16 @@ function getLast30Days() {
       .reduce((sum, order) => sum + order.profit, 0);
     const adsCost = filteredAds
       .filter(ad => ad.name === emp.name)
-      .reduce((sum, ad) => sum + ad.adsMoney, 0);
+      .reduce((sum, ad) => sum + ad.totalReceived, 0);
     return { name: emp.name, profit: sales*17000, adsCost };
+  });
+  const saleEmployees = employees.filter(emp => emp.position_team === "sale");
+  const employeeChartDataNewsale = saleEmployees.map(emp => {
+    const sales = filteredOrders
+      .filter(order => order.sale === emp.name)
+      .reduce((sum, order) => sum + order.profit, 0);
+    
+    return { name: emp.name, profit: sales*17000 };
   });
 
   // === Biểu đồ doanh số theo team (Grouped Double Bar Chart) ===
@@ -274,7 +307,7 @@ function getLast30Days() {
     const adsCost = teamEmps.reduce((acc, emp) => {
       const empAds = filteredAds
         .filter(ad => ad.name === emp.name)
-        .reduce((sum, ad) => sum + ad.adsMoney, 0);
+        .reduce((sum, ad) => sum + ad.totalReceived, 0);
       return acc + empAds;
     }, 0);
     return { name: team.label, profit: sales*17000, adsCost };
@@ -303,7 +336,7 @@ function getLast30Days() {
         .reduce((sum, order) => sum + order.profit, 0);
       const adsCost = filteredAds
         .filter(ad => ad.date === date)
-        .reduce((sum, ad) => sum + ad.adsMoney, 0);
+        .reduce((sum, ad) => sum + ad.totalReceived, 0);
       return { name: date, profit: sales*17000, adsCost };
     });
   } else {
@@ -314,7 +347,7 @@ function getLast30Days() {
         .reduce((sum, order) => sum + order.profit, 0);
       const adsCost = adsMoneyData
         .filter(ad => ad.date === date)
-        .reduce((sum, ad) => sum + ad.adsMoney, 0);
+        .reduce((sum, ad) => sum + ad.totalReceived, 0);
       return { name: date, profit: sales*17000, adsCost };
     });
   }
@@ -354,13 +387,13 @@ function getLast30Days() {
     const adsCost = teamEmps.reduce((acc, emp) => {
       const empAds = filteredAds
         .filter(ad => ad.name === emp.name)
-        .reduce((sum, ad) => sum + ad.adsMoney, 0);
+        .reduce((sum, ad) => sum + ad.totalReceived, 0);
       return acc + empAds;
     }, 0);
     const adsCost2 = othersEmps.reduce((acc, emp) => {
       const empAds = filteredAds
         .filter(ad => ad.name === emp.name)
-        .reduce((sum, ad) => sum + ad.adsMoney, 0);
+        .reduce((sum, ad) => sum + ad.totalReceived, 0);
       return acc + empAds;
     }, 0);
     const othersSales0 = othersEmps.reduce((acc, emp) => {
@@ -386,7 +419,7 @@ function getLast30Days() {
     const tienVND = total * exchangeRate;
     const totalAds = filteredAds
       .filter(ad => ad.name === emp.name)
-      .reduce((sum, ad) => sum + ad.adsMoney, 0);
+      .reduce((sum, ad) => sum + ad.totalReceived, 0);
     const adsPercent = tienVND ? ((totalAds / tienVND) * 100).toFixed(2) : "0.00";
     return { key: index, name: emp.name, paid, unpaid, total, tienVND, totalAds, adsPercent };
   });
@@ -471,7 +504,7 @@ function getLast30Days() {
   // =================== Các bảng báo cáo SALE ===================
 
   // Báo cáo sale: lấy các nhân viên có position_team === "sale"
-  const saleEmployees = employees.filter(emp => emp.position_team === "sale");
+  
   const saleReportData = saleEmployees.map((emp, index) => {
     let paid = 0, unpaid = 0;
     if (emp.position === "salenhapdon" || emp.position === "salefull") {
@@ -680,7 +713,7 @@ function getLast30Days() {
     .reduce((sum, order) => sum + order.profit, 0);
   const tongKW = daThanhToanKW + chuaThanhToanKW;
   const thanhToanDat = tongKW > 0 ? (daThanhToanKW / tongKW) * 100 : 0;
-  const totalAdsKW = filteredAds.reduce((sum, ad) => sum + ad.adsMoney, 0);
+  const totalAdsKW = filteredAds.reduce((sum, ad) => sum + ad.totalReceived, 0);
   const percentAds = tongKW > 0 ? Number(((totalAdsKW / (tongKW*exchangeRate)) * 100).toFixed(2)) : 0;
 
   const totalData = [
@@ -785,8 +818,9 @@ function getLast30Days() {
       {(currentUser.position === "admin" || currentUser.position === "managerMKT"||currentUser.position === "leadSALE" || currentUser.position === "managerSALE"  ) && (
       <Row gutter={[16, 16]}  >
   <Col xs={24} md={12}>
-  <div style={{ marginBottom: "1rem" }}>
-        <label htmlFor="dateFilter" style={{ marginRight: "0.5rem" }}>Chọn ngày:</label>
+  <Row>
+  <Col xs={24} md={8}><div style={{ marginBottom: "1rem" }}>
+        <label htmlFor="dateFilter" style={{ marginRight: "0.5rem", marginTop: "2rem" }}>Chọn ngày:</label>
         <input
           type="date"
           id="dateFilter"
@@ -796,9 +830,9 @@ function getLast30Days() {
             setSelectedPreset('');
           }}
         />
-      </div>
-      <div style={{ marginBottom: "1rem" }}>
-        <label htmlFor="presetFilter" style={{ marginRight: "0.5rem" }}>Chọn khoảng thời gian:</label>
+      </div></Col>
+  <Col xs={24} md={12}><div style={{ marginBottom: "1rem" }}>
+        {/* <label htmlFor="presetFilter" style={{ marginRight: "0.5rem" }}>Chọn khoảng thời gian:</label> */}
         <Select
           allowClear
           id="presetFilter"
@@ -811,16 +845,20 @@ function getLast30Days() {
           }}
         >
           <Option value="today">Hôm Nay</Option>
+          <Option value="yesterday">Hôm Qua</Option>
           <Option value="week">1 Tuần gần nhất</Option>
           <Option value="currentMonth">1 Tháng (Từ đầu tháng đến hiện tại)</Option>
           <Option value="lastMonth">Tháng trước</Option>
           <Option value="twoMonthsAgo">2 Tháng trước</Option>
           <Option value="threeMonthsAgo">3 Tháng trước</Option>
         </Select>
-      </div>
+      </div></Col>
+  </Row>
+  
+      
 
       {/* Ô nhập Tỉ giá VNĐ */}
-      <div style={{ marginBottom: "1rem" }}>
+      {/* <div style={{ marginBottom: "1rem" }}>
         <label htmlFor="exchangeRate" style={{ marginRight: "0.5rem" }}>Tỉ giá VNĐ:</label>
         <Input
           type="number"
@@ -832,18 +870,31 @@ function getLast30Days() {
         <Button type="primary" onClick={() => setExchangeRate(exchangeRateInput)}>
           Sửa giá trị
         </Button>
-      </div>
+      </div> */}
   </Col>
   
   <Col xs={24} md={10}>
-  <h2 style={{ marginTop: "2rem" }}>Tổng</h2>
-  <Table columns={totalColumns} dataSource={totalData} pagination={false} />
+        
   </Col>
 </Row>)}
       
 {(currentUser.position === "admin" || currentUser.position === "managerMKT") ? (
   <Tabs defaultActiveKey="MKT">
   <Tabs.TabPane tab="MKT" key="MKT">
+  <h3>Doanh số &amp; chi phí Ads theo Nhân viên MKT</h3>
+<div style={{ width: '100%' }}>
+  <GroupedDoubleBarChartComponent data={employeeChartDataNew} />
+</div>
+<h3 style={{ marginTop: "2rem" }}>
+      {isFilterApplied
+        ? "Doanh số & chi phí Ads hàng ngày (theo bộ lọc)"
+        : "Doanh số & chi phí Ads hàng ngày (30 ngày gần nhất)"}
+    </h3>
+    <GroupedDoubleBarChartComponent data={dailyChartDataNew} />
+    
+<h3>Doanh số &amp; chi phí Ads theo Team</h3>
+        <GroupedDoubleBarChartComponent data={teamChartDataNew} />
+        
     {/* Báo cáo Marketing và các biểu đồ cũ */}
     <Row gutter={[16, 16]} style={{ marginTop: "2rem" }}>
 <Col xs={24} md={12}>
@@ -852,31 +903,27 @@ function getLast30Days() {
 </Col>
 {/* <Col xs={24} md={1}></Col> */}
 <Col xs={24} md={10}>
-<h3>Doanh số &amp; chi phí Ads theo Nhân viên</h3>
-<GroupedDoubleBarChartComponent data={employeeChartDataNew} />
-<h3 style={{ marginTop: "2rem" }}>
-      {isFilterApplied
-        ? "Doanh số & chi phí Ads hàng ngày (theo bộ lọc)"
-        : "Doanh số & chi phí Ads hàng ngày (30 ngày gần nhất)"}
-    </h3>
-    <GroupedDoubleBarChartComponent data={dailyChartDataNew} />
-    <h3>Doanh số &amp; chi phí Ads theo Team</h3>
-        <GroupedDoubleBarChartComponent data={teamChartDataNew} />
+
+<h2 style={{ marginTop: "2rem" }}>Tổng</h2>
+  <Table columns={totalColumns} dataSource={totalData} pagination={false} />
+
         <h3>Phần trăm doanh số theo Team</h3>
         <PieChartComponent data={teamPieData} />
+        <h3 style={{ marginTop: "2rem" }}>Doanh số trung bình theo Nhân viên theo Team</h3>
+      <BarChartComponent data={averageTeamChartData} />
+      <h3 style={{ marginTop: "2rem" }}>
+      So sánh %ADS : Gồm Leader vs Các nhân viên khác trong Team
+    </h3>
+    <GroupedBarChartComponent data={leaderComparisonChartData} />
 </Col>
 </Row>
     
     <Row gutter={[16, 16]}>
       <Col xs={24} md={12}>
-      <h3 style={{ marginTop: "2rem" }}>Doanh số trung bình theo Nhân viên theo Team</h3>
-      <BarChartComponent data={averageTeamChartData} />
+      
       </Col>
       <Col xs={24} md={12}>
-      <h3 style={{ marginTop: "2rem" }}>
-      So sánh %ADS : Gồm Leader vs Các nhân viên khác trong Team
-    </h3>
-    <GroupedBarChartComponent data={leaderComparisonChartData} />
+      
       </Col>
     </Row>
     
@@ -885,6 +932,10 @@ function getLast30Days() {
     
   </Tabs.TabPane>
   <Tabs.TabPane tab="SALE" key="SALE">
+  <h3>Doanh số &amp; chi phí Ads theo Nhân viên SALE</h3>
+<div style={{ width: '100%' }}>
+  <GroupedDoubleBarChartComponent2 data={employeeChartDataNewsale} />
+</div>
     {/* Các bảng báo cáo SALE */}
     <Row gutter={[16, 16]}>
 <Col xs={24} md={14}>

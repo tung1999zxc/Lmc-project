@@ -154,6 +154,9 @@ console.log(safeEmployees);
     } else if (period === "day") {
       // Ngày hiện tại: so sánh theo ngày
       return orderDate.isSame(moment(), "day");
+    } else if (period === "yesterday") {
+      // Ngày hiện tại: so sánh theo ngày
+      return orderDate.isSameOrAfter(now.clone().subtract(1, "days"), "day");
     } else if (period === "month") {
       // Tháng Này: từ đầu tháng đến hiện tại
       return orderDate.isSame(now, "month") && orderDate.isSameOrAfter(now.clone().startOf("month"));
@@ -175,9 +178,15 @@ console.log(safeEmployees);
     const now = moment();
     if (period === "week") {
       return recordDate.isSameOrAfter(now.clone().subtract(7, "days"), "day");
-    }else if (period === "day") {
+    }
+    else if (period === "day") {
       // Ngày hiện tại: so sánh theo định dạng "YYYY-MM-DD"
       return recordDate.format("YYYY-MM-DD") === now.format("YYYY-MM-DD");}
+      else if (period === "yesterday") {
+        // So sánh ngày hôm qua
+        const yesterday = now.clone().subtract(1, "days");
+        return recordDate.format("YYYY-MM-DD") === yesterday.format("YYYY-MM-DD");}
+      
      else if (period === "month") {
       return recordDate.isSame(now, "month") && recordDate.isSameOrAfter(now.clone().startOf("month"));
     } else if (period === "lastMonth") {
@@ -329,6 +338,9 @@ console.log(safeEmployees);
     const now = moment();
     if (period === "day") {
       start = now.clone();
+      end = now.clone();
+    } else if (period === "yesterday") {
+      start = now.clone().subtract(1, 'days');
       end = now.clone();
     } else if (period === "week") {
       start = now.clone().subtract(6, 'days');
@@ -572,7 +584,7 @@ const adminSummaryColumns = [
     return date
       ? safeOrders
           .filter(p => p.orderDate === date && p.mkt === recordname)
-          .reduce((sum, p) => (sum + p.profit)*17000, 0)
+          .reduce((sum, p) => (sum + p.profit), 0)
       : 0;
   };
 
@@ -636,7 +648,7 @@ const adminSummaryColumns = [
       key: 'sales',
       render: (_, record) => {
         const totalSalesForSelectedDate = computeTotalSalesForDate(record.date, record.name);
-        return (totalSalesForSelectedDate*0.95).toLocaleString('vi-VN');
+        return (totalSalesForSelectedDate*0.95*17000).toLocaleString('vi-VN');
       },
     },
     {
@@ -677,7 +689,8 @@ const adminSummaryColumns = [
       key: 'action',
       render: (_, record) => {
         // Với lead và manager: chỉ cho phép sửa/xóa nếu record thuộc về chính họ, ngược lại chỉ xem
-        if (currentUser.position === 'lead' || currentUser.position === 'managerMKT'||currentUser.position === 'admin') {
+        if (currentUser.position === 'lead' ) {
+          // || currentUser.position === 'managerMKT '||currentUser.position === 'admin '
           if (record.userId === currentUser.employee_code) {
             return (
               <>
@@ -785,7 +798,8 @@ const adminSummaryColumns = [
                     onChange={(value) => setPeriod(value)}
                     style={{ width: 250 }}
                   >
-                    <Option value="day">Hôm nay</Option>
+                    <Option value="day">Hôm Nay</Option>
+                    <Option value="yesterday">Hôm Qua</Option> 
                     <Option value="week">1 Tuần Gần Nhất</Option>
                     <Option value="month">Tháng Này</Option>
                     <Option value="lastMonth">Tháng Trước</Option>

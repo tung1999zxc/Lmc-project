@@ -381,7 +381,7 @@ const handleDelete = async (key) => {
           <Button
             type="primary"
             htmlType="submit"
-            disabled={currentUser.position_team === "mkt"}
+            disabled={currentUser.position_team === "mkt" ||currentUser.position_team === "kho"}
           >
             {editingKey ? "Cập nhật" : "Thêm"}
           </Button>

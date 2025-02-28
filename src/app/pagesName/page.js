@@ -14,6 +14,8 @@ const EmployeePageTable = () => {
   useEffect(() => {
     if (!currentUser.name) {
       router.push("/login");
+    } if (currentUser.position==="kho1") {
+      router.push("/orders");
     }
   }, []);
 

@@ -17,7 +17,8 @@
     useEffect(() => {
       if (!currentUser.name) {
         router.push("/login");
-      }
+      }if (currentUser.position==="kho1") {
+        router.push("/orders");}
       // if (
       //   currentUser.position !== 'admin' &&
       //   currentUser.position !== 'managerMKT' &&
@@ -88,7 +89,10 @@
 
     // Gọi API khi component được mount
     useEffect(() => {
-      fetchEmployees();
+      if (currentUser.position!=="kho1") {
+        fetchEmployees();
+      }
+     
     }, []);
 
   // Nếu currentUser không phải admin/manager, chỉ hiển thị nhân viên có employee_code trùng với currentUser.employee_code
