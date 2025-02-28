@@ -104,7 +104,7 @@ const handlePageNameChange = (value) => {
     .filter((order) => order.position === "salexuly")
     .map((order) => order.name);
 
-  const saleBaoOptions = ["DONE", "HỦY", "ĐỢI XN", "NGUY CƠ", "BÙNG", "ĐANG UP", "CHECK"];
+  const saleBaoOptions = ["DONE","OK", "HỦY", "ĐỢI XN", "NGUY CƠ", "BÙNG", "ĐANG UP", "CHECK"];
   const massOptions = ["Nặng", "Nhẹ"];
   const thanhToanOptions = ["ĐÃ THANH TOÁN", "CHƯA THANH TOÁN"];
   const tinhTrangGHOptions = ["ĐÃ GỬI HÀNG", "GIAO THÀNH CÔNG"];
@@ -383,7 +383,7 @@ const productOptions = products.map((p) => p.name);
                   <Input.TextArea rows={2} />
                 </Form.Item>
               </Col>
-              <Col span={8}>
+              <Col span={9}>
                 {/* Thay đổi: dùng Form.List cho SẢN PHẨM và SỐ LƯỢNG SP */}
                 <p style={{ marginBottom: 3, marginTop: 5  }}>SẢN PHẨM</p>
                 <Form.List name="products">
@@ -397,7 +397,7 @@ const productOptions = products.map((p) => p.name);
                             fieldKey={[field.fieldKey, "product"]}
                             rules={[{ required: true, message: "Chọn sản phẩm" }]}
                           >
-                            <Select placeholder="Chọn sản phẩm" style={{ width: 250 }} showSearch>
+                            <Select placeholder="Chọn sản phẩm" style={{ width: 270 }} showSearch>
                               {productOptions.map((product) => (
                                 <Option key={product} value={product}>
                                   {product}
@@ -413,7 +413,7 @@ const productOptions = products.map((p) => p.name);
                           >
                             <Input type="number" placeholder="SL" style={{ width: 60 }} />
                           </Form.Item>
-                          {/* <MinusCircleOutlined onClick={() => remove(field.name)} /> */}
+                          <MinusCircleOutlined onClick={() => remove(field.name)} />
                         </Space>
                       ))}
                       <Form.Item>
@@ -454,7 +454,7 @@ const productOptions = products.map((p) => p.name);
                 </Form.Item>
                
               </Col>
-              <Col span={8}>
+              <Col span={7}>
                 
                 
                 

@@ -198,7 +198,7 @@ console.log(safeEmployees);
   const computeTotalADS = (employeeName) => {
     const totalADS = records
       .filter((p) => p.name === employeeName && filterRecordsByPeriod(p))
-      .reduce((sum, p) => sum + p.adsMoney2, 0);
+      .reduce((sum, p) => sum + p.totalReceived, 0);
     return totalADS;
   };
   
@@ -240,7 +240,7 @@ console.log(safeEmployees);
   };
   /*** Xử lý submit form (Thêm mới hoặc cập nhật) ***/
   const onFinish = async (values) => {
-    const { date, oldMoney = 0, request1 = 0, request2 = 0,totalReceived=0, excessMoney = 0, sales = 0 } = values;
+    const { date, oldMoney = 0, request1 = 0, request2 = 0,  totalReceived=0, excessMoney = 0, sales = 0 } = values;
     const newRecord = {
       id: editingRecord ? editingRecord.id : Date.now(),
       date: date.format('YYYY-MM-DD'),
@@ -276,7 +276,13 @@ console.log(safeEmployees);
       }
     }
   };
-
+  const computeTotalExcess = (employeeName) => {
+    const totalExcess = records
+      .filter(p => p.name === employeeName && filterRecordsByPeriod(p))
+      .reduce((sum, p) => sum + (((p.oldMoney || 0) + p.request1 + p.request2) - p.totalReceived), 0);
+    return totalExcess;
+  };
+  
   /*** Xử lý sửa record ***/
   const onEdit = (record) => {
     setEditingRecord(record);
@@ -291,9 +297,230 @@ console.log(safeEmployees);
       adsMoney2: record.oldMoney + record.request1 + record.request2 - record.excessMoney,
     });
   };
-
+  const onSave = async (record) => {
+    try {
+      const response = await axios.put(`/api/recordsMKT/${record.id}`, record);
+      message.success(response.data.message || "Lưu thành công");
+      fetchRecords();
+    } catch (error) {
+      console.error(error);
+      message.error("Lỗi khi lưu");
+    }
+  };
   /*** Xử lý xóa record ***/
- 
+  const handleInlineChange = (id, field, value) => {
+    setRecords(prevRecords =>
+      prevRecords.map(rec => {
+        if (rec.id === id) {
+          const updated = { ...rec, [field]: value };
+          updated.excessMoney = (updated.oldMoney || 0) + (updated.request1 || 0) + (updated.request2 || 0) - (updated.totalReceived || 0);
+          return updated;
+        }
+        return rec;
+      })
+    );
+  };
+  //Hàm lấy danh sách ngày dựa theo bộ lọc:
+  const getDateRange = () => {
+    let start, end;
+    const now = moment();
+    if (period === "day") {
+      start = now.clone();
+      end = now.clone();
+    } else if (period === "week") {
+      start = now.clone().subtract(6, 'days');
+      end = now.clone();
+    } else if (period === "month") {
+      start = now.clone().startOf('month');
+      end = now.clone();
+    } else if (period === "lastMonth") {
+      start = now.clone().subtract(1, 'months').startOf('month');
+      end = now.clone().subtract(1, 'months').endOf('month');
+    } else if (period === "twoMonthsAgo") {
+      start = now.clone().subtract(2, 'months').startOf('month');
+      end = now.clone().subtract(2, 'months').endOf('month');
+    } else {
+      start = now.clone().startOf('month');
+      end = now.clone();
+    }
+    const dates = [];
+    for (let m = start.clone(); m.diff(end, 'days') <= 0; m.add(1, 'days')) {
+      dates.push(m.format('YYYY-MM-DD'));
+    }
+    return dates;
+  };  
+
+//Tạo dữ liệu tổng hợp cho từng ngày và tính các chỉ số tổng:
+const summaryDates = getDateRange();
+
+const adminSummaryData = summaryDates.map(date => {
+  const dsTong = safeOrders
+    .filter(order => order.orderDate === date)
+    .reduce((sum, order) => sum + order.profit, 0) * 17000;
+  const adsSang = records
+    .filter(r => r.date === date)
+    .reduce((sum, r) => sum + (r.request1 || 0), 0);
+  const adsChieu = records
+    .filter(r => r.date === date)
+    .reduce((sum, r) => sum + (r.request2 || 0), 0);
+  const tongAdsXin = adsSang + adsChieu;
+  const tongTienTieu = records
+    .filter(r => r.date === date)
+    .reduce((sum, r) => sum + (r.totalReceived || 0), 0);
+  const tienThua = tongAdsXin - tongTienTieu;
+  const percentAds = dsTong > 0 ? ((tongTienTieu / dsTong) * 100).toFixed(2) : 0;
+  return {
+    key: date,
+    date,
+    dsTong,
+    adsSang,
+    adsChieu,
+    tongAdsXin,
+    tongTienTieu,
+    tienThua,
+    percentAds,
+  };
+});
+
+const totalDSTong = adminSummaryData.reduce((sum, row) => sum + row.dsTong, 0);
+const totalTongAdsXin = adminSummaryData.reduce((sum, row) => sum + row.tongAdsXin, 0);
+const totalTienThua = adminSummaryData.reduce((sum, row) => sum + row.tienThua, 0);
+const totalPercentAds = totalDSTong > 0 ? ((totalTongAdsXin / totalDSTong) * 100).toFixed(2) : 0;
+
+const adminSummaryColumns = [
+  {
+    title: 'Ngày',
+    dataIndex: 'date',
+    key: 'date',
+    render: (date) => moment(date, 'YYYY-MM-DD').format('DD/MM/YYYY'),
+  },
+  {
+    title: 'DS TỔNG',
+    dataIndex: 'dsTong',
+    key: 'dsTong',
+    render: (value) => value.toLocaleString('vi-VN'),
+  },
+  {
+    title: 'ADS SÁNG',
+    dataIndex: 'adsSang',
+    key: 'adsSang',
+    render: (value) => value.toLocaleString('vi-VN'),
+  },
+  {
+    title: 'ADS CHIỀU',
+    dataIndex: 'adsChieu',
+    key: 'adsChieu',
+    render: (value) => value.toLocaleString('vi-VN'),
+  },
+  {
+    title: 'TỔNG ADS XIN',
+    dataIndex: 'tongAdsXin',
+    key: 'tongAdsXin',
+    render: (value) => value.toLocaleString('vi-VN'),
+  },
+  {
+    title: 'TỔNG TIỀN TIÊU',
+    dataIndex: 'tongTienTieu',
+    key: 'tongTienTieu',
+    render: (value) => value.toLocaleString('vi-VN'),
+  },
+  {
+    title: 'TIỀN THỪA',
+    dataIndex: 'tienThua',
+    key: 'tienThua',
+    render: (value) => value.toLocaleString('vi-VN'),
+  },
+  {
+    title: '%ADS',
+    dataIndex: 'percentAds',
+    key: 'percentAds',
+    render: (value) => {
+      const numValue = typeof value === "number" ? value : parseFloat(value);
+      let bgColor = "";
+      if (numValue < 30) {
+        bgColor = "#54DA1F"; // nền xanh lá (màu xanh nhạt)
+      } else if (numValue >= 30 && numValue <= 35) {
+        bgColor = "#FF9501"; // nền vàng nhạt
+      } else {
+        bgColor = "#EC2527"; // nền đỏ nhạt
+      }
+      return (
+        <div
+          style={{
+            backgroundColor: bgColor,
+            
+            borderRadius: "4px",
+            textAlign: "center",
+            fontWeight: "bold"
+          }}
+        >
+          {numValue.toFixed(2)}%
+        </div>
+      );
+    } 
+  }
+];
+// DS TỔNG: {totalDSTong.toLocaleString('vi-VN')} | TỔNG CẤP ADS: {totalTongAdsXin.toLocaleString('vi-VN')} | %ADS:  | TIỀN THỪA TẤT CẢ: {totalTienThua.toLocaleString('vi-VN')}
+//     </div>const 
+    const data2 = [
+      {
+        key: '1',
+        dsTong: totalDSTong,
+        tongCapADS: totalTongAdsXin,
+        tienThuaTatCa: totalTienThua,
+        percentADS: totalPercentAds,
+      },
+    ];   
+    const columns2 = [
+      {
+        title: 'DS TỔNG',
+        dataIndex: 'dsTong',
+        key: 'dsTong',
+        render: (value) => value.toLocaleString('vi-VN'),
+      },
+      {
+        title: 'TỔNG CẤP ADS',
+        dataIndex: 'tongCapADS',
+        key: 'tongCapADS',
+        render: (value) => value.toLocaleString('vi-VN'),
+      },
+      {
+        title: 'TIỀN THỪA TẤT CẢ',
+        dataIndex: 'tienThuaTatCa',
+        key: 'tienThuaTatCa',
+        render: (value) => value.toLocaleString('vi-VN'),
+      },
+      {
+        title: '%ADS',
+        dataIndex: 'percentADS',
+        key: 'percentADS',
+        render: (value) => {
+          const numValue = typeof value === "number" ? value : parseFloat(value);
+          let bgColor = "";
+          if (numValue < 30) {
+            bgColor = "#54DA1F"; // nền xanh lá (màu xanh nhạt)
+          } else if (numValue >= 30 && numValue <= 35) {
+            bgColor = "#FF9501"; // nền vàng nhạt
+          } else {
+            bgColor = "#EC2527"; // nền đỏ nhạt
+          }
+          return (
+            <div
+              style={{
+                backgroundColor: bgColor,
+                
+                borderRadius: "4px",
+                textAlign: "center",
+                fontWeight: "bold"
+              }}
+            >
+              {numValue.toFixed(2)}%
+            </div>
+          );
+        } },
+    ];
+    
+    
   const onDelete = async (record) => {
     try {
       const response = await axios.delete(`/api/recordsMKT/${record.id}`);
@@ -355,24 +582,47 @@ console.log(safeEmployees);
     {
       title: 'Tiền ADS THỰC TẾ',
       key: 'totalReceived',
-      render: (_, record) => record.totalReceived?record.totalReceived.toLocaleString('vi-VN'):0
+      render: (_, record) => (
+        <InputNumber
+          value={record.totalReceived}
+          onChange={(value) => handleInlineChange(record.id, 'totalReceived', value)}
+          style={{ width: '100%' }}
+          formatter={value => value.toLocaleString('vi-VN')}
+          parser={value => value.replace(/\$\s?|(,*)/g, '')}
+        />
+      )
     },
-   
     {
       title: 'Xin buổi sáng',
-      key: 'excessMoney1',
-      render: (_, record) => record.request1.toLocaleString('vi-VN')
+      key: 'request1',
+      render: (_, record) => (
+        <InputNumber
+          value={record.request1}
+          onChange={(value) => handleInlineChange(record.id, 'request1', value)}
+          style={{ width: '100%' }}
+          formatter={value => value.toLocaleString('vi-VN')}
+          parser={value => value.replace(/\$\s?|(,*)/g, '')}
+        />
+      )
     },
     {
       title: 'Xin buổi chiều',
-      key: 'excessMoney2',
-      render: (_, record) => record.request2.toLocaleString('vi-VN')
+      key: 'request2',
+      render: (_, record) => (
+        <InputNumber
+          value={record.request2}
+          onChange={(value) => handleInlineChange(record.id, 'request2', value)}
+          style={{ width: '100%' }}
+          formatter={value => value.toLocaleString('vi-VN')}
+          parser={value => value.replace(/\$\s?|(,*)/g, '')}
+        />
+      )
     }, {
       title: 'Tiền dư',
       key: 'excessMoney3',
       
       render: (_, record) => {
-        const total = record.oldMoney + record.request1 + record.request2;
+        const total =  record.request1 + record.request2;
         return (total - record.totalReceived)?(total - record.totalReceived).toLocaleString('vi-VN'):0;
       }
     },
@@ -381,7 +631,7 @@ console.log(safeEmployees);
       key: 'sales',
       render: (_, record) => {
         const totalSalesForSelectedDate = computeTotalSalesForDate(record.date, record.name);
-        return totalSalesForSelectedDate.toLocaleString('vi-VN');
+        return (totalSalesForSelectedDate*0.95).toLocaleString('vi-VN');
       },
     },
     {
@@ -422,11 +672,11 @@ console.log(safeEmployees);
       key: 'action',
       render: (_, record) => {
         // Với lead và manager: chỉ cho phép sửa/xóa nếu record thuộc về chính họ, ngược lại chỉ xem
-        if (currentUser.position === 'lead' || currentUser.position === 'managerMKT'||currentUser.position === 'admin ') {
+        if (currentUser.position === 'lead' || currentUser.position === 'managerMKT'||currentUser.position === 'admin') {
           if (record.userId === currentUser.employee_code) {
             return (
               <>
-                <Button icon={<EditOutlined />} onClick={() => onEdit(record)} />
+                <Button type="primary" onClick={() => onSave(record)}>Save</Button>
                 <Popconfirm title="Xóa bản ghi?" onConfirm={() => onDelete(record)}>
                   <Button danger icon={<DeleteOutlined />} />
                 </Popconfirm>
@@ -439,7 +689,7 @@ console.log(safeEmployees);
         // Với employee: hiển thị các thao tác sửa/xóa
         return (
           <>
-            <Button icon={<EditOutlined />} onClick={() => onEdit(record)} />
+            <Button type="primary" onClick={() => onSave(record)}>Save</Button>
             <Popconfirm title="Xóa bản ghi?" onConfirm={() => onDelete(record)}>
               <Button danger icon={<DeleteOutlined />} />
             </Popconfirm>
@@ -460,9 +710,7 @@ console.log(safeEmployees);
     <div style={{ padding: 24 }}>
       {/* Tiêu đề "Nhập thông tin" */}
       <Row gutter={[16, 16]}>
-        <Col xs={24}>
-          <h2>Nhập thông tin</h2>
-        </Col>
+        
       </Row>
       {/* Form nhập liệu */}
       <Row gutter={[16, 16]}>
@@ -486,38 +734,7 @@ console.log(safeEmployees);
                     style={{ width: '100%' }}
                   />
                 </Form.Item>
-              </Col>
-              
-            
-             
-              <Col xs={24} sm={12} md={3} lg={6}>
-              <h4 >{editingRecord? 'Tiền dư hôm kia':'Tiền dư'}</h4>
-                <Form.Item name="oldMoney">
-                  <InputNumber  disabled={editingRecord} style={{ width: '100%' }} />
                 
-        </Form.Item>
-              </Col>
-              <Col xs={24} sm={12} md={3} lg={6}>
-              <h4 >Xin buổi sáng</h4>
-                <Form.Item name="request1"  >
-                  <InputNumber  style={{ width: '100%' }} />
-                </Form.Item>
-              </Col>
-              <Col xs={24} sm={12} md={3} lg={6}>
-              <h4  >Xin buổi chiều</h4>
-                <Form.Item name="request2" >
-                  <InputNumber  style={{ width: '100%' }} />
-                </Form.Item>
-              </Col>
-              <Col xs={24} sm={12} md={3} lg={6}>
-              
-                <h4 hidden={!editingRecord}>Tiền ADS THỰC TẾ HÔM QUA</h4>
-              <Form.Item name="totalReceived" hidden={!editingRecord}>
-          <InputNumber  style={{ width: '100%' }} />
-        </Form.Item>
-              </Col>
-
-              <Col xs={24} sm={12} md={3} lg={6}>
                 <Form.Item>
                   <Button
                     disabled={currentUser.position_team === 'sale' || currentUser.position_team === 'kho'}
@@ -526,9 +743,22 @@ console.log(safeEmployees);
                     style={{ width: '100%' }}
                     
                   >
-                    {editingRecord ? 'Cập nhật' : 'Thêm mới'}
+                    {editingRecord ? 'Cập nhật' : 'Thêm mới Báo cáo'}
                   </Button>
                 </Form.Item>
+              </Col>
+              
+              <Col xs={24} sm={12} md={8} lg={10}>
+
+              </Col>
+              <Col xs={24} sm={12} md={3} lg={6}>
+              <Table style={{ width: '33.33%' }}
+   
+    dataSource={data2}
+    columns={columns2}
+    pagination={false}
+    bordered
+  />
               </Col>
             </Row>
           </Form>
@@ -536,15 +766,11 @@ console.log(safeEmployees);
       </Row>
 
       {/* Tiêu đề "Danh sách giao dịch" */}
-      <Row gutter={[16, 16]}>
-        <Col xs={24}>
-          <h2>Bảng thông tin Nhân viên </h2>
-        </Col>
-      </Row>
+      
 
       {/* Bộ lọc */}
       <Row gutter={[16, 16]} style={{ marginBottom: 16 }}>
-        <Col xs={24} sm={12} md={8}>
+        <Col xs={24} sm={12} md={5}>
           <div style={{ marginBottom: 16 }}>
           <span style={{ marginRight: 8 }}>Chọn thời gian </span><br/>
                   <Select
@@ -561,7 +787,8 @@ console.log(safeEmployees);
                 </div>
         </Col>
         {(currentUser.position === 'managerMKT'|| currentUser.position === 'admin' )&& (
-          <Col xs={24} sm={12} md={8}>
+
+          <Col xs={24} sm={12} md={5}>
             <div>
               <span style={{ marginRight: 8 }}>Chọn team: </span>
               <Select
@@ -580,7 +807,20 @@ console.log(safeEmployees);
           </Col>
         )}
       </Row>
-
+      {(currentUser.position === 'managerMKT'|| currentUser.position === 'admin' )&& (
+  <>
+   
+    <Table
+      dataSource={adminSummaryData.sort((a, b) => {
+        return dayjs(b.date).valueOf() - dayjs(a.date).valueOf();
+      })}
+      columns={adminSummaryColumns}
+      rowKey="date"
+      pagination={{ pageSize: 10 }}
+      scroll={{ x: true }}
+    />
+  </>
+)}
       {/* Render bảng dữ liệu */}
       {currentUser.position === 'managerMKT'||currentUser.position === 'admin' || currentUser.position === 'lead' ? (
         Object.entries(groupRecordsByUser(filteredRecords))
@@ -604,8 +844,7 @@ console.log(safeEmployees);
           color: "#111111",
         }}
       >
-        Tổng doanh số: {computeTotalSales(userRecords[0].name).toLocaleString("vi-VN")} | Chi phí Ads:{" "}
-        {computeTotalADS(userRecords[0].name).toLocaleString("vi-VN")} | %ADS: {computePercentADS(userRecords[0].name)}%
+         Tổng doanh số: {computeTotalSales(userRecords[0].name).toLocaleString("vi-VN")} | Chi phí Ads: {computeTotalADS(userRecords[0].name).toLocaleString("vi-VN")} | %ADS: {computePercentADS(userRecords[0].name)}% | Số dư: {computeTotalExcess(userRecords[0].name).toLocaleString("vi-VN")}
       </div>
                 
                 
@@ -637,7 +876,7 @@ console.log(safeEmployees);
         }}
       >
         Tổng doanh số: {computeTotalSales(currentUser.name).toLocaleString("vi-VN")} | Chi phí Ads:{" "}
-        {computeTotalADS(currentUser.name).toLocaleString("vi-VN")} | %ADS: {computePercentADS(currentUser.name)}%
+        {computeTotalADS(currentUser.name).toLocaleString("vi-VN")} | %ADS: {computePercentADS(currentUser.name)}% | Số dư:{" "} {computeTotalExcess(currentUser.name).toLocaleString("vi-VN")}
       </div>
           
           <Row gutter={[16, 16]}>
