@@ -389,15 +389,15 @@ const productOptions = products.map((p) => p.name);
                 <Form.List name="products">
                   {(fields, { add, remove }) => (
                     <>
-                      {fields.map((field) => (
-                        <Space key={field.key} align="baseline">
+                      {fields.map((field,index) => (
+                        <Space key={`${field.key}-${index}`} align="baseline">
                           <Form.Item
                             {...field}
                             name={[field.name, "product"]}
                             fieldKey={[field.fieldKey, "product"]}
                             rules={[{ required: true, message: "Chọn sản phẩm" }]}
                           >
-                            <Select placeholder="Chọn sản phẩm" style={{ width: 200 }} showSearch>
+                            <Select placeholder="Chọn sản phẩm" style={{ width: 250 }} showSearch>
                               {productOptions.map((product) => (
                                 <Option key={product} value={product}>
                                   {product}
@@ -411,9 +411,9 @@ const productOptions = products.map((p) => p.name);
                             fieldKey={[field.fieldKey, "quantity"]}
                             rules={[{ required: true, message: "Nhập số lượng" }]}
                           >
-                            <Input type="number" placeholder="Số lượng" style={{ width: 80 }} />
+                            <Input type="number" placeholder="SL" style={{ width: 60 }} />
                           </Form.Item>
-                          <MinusCircleOutlined onClick={() => remove(field.name)} />
+                          {/* <MinusCircleOutlined onClick={() => remove(field.name)} /> */}
                         </Space>
                       ))}
                       <Form.Item>

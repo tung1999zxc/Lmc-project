@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useMemo, useEffect } from "react";
+import React, { useState,useRef, useMemo, useEffect } from "react";
 import {
   Table,
   Space,
@@ -20,6 +20,7 @@ import OrderForm from "./OrderForm";
 import isBetween from "dayjs/plugin/isBetween";
 import { useSelector } from "react-redux";
 import axios from "axios";
+
 // Gọi dayjs.extend bên ngoài component để không gọi lại mỗi lần render
 dayjs.extend(isBetween);
 import { useRouter } from 'next/navigation';
@@ -28,7 +29,7 @@ const OrderList = () => {
   // Lấy thông tin người dùng và danh sách nhân viên từ Redux
   const currentUser = useSelector((state) => state.user.currentUser);
   const router = useRouter(); 
-  
+  const roundRobinIndex = useRef(0); 
   useEffect(() => {
     if (!currentUser.name) {
       router.push("/login");
@@ -85,9 +86,11 @@ const OrderList = () => {
   const saleOptions = employees
     .filter((emp) => emp.position_team === "sale")
     .map((emp) => emp.name);
-  const salexulyOptions = employees
-    .filter((emp) => emp.position === "salexuly")
-    .map((emp) => emp.name);
+    const salexulyOptions = useMemo(() => {
+      return employees
+        .filter(emp => emp.position === "salexuly")
+        .map(emp => emp.name);
+    }, [employees]);
 
   // Lấy đơn hàng từ localStorage khi component mount
   // useEffect(() => {
@@ -116,35 +119,49 @@ const OrderList = () => {
 
   // Tính toán chọn nhân viên salexuly dựa trên số đơn hàng của hôm nay
   useEffect(() => {
-    if (currentUser.position ==="salefull") {
+    if (currentUser.position === "salefull") {
       setnamesalexuly(currentUser.name);
-      return
+      return;
     }
+  
     const getLocalDateString = (date) => {
       const year = date.getFullYear();
       const month = String(date.getMonth() + 1).padStart(2, "0");
       const day = String(date.getDate()).padStart(2, "0");
       return `${year}-${month}-${day}`;
     };
-
+  
     const todayStr = getLocalDateString(new Date());
     const filteredOrders = orders.filter(
       (order) => order.orderDate === todayStr
     );
+  
+    // Tính số đơn hàng của từng nhân viên trong salexulyOptions
     const employeeOrderCounts = salexulyOptions.map((employee) => ({
       name: employee,
-      count: filteredOrders.filter(
-        (order) => order.salexuly === employee
-      ).length,
+      count: filteredOrders.filter((order) => order.salexuly === employee).length,
     }));
+  
+    // Tìm số đơn tối thiểu
     const minCount = Math.min(...employeeOrderCounts.map((emp) => emp.count));
-    const selectedEmployee = employeeOrderCounts.find(
+  
+    // Lấy danh sách các ứng viên có số đơn bằng số nhỏ nhất
+    let candidates = employeeOrderCounts.filter(
       (emp) => emp.count === minCount
     );
-    if (selectedEmployee) {
+  
+    // Sắp xếp các ứng viên theo thứ tự tên (để thứ tự luôn cố định)
+    candidates.sort((a, b) => a.name.localeCompare(b.name));
+  
+    if (candidates.length > 0) {
+      // Lấy ứng viên theo vòng tròn
+      const index = roundRobinIndex.current % candidates.length;
+      const selectedEmployee = candidates[index];
+      // Tăng chỉ số roundRobin cho lần gọi sau
+      roundRobinIndex.current += 1;
       setnamesalexuly(selectedEmployee.name);
     }
-  }, [orders, salexulyOptions]);
+  }, [orders, salexulyOptions, currentUser]);
 
   // Lọc đơn hàng dựa trên vai trò và các filter được chọn
   const filteredOrders = useMemo(() => {
@@ -379,7 +396,42 @@ const OrderList = () => {
       dataIndex: "customerName",
       key: "customerName"
     },
-    { title: "TÊN PAGE", dataIndex: "pageName", key: "pageName" },
+    {
+      title: (
+        <Checkbox
+          checked={selectedColumns.includes("pageName")}
+          onChange={(e) => handleColumnSelect("pageName", e.target.checked)}
+        >
+          TÊN PAGE
+        </Checkbox>
+      ),
+      dataIndex: "pageName",
+      key: "pageName",
+    },
+    ...(currentUser.position !== "salexuly"
+      ? [
+          {
+            title: (
+              <Checkbox
+                checked={selectedColumns.includes("isShipping")}
+                onChange={(e) => handleColumnSelect("isShipping", e.target.checked)}
+              >
+                Công ty đóng hàng
+              </Checkbox>
+            ),
+            key: "isShipping",
+            dataIndex: "isShipping",
+            render: (_, record) => (
+              <Checkbox
+                checked={record.isShipping}
+                onChange={(e) =>
+                  handleShippingChange(record.id, e.target.checked)
+                }
+              />
+            ),
+          },
+        ]
+      : []),
     {
       title: (
         <Checkbox
@@ -389,83 +441,231 @@ const OrderList = () => {
           SẢN PHẨM
         </Checkbox>
       ),
-  
       key: "products",
       render: (_, record) => (
         <>
           {record.products &&
             record.products.map((item, index) => (
               <div key={index} style={{ whiteSpace: "nowrap" }}>
-                <strong>{item.product} </strong> - SL :{" "}
-                <strong>{item.quantity}</strong>
+                <strong>{item.product} </strong> - SL: <strong>{item.quantity}</strong>
               </div>
             ))}
         </>
-      )
+      ),
     },
-    { title: "QUÀ", dataIndex: "category", key: "category" },
-    
-    
-    ...(currentUser.position !== 'salexuly'
-      ? [
-        {
-          title: "Công ty đóng hàng",
-          key: "isShipping",
-          dataIndex: "isShipping",
-          render: (_, record) => (
-            <Checkbox
-              checked={record.isShipping}
-              onChange={(e) =>
-                handleShippingChange(record.id, e.target.checked)
-              }
-            />
-          )
-        },
-        ]
-      : []),
-    { title: "DOANH SỐ", dataIndex: "revenue", key: "revenue" },
-    { title: "DOANH THU", dataIndex: "profit", key: "profit" },
-    { title: "SALE", dataIndex: "sale", key: "sale" },
-    { title: "VẬN ĐƠN", dataIndex: "salexuly", key: "salexuly" },
-    { title: "MKT", dataIndex: "mkt", key: "mkt" },
-    { title: "ĐƠN", dataIndex: "saleReport", key: "saleReport" },
-    { title: "SĐT", dataIndex: "phone", key: "phone" },
-    { title: "ĐỊA CHỈ", dataIndex: "address", key: "address" },
     {
-      title: "THANH TOÁN",
+      title: (
+        <Checkbox
+          checked={selectedColumns.includes("category")}
+          onChange={(e) => handleColumnSelect("category", e.target.checked)}
+        >
+          QUÀ
+        </Checkbox>
+      ),
+      dataIndex: "category",
+      key: "category",
+    },
+   
+    {
+      title: (
+        <Checkbox
+          checked={selectedColumns.includes("revenue")}
+          onChange={(e) => handleColumnSelect("revenue", e.target.checked)}
+        >
+          DOANH SỐ
+        </Checkbox>
+      ),
+      dataIndex: "revenue",
+      key: "revenue",
+    },
+    {
+      title: (
+        <Checkbox
+          checked={selectedColumns.includes("profit")}
+          onChange={(e) => handleColumnSelect("profit", e.target.checked)}
+        >
+          DOANH THU
+        </Checkbox>
+      ),
+      dataIndex: "profit",
+      key: "profit",
+    },
+    {
+      title: (
+        <Checkbox
+          checked={selectedColumns.includes("sale")}
+          onChange={(e) => handleColumnSelect("sale", e.target.checked)}
+        >
+          SALE
+        </Checkbox>
+      ),
+      dataIndex: "sale",
+      key: "sale",
+    },
+    {
+      title: (
+        <Checkbox
+          checked={selectedColumns.includes("salexuly")}
+          onChange={(e) => handleColumnSelect("salexuly", e.target.checked)}
+        >
+          VẬN ĐƠN
+        </Checkbox>
+      ),
+      dataIndex: "salexuly",
+      key: "salexuly",
+    },
+    {
+      title: (
+        <Checkbox
+          checked={selectedColumns.includes("mkt")}
+          onChange={(e) => handleColumnSelect("mkt", e.target.checked)}
+        >
+          MKT
+        </Checkbox>
+      ),
+      dataIndex: "mkt",
+      key: "mkt",
+    },
+    {
+      title: (
+        <Checkbox
+          checked={selectedColumns.includes("saleReport")}
+          onChange={(e) => handleColumnSelect("saleReport", e.target.checked)}
+        >
+          ĐƠN
+        </Checkbox>
+      ),
+      dataIndex: "saleReport",
+      key: "saleReport",
+    },
+    {
+      title: (
+        <Checkbox
+          checked={selectedColumns.includes("phone")}
+          onChange={(e) => handleColumnSelect("phone", e.target.checked)}
+        >
+          SĐT
+        </Checkbox>
+      ),
+      dataIndex: "phone",
+      key: "phone",
+    },
+    {
+      title: (
+        <Checkbox
+          checked={selectedColumns.includes("address")}
+          onChange={(e) => handleColumnSelect("address", e.target.checked)}
+        >
+          ĐỊA CHỈ
+        </Checkbox>
+      ),
+      dataIndex: "address",
+      key: "address",
+    },
+    {
+      title: (
+        <Checkbox
+          checked={selectedColumns.includes("paymentStatus")}
+          onChange={(e) => handleColumnSelect("paymentStatus", e.target.checked)}
+        >
+          THANH TOÁN
+        </Checkbox>
+      ),
       dataIndex: "paymentStatus",
       key: "paymentStatus",
       render: (text) => (
         <Tag color={text === "ĐÃ THANH TOÁN" ? "green" : "red"}>{text}</Tag>
-      )
+      ),
     },
-    { title: "GHI CHÚ SALE", dataIndex: "note", key: "note" },
     {
-      title: "TÌNH TRẠNG GH",
+      title: (
+        <Checkbox
+          checked={selectedColumns.includes("note")}
+          onChange={(e) => handleColumnSelect("note", e.target.checked)}
+        >
+          GHI CHÚ SALE
+        </Checkbox>
+      ),
+      dataIndex: "note",
+      key: "note",
+    },
+    {
+      title: (
+        <Checkbox
+          checked={selectedColumns.includes("deliveryStatus")}
+          onChange={(e) => handleColumnSelect("deliveryStatus", e.target.checked)}
+        >
+          TÌNH TRẠNG GH
+        </Checkbox>
+      ),
       dataIndex: "deliveryStatus",
       key: "deliveryStatus",
       render: (text) => (
         <Tag color={text === "GIAO THÀNH CÔNG" ? "blue" : "orange"}>{text}</Tag>
-      )
+      ),
     },
-    { title: "MÃ VẬN ĐƠN", dataIndex: "trackingCode", key: "trackingCode" },
     {
-      title: "NGÀY GỬI",
+      title: (
+        <Checkbox
+          checked={selectedColumns.includes("trackingCode")}
+          onChange={(e) => handleColumnSelect("trackingCode", e.target.checked)}
+        >
+          MÃ VẬN ĐƠN
+        </Checkbox>
+      ),
+      dataIndex: "trackingCode",
+      key: "trackingCode",
+    },
+    {
+      title: (
+        <Checkbox
+          checked={selectedColumns.includes("shippingDate1")}
+          onChange={(e) => handleColumnSelect("shippingDate1", e.target.checked)}
+        >
+          NGÀY GỬI
+        </Checkbox>
+      ),
       dataIndex: "shippingDate1",
       key: "shippingDate1",
-      render: (text) => text && dayjs(text).format("DD/MM/YYYY")
+      render: (text) => text && dayjs(text).format("DD/MM/YYYY"),
     },
     {
-      title: "NGÀY NHẬN",
+      title: (
+        <Checkbox
+          checked={selectedColumns.includes("shippingDate2")}
+          onChange={(e) => handleColumnSelect("shippingDate2", e.target.checked)}
+        >
+          NGÀY NHẬN
+        </Checkbox>
+      ),
       dataIndex: "shippingDate2",
       key: "shippingDate2",
-      render: (text) => text && dayjs(text).format("DD/MM/YYYY")
+      render: (text) => text && dayjs(text).format("DD/MM/YYYY"),
     },
-    { title: "GHI CHÚ KHO", dataIndex: "noteKHO", key: "noteKHO" },
-    { title: "TT XỬ LÍ", dataIndex: "processStatus", key: "processStatus" },
-    // Thêm cột "Công ty đóng hàng" với Checkbox
-    
-   
+    {
+      title: (
+        <Checkbox
+          checked={selectedColumns.includes("noteKHO")}
+          onChange={(e) => handleColumnSelect("noteKHO", e.target.checked)}
+        >
+          GHI CHÚ KHO
+        </Checkbox>
+      ),
+      dataIndex: "noteKHO",
+      key: "noteKHO",
+    },
+    {
+      title: (
+        <Checkbox
+          checked={selectedColumns.includes("processStatus")}
+          onChange={(e) => handleColumnSelect("processStatus", e.target.checked)}
+        >
+          TT XỬ LÍ
+        </Checkbox>
+      ),
+      dataIndex: "processStatus",
+      key: "processStatus",
+    },
   ];
 // Lọc ra các cột đã được tick để hiển thị ở bảng phụ
 const selectedTableColumns = columns.filter((col) =>
@@ -765,17 +965,18 @@ const selectedTableColumns = columns.filter((col) =>
         {(currentUser.position === "leadSALE" ||
   currentUser.position === "managerSALE"
  ) && (
-  <Table
+  <Table 
     columns={selectedTableColumns}
     dataSource={[...filteredOrders].sort((a, b) => b.stt - a.stt)}
     rowKey="id"
     bordered
-    pagination={{ pageSize: 10 }}
+    pagination={{ pageSize: 50 }}
   />
 )}
         </Col>
         <Col flex="auto">
-        <Table
+       
+        <Table 
         columns={
           currentUser.position_team === "kho"
             ? columnsKHO
@@ -787,7 +988,7 @@ const selectedTableColumns = columns.filter((col) =>
         rowKey="id"
         scroll={{ x: 2500 }}
         bordered
-        pagination={{ pageSize: 10 }}
+        pagination={{ pageSize: 50 }}
       />
         </Col>
       </Row>
