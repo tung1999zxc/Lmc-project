@@ -656,9 +656,9 @@ const adminSummaryColumns = [
       key: 'percentAds',
       render: (_, record) => {
         const totalSalesForSelectedDate = computeTotalSalesForDate(record.date, record.name);
-        const total = record.oldMoney + record.request1 + record.request2;
+        const total = totalSalesForSelectedDate*17000*0.95;
         if (totalSalesForSelectedDate === 0) return 0;
-        const percent = Number(((total - record.excessMoney) / totalSalesForSelectedDate) * 100);
+        const percent = Number(((record.totalReceived) / total) * 100);
         
         let bgColor = "";
         if (percent < 30) {
