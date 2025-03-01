@@ -63,7 +63,10 @@ const BarChartComponent = dynamic(
       return (
         <BarChart width={600} height={300} data={data}>
           <CartesianGrid strokeDasharray="3 3" />
-          <XAxis dataKey="name" />
+          <XAxis 
+  dataKey="name" 
+  tickFormatter={(fullName) => formatEmployeeName(fullName)} 
+/>
            <YAxis tickFormatter={(value) => value.toLocaleString('vi-VN')} />
           <Tooltip formatter={(value) => value.toLocaleString('vi-VN')} />
 
@@ -104,31 +107,174 @@ const PieChartComponent = dynamic(
     }),
   { ssr: false, loading: () => <p>Loading Pie Chart...</p> }
 );
+const formatEmployeeName2 = (fullName) => {
+  const parts = fullName.trim().split(/\s+/);
+
+  // Trường hợp đặc biệt: "Hoàng Công Phi"
+  if (fullName.trim().toLowerCase() === "hoàng công phi") {
+    return "PhiHc";
+  }
+  if (fullName.trim().toLowerCase() === "team tuấn anh") {
+    return "Tuấn Anh";
+  }
+  if (fullName.trim().toLowerCase() === "hạnh tm") {
+    return "Hạnh TM";
+  }
+  if (fullName.trim().toLowerCase() === "bùi yến nhi") {
+    return "Bùi Nhi";
+  }
+  
+  if (fullName.trim().toLowerCase() === "nguyễn diệp anh") {
+    return "Diệp Anh";
+  }
+  
+  
+
+  if (parts.length === 4) {
+    // Nếu có 4 chữ:
+    // Nếu chữ cuối là "Anh", lấy cả chữ thứ 3 và chữ thứ 4
+    if (parts[3].toLowerCase() === "anh") {
+      return parts[2] + parts[3];
+    } else {
+      // Ngược lại, chỉ lấy chữ cuối
+      return parts[3];
+    }
+  } else if (parts.length === 3) {
+    // Nếu có 4 chữ:
+    // Nếu chữ cuối là "Anh", lấy cả chữ thứ 3 và chữ thứ 4
+    if (parts[2].toLowerCase() === "anh") {
+      return parts[1] + parts[2];
+    } else {
+      // Ngược lại, chỉ lấy chữ cuối
+      return parts[2];
+    }
+  }  
+  
+  else if (parts.length === 2) {
+    // Nếu có 3 chữ, chỉ lấy chữ cuối
+    return parts[1];
+  }
+  // Trường hợp khác, trả về tên đầy đủ ban đầu
+  return fullName;
+};
+const formatEmployeeName = (fullName, existingFormatted = new Set()) => {
+  const parts = fullName.trim().split(/\s+/);
+
+  // Trường hợp đặc biệt
+  if (fullName.trim().toLowerCase() === "hoàng công phi") {
+    // Không cần kiểm tra trùng, trả luôn "PhiHc"
+    existingFormatted.add("PhiHc");
+    return "PhiHc";
+  }
+  if (fullName.trim().toLowerCase() === "team tuấn anh") {
+    return "Tuấn Anh";
+  }
+  if (fullName.trim().toLowerCase() === "hạnh tm") {
+    return "Hạnh TM";
+  }
+  if (fullName.trim().toLowerCase() === "bùi yến nhi") {
+    return "Bùi Nhi";
+  }
+  if (fullName.trim().toLowerCase() === "đỗ uyển nhi") {
+    return "Uyển Nhi";
+  }
+  if (fullName.trim().toLowerCase() === "phan thị bích ngọc") {
+    return "Bích Ngọc";
+  }
+  
+  if (fullName.trim().toLowerCase() === "diệp anh") {
+    return "Diệp Anh";
+  }
+  let formatted;
+  if (parts.length === 4) {
+    // Nếu có 4 chữ
+    if (parts[3].toLowerCase() === "anh") {
+      formatted = parts[2] + parts[3]; // ví dụ: "MinhAnh"
+    } else {
+      formatted = parts[3]; // ban đầu chỉ lấy chữ cuối
+    }
+  } else if (parts.length === 3) {
+    if (parts[2].toLowerCase() === "anh") {
+      formatted = parts[1] + parts[2]; // ví dụ: "MinhAnh"
+    } else {
+      formatted = parts[2]; // ban đầu chỉ lấy chữ cuối
+    } // chỉ lấy chữ cuối
+  } else if (parts.length === 2) {
+    formatted = parts[1]; // chỉ lấy chữ cuối
+  } else {
+    formatted = fullName; // nếu không đủ 3 hoặc 4 chữ, trả về tên đầy đủ
+  }
+
+  // Nếu tên đã bị trùng (đã có trong set), ta sẽ kết hợp thêm chữ trước đó
+  if (existingFormatted.has(formatted) && parts.length >= 2) {
+    if (parts.length === 4) {
+      // Với 4 chữ, nếu chữ cuối không phải "Anh" (nếu chữ cuối là "Anh" thì đã được kết hợp)
+      formatted = parts[2] + parts[3];
+    } else if (parts.length === 3) {
+      formatted = parts[1] + parts[2];
+    }
+     else if (parts.length === 2) {
+      formatted = parts[1] + parts[2];
+    }
+  }
+  existingFormatted.add(formatted);
+  return formatted;
+};
 
 // Component biểu đồ nhóm (grouped double bar chart) hiển thị 2 series: profit và adsCost
 const GroupedDoubleBarChartComponent = dynamic(
   () =>
     Promise.resolve(({ data }) => {
-      const {ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend } = require('recharts');
+      const {
+        ResponsiveContainer,
+        BarChart,
+        Bar,
+        LabelList,
+        XAxis,
+        YAxis,
+        CartesianGrid,
+        Tooltip,
+        Legend,
+      } = require("recharts");
+
       return (
         <ResponsiveContainer width="100%" height={400}>
-        <BarChart  data={data}>
-          <CartesianGrid strokeDasharray="3 3" />
-          <XAxis dataKey="name" />
-           <YAxis tickFormatter={(value) => value.toLocaleString('vi-VN')} 
-             interval={0}
-             tickCount={10} />
-             dx={10} 
-          <Tooltip formatter={(value) => value.toLocaleString('vi-VN')} />
-
-          <Legend />
-          <Bar dataKey="profit" fill="#8884d8" />
-          <Bar dataKey="adsCost" fill="#FF8042" />
-        </BarChart></ResponsiveContainer>
+          <BarChart data={data}>
+            <CartesianGrid strokeDasharray="3 3" />
+            <XAxis 
+  dataKey="name" 
+  tickFormatter={(fullName) => formatEmployeeName(fullName)} 
+/>
+            <YAxis
+              tickFormatter={(value) => value.toLocaleString("vi-VN")}
+              // interval={0}
+              tickCount={12}
+              dx={11} // Dịch chuyển nhãn trục Y sang bên phải
+            />
+            <Tooltip formatter={(value) => value.toLocaleString("vi-VN")} />
+            <Legend />
+            <Bar dataKey="profit" fill="#8884d8">
+              <LabelList
+                dataKey="profit"
+                formatter={(value) => value.toLocaleString("vi-VN")}
+                position="top"
+              />
+            </Bar>
+            <Bar dataKey="adsCost" fill="#FF8042">
+              {/* <LabelList
+                dataKey="adsCost"
+                formatter={(value) => value.toLocaleString("vi-VN")}
+                position="top"
+              /> */}
+            </Bar>
+            
+          </BarChart>
+        </ResponsiveContainer>
       );
     }),
   { ssr: false, loading: () => <p>Loading Grouped Chart...</p> }
 );
+
 const GroupedDoubleBarChartComponent2 = dynamic(
   () =>
     Promise.resolve(({ data }) => {
@@ -137,7 +283,10 @@ const GroupedDoubleBarChartComponent2 = dynamic(
         <ResponsiveContainer width="100%" height={400}>
         <BarChart  data={data}>
           <CartesianGrid strokeDasharray="3 3" />
-          <XAxis dataKey="name" />
+          <XAxis 
+  dataKey="name" 
+  tickFormatter={(fullName) => formatEmployeeName(fullName)} 
+/>
            <YAxis tickFormatter={(value) => value.toLocaleString('vi-VN')} />
           <Tooltip formatter={(value) => value.toLocaleString('vi-VN')} />
 
@@ -168,7 +317,10 @@ const GroupedBarChartComponent = dynamic(
       return (
         <BarChart width={600} height={300} data={data}>
           <CartesianGrid strokeDasharray="3 3" />
-          <XAxis dataKey="team" />
+          <XAxis 
+  dataKey="team" 
+  tickFormatter={(fullName) => formatEmployeeName(fullName)} 
+/>
            <YAxis tickFormatter={(value) => value.toLocaleString('vi-VN')} />
           <Tooltip formatter={(value) => value.toLocaleString('vi-VN')} />
 
