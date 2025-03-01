@@ -289,7 +289,7 @@ function getLast30Days() {
   const saleEmployees = employees.filter(emp => emp.position_team === "sale");
   const employeeChartDataNewsale = saleEmployees.map(emp => {
     const sales = filteredOrders
-      .filter(order => order.sale === emp.name)
+      .filter(order => order.sale === emp.name || order.salexuly === emp.name)
       .reduce((sum, order) => sum + order.profit, 0);
     
     return { name: emp.name, profit: sales*17000 };
@@ -936,7 +936,7 @@ function getLast30Days() {
     
   </Tabs.TabPane>
   <Tabs.TabPane tab="SALE" key="SALE">
-  <h3>Doanh số &amp; chi phí Ads theo Nhân viên SALE</h3>
+  <h3>Doanh số Nhân viên SALE</h3>
 <div style={{ width: '100%' }}>
   <GroupedDoubleBarChartComponent2 data={employeeChartDataNewsale} />
 </div>
