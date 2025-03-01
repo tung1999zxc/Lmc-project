@@ -47,6 +47,8 @@ export async function POST(req) {
       shippingDate1,
       shippingDate2,
       employee_code_order,
+      istick,
+      isShipping,
       // Các trường khác nếu cần
     } = await req.json();
 
@@ -84,6 +86,8 @@ export async function POST(req) {
       shippingDate1,
       shippingDate2,
       employee_code_order,
+      istick,
+      isShipping,
       createdAt: new Date(),
     };
 

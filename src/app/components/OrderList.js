@@ -20,7 +20,7 @@ import OrderForm from "./OrderForm";
 import isBetween from "dayjs/plugin/isBetween";
 import { useSelector } from "react-redux";
 import axios from "axios";
-
+import ExportExcelButton from "./exportOrdersToExcel.js";
 // Gọi dayjs.extend bên ngoài component để không gọi lại mỗi lần render
 dayjs.extend(isBetween);
 import { useRouter } from 'next/navigation';
@@ -51,7 +51,9 @@ const OrderList = () => {
   const [selectedMKT, setSelectedMKT] = useState(undefined);
   const [selectedColumns, setSelectedColumns] = useState([]);
   const bangphu= selectedColumns.length;
-
+  const [totalQuantities, setTotalQuantities] = useState({});
+  const [initialOrders, setInitialOrders] = useState([]);
+  const [isdemkho, setIsdemkho] = useState(true);
   const fetchEmployees = async () => {
       
       try {
@@ -70,7 +72,8 @@ const OrderList = () => {
     fetchEmployees();
     
   }, []);
-
+   
+  
   // Danh sách thành viên team (dùng cho vai trò lead)
   const leadTeamMembers = employees
     .filter((employee) => employee.team_id === currentUser.team_id)
@@ -108,6 +111,7 @@ const OrderList = () => {
     try {
       const response = await axios.get("/api/orders");
       setOrders(response.data.data);
+      setInitialOrders(response.data.data);
     } catch (error) {
       console.error(error);
       message.error("Lỗi khi lấy đơn hàng");
@@ -271,6 +275,12 @@ const OrderList = () => {
                 return order.saleReport === "ĐỢI XN";
               case "done":
                 return order.saleReport === "DONE";
+              case "ok":
+                return order.saleReport === "OK";
+              case "istick":
+                return order.istick === true;
+              case "notick":
+                return order.istick === false;
               case "ero":
                 return order.salexuly === "";
               case "waiting_done":
@@ -310,7 +320,36 @@ const OrderList = () => {
     currentUser,
     leadTeamMembers
   ]);
-
+  const calculateTotalQuantities = (orders) => {
+    return orders.reduce((acc, order) => {
+      if (order.products && Array.isArray(order.products)) {
+        order.products.forEach((productItem) => {
+          const { product, quantity } = productItem;
+          // Ép quantity về kiểu số để thực hiện phép cộng số học
+          const numQuantity = Number(quantity);
+          acc[product] = (acc[product] || 0) + numQuantity;
+        });
+      }
+      return acc;
+    }, {});
+  };
+  // Hàm xử lý khi bấm nút tính tổng
+  const handleCalculateTotals = () => {
+    const totals = calculateTotalQuantities(filteredOrders);
+    setTotalQuantities(totals);
+  };
+      
+  const columns3 = Object.keys(totalQuantities).map((product) => ({
+    title: product,          // Tiêu đề cột là tên sản phẩm
+    dataIndex: product,      // Dữ liệu lấy từ key của đối tượng
+    key: product,
+  }));
+  const dataSource3 = [
+    {
+      key: '1',
+      ...totalQuantities,
+    },
+  ];
   // Hàm cập nhật checkbox "Công ty đóng hàng"
   const handleShippingChange = async (orderId, checked) => {
     try {
@@ -716,6 +755,53 @@ const selectedTableColumns = columns.filter((col) =>
     { title: "GHI CHÚ SALE", dataIndex: "note", key: "note" }
   ];
 
+  const handleSelectAllIstick = (value) => {
+    setOrders((prevOrders) =>
+      prevOrders.map((order) =>
+        filteredOrders.some((fOrder) => fOrder.id === order.id)
+          ? { ...order, istick: value }
+          : order
+      )
+    );
+  };
+  const handleIstickChange = (orderId, value) => {
+    setOrders((prevOrders) =>
+      prevOrders.map((order) =>
+        order.id === orderId ? { ...order, istick: value } : order
+      )
+    );
+  };
+  
+  const allRowsSelected = filteredOrders.length > 0 && filteredOrders.every(order => order.istick);
+  
+  const handleSaveIstick = async () => {
+    // Lọc ra các đơn hàng mà giá trị istick đã thay đổi so với ban đầu
+    const ordersToUpdate = orders.filter((order) => {
+      const originalOrder = initialOrders.find((o) => o.id === order.id);
+      // Nếu đơn hàng mới (không có trong initialOrders) hoặc có sự thay đổi về istick
+      return !originalOrder || order.istick !== originalOrder.istick;
+    });
+  
+    if (ordersToUpdate.length === 0) {
+      message.info("Không có đơn hàng nào thay đổi");
+      return;
+    }
+  
+    try {
+      // Gửi chỉ các trường cần cập nhật (id và istick)
+      const response = await axios.post("/api/orders/updateIstick", {
+        orders: ordersToUpdate.map(({ id, istick }) => ({ id, istick })),
+      });
+      message.success(response.data.message || "Đã lưu cập nhật các đơn");
+      // Cập nhật lại initialOrders sau khi lưu để làm mốc mới
+      setInitialOrders(orders);
+      fetchOrders();
+    } catch (error) {
+      console.error(error);
+      message.error("Lỗi khi lưu các đơn");
+    }
+  };
+
   const columnsKHO = [
     {
       title: "Thao Tác",
@@ -724,6 +810,27 @@ const selectedTableColumns = columns.filter((col) =>
         <Space>
           <Button icon={<EditOutlined />} onClick={() => handleEdit(record)} />
         </Space>
+      ),
+    },
+    {
+      title: (<>
+        <Checkbox
+          checked={allRowsSelected}
+          onChange={(e) => handleSelectAllIstick(e.target.checked)}
+        >
+          In đơn
+        </Checkbox>
+        <Button disabled={!searchText} type="primary" onClick={handleSaveIstick}>
+        Lưu 
+      </Button></>
+      ),
+      key: "istick",
+      dataIndex: "istick",
+      render: (_, record) => (
+        <Checkbox
+          checked={record.istick || false}
+          onChange={(e) => handleIstickChange(record.id, e.target.checked)}
+        />
       ),
     },
     {
@@ -760,6 +867,63 @@ const selectedTableColumns = columns.filter((col) =>
       ),
       dataIndex: "customerName",
       key: "customerName",
+    },
+    {
+      title: (
+        <Checkbox
+          checked={selectedColumns.includes("phone")}
+          onChange={(e) => handleColumnSelect("phone", e.target.checked)}
+        >
+          SĐT
+        </Checkbox>
+      ),
+      dataIndex: "phone",
+      key: "phone",
+    },
+    {
+      title: (
+        <Checkbox
+          checked={selectedColumns.includes("address")}
+          onChange={(e) => handleColumnSelect("address", e.target.checked)}
+        >
+          ĐỊA CHỈ
+        </Checkbox>
+      ),
+      dataIndex: "address",
+      key: "address",
+    },
+    {
+      title: (
+        <Checkbox
+          checked={selectedColumns.includes("products")}
+          onChange={(e) => handleColumnSelect("products", e.target.checked)}
+        >
+          SẢN PHẨM
+        </Checkbox>
+      ),
+      key: "products",
+      render: (_, record) => (
+        <>
+          {record.products &&
+            record.products.map((item, index) => (
+              <div key={index} style={{ whiteSpace: "nowrap" }}>
+                <strong>{item.product}</strong> - SL: <strong>{item.quantity}</strong>
+              </div>
+            ))}
+        </>
+      ),
+    },
+    {
+      title: (
+        <Checkbox
+          checked={selectedColumns.includes("category")}
+          onChange={(e) => handleColumnSelect("category", e.target.checked)}
+        >
+          QUÀ
+        </Checkbox>
+      ),
+      dataIndex: "category",
+      key: "category",
     },
     {
       title: (
@@ -829,63 +993,8 @@ const selectedTableColumns = columns.filter((col) =>
     },
     // Cột TÊN KHÁCH đã có checkbox, giữ nguyên:
   
-    {
-      title: (
-        <Checkbox
-          checked={selectedColumns.includes("products")}
-          onChange={(e) => handleColumnSelect("products", e.target.checked)}
-        >
-          SẢN PHẨM
-        </Checkbox>
-      ),
-      key: "products",
-      render: (_, record) => (
-        <>
-          {record.products &&
-            record.products.map((item, index) => (
-              <div key={index} style={{ whiteSpace: "nowrap" }}>
-                <strong>{item.product}</strong> - SL: <strong>{item.quantity}</strong>
-              </div>
-            ))}
-        </>
-      ),
-    },
-    {
-      title: (
-        <Checkbox
-          checked={selectedColumns.includes("category")}
-          onChange={(e) => handleColumnSelect("category", e.target.checked)}
-        >
-          QUÀ
-        </Checkbox>
-      ),
-      dataIndex: "category",
-      key: "category",
-    },
-    {
-      title: (
-        <Checkbox
-          checked={selectedColumns.includes("phone")}
-          onChange={(e) => handleColumnSelect("phone", e.target.checked)}
-        >
-          SĐT
-        </Checkbox>
-      ),
-      dataIndex: "phone",
-      key: "phone",
-    },
-    {
-      title: (
-        <Checkbox
-          checked={selectedColumns.includes("address")}
-          onChange={(e) => handleColumnSelect("address", e.target.checked)}
-        >
-          ĐỊA CHỈ
-        </Checkbox>
-      ),
-      dataIndex: "address",
-      key: "address",
-    },
+    
+    
     {
       title: (
         <Checkbox
@@ -983,6 +1092,8 @@ const selectedTableColumns = columns.filter((col) =>
       shippingDate1: values.shippingDate1 || "",
       shippingDate2: values.shippingDate2 || "",
       employee_code_order: currentUser.employee_code,
+      istick: false,
+      isShipping: false,
     };
   
     try {
@@ -1000,10 +1111,29 @@ const selectedTableColumns = columns.filter((col) =>
       message.error("Lỗi khi lưu đơn hàng");
     }
   };
-  
+  const filteredOrdersForExcel = orders
+  .filter(order =>
+    order.saleReport === "DONE" &&
+    order.istick === true &&
+    order.deliveryStatus === ""
+  )
+  .map(order => ({
+    STT: order.stt,
+    NAME: order.customerName,
+    Address: order.address,
+    Phone: order.phone,
+    Products: order.products
+      ? order.products
+          .map(item => `${item.product} (SL: ${item.quantity})`)
+          .join(", ")
+      : "",
+    category: order.category,
+  })); 
   return (
     <div style={{ padding: 24 }}>
-      <div style={{ marginBottom: 16 }}>
+      
+      <Row>
+      <Col span={6}><div style={{ marginBottom: 16 }}>
         <Button
           type="primary"
           onClick={handleAddNew}
@@ -1016,8 +1146,24 @@ const selectedTableColumns = columns.filter((col) =>
         >
           Thêm đơn hàng mới
         </Button>
-      </div>
-
+       
+      </div> </Col>
+      {currentUser.position_team==="kho" && <Col span={5}>
+      <Table 
+      columns={columns3} 
+      dataSource={dataSource3} 
+      pagination={false}  // Không hiển thị phân trang nếu chỉ có 1 dòng
+      bordered
+    />
+      <Button
+          type="primary"
+          onClick={handleCalculateTotals}
+          
+        >
+         Đếm SL 
+        </Button> </Col>}
+      </Row>
+      
       <Row gutter={[16, 16]} style={{ marginBottom: 24 }}>
         <Col span={4}>
           <RangePicker
@@ -1042,6 +1188,8 @@ const selectedTableColumns = columns.filter((col) =>
             placeholder="Chọn bộ lọc"
             allowClear
             options={[
+              { value: "istick", label: "ĐƠN ĐÃ IN" },
+              { value: "notick", label: "ĐƠN CHƯA IN" },
               { value: "today", label: "Đơn mới trong ngày" },
               { value: "khoshiping", label: "Kho đóng hàng" },
               { value: "waitDelivered", label: "Chưa gửi hàng" },
@@ -1061,6 +1209,7 @@ const selectedTableColumns = columns.filter((col) =>
               { value: "ero", label: "Đơn thiếu sale xử lý" },
               { value: "today", label: "Đơn mới trong ngày" },
               { value: "done", label: "Đơn đã Done" },
+              { value: "ok", label: "Đơn OK" },
               { value: "waiting_done", label: "Đơn chưa Done" },
               { value: "isshiping", label: "Công Ty đóng hàng" },
               { value: "khoshiping", label: "Kho đóng hàng" },
@@ -1107,6 +1256,11 @@ const selectedTableColumns = columns.filter((col) =>
             showSearch
           />
         </Col>
+        {currentUser.position_team==="kho" &&
+        <Col span={2}>
+        <ExportExcelButton orders={filteredOrdersForExcel} />
+          
+        </Col>}
       </Row>
 
       

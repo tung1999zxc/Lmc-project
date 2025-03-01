@@ -658,7 +658,7 @@ const adminSummaryColumns = [
         const totalSalesForSelectedDate = computeTotalSalesForDate(record.date, record.name);
         const total = totalSalesForSelectedDate*17000*0.95;
         if (totalSalesForSelectedDate === 0) return 0;
-        const percent = Number(((record.totalReceived) / total) * 100);
+        const percent = Number(((record.request1+record.request2) / total) * 100);
         
         let bgColor = "";
         if (percent < 30) {
