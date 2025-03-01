@@ -479,7 +479,7 @@ const productOptions = products.map((p) => p.name);
                   </Select>
                 </Form.Item>
                 <Form.Item label="ĐƠN" name="saleReport">
-                  <Select>
+                  <Select allowClear>
                     {saleBaoOptions.map((report) => (
                       <Option key={report} value={report}>
                         {report}

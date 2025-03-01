@@ -687,21 +687,25 @@ function getLast30Days() {
 
   // Thống kê để dục chuyển khoản
   const giaoThanhCongKW = filteredOrders
-    .filter(order => order.paymentStatus === "CHƯA THANH TOÁN" && order.deliveryStatus === "GIAO THÀNH CÔNG")
+    .filter(order => order.paymentStatus === "CHƯA THANH TOÁN" && order.deliveryStatus === "GIAO THÀNH CÔNG" &&order.saleReport === "DONE")
     .reduce((sum, order) => sum + order.profit, 0);
   const daGuiHangKW = filteredOrders
-    .filter(order => order.paymentStatus === "CHƯA THANH TOÁN" && order.deliveryStatus === "ĐÃ GỦI HÀNG")
+    .filter(order => order.paymentStatus === "CHƯA THANH TOÁN" && order.deliveryStatus === "ĐÃ GỬI HÀNG" &&order.saleReport === "DONE")
+    .reduce((sum, order) => sum + order.profit, 0);
+  const chuaGuiHangKW = filteredOrders
+    .filter(order => order.paymentStatus === "CHƯA THANH TOÁN" && (order.deliveryStatus === ""||order.deliveryStatus === "BỊ BẮT CHỜ GỬI LẠI") && order.saleReport === "DONE" )
     .reduce((sum, order) => sum + order.profit, 0);
 
   const transferData = [
-    { key: "KW", currency: "KW", giaoThanhCong: giaoThanhCongKW, daGuiHang: daGuiHangKW },
-    { key: "VND", currency: "VND", giaoThanhCong: giaoThanhCongKW * exchangeRate, daGuiHang: daGuiHangKW * exchangeRate }
+    { key: "KW", currency: "KW", giaoThanhCong: giaoThanhCongKW, daGuiHang: daGuiHangKW ,chuaGuiHang:chuaGuiHangKW},
+    { key: "VND", currency: "VND", giaoThanhCong: giaoThanhCongKW * exchangeRate, daGuiHang: daGuiHangKW * exchangeRate,chuaGuiHang:chuaGuiHangKW*exchangeRate }
   ];
 
   const transferColumns = [
     { title: "Tiền tệ", dataIndex: "currency", key: "currency" },
     { title: "Giao thành công", dataIndex: "giaoThanhCong", key: "giaoThanhCong", render: (value) => value.toLocaleString() },
-    { title: "Đã gửi hàng", dataIndex: "daGuiHang", key: "daGuiHang", render: (value) => value.toLocaleString() }
+    { title: "Đã gửi hàng", dataIndex: "daGuiHang", key: "daGuiHang", render: (value) => value.toLocaleString() },
+    { title: "Chưa gửi hàng", dataIndex: "chuaGuiHang", key: "chuaGuiHang", render: (value) => value.toLocaleString() }
   ];
 
   // Bảng Tổng
