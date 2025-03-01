@@ -297,7 +297,8 @@ const InventoryPage = () => {
           .filter(
             (order) =>
               order.deliveryStatus === 'ĐÃ GỬI HÀNG' ||
-              order.deliveryStatus === 'GIAO THÀNH CÔNG'
+              order.deliveryStatus === 'GIAO THÀNH CÔNG'||
+              order.deliveryStatus === 'BỊ BẮT CHỜ GỬI LẠI'
           )
           .reduce((acc, order) => {
             if (order.products && order.products.length > 0) {
@@ -319,7 +320,8 @@ const InventoryPage = () => {
           .filter(
             (order) =>
               order.deliveryStatus === 'ĐÃ GỬI HÀNG' ||
-              order.deliveryStatus === 'GIAO THÀNH CÔNG'
+              order.deliveryStatus === 'GIAO THÀNH CÔNG'||
+              order.deliveryStatus === 'BỊ BẮT CHỜ GỬI LẠI'
           )
           .reduce((acc, order) => {
             if (order.products && order.products.length > 0) {
@@ -342,7 +344,8 @@ const InventoryPage = () => {
           .filter(
             (order) =>
               order.deliveryStatus === 'ĐÃ GỬI HÀNG' ||
-              order.deliveryStatus === 'GIAO THÀNH CÔNG'
+              order.deliveryStatus === 'GIAO THÀNH CÔNG'||
+              order.deliveryStatus === 'BỊ BẮT CHỜ GỬI LẠI'
           )
           .reduce((acc, order) => {
             if (order.products && order.products.length > 0) {
@@ -387,7 +390,8 @@ const InventoryPage = () => {
           .filter(
             (order) =>
               order.deliveryStatus === 'ĐÃ GỬI HÀNG' ||
-              order.deliveryStatus === 'GIAO THÀNH CÔNG'
+              order.deliveryStatus === 'GIAO THÀNH CÔNG'||
+              order.deliveryStatus === 'BỊ BẮT CHỜ GỬI LẠI'
           )
           .reduce((acc, order) => {
             if (order.products && order.products.length > 0) {

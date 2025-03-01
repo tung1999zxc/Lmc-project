@@ -50,6 +50,7 @@ const OrderList = () => {
   const [selectedSale, setSelectedSale] = useState(undefined);
   const [selectedMKT, setSelectedMKT] = useState(undefined);
   const [selectedColumns, setSelectedColumns] = useState([]);
+  const bangphu= selectedColumns.length;
 
   const fetchEmployees = async () => {
       
@@ -270,10 +271,16 @@ const OrderList = () => {
                 return order.saleReport === "ĐỢI XN";
               case "done":
                 return order.saleReport === "DONE";
+              case "ero":
+                return order.salexuly === "";
               case "waiting_done":
                 return order.saleReport !== "DONE";
+              case "khoshiping":
+                return order.isShipping === false;
               case "isshiping":
                 return order.isShipping === true;
+              case "waitDelivered":
+                return order.deliveryStatus === "";
               
               default:
                 return true;
@@ -348,7 +355,8 @@ const OrderList = () => {
             />
           </Popconfirm>
         </Space>)
-      }
+      },
+      width: 50,
     },
     {
       // Ví dụ với cột "NGÀY ĐẶT": thêm checkbox trong tiêu đề
@@ -362,7 +370,8 @@ const OrderList = () => {
       ),
       dataIndex: "orderDate",
       key: "orderDate",
-      render: (text) => dayjs(text).format("DD/MM/YYYY")
+      render: (text) => dayjs(text).format("DD/MM"),
+      width: 50,
     },
     // Ví dụ cho một cột khác có checkbox trong tiêu đề
         
@@ -378,7 +387,9 @@ const OrderList = () => {
             </Checkbox>
           ),
           dataIndex: "stt",       
-          key: "stt"
+          key: "stt",
+         
+         
         },
         ]
       : []),
@@ -411,14 +422,7 @@ const OrderList = () => {
     ...(currentUser.position !== "salexuly"
       ? [
           {
-            title: (
-              <Checkbox
-                checked={selectedColumns.includes("isShipping")}
-                onChange={(e) => handleColumnSelect("isShipping", e.target.checked)}
-              >
-                Công ty đóng hàng
-              </Checkbox>
-            ),
+            title:"Công ty đóng hàng", 
             key: "isShipping",
             dataIndex: "isShipping",
             render: (_, record) => (
@@ -561,6 +565,8 @@ const OrderList = () => {
       ),
       dataIndex: "address",
       key: "address",
+      render: (text) => <div style={{ width: 200,  }}>{text}</div>,
+      
     },
     {
       title: (
@@ -588,6 +594,7 @@ const OrderList = () => {
       ),
       dataIndex: "note",
       key: "note",
+      render: (text) => <div style={{ width: 200,  }}><h3>{text} </h3></div>,
     },
     {
       title: (
@@ -715,71 +722,194 @@ const selectedTableColumns = columns.filter((col) =>
       key: "action",
       render: (_, record) => (
         <Space>
-          <Button
-            icon={<EditOutlined />}
-            onClick={() => handleEdit(record)}
-          />
+          <Button icon={<EditOutlined />} onClick={() => handleEdit(record)} />
         </Space>
-      )
+      ),
     },
     {
       title: "BÊN ĐÓNG HÀNG",
       key: "isShipping",
       dataIndex: "isShipping",
       render: (_, record) =>
-        record.isShipping ? "Công ty đóng hàng" : "Kho đóng hàng"
+        record.isShipping ? "Công ty đóng hàng" : "Kho đóng hàng",
     },
-    { title: "STT", dataIndex: "stt", key: "stt" },
+    
+        {
+          title: (
+            <Checkbox
+              checked={selectedColumns.includes("stt")}
+              onChange={(e) => handleColumnSelect("stt", e.target.checked)}
+            >
+              STT
+            </Checkbox>
+          ),
+          dataIndex: "stt",       
+          key: "stt",
+        
+         
+        },
+       
     {
-      title: "NGÀY ĐẶT",
+      title: (
+        <Checkbox
+          checked={selectedColumns.includes("customerName")}
+          onChange={(e) => handleColumnSelect("customerName", e.target.checked)}
+        >
+          TÊN KHÁCH
+        </Checkbox>
+      ),
+      dataIndex: "customerName",
+      key: "customerName",
+    },
+    {
+      title: (
+        <Checkbox
+          checked={selectedColumns.includes("orderDate")}
+          onChange={(e) => handleColumnSelect("orderDate", e.target.checked)}
+        >
+          NGÀY ĐẶT
+        </Checkbox>
+      ),
       dataIndex: "orderDate",
       key: "orderDate",
-      render: (text) => dayjs(text).format("DD/MM/YYYY")
+      render: (text) => dayjs(text).format("DD/MM"),
     },
     {
-      title: "TÌNH TRẠNG GH",
+      title: (
+        <Checkbox
+          checked={selectedColumns.includes("deliveryStatus")}
+          onChange={(e) => handleColumnSelect("deliveryStatus", e.target.checked)}
+        >
+          TÌNH TRẠNG GH
+        </Checkbox>
+      ),
       dataIndex: "deliveryStatus",
       key: "deliveryStatus",
       render: (text) => (
-        <Tag color={text === "GIAO THÀNH CÔNG" ? "blue" : "orange"}>
-          {text}
-        </Tag>
-      )
+        <Tag color={text === "GIAO THÀNH CÔNG" ? "blue" : "orange"}>{text}</Tag>
+      ),
     },
-    { title: "MÃ VẬN ĐƠN", dataIndex: "trackingCode", key: "trackingCode" },
-    { title: "TÊN KHÁCH", dataIndex: "customerName", key: "customerName" },
     {
-      title: "SẢN PHẨM",
+      title: (
+        <Checkbox
+          checked={selectedColumns.includes("trackingCode")}
+          onChange={(e) => handleColumnSelect("trackingCode", e.target.checked)}
+        >
+          MÃ VẬN ĐƠN
+        </Checkbox>
+      ),
+      dataIndex: "trackingCode",
+      key: "trackingCode",
+    },
+    {
+      title: (
+        <Checkbox
+          checked={selectedColumns.includes("shippingDate1")}
+          onChange={(e) => handleColumnSelect("shippingDate1", e.target.checked)}
+        >
+          NGÀY GỬI
+        </Checkbox>
+      ),
+      dataIndex: "shippingDate1",
+      key: "shippingDate1",
+      render: (text) => text && dayjs(text).format("DD/MM/YYYY"),
+    },
+    {
+      title: (
+        <Checkbox
+          checked={selectedColumns.includes("shippingDate2")}
+          onChange={(e) => handleColumnSelect("shippingDate2", e.target.checked)}
+        >
+          NGÀY NHẬN
+        </Checkbox>
+      ),
+      dataIndex: "shippingDate2",
+      key: "shippingDate2",
+      render: (text) => text && dayjs(text).format("DD/MM/YYYY"),
+    },
+    // Cột TÊN KHÁCH đã có checkbox, giữ nguyên:
+  
+    {
+      title: (
+        <Checkbox
+          checked={selectedColumns.includes("products")}
+          onChange={(e) => handleColumnSelect("products", e.target.checked)}
+        >
+          SẢN PHẨM
+        </Checkbox>
+      ),
       key: "products",
       render: (_, record) => (
         <>
           {record.products &&
             record.products.map((item, index) => (
               <div key={index} style={{ whiteSpace: "nowrap" }}>
-                <strong>{item.product} </strong> - SL :{" "}
-                <strong>{item.quantity}</strong>
+                <strong>{item.product}</strong> - SL: <strong>{item.quantity}</strong>
               </div>
             ))}
         </>
-      )
-    },
-    { title: "QUÀ", dataIndex: "category", key: "category" },
-    { title: "SĐT", dataIndex: "phone", key: "phone" },
-    { title: "ĐỊA CHỈ", dataIndex: "address", key: "address" },
-    { title: "GHI CHÚ SALE", dataIndex: "note", key: "note" },
-    { title: "GHI CHÚ KHO", dataIndex: "noteKHO", key: "noteKHO" },
-    {
-      title: "NGÀY GỬI",
-      dataIndex: "shippingDate1",
-      key: "shippingDate1",
-      render: (text) => text && dayjs(text).format("DD/MM/YYYY")
+      ),
     },
     {
-      title: "NGÀY NHẬN",
-      dataIndex: "shippingDate2",
-      key: "shippingDate2",
-      render: (text) => text && dayjs(text).format("DD/MM/YYYY")
-    }
+      title: (
+        <Checkbox
+          checked={selectedColumns.includes("category")}
+          onChange={(e) => handleColumnSelect("category", e.target.checked)}
+        >
+          QUÀ
+        </Checkbox>
+      ),
+      dataIndex: "category",
+      key: "category",
+    },
+    {
+      title: (
+        <Checkbox
+          checked={selectedColumns.includes("phone")}
+          onChange={(e) => handleColumnSelect("phone", e.target.checked)}
+        >
+          SĐT
+        </Checkbox>
+      ),
+      dataIndex: "phone",
+      key: "phone",
+    },
+    {
+      title: (
+        <Checkbox
+          checked={selectedColumns.includes("address")}
+          onChange={(e) => handleColumnSelect("address", e.target.checked)}
+        >
+          ĐỊA CHỈ
+        </Checkbox>
+      ),
+      dataIndex: "address",
+      key: "address",
+    },
+    {
+      title: (
+        <Checkbox
+          checked={selectedColumns.includes("note")}
+          onChange={(e) => handleColumnSelect("note", e.target.checked)}
+        >
+          GHI CHÚ SALE
+        </Checkbox>
+      ),
+      dataIndex: "note",
+      key: "note",
+    },
+    {
+      title: (
+        <Checkbox
+          checked={selectedColumns.includes("noteKHO")}
+          onChange={(e) => handleColumnSelect("noteKHO", e.target.checked)}
+        >
+          GHI CHÚ KHO
+        </Checkbox>
+      ),
+      dataIndex: "noteKHO",
+      key: "noteKHO",
+    },
   ];
 
   // Xử lý mở form thêm mới, sửa và xóa đơn hàng
@@ -906,16 +1036,35 @@ const selectedTableColumns = columns.filter((col) =>
           />
         </Col>
         <Col span={5}>
-          <Select
+        {currentUser.position_team==="kho" ?(<Select
             mode="multiple"
             style={{ width: "100%" }}
             placeholder="Chọn bộ lọc"
             allowClear
             options={[
               { value: "today", label: "Đơn mới trong ngày" },
+              { value: "khoshiping", label: "Kho đóng hàng" },
+              { value: "waitDelivered", label: "Chưa gửi hàng" },
+              { value: "not_delivered", label: "Đã gửi hàng" },
+              { value: "delivered", label: "Giao thành công" },
+              { value: "isshiping", label: "Công Ty đóng hàng" },
+              { value: "duplicate_name", label: "Trùng tên khách" },
+              
+            ]}
+            onChange={(values) => setSelectedFilters(values)}
+          />) :(<Select
+            mode="multiple"
+            style={{ width: "100%" }}
+            placeholder="Chọn bộ lọc"
+            allowClear
+            options={[
+              { value: "ero", label: "Đơn thiếu sale xử lý" },
+              { value: "today", label: "Đơn mới trong ngày" },
               { value: "done", label: "Đơn đã Done" },
               { value: "waiting_done", label: "Đơn chưa Done" },
               { value: "isshiping", label: "Công Ty đóng hàng" },
+              { value: "khoshiping", label: "Kho đóng hàng" },
+              { value: "waitDelivered", label: "Chưa gửi hàng" },
              
               { value: "not_delivered", label: "Đã gửi hàng" },
               { value: "delivered", label: "Giao thành công" },
@@ -927,7 +1076,8 @@ const selectedTableColumns = columns.filter((col) =>
               { value: "waiting_approval", label: "Đợi xác nhận" }
             ]}
             onChange={(values) => setSelectedFilters(values)}
-          />
+          />) }
+          
         </Col>
         <Col span={4}>
           <Select style={{ width: "100%" }}
@@ -962,21 +1112,23 @@ const selectedTableColumns = columns.filter((col) =>
       
 <Row gutter={16} wrap={false} style={{ display: "flex", alignItems: "flex-start" }}>
         <Col flex="none">
-        {(currentUser.position === "leadSALE" ||
-  currentUser.position === "managerSALE"
+        {(  selectedColumns.length > 0
  ) && (
-  <Table 
+  <Table  
+  
     columns={selectedTableColumns}
     dataSource={[...filteredOrders].sort((a, b) => b.stt - a.stt)}
     rowKey="id"
     bordered
-    pagination={{ pageSize: 50 }}
+    // pagination={{ pageSize: 50 }}
+    pagination={false}
   />
 )}
         </Col>
         <Col flex="auto">
        
         <Table 
+        
         columns={
           currentUser.position_team === "kho"
             ? columnsKHO
@@ -986,9 +1138,9 @@ const selectedTableColumns = columns.filter((col) =>
         }
         dataSource={[...filteredOrders].sort((a, b) => b.stt - a.stt)}
         rowKey="id"
-        scroll={{ x: 2500 }}
+        
         bordered
-        pagination={{ pageSize: 50 }}
+        pagination={false}
       />
         </Col>
       </Row>

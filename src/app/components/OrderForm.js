@@ -107,7 +107,7 @@ const handlePageNameChange = (value) => {
   const saleBaoOptions = ["DONE","OK", "HỦY", "ĐỢI XN", "NGUY CƠ", "BÙNG", "ĐANG UP", "CHECK"];
   const massOptions = ["Nặng", "Nhẹ"];
   const thanhToanOptions = ["ĐÃ THANH TOÁN", "CHƯA THANH TOÁN"];
-  const tinhTrangGHOptions = ["ĐÃ GỬI HÀNG", "GIAO THÀNH CÔNG"];
+  const tinhTrangGHOptions = ["ĐÃ GỬI HÀNG", "GIAO THÀNH CÔNG","BỊ BẮT CHỜ GỬI LẠI"];
 const fetchNamePage = async () => {
     try {
       const response = await axios.get('/api/pageName');
