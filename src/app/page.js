@@ -126,7 +126,7 @@ const GroupedDoubleBarChartComponent = dynamic(
 const GroupedDoubleBarChartComponent2 = dynamic(
   () =>
     Promise.resolve(({ data }) => {
-      const {ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend } = require('recharts');
+      const {ResponsiveContainer, BarChart,Cell, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend } = require('recharts');
       return (
         <ResponsiveContainer width="100%" height={400}>
         <BarChart  data={data}>
@@ -135,7 +135,11 @@ const GroupedDoubleBarChartComponent2 = dynamic(
           <YAxis />
           <Tooltip />
           <Legend />
-          <Bar dataKey="profit" fill="#8884d8" />
+          <Bar dataKey="profit">
+              {data.map((entry, index) => (
+                <Cell key={`cell-${index}`} fill={entry.fill} />
+              ))}
+            </Bar>
          
         </BarChart></ResponsiveContainer>
       );
@@ -292,8 +296,18 @@ function getLast30Days() {
       .filter(order => order.sale === emp.name || order.salexuly === emp.name)
       .reduce((sum, order) => sum + order.profit, 0);
     
-    return { name: emp.name, profit: sales*17000 };
+    let fillColor = "#8884d8"; // Màu mặc định
+    if (emp.position === "salenhapdon") {
+      fillColor = "#8884d8"; // ví dụ: màu xanh tím
+    } else if (emp.position === "salexuly") {
+      fillColor = "#82ca9d"; // ví dụ: màu xanh lá nhạt
+    } else if (emp.position === "salefull") {
+      fillColor = "#ffc658"; // ví dụ: màu vàng
+    }
+    
+    return { name: emp.name, profit: sales * 17000, fill: fillColor };
   });
+  
 
   // === Biểu đồ doanh số theo team (Grouped Double Bar Chart) ===
   const teamChartDataNew = teams.map(team => {
