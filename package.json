@@ -27,7 +27,8 @@
     "react-redux": "^9.2.0",
     "react-router-dom": "^7.1.5",
     "recharts": "^2.15.1",
-    "xlsx": "^0.18.5"
+    "xlsx": "^0.18.5",
+    "xlsx-style": "^0.8.13"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",

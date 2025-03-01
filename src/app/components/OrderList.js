@@ -1122,11 +1122,16 @@ const selectedTableColumns = columns.filter((col) =>
     NAME: order.customerName,
     Address: order.address,
     Phone: order.phone,
-    Products: order.products
+     products: order.products
       ? order.products
-          .map(item => `${item.product} (SL: ${item.quantity})`)
-          .join(", ")
+          .map(item => `${item.product} (${item.quantity})`)
+          .join("\n")
       : "",
+      // Products: order.products
+      // ? order.products
+      //     .map(item => `${item.product} (SL: ${item.quantity})`)
+      //     .join(", ")
+      // : "",
     category: order.category,
   })); 
   return (
