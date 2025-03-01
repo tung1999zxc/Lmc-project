@@ -66,8 +66,8 @@ const Dashboard = () => {
   // Xử lý submit form: Nếu đang chỉnh sửa thì cập nhật record, ngược lại thêm mới
   const onFinish = async (values) => {
     const newMess = values.newMess;
-    const closedOrders = values.closedOrders;
-    const ratio = newMess > 0 ? closedOrders / newMess : 0;
+    const closedOrders = 0;
+    const ratio = 0;
     const formattedDate = values.date.format("YYYY-MM-DD");
     const recordData = {
       id: editingKey !== null ? editingKey : Date.now(),
@@ -162,6 +162,12 @@ const handleDelete = async (key) => {
       .reduce((sum, p) => sum + p.profit, 0)*17000;
       return totalProfit.toLocaleString('vi-VN');
   };
+  // const computeTotalNumberSales = (employeeName) => {
+  //   const totalProfit = sampleOrders
+  //     .filter((p) => p.sale === employeeName && filterSampleOrdersByPeriod(p))
+  //     ;
+  //     return totalProfit.length;
+  // };
 
 
   // Hàm tính doanh số cá nhân theo ngày của một record
@@ -175,6 +181,17 @@ const handleDelete = async (key) => {
               filterSampleOrdersByPeriod(p)
           )
           .reduce((sum, p) => sum + p.profit, 0)
+      : 0;
+  };
+  const computeTotalSalesNumberForDate = (date, employeeName) => {
+    return date
+      ? sampleOrders.filter(
+          (p) =>
+            p.orderDate === date &&
+            p.saleReport === "DONE" &&
+            p.sale === employeeName &&
+            filterSampleOrdersByPeriod(p)
+        ).length
       : 0;
   };
 
@@ -191,10 +208,17 @@ const handleDelete = async (key) => {
       dataIndex: "newMess",
       key: "newMess",
     },
+    
     {
       title: "Số đơn chốt được",
-      dataIndex: "closedOrders",
       key: "closedOrders",
+      render: (_, record) => {
+        const totalSalesForSelectedDate = computeTotalSalesNumberForDate(
+          record.date,
+          record.employeeName
+        );
+        return totalSalesForSelectedDate;
+      },
     },
     {
       title: "Tổng số mess tiếp thị lại",
@@ -217,7 +241,11 @@ const handleDelete = async (key) => {
       dataIndex: "ratio",
       key: "ratio",
       render: (_, record) => {
-        let rate = record.ratio * 100;
+        const totalSalesForSelectedDate = computeTotalSalesNumberForDate(
+          record.date,
+          record.employeeName
+        );
+        let rate = totalSalesForSelectedDate/record.newMess * 100;
         // Nếu rate là chuỗi (ví dụ "80.00%"), chuyển đổi thành số
         if (typeof rate !== "number") {
           rate = parseFloat(rate);
@@ -362,12 +390,7 @@ const handleDelete = async (key) => {
         >
           <InputNumber style={{ width: "200px" }} placeholder="Số mess mới được cấp" />
         </Form.Item>
-        <Form.Item
-          name="closedOrders"
-          rules={[{ required: true, message: "Vui lòng nhập số đơn chốt được" }]}
-        >
-          <InputNumber style={{ width: "150px" }} placeholder="Số đơn chốt được" />
-        </Form.Item>
+        
         <Form.Item
           name="totalRemarketing"
           rules={[{ required: true, message: "Vui lòng nhập tổng số mess tiếp thị lại" }]}
@@ -381,7 +404,7 @@ const handleDelete = async (key) => {
           <Button
             type="primary"
             htmlType="submit"
-            disabled={currentUser.position_team === "mkt" ||currentUser.position_team === "kho"}
+            disabled={currentUser.position_team === "mkt" ||currentUser.position_team === "kho" || currentUser.position === "salexuly"}
           >
             {editingKey ? "Cập nhật" : "Thêm"}
           </Button>
