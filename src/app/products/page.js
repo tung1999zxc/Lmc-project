@@ -406,7 +406,7 @@ const InventoryPage = () => {
         const slAm = inventoryTotal - ordersNotDone - ordersDone + deliveredQty;
         let bgColor = "";
         if (slAm <= 0) {
-          bgColor = "#EC2527";
+          bgColor = "#FB686A";
         } else if (slAm > 0 && slAm < 10) {
           bgColor = "#FF9501";
         } else {

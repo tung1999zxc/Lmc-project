@@ -209,7 +209,7 @@ console.log(safeEmployees);
   const computeTotalADS = (employeeName) => {
     const totalADS = records
       .filter((p) => p.name === employeeName && filterRecordsByPeriod(p))
-      .reduce((sum, p) => sum + p.totalReceived, 0);
+      .reduce((sum, p) => sum + (p.request1 + p.request2), 0);
     return totalADS;
   };
   
@@ -381,7 +381,7 @@ const adminSummaryData = summaryDates.map(date => {
   const tongAdsXin = adsSang + adsChieu;
   const tongTienTieu = records
     .filter(r => r.date === date)
-    .reduce((sum, r) => sum + (r.totalReceived || 0), 0);
+    .reduce((sum, r) => sum + ((r.request1 + r.request2) || 0), 0);
   const tienThua = tongAdsXin - tongTienTieu;
   const percentAds = dsTong > 0 ? ((tongTienTieu / dsTong) * 100).toFixed(2) : 0;
   return {
@@ -457,7 +457,7 @@ const adminSummaryColumns = [
       } else if (numValue >= 30 && numValue <= 35) {
         bgColor = "#FF9501"; // nền vàng nhạt
       } else {
-        bgColor = "#EC2527"; // nền đỏ nhạt
+        bgColor = "#FB686A"; // nền đỏ nhạt
       }
       return (
         <div
@@ -517,7 +517,7 @@ const adminSummaryColumns = [
           } else if (numValue >= 30 && numValue <= 35) {
             bgColor = "#FF9501"; // nền vàng nhạt
           } else {
-            bgColor = "#EC2527"; // nền đỏ nhạt
+            bgColor = "#FB686A"; // nền đỏ nhạt
           }
           return (
             <div
@@ -666,7 +666,7 @@ const adminSummaryColumns = [
         } else if (percent >= 30 && percent <= 35) {
           bgColor = "##FF9501"; // nền vàng nhạt
         } else {
-          bgColor = "#EC2527"; // nền đỏ nhạt
+          bgColor = "#FB686A"; // nền đỏ nhạt
         }
         return (
           <div
@@ -722,7 +722,7 @@ const adminSummaryColumns = [
   if (isNaN(p)) return "transparent";
   if (p < 30) return "#54DA1F"; // màu xanh (blue)
   if (p >= 30 && p <= 35) return "##FF9501"; // màu cam (orange)
-  return "#FF0000"; // màu đỏ (red)
+  return "#FB686A"; // màu đỏ (red)
 };
   return (  
     <div style={{ padding: 24 }}>

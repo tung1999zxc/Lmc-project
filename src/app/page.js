@@ -64,8 +64,9 @@ const BarChartComponent = dynamic(
         <BarChart width={600} height={300} data={data}>
           <CartesianGrid strokeDasharray="3 3" />
           <XAxis dataKey="name" />
-          <YAxis />
-          <Tooltip />
+           <YAxis tickFormatter={(value) => value.toLocaleString('vi-VN')} />
+          <Tooltip formatter={(value) => value.toLocaleString('vi-VN')} />
+
           <Legend />
           <Bar dataKey="profit" fill="#8884d8" />
         </BarChart>
@@ -89,13 +90,14 @@ const PieChartComponent = dynamic(
             cx="50%"
             cy="50%"
             outerRadius={80}
-            label={({ name, percent }) => `${name}: ${percent}%`}
+            label={({ name, percent }) => `${name}`}
           >
             {data.map((entry, index) => (
               <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
             ))}
           </Pie>
-          <Tooltip />
+          <Tooltip formatter={(value) => value.toLocaleString('vi-VN')} />
+
           <Legend />
         </PieChart>
       );
@@ -113,8 +115,12 @@ const GroupedDoubleBarChartComponent = dynamic(
         <BarChart  data={data}>
           <CartesianGrid strokeDasharray="3 3" />
           <XAxis dataKey="name" />
-          <YAxis />
-          <Tooltip />
+           <YAxis tickFormatter={(value) => value.toLocaleString('vi-VN')} 
+             interval={0}
+             tickCount={10} />
+             dx={10} 
+          <Tooltip formatter={(value) => value.toLocaleString('vi-VN')} />
+
           <Legend />
           <Bar dataKey="profit" fill="#8884d8" />
           <Bar dataKey="adsCost" fill="#FF8042" />
@@ -126,19 +132,26 @@ const GroupedDoubleBarChartComponent = dynamic(
 const GroupedDoubleBarChartComponent2 = dynamic(
   () =>
     Promise.resolve(({ data }) => {
-      const {ResponsiveContainer, BarChart,Cell, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend } = require('recharts');
+      const {ResponsiveContainer, BarChart,Cell,LabelList, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend } = require('recharts');
       return (
         <ResponsiveContainer width="100%" height={400}>
         <BarChart  data={data}>
           <CartesianGrid strokeDasharray="3 3" />
           <XAxis dataKey="name" />
-          <YAxis />
-          <Tooltip />
+           <YAxis tickFormatter={(value) => value.toLocaleString('vi-VN')} />
+          <Tooltip formatter={(value) => value.toLocaleString('vi-VN')} />
+
           <Legend />
           <Bar dataKey="profit">
               {data.map((entry, index) => (
                 <Cell key={`cell-${index}`} fill={entry.fill} />
+                
               ))}
+              <LabelList 
+    dataKey="profit" 
+    formatter={(value) => value.toLocaleString('vi-VN')} 
+    position="top" 
+  />
             </Bar>
          
         </BarChart></ResponsiveContainer>
@@ -156,8 +169,9 @@ const GroupedBarChartComponent = dynamic(
         <BarChart width={600} height={300} data={data}>
           <CartesianGrid strokeDasharray="3 3" />
           <XAxis dataKey="team" />
-          <YAxis />
-          <Tooltip />
+           <YAxis tickFormatter={(value) => value.toLocaleString('vi-VN')} />
+          <Tooltip formatter={(value) => value.toLocaleString('vi-VN')} />
+
           <Legend />
           <Bar 
             dataKey="leader" 
@@ -287,7 +301,7 @@ function getLast30Days() {
       .reduce((sum, order) => sum + order.profit, 0);
     const adsCost = filteredAds
       .filter(ad => ad.name === emp.name)
-      .reduce((sum, ad) => sum + ad.totalReceived, 0);
+      .reduce((sum, ad) => sum + (ad.request1 + ad.request2), 0);
     return { name: emp.name, profit: sales*17000, adsCost };
   });
   const saleEmployees = employees.filter(emp => emp.position_team === "sale");
@@ -321,7 +335,7 @@ function getLast30Days() {
     const adsCost = teamEmps.reduce((acc, emp) => {
       const empAds = filteredAds
         .filter(ad => ad.name === emp.name)
-        .reduce((sum, ad) => sum + ad.totalReceived, 0);
+        .reduce((sum, ad) => sum + (ad.request1 + ad.request2), 0);
       return acc + empAds;
     }, 0);
     return { name: team.label, profit: sales*17000, adsCost };
@@ -350,7 +364,7 @@ function getLast30Days() {
         .reduce((sum, order) => sum + order.profit, 0);
       const adsCost = filteredAds
         .filter(ad => ad.date === date)
-        .reduce((sum, ad) => sum + ad.totalReceived, 0);
+        .reduce((sum, ad) => sum + (ad.request1 + ad.request2), 0);
       return { name: date, profit: sales*17000, adsCost };
     });
   } else {
@@ -361,16 +375,17 @@ function getLast30Days() {
         .reduce((sum, order) => sum + order.profit, 0);
       const adsCost = adsMoneyData
         .filter(ad => ad.date === date)
-        .reduce((sum, ad) => sum + ad.totalReceived, 0);
+        .reduce((sum, ad) => sum + (ad.request1 + ad.request2), 0);
       return { name: date, profit: sales*17000, adsCost };
     });
   }
 
   // === Biểu đồ phần trăm doanh số theo team (PieChart) ===
   const totalCompanyProfit = filteredOrders.reduce((sum, order) => sum + order.profit, 0);
+  const tcp=Number(totalCompanyProfit);
   const teamPieData = teamChartDataNew.map(item => ({
     ...item,
-    percent: totalCompanyProfit > 0 ? ((item.profit / totalCompanyProfit) * 100).toFixed(2) : 0
+    percent: totalCompanyProfit > 0 ?Number( ((item.profit / tcp)) * 100).toFixed(2) : 0
   }));
 
   // === Biểu đồ doanh số trung bình của nhân viên trong từng team (BarChart) ===
@@ -401,13 +416,13 @@ function getLast30Days() {
     const adsCost = teamEmps.reduce((acc, emp) => {
       const empAds = filteredAds
         .filter(ad => ad.name === emp.name)
-        .reduce((sum, ad) => sum + ad.totalReceived, 0);
+        .reduce((sum, ad) => sum + (ad.request1 + ad.request2), 0);
       return acc + empAds;
     }, 0);
     const adsCost2 = othersEmps.reduce((acc, emp) => {
       const empAds = filteredAds
         .filter(ad => ad.name === emp.name)
-        .reduce((sum, ad) => sum + ad.totalReceived, 0);
+        .reduce((sum, ad) => sum + (ad.request1 + ad.request2), 0);
       return acc + empAds;
     }, 0);
     const othersSales0 = othersEmps.reduce((acc, emp) => {
@@ -433,7 +448,7 @@ function getLast30Days() {
     const tienVND = total * exchangeRate;
     const totalAds = filteredAds
       .filter(ad => ad.name === emp.name)
-      .reduce((sum, ad) => sum + ad.totalReceived, 0);
+      .reduce((sum, ad) => sum + (ad.request1 + ad.request2), 0);
     const adsPercent = tienVND ? ((totalAds / tienVND) * 100).toFixed(2) : "0.00";
     return { key: index, name: emp.name, paid, unpaid, total, tienVND, totalAds, adsPercent };
   });
@@ -496,7 +511,7 @@ function getLast30Days() {
         } else if (percent >= 30 && percent <= 35) {
           bgColor = "#FF9501";
         } else {
-          bgColor = "#EC2527";
+          bgColor = "#FB686A";
         }
         return (
           <div
@@ -555,7 +570,7 @@ function getLast30Days() {
       } else if (percent >= 80 && percent <= 95) {
         bgColor = "#FF9501"; // nền vàng nhạt (đã sửa lỗi ## thành #)
       } else {
-        bgColor = "#EC2527"; // nền đỏ nhạt
+        bgColor = "#FB686A"; // nền đỏ nhạt
       }
       return (
         <div
@@ -632,7 +647,7 @@ function getLast30Days() {
       } else if (percent >= 30 && percent <= 50) {
         bgColor = "#FF9501"; // nền vàng nhạt (đã sửa lỗi ## thành #)
       } else {
-        bgColor = "#EC2527"; // nền đỏ nhạt
+        bgColor = "#FB686A"; // nền đỏ nhạt
       }
       return (
         <div
@@ -656,7 +671,7 @@ function getLast30Days() {
       } else if (percent >= 30 && percent <= 50) {
         bgColor = "#FF9501"; // nền vàng nhạt (đã sửa lỗi ## thành #)
       } else {
-        bgColor = "#EC2527"; // nền đỏ nhạt
+        bgColor = "#FB686A"; // nền đỏ nhạt
       }
       return (
         <div
@@ -680,7 +695,7 @@ function getLast30Days() {
       } else if (percent >= 30 && percent <= 50) {
         bgColor = "#FF9501"; // nền vàng nhạt (đã sửa lỗi ## thành #)
       } else {
-        bgColor = "#EC2527"; // nền đỏ nhạt
+        bgColor = "#FB686A"; // nền đỏ nhạt
       }
       return (
         <div
@@ -731,7 +746,7 @@ function getLast30Days() {
     .reduce((sum, order) => sum + order.profit, 0);
   const tongKW = daThanhToanKW + chuaThanhToanKW;
   const thanhToanDat = tongKW > 0 ? (daThanhToanKW / tongKW) * 100 : 0;
-  const totalAdsKW = filteredAds.reduce((sum, ad) => sum + ad.totalReceived, 0);
+  const totalAdsKW = filteredAds.reduce((sum, ad) => sum + (ad.request1 + ad.request2), 0);
   const percentAds = tongKW > 0 ? Number(((totalAdsKW / (tongKW*exchangeRate)) * 100).toFixed(2)) : 0;
 
   const totalData = [
@@ -766,7 +781,7 @@ function getLast30Days() {
       } else if (percent >= 50 && percent <= 80) {
         bgColor = "#FF9501"; // nền vàng nhạt (đã sửa lỗi ## thành #)
       } else {
-        bgColor = "#EC2527"; // nền đỏ nhạt
+        bgColor = "#FB686A"; // nền đỏ nhạt
       }
       return (
         <div
@@ -791,7 +806,7 @@ function getLast30Days() {
       } else if (percent >= 30 && percent <= 35) {
         bgColor = "#FF9501"; // nền vàng nhạt (đã sửa lỗi ## thành #)
       } else {
-        bgColor = "#EC2527"; // nền đỏ nhạt
+        bgColor = "#FB686A"; // nền đỏ nhạt
       }
       return (
         <div
@@ -899,20 +914,21 @@ function getLast30Days() {
 {(currentUser.position === "admin" || currentUser.position === "managerMKT") ? (
   <Tabs defaultActiveKey="MKT">
   <Tabs.TabPane tab="MKT" key="MKT">
+  <div style={{ paddingLeft: '10px' }}>
   <h3>Doanh số &amp; chi phí Ads theo Nhân viên MKT</h3>
-<div style={{ width: '100%' }}>
-  <GroupedDoubleBarChartComponent data={employeeChartDataNew} />
-</div>
-<h3 style={{ marginTop: "2rem" }}>
-      {isFilterApplied
-        ? "Doanh số & chi phí Ads hàng ngày (theo bộ lọc)"
-        : "Doanh số & chi phí Ads hàng ngày (30 ngày gần nhất)"}
-    </h3>
-    <GroupedDoubleBarChartComponent data={dailyChartDataNew} />
+  <div style={{ width: '100%' }}>
+    <GroupedDoubleBarChartComponent data={employeeChartDataNew} />
+  </div>
+  <h3 style={{ marginTop: '2rem' }}>
+    {isFilterApplied
+      ? "Doanh số & chi phí Ads hàng ngày (theo bộ lọc)"
+      : "Doanh số & chi phí Ads hàng ngày (30 ngày gần nhất)"}
+  </h3>
+  <GroupedDoubleBarChartComponent data={dailyChartDataNew} />
     
-<h3>Doanh số &amp; chi phí Ads theo Team</h3>
-        <GroupedDoubleBarChartComponent data={teamChartDataNew} />
-        
+  <h3>Doanh số &amp; chi phí Ads theo Team</h3>
+  <GroupedDoubleBarChartComponent data={teamChartDataNew} />
+</div>
     {/* Báo cáo Marketing và các biểu đồ cũ */}
     <Row gutter={[16, 16]} style={{ marginTop: "2rem" }}>
 <Col xs={24} md={12}>

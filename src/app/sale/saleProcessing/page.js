@@ -147,7 +147,7 @@ const Dashboard = () => {
         const percent = Number((paymentRate * 100));
         let bgColor = "";
         if (percent < 80) {
-          bgColor = "#EC2527";
+          bgColor = "#FB686A";
         } else if (percent >= 80 && percent <= 95) {
           bgColor = "#FF9501";
         } else {
@@ -191,7 +191,7 @@ const Dashboard = () => {
     
     let bgColor = "";
     if (ratePercentage < 80) {
-      bgColor = "#EC2527";
+      bgColor = "#FB686A";
     } else if (ratePercentage >= 80 && ratePercentage <= 95) {
       bgColor = "#FF9501";
     } else {

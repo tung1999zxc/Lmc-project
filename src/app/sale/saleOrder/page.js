@@ -252,7 +252,7 @@ const handleDelete = async (key) => {
         }
         let bgColor = "";
         if (rate < 10) {
-          bgColor = "#EC2527";
+          bgColor = "#FB686A";
         } else if (rate >= 10 && rate <= 15) {
           bgColor = "#FF9501";
         } else {

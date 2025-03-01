@@ -114,13 +114,13 @@ const OrdersTable = () => {
           }
           let bgColor = "";
           if (rate < 80) {
-            bgColor = "#EC2527";
+            bgColor = "#aaa";
           } else if (rate >= 80 && rate <= 95) {
             bgColor = "#FF9501";
           } else {
             bgColor = "#54DA1F";
           }
-          return (
+          return (  
             <div
               style={{
                 backgroundColor: bgColor,
