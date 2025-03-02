@@ -20,6 +20,7 @@ import OrderForm from "./OrderForm";
 import isBetween from "dayjs/plugin/isBetween";
 import { useSelector } from "react-redux";
 import axios from "axios";
+import moment from "moment";
 import ExportExcelButton from "./exportOrdersToExcel.js";
 // Gọi dayjs.extend bên ngoài component để không gọi lại mỗi lần render
 dayjs.extend(isBetween);
@@ -1088,7 +1089,7 @@ const selectedTableColumns = columns.filter((col) =>
       paymentStatus: values.paymentStatus || "",
       deliveryStatus: values.deliveryStatus || "",
       trackingCode: values.trackingCode || "",
-      orderDate: values.orderDate || "",
+      orderDate: currentEditId ? values.orderDate : moment().format("YYYY-MM-DD"),
       shippingDate1: values.shippingDate1 || "",
       shippingDate2: values.shippingDate2 || "",
       employee_code_order: currentUser.employee_code,
