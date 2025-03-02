@@ -65,24 +65,20 @@ const InventoryPage = () => {
   // previewImage có thể là mảng ảnh (base64 strings)
   const [previewImage, setPreviewImage] = useState(null);
 
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const savedOrders = localStorage.getItem('orders');
-      if (savedOrders) {
-        setOrders(JSON.parse(savedOrders));
-      }
-     
-    }
-  }, []);
 
-  useEffect(() => {
-    if (typeof window !== 'undefined' && products && products.length > 0) {
-      localStorage.setItem('products', JSON.stringify(products));
-      const productNames = products.map((p) => p.name);
-      localStorage.setItem('productNames', JSON.stringify(productNames));
+  const fetchOrders = async () => {
+    try {
+      const response = await axios.get("/api/orders");
+      setOrders(response.data.data);
+     
+    } catch (error) {
+      console.error(error);
+      message.error("Lỗi khi lấy đơn hàng");
     }
-  }, [products]);
+  };
+  
   useEffect(() => {
+    fetchOrders();
     fetchProducts();
   }, []);
   
@@ -406,7 +402,7 @@ const InventoryPage = () => {
         const slAm = inventoryTotal - ordersNotDone - ordersDone + deliveredQty;
         let bgColor = "";
         if (slAm <= 0) {
-          bgColor = "#FB686A";
+          bgColor = "#F999A8";
         } else if (slAm > 0 && slAm < 10) {
           bgColor = "#FF9501";
         } else {

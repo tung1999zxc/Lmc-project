@@ -233,7 +233,7 @@ const handleDelete = async (key) => {
           record.date,
           record.employeeName
         );
-        return totalSalesForSelectedDate;
+        return (totalSalesForSelectedDate*17000).toLocaleString('vi-VN');
       },
     },
     {
@@ -252,7 +252,7 @@ const handleDelete = async (key) => {
         }
         let bgColor = "";
         if (rate < 10) {
-          bgColor = "#FB686A";
+          bgColor = "#F999A8";
         } else if (rate >= 10 && rate <= 15) {
           bgColor = "#FF9501";
         } else {

@@ -17,15 +17,14 @@ import dayjs from "dayjs";
 import moment from "moment";
 import { useDispatch, useSelector } from "react-redux";
 
-const OrderForm = ({ visible, onCancel, onSubmit, initialValues, namesalexuly }) => {
+const OrderForm = ({ visible, onCancel, onSubmit, initialValues, namesalexuly, employees=[] ,dataPagename=[]}) => {
   const [form] = Form.useForm();
   const { Option } = Select;
   const currentUser = useSelector((state) => state.user.currentUser);
   // Giả sử: nếu mã nhân viên là 1 thì isEmployee1 = true
   
-  const [dataPagename, setdataPagename] = useState([]);
-    const [employees, setEmployees] = useState([]);
   
+   
 
   // Danh sách options
   const [products, setProducts] = useState([]);
@@ -41,23 +40,11 @@ const OrderForm = ({ visible, onCancel, onSubmit, initialValues, namesalexuly })
     }
   };
 
-  const fetchEmployees = async () => {
-      
-      try {
-        const response = await axios.get('/api/employees');
-        // response.data.data chứa danh sách nhân viên theo API đã viết
-        setEmployees(response.data.data);
-      } catch (error) {
-        console.error('Lỗi khi lấy danh sách nhân viên:', error);
-        message.error('Lỗi khi lấy danh sách nhân viên');
-      } finally {
-       
-      }
-    };
+  
    useEffect(() => {
     fetchProducts();
-    fetchNamePage();
-    fetchEmployees();
+    
+   
   }, []);
   const mktOptions = employees
     .filter((order) => order.position_team === "mkt")
@@ -108,14 +95,7 @@ const handlePageNameChange = (value) => {
   const massOptions = ["Nặng", "Nhẹ"];
   const thanhToanOptions = ["ĐÃ THANH TOÁN", "CHƯA THANH TOÁN"];
   const tinhTrangGHOptions = ["ĐÃ GỬI HÀNG", "GIAO THÀNH CÔNG","BỊ BẮT CHỜ GỬI LẠI"];
-const fetchNamePage = async () => {
-    try {
-      const response = await axios.get('/api/pageName');
-      setdataPagename(response.data.data); // Danh sách đơn hàng
-    } catch (error) {
-      console.error('Lỗi khi lấy đơn hàng:', error);
-    }
-  };
+
   // Khi có initialValues (dữ liệu cũ) thì chuyển các trường ngày về đối tượng dayjs
  
 const productOptions = products.map((p) => p.name);

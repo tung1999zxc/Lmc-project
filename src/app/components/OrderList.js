@@ -37,7 +37,8 @@ const OrderList = () => {
     }
   }, []);
 
-
+  const lastFetchTime = useRef(0);
+  const THIRTY_MINUTES = 60 * 60 * 1000;  
   // Các state quản lý đơn hàng, form, filter, …
   const [orders, setOrders] = useState([]);
   const [currentEditId, setCurrentEditId] = useState(null);
@@ -55,6 +56,8 @@ const OrderList = () => {
   const [totalQuantities, setTotalQuantities] = useState({});
   const [initialOrders, setInitialOrders] = useState([]);
   const [isdemkho, setIsdemkho] = useState(true);
+  const [dataPagename, setdataPagename] = useState([]);
+
   const fetchEmployees = async () => {
       
       try {
@@ -71,9 +74,16 @@ const OrderList = () => {
    useEffect(() => {
     fetchOrders();
     fetchEmployees();
-    
+    fetchNamePage();
   }, []);
-   
+  const fetchNamePage = async () => {
+    try {
+      const response = await axios.get('/api/pageName');
+      setdataPagename(response.data.data); // Danh sách đơn hàng
+    } catch (error) {
+      console.error('Lỗi khi lấy đơn hàng:', error);
+    }
+  };
   
   // Danh sách thành viên team (dùng cho vai trò lead)
   const leadTeamMembers = employees
@@ -1024,6 +1034,7 @@ const selectedTableColumns = columns.filter((col) =>
 
   // Xử lý mở form thêm mới, sửa và xóa đơn hàng
   const handleAddNew = () => {
+    
     setCurrentEditId(null);
     setFormVisible(true);
   };
@@ -1107,6 +1118,10 @@ const selectedTableColumns = columns.filter((col) =>
       }
       fetchOrders();
       setFormVisible(false);
+      const now = Date.now();
+    if (now - lastFetchTime.current >= THIRTY_MINUTES) {
+      fetchNamePage();
+      lastFetchTime.current = now;}
     } catch (error) {
       console.error(error);
       message.error("Lỗi khi lưu đơn hàng");
@@ -1154,7 +1169,7 @@ const selectedTableColumns = columns.filter((col) =>
         </Button>
        
       </div> </Col>
-      {currentUser.position_team==="kho" && <Col span={5}>
+      {(currentUser.position_team==="kho" ||  currentUser.name ==="admin" )&& <Col span={5}>
       <Table 
       columns={columns3} 
       dataSource={dataSource3} 
@@ -1309,7 +1324,9 @@ const selectedTableColumns = columns.filter((col) =>
         onCancel={() => setFormVisible(false)}
         onSubmit={handleSubmit}
         initialValues={orders.find((order) => order.id === currentEditId)}
-        namesalexuly={namesalexuly}
+        employees={employees}
+        dataPagename={dataPagename}
+        // namesalexuly={namesalexuly}
       />
     </div>
   );

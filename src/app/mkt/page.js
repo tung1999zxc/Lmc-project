@@ -457,7 +457,7 @@ const adminSummaryColumns = [
       } else if (numValue >= 30 && numValue <= 35) {
         bgColor = "#FF9501"; // nền vàng nhạt
       } else {
-        bgColor = "#FB686A"; // nền đỏ nhạt
+        bgColor = "#F999A8"; // nền đỏ nhạt
       }
       return (
         <div
@@ -517,7 +517,7 @@ const adminSummaryColumns = [
           } else if (numValue >= 30 && numValue <= 35) {
             bgColor = "#FF9501"; // nền vàng nhạt
           } else {
-            bgColor = "#FB686A"; // nền đỏ nhạt
+            bgColor = "#F999A8"; // nền đỏ nhạt
           }
           return (
             <div
@@ -666,7 +666,7 @@ const adminSummaryColumns = [
         } else if (percent >= 30 && percent <= 35) {
           bgColor = "##FF9501"; // nền vàng nhạt
         } else {
-          bgColor = "#FB686A"; // nền đỏ nhạt
+          bgColor = "#F999A8"; // nền đỏ nhạt
         }
         return (
           <div
@@ -722,7 +722,7 @@ const adminSummaryColumns = [
   if (isNaN(p)) return "transparent";
   if (p < 30) return "#54DA1F"; // màu xanh (blue)
   if (p >= 30 && p <= 35) return "##FF9501"; // màu cam (orange)
-  return "#FB686A"; // màu đỏ (red)
+  return "#F999A8"; // màu đỏ (red)
 };
   return (  
     <div style={{ padding: 24 }}>

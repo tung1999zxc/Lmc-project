@@ -14,11 +14,7 @@ const [adsMoneyData, setAdsMoneyData] = useState([]);//mkt
 // Component biểu đồ Bar (Recharts) cho biểu đồ đơn (có 1 series)
 const router = useRouter(); 
   const currentUser = useSelector((state) => state.user.currentUser);
-  useEffect(() => {
-    if (!currentUser.name) {
-      router.push("/login");
-    }
-  }, []);
+ 
 
   const fetchOrders = async () => {
     try {
@@ -59,7 +55,7 @@ const fetchEmployees = async () => {
 const BarChartComponent = dynamic(
   () =>
     Promise.resolve(({ data }) => {
-      const { BarChart, Bar, XAxis, YAxis,LabelList, CartesianGrid, Tooltip, Legend } = require('recharts');
+      const { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend } = require('recharts');
       return (
         <BarChart width={600} height={300} data={data}>
           <CartesianGrid strokeDasharray="3 3" />
@@ -67,17 +63,11 @@ const BarChartComponent = dynamic(
   dataKey="name" 
   tickFormatter={(fullName) => formatEmployeeName(fullName)} 
 />
-<YAxis tickFormatter={formatYAxisTick}  tickCount={6}/>
+           <YAxis tickFormatter={(value) => value.toLocaleString('vi-VN')} />
           <Tooltip formatter={(value) => value.toLocaleString('vi-VN')} />
 
           <Legend />
-          <Bar dataKey="profit" fill="#8884d8" >
-          <LabelList
-                dataKey="profit"
-                formatter={formatYAxisTick }
-                
-                position="top"
-              /></Bar>
+          <Bar dataKey="profit" fill="#8884d8" />
         </BarChart>
       );
     }),
@@ -227,67 +217,7 @@ const formatEmployeeName = (fullName, existingFormatted = new Set()) => {
   return formatted;
 };
 
-const formatYAxisTick = (value) => {
-  if (value >= 1000000) {
-    return (value / 1000000).toFixed(1).replace(/\.0$/, "") + "M";
-  } else if (value >= 1000) {
-    return (value / 1000).toFixed(1).replace(/\.0$/, "") + "K";
-  }
-  return value;
-};
 // Component biểu đồ nhóm (grouped double bar chart) hiển thị 2 series: profit và adsCost
-// const GroupedDoubleBarChartComponent = dynamic(
-//   () =>
-//     Promise.resolve(({ data }) => {
-//       const {
-//         ResponsiveContainer,
-//         BarChart,
-//         Bar,
-//         LabelList,
-//         XAxis,
-//         YAxis,
-//         CartesianGrid,
-//         Tooltip,
-//         Legend,
-//       } = require("recharts");
-
-//       return (
-//         <ResponsiveContainer width="100%" height={400}>
-//           <BarChart data={data}>
-//             <CartesianGrid strokeDasharray="3 3" />
-//             <XAxis 
-//   dataKey="name" 
-//   tickFormatter={(fullName) => formatEmployeeName(fullName)} 
-// />
-//             <YAxis
-//               tickFormatter={(value) => value.toLocaleString("vi-VN")}
-//               // interval={0}
-//               tickCount={12}
-//               dx={11} // Dịch chuyển nhãn trục Y sang bên phải
-//             />
-//             <Tooltip formatter={(value) => value.toLocaleString("vi-VN")} />
-//             <Legend />
-//             <Bar dataKey="profit" fill="#8884d8">
-//               <LabelList
-//                 dataKey="profit"
-//                 formatter={(value) => value.toLocaleString("vi-VN")}
-//                 position="top"
-//               />
-//             </Bar>
-//             <Bar dataKey="adsCost" fill="#FF8042">
-//               {/* <LabelList
-//                 dataKey="adsCost"
-//                 formatter={(value) => value.toLocaleString("vi-VN")}
-//                 position="top"
-//               /> */}
-//             </Bar>
-            
-//           </BarChart>
-//         </ResponsiveContainer>
-//       );
-//     }),
-//   { ssr: false, loading: () => <p>Loading Grouped Chart...</p> }
-// );
 const GroupedDoubleBarChartComponent = dynamic(
   () =>
     Promise.resolve(({ data }) => {
@@ -311,67 +241,27 @@ const GroupedDoubleBarChartComponent = dynamic(
   dataKey="name" 
   tickFormatter={(fullName) => formatEmployeeName(fullName)} 
 />
-           
-            <YAxis tickFormatter={formatYAxisTick}  tickCount={6}/>
-
+            <YAxis
+              tickFormatter={(value) => value.toLocaleString("vi-VN")}
+              // interval={0}
+              tickCount={12}
+              dx={11} // Dịch chuyển nhãn trục Y sang bên phải
+            />
             <Tooltip formatter={(value) => value.toLocaleString("vi-VN")} />
             <Legend />
             <Bar dataKey="profit" fill="#8884d8">
               <LabelList
                 dataKey="profit"
-                formatter={formatYAxisTick }
-                
+                formatter={(value) => value.toLocaleString("vi-VN")}
                 position="top"
               />
             </Bar>
-           
-            
-          </BarChart>
-        </ResponsiveContainer>
-      );
-    }),
-  { ssr: false, loading: () => <p>Loading Grouped Chart...</p> }
-);
-const GroupedDoubleBarChartComponent3 = dynamic(
-  () =>
-    Promise.resolve(({ data }) => {
-      const {
-        ResponsiveContainer,
-        BarChart,
-        Bar,
-        LabelList,
-        XAxis,
-        YAxis,
-        CartesianGrid,
-        Tooltip,
-        Legend,
-      } = require("recharts");
-
-      return (
-        <ResponsiveContainer width="100%" height={400}>
-          <BarChart data={data}>
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis 
-  dataKey="name" 
-  tickFormatter={(fullName) => formatEmployeeName(fullName)} 
-/>
-<YAxis tickFormatter={formatYAxisTick}  tickCount={6}/>
-            <Tooltip formatter={(value) => value.toLocaleString("vi-VN")} />
-            <Legend />
-            <Bar dataKey="LeadAndMembers" fill="#8884d8">
-              <LabelList
-                dataKey="LeadAndMembers"
-                formatter={formatYAxisTick }
-                
+            <Bar dataKey="adsCost" fill="#FF8042">
+              {/* <LabelList
+                dataKey="adsCost"
+                formatter={(value) => value.toLocaleString("vi-VN")}
                 position="top"
-              />
-            </Bar>
-            <Bar dataKey="members" fill="#FF8042">
-              <LabelList
-                dataKey="members"
-                formatter={formatYAxisTick }
-                position="top"
-              />
+              /> */}
             </Bar>
             
           </BarChart>
@@ -380,7 +270,6 @@ const GroupedDoubleBarChartComponent3 = dynamic(
     }),
   { ssr: false, loading: () => <p>Loading Grouped Chart...</p> }
 );
-
 
 const GroupedDoubleBarChartComponent2 = dynamic(
   () =>
@@ -394,7 +283,7 @@ const GroupedDoubleBarChartComponent2 = dynamic(
   dataKey="name" 
   tickFormatter={(fullName) => formatEmployeeName(fullName)} 
 />
-<YAxis tickFormatter={formatYAxisTick} />
+           <YAxis tickFormatter={(value) => value.toLocaleString('vi-VN')} />
           <Tooltip formatter={(value) => value.toLocaleString('vi-VN')} />
 
           <Legend />
@@ -403,11 +292,11 @@ const GroupedDoubleBarChartComponent2 = dynamic(
                 <Cell key={`cell-${index}`} fill={entry.fill} />
                 
               ))}
-             <LabelList
-                dataKey="profit"
-                formatter={formatYAxisTick }
-                position="top"
-              />
+              <LabelList 
+    dataKey="profit" 
+    formatter={(value) => value.toLocaleString('vi-VN')} 
+    position="top" 
+  />
             </Bar>
          
         </BarChart></ResponsiveContainer>
@@ -575,15 +464,15 @@ function getLast30Days() {
     } else if (emp.position === "salexuly") {
       fillColor = "#82ca9d"; // ví dụ: màu xanh lá nhạt
     } else if (emp.position === "salefull") {
-      fillColor = "#AA336A"; // ví dụ: màu vàng
+      fillColor = "#ffc658"; // ví dụ: màu vàng
     }
     
     return { name: emp.name, profit: sales * 17000, fill: fillColor };
   });
   
 
-  // // === Biểu đồ doanh số theo team (Grouped Double Bar Chart) ===
-  const teamChartDataNew2 = teams.map(team => {
+  // === Biểu đồ doanh số theo team (Grouped Double Bar Chart) ===
+  const teamChartDataNew = teams.map(team => {
     const teamEmps = employees.filter(emp => emp.position_team === "mkt" && emp.team_id === team.value);
     const sales = teamEmps.reduce((acc, emp) => {
       const empSales = filteredOrders
@@ -598,42 +487,6 @@ function getLast30Days() {
       return acc + empAds;
     }, 0);
     return { name: team.label, profit: sales*17000, adsCost };
-  });
-  // const teamChartDataNew = teams.map(team => {
-  //   const teamEmps = employees.filter(emp => emp.position_team === "mkt" && emp.team_id === team.value);
-  //   const sales = teamEmps.reduce((acc, emp) => {
-  //     const empSales = filteredOrders
-  //       .filter(order => order.mkt === emp.name)
-  //       .reduce((sum, order) => sum + order.profit, 0);
-  //     return acc + empSales;
-  //   }, 0);
-  //   const adsCost = teamEmps.reduce((acc, emp) => {
-  //     const empAds = filteredAds
-  //       .filter(ad => ad.name === emp.name)
-  //       .reduce((sum, ad) => sum + (ad.request1 + ad.request2), 0);
-  //     return acc + empAds;
-  //   }, 0);
-  //   return { name: team.label, profit: sales*17000, adsCost };
-  // });
-
-
-  const teamChartDataNew = teams.map(team => {
-    const teamEmps = employees.filter(emp => emp.position_team === "mkt" && emp.team_id === team.value);
-    const teamEmps2 = employees.filter(emp => emp.position_team === "mkt" && emp.team_id === team.value && emp.position !=="lead" );
-    const sales = teamEmps.reduce((acc, emp) => {
-      const empSales = filteredOrders
-        .filter(order => order.mkt === emp.name)
-        .reduce((sum, order) => sum + order.profit, 0);
-      return acc + empSales;
-    }, 0);
-    const members = teamEmps2.reduce((acc, emp) => {
-      const empSales = filteredOrders
-        .filter(order => order.mkt === emp.name )
-        .reduce((sum, order) => sum + order.profit, 0);
-      return acc + empSales;
-    }, 0);
-    
-    return { name: team.label, LeadAndMembers: sales*17000, members:members*17000 };
   });
 
   // === Biểu đồ doanh số hàng ngày (Grouped Double Bar Chart) ===
@@ -678,7 +531,7 @@ function getLast30Days() {
   // === Biểu đồ phần trăm doanh số theo team (PieChart) ===
   const totalCompanyProfit = filteredOrders.reduce((sum, order) => sum + order.profit, 0);
   const tcp=Number(totalCompanyProfit);
-  const teamPieData = teamChartDataNew2.map(item => ({
+  const teamPieData = teamChartDataNew.map(item => ({
     ...item,
     percent: totalCompanyProfit > 0 ?Number( ((item.profit / tcp)) * 100).toFixed(2) : 0
   }));
@@ -851,7 +704,7 @@ function getLast30Days() {
     const percent = total > 0 ? (paid / total) * 100 : 0;
     return { key: index, name: emp.name, paid, unpaid, total, tienVND, percent };
   });
-  saleReportData.sort((a, b) => b.tienVND - a.tienVND);
+
   const saleColumns = [
     { title: "Tên", dataIndex: "name", key: "name" },
     { title: "Đã thanh toán", dataIndex: "paid", key: "paid", render: (value) => value.toLocaleString() },
@@ -1210,79 +1063,51 @@ function getLast30Days() {
   <Tabs defaultActiveKey="MKT">
   <Tabs.TabPane tab="MKT" key="MKT">
   <div style={{ paddingLeft: '10px' }}>
-  <h3>Doanh số Nhân viên MKT</h3>
+  <h3>Doanh số &amp; chi phí Ads theo Nhân viên MKT</h3>
   <div style={{ width: '100%' }}>
     <GroupedDoubleBarChartComponent data={employeeChartDataNew} />
   </div>
   <h3 style={{ marginTop: '2rem' }}>
     {isFilterApplied
-      ? "Doanh số hàng ngày "
-      : "Doanh số hàng ngày "}
+      ? "Doanh số & chi phí Ads hàng ngày (theo bộ lọc)"
+      : "Doanh số & chi phí Ads hàng ngày (30 ngày gần nhất)"}
   </h3>
   <GroupedDoubleBarChartComponent data={dailyChartDataNew} />
     
- 
+  <h3>Doanh số &amp; chi phí Ads theo Team</h3>
+  <GroupedDoubleBarChartComponent data={teamChartDataNew} />
 </div>
     {/* Báo cáo Marketing và các biểu đồ cũ */}
     <Row gutter={[16, 16]} style={{ marginTop: "2rem" }}>
-<Col xs={24} md={15}>
-<h3>Doanh số theo Team</h3>
-<GroupedDoubleBarChartComponent3 data={teamChartDataNew} />
-
-</Col>
-{/* <Col xs={24} md={1}></Col> */}
-<Col xs={24} md={8}>
-<br></br>
-<br></br>
-<h3>Phần trăm doanh số theo Team</h3>
-<PieChartComponent data={teamPieData} />
-
-
-       
-        
-      {/* <h3 style={{ marginTop: "2rem" }}>
-      So sánh %ADS : Gồm Leader vs Các nhân viên khác trong Team
-    </h3>
-    <GroupedBarChartComponent data={leaderComparisonChartData} /> */}
-</Col>
-
-</Row>
-    <Row gutter={[16, 16]} style={{ marginTop: "2rem" }}>
 <Col xs={24} md={12}>
-<h3 style={{ marginTop: "2rem" }}>Doanh số trung bình theo Nhân viên theo Team</h3>
-      <BarChartComponent data={averageTeamChartData} />
-
+<h2>Báo cáo marketing</h2>
+<Table columns={marketingColumns} dataSource={marketingReportData} pagination={false} />
 </Col>
 {/* <Col xs={24} md={1}></Col> */}
 <Col xs={24} md={10}>
-<br></br>
+
 <h2 style={{ marginTop: "2rem" }}>Tổng</h2>
   <Table columns={totalColumns} dataSource={totalData} pagination={false} />
 
-
-       
-        
-      {/* <h3 style={{ marginTop: "2rem" }}>
+        <h3>Phần trăm doanh số theo Team</h3>
+        <PieChartComponent data={teamPieData} />
+        <h3 style={{ marginTop: "2rem" }}>Doanh số trung bình theo Nhân viên theo Team</h3>
+      <BarChartComponent data={averageTeamChartData} />
+      <h3 style={{ marginTop: "2rem" }}>
       So sánh %ADS : Gồm Leader vs Các nhân viên khác trong Team
     </h3>
-    <GroupedBarChartComponent data={leaderComparisonChartData} /> */}
+    <GroupedBarChartComponent data={leaderComparisonChartData} />
 </Col>
-
 </Row>
-<Row gutter={[16, 16]}>
-      <Col xs={24} md={5}>
+    
+    <Row gutter={[16, 16]}>
+      <Col xs={24} md={12}>
       
       </Col>
-      <Col xs={24} md={14}>
-      
-      </Col>
-      <Col xs={24} md={5}>
+      <Col xs={24} md={12}>
       
       </Col>
     </Row>
-<h2>Báo cáo marketing</h2>
-<Table columns={marketingColumns} dataSource={marketingReportData} pagination={false} />   
-   
     
     
     
@@ -1308,7 +1133,7 @@ pagination={7}
 </Col>
 <Col xs={24} md={10}>
 <br/>
-<h2 style={{ marginTop: "2rem" }}>Báo cáo Doanh Số Nhân Viên Sale</h2>
+<h2 style={{ marginTop: "2rem" }}>Báo cáo Doanh Số Nhân Viên</h2>
 <Table columns={saleColumns} dataSource={saleReportData} pagination={false} />
 </Col>
 </Row>
