@@ -1122,10 +1122,10 @@ const selectedTableColumns = columns.filter((col) =>
       }
       fetchOrders();
       setFormVisible(false);
-      // const now = Date.now();
-    // if (now - lastFetchTime.current >= THIRTY_MINUTES) {
-    //   fetchNamePage();
-    //   lastFetchTime.current = now;}
+      const now = Date.now();
+    if (now - lastFetchTime.current >= THIRTY_MINUTES) {
+      fetchNamePage();
+      lastFetchTime.current = now;}
     } catch (error) {
       console.error(error);
       message.error("Lỗi khi lưu đơn hàng");
