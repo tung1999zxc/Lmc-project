@@ -381,7 +381,7 @@ const adminSummaryData = summaryDates.map(date => {
   const tongAdsXin = adsSang + adsChieu;
   const tongTienTieu = records
     .filter(r => r.date === date)
-    .reduce((sum, r) => sum + ((r.request1 + r.request2) || 0), 0);
+    .reduce((sum, r) => sum + (r.totalReceived || 0), 0);
   const tienThua = tongAdsXin - tongTienTieu;
   const percentAds = dsTong > 0 ? ((tongTienTieu / dsTong) * 100).toFixed(2) : 0;
   return {
