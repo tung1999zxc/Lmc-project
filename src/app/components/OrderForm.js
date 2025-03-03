@@ -326,7 +326,8 @@ const productOptions = products.map((p) => p.name);
             <Row gutter={16}>
               <Col span={8}>
                 <Form.Item  label="NGÀY ĐẶT" name="orderDate">
-                  <DatePicker style={{ width: "100%" }} disabled={true} />
+                  {/* <DatePicker style={{ width: "100%" }} disabled={true} /> */}
+                  <DatePicker style={{ width: "100%" }}  />
                 </Form.Item>
                 {/* <Form.Item label="Hàng nặng/nhẹ" name="mass">
                   <Select showSearch>
