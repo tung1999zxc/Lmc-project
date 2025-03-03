@@ -1472,11 +1472,8 @@ pagination={7}
    
     <Row gutter={[16, 16]}>
       
-      <Col xs={24} md={14}>
-      <h3>Doanh số Nhân viên SALE</h3>
-
-  <GroupedDoubleBarChartComponent2 data={employeeChartDataNewsale} />
-
+      <Col xs={24} md={10}>
+      
       </Col>
       <Col xs={24} md={10}>
       <PieChartComponent data={salePieData} />
@@ -1484,6 +1481,7 @@ pagination={7}
       </Col>
       
     </Row>
+    
   </Col>
   <Col xs={24} md={10}>
   <br/>
@@ -1492,6 +1490,9 @@ pagination={7}
   <Table columns={saleColumns} dataSource={saleReportData} pagination={false} />
   </Col>
 </Row>
+<h3>Doanh số Nhân viên SALE</h3>
+
+  <GroupedDoubleBarChartComponent2 data={employeeChartDataNewsale} />
 
 
 
