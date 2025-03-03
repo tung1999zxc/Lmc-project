@@ -191,6 +191,10 @@ const OrderList = () => {
       roleFilteredOrders = roleFilteredOrders.filter(
         (order) => order.sale === currentUser.name
       );
+    } else if (currentUser.position === "salefull") {
+      roleFilteredOrders = roleFilteredOrders.filter(
+        (order) => order.sale === currentUser.name
+      );
     } else if (currentUser.position === "salexuly") {
       roleFilteredOrders = roleFilteredOrders.filter(
         (order) =>
