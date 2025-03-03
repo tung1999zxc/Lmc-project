@@ -1118,10 +1118,10 @@ const selectedTableColumns = columns.filter((col) =>
       }
       fetchOrders();
       setFormVisible(false);
-      const now = Date.now();
-    if (now - lastFetchTime.current >= THIRTY_MINUTES) {
-      fetchNamePage();
-      lastFetchTime.current = now;}
+      // const now = Date.now();
+    // if (now - lastFetchTime.current >= THIRTY_MINUTES) {
+    //   fetchNamePage();
+    //   lastFetchTime.current = now;}
     } catch (error) {
       console.error(error);
       message.error("Lỗi khi lưu đơn hàng");
@@ -1326,7 +1326,7 @@ const selectedTableColumns = columns.filter((col) =>
         initialValues={orders.find((order) => order.id === currentEditId)}
         employees={employees}
         dataPagename={dataPagename}
-        // namesalexuly={namesalexuly}
+        namesalexuly={namesalexuly}
       />
     </div>
   );
