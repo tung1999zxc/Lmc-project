@@ -43,7 +43,8 @@ const OrderList = () => {
   const [orders, setOrders] = useState([]);
   const [currentEditId, setCurrentEditId] = useState(null);
   const [formVisible, setFormVisible] = useState(false);
-  const [dateRange, setDateRange] = useState(undefined);
+  const [dateRange2, setDateRange2] = useState('today');
+  const [dateRange, setDateRange] = useState('undefined');
   const [searchText, setSearchText] = useState("");
   const [namesalexuly, setnamesalexuly] = useState("");
   // Cho phép chọn nhiều filter
@@ -179,6 +180,57 @@ const OrderList = () => {
     }
   }, [orders, salexulyOptions, currentUser]);
 
+
+  function getDateRangeByPreset(preset) {
+    const now = new Date();
+    let start, end;
+    switch (preset) {
+      case "today":
+        // Từ 00:00:00 đến 23:59:59.999 của hôm nay
+        start = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+        end = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999);
+        break;
+      case "yesterday":
+        // Hôm qua: từ 00:00:00 đến 23:59:59.999 của ngày hôm qua
+        start = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1);
+        end = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1, 23, 59, 59, 999);
+        break;
+      case "week":
+        // 7 ngày gần nhất: từ 7 ngày trước (00:00:00) đến hôm nay (23:59:59.999)
+        start = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 7);
+        end = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999);
+        break;
+      case "currentMonth":
+        // Từ ngày 1 của tháng đến cuối ngày hôm nay
+        start = new Date(now.getFullYear(), now.getMonth(), 1);
+        end = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999);
+        break;
+      case "lastMonth":
+        // Tháng trước: từ ngày 1 đến ngày cuối của tháng trước
+        start = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+        end = new Date(now.getFullYear(), now.getMonth(), 0);
+        break;
+      case "twoMonthsAgo":
+        start = new Date(now.getFullYear(), now.getMonth() - 2, 1);
+        end = new Date(now.getFullYear(), now.getMonth() - 1, 0);
+        break;
+      case "threeMonthsAgo":
+        start = new Date(now.getFullYear(), now.getMonth() - 3, 1);
+        end = new Date(now.getFullYear(), now.getMonth() - 2, 0);
+        break;
+      default:
+        return undefined;
+    }
+    return [start, end];
+  }
+  const { Option } = Select;
+  
+  useEffect(() => {
+    
+      const range = getDateRangeByPreset(dateRange2);
+    setDateRange(range);
+    
+  }, [dateRange2]);
   // Lọc đơn hàng dựa trên vai trò và các filter được chọn
   const filteredOrders = useMemo(() => {
     let roleFilteredOrders = [...orders];
@@ -1191,12 +1243,24 @@ const selectedTableColumns = columns.filter((col) =>
       
       <Row gutter={[16, 16]} style={{ marginBottom: 24 }}>
         <Col span={4}>
-          <RangePicker
-            allowClear
-            format="DD/MM/YYYY"
-            onChange={(dates) => setDateRange(dates)}
-            style={{ width: "100%" }}
-          />
+        <Select
+          allowClear
+          id="presetFilter"
+          style={{ width: '100%' }}
+          placeholder="Chọn khoảng thời gian"
+          value={dateRange2 || undefined}
+          onChange={(value) => {
+            setDateRange2(value);
+          }}
+        >
+          <Option value="today">Hôm Nay</Option>
+          <Option value="yesterday">Hôm Qua</Option>
+          <Option value="week">1 Tuần gần nhất</Option>
+          <Option value="currentMonth">1 Tháng (Từ đầu tháng đến hiện tại)</Option>
+          <Option value="lastMonth">Tháng trước</Option>
+          <Option value="twoMonthsAgo">2 Tháng trước</Option>
+          <Option value="threeMonthsAgo">3 Tháng trước</Option>
+        </Select>
         </Col>
         <Col span={4}>
           <Search

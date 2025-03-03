@@ -61,7 +61,7 @@ const BarChartComponent = dynamic(
     Promise.resolve(({ data }) => {
       const { BarChart, Bar, XAxis, YAxis,LabelList, CartesianGrid, Tooltip, Legend } = require('recharts');
       return (
-        <BarChart width={600} height={300} data={data}>
+        <BarChart width={800} height={400} data={data}>
           <CartesianGrid strokeDasharray="3 3" />
           <XAxis 
   dataKey="name" 
@@ -304,8 +304,8 @@ const GroupedDoubleBarChartComponent = dynamic(
       } = require("recharts");
 
       return (
-        <ResponsiveContainer width="100%" height={400}>
-          <BarChart data={data}>
+       
+        <BarChart width={chartWidth} height={400} data={data}>
             <CartesianGrid strokeDasharray="3 3" />
             <XAxis 
   dataKey="name" 
@@ -327,7 +327,51 @@ const GroupedDoubleBarChartComponent = dynamic(
            
             
           </BarChart>
-        </ResponsiveContainer>
+        
+      );
+    }),
+  { ssr: false, loading: () => <p>Loading Grouped Chart...</p> }
+);
+const GroupedDoubleBarChartComponent4 = dynamic(
+  () =>
+    Promise.resolve(({ data }) => {
+      const {
+        ResponsiveContainer,
+        BarChart,
+        Bar,
+        LabelList,
+        XAxis,
+        YAxis,
+        CartesianGrid,
+        Tooltip,
+        Legend,
+      } = require("recharts");
+
+      return (
+       
+        <BarChart width={600} height={400} data={data}>
+            <CartesianGrid strokeDasharray="3 3" />
+            <XAxis 
+  dataKey="name" 
+  tickFormatter={(fullName) => formatEmployeeName(fullName)} 
+/>
+           
+            <YAxis tickFormatter={formatYAxisTick}  tickCount={6}/>
+
+            <Tooltip formatter={(value) => value.toLocaleString("vi-VN")} />
+            <Legend />
+            <Bar dataKey="profit" fill="#8884d8">
+              <LabelList
+                dataKey="profit"
+                formatter={formatYAxisTick }
+                
+                position="top"
+              />
+            </Bar>
+           
+            
+          </BarChart>
+        
       );
     }),
   { ssr: false, loading: () => <p>Loading Grouped Chart...</p> }
@@ -348,8 +392,8 @@ const GroupedDoubleBarChartComponent3 = dynamic(
       } = require("recharts");
 
       return (
-        <ResponsiveContainer width="100%" height={400}>
-          <BarChart data={data}>
+      
+          <BarChart width={700} height={400} data={data}>
             <CartesianGrid strokeDasharray="3 3" />
             <XAxis 
   dataKey="name" 
@@ -375,20 +419,37 @@ const GroupedDoubleBarChartComponent3 = dynamic(
             </Bar>
             
           </BarChart>
-        </ResponsiveContainer>
+        
       );
     }),
   { ssr: false, loading: () => <p>Loading Grouped Chart...</p> }
 );
 
+const [chartWidth, setChartWidth] = useState(800); // giá trị mặc định
+
+      useEffect(() => {
+        const handleResize = () => {
+          setChartWidth(window.innerWidth);
+        };
+
+        // Cập nhật ngay khi component mount
+        handleResize();
+
+        // Lắng nghe sự kiện resize
+        window.addEventListener('resize', handleResize);
+
+        return () => {
+          window.removeEventListener('resize', handleResize);
+        };
+      }, []);
 
 const GroupedDoubleBarChartComponent2 = dynamic(
   () =>
     Promise.resolve(({ data }) => {
       const {ResponsiveContainer, BarChart,Cell,LabelList, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend } = require('recharts');
       return (
-        <ResponsiveContainer width="100%" height={400}>
-        <BarChart  data={data}>
+       
+        <BarChart width={chartWidth} height={400} data={data}>
           <CartesianGrid strokeDasharray="3 3" />
           <XAxis 
   dataKey="name" 
@@ -410,7 +471,7 @@ const GroupedDoubleBarChartComponent2 = dynamic(
               />
             </Bar>
          
-        </BarChart></ResponsiveContainer>
+        </BarChart>
       );
     }),
   { ssr: false, loading: () => <p>Loading Grouped Chart...</p> }
@@ -422,7 +483,7 @@ const GroupedBarChartComponent = dynamic(
     Promise.resolve(({ data }) => {
       const { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend } = require('recharts');
       return (
-        <BarChart width={600} height={300} data={data}>
+        <BarChart width={chartWidth} height={400} data={data}>
           <CartesianGrid strokeDasharray="3 3" />
           <XAxis 
   dataKey="team" 
@@ -937,7 +998,7 @@ function getLast30Days() {
     { title: "Tối", dataIndex: "toi", key: "toi", render: (value) => value.toLocaleString() },
     { title: "Tổng", dataIndex: "total", key: "total", render: (value) => value.toLocaleString() },
     { title: "VNĐ", dataIndex: "total", key: "total", render: (value) => (value*17000).toLocaleString() },
-    { title: "Số đơn", dataIndex: "sodon", key: "sodon", render: (value) => value.toLocaleString() },
+    { title: "SL Đơn", dataIndex: "sodon", key: "sodon", render: (value) => value.toLocaleString() },
     { title: "% Ds ca Sáng sớm", dataIndex: "percentSang", key: "percentSang",   render: (percent) => {
       let bgColor;
       if (percent >50 ) {
@@ -1268,8 +1329,12 @@ function getLast30Days() {
 <GroupedDoubleBarChartComponent3 data={teamChartDataNew} />
 
 </Col>
+<Col xs={24} md={2}>
+
+
+</Col>
 {/* <Col xs={24} md={1}></Col> */}
-<Col xs={24} md={10}>
+<Col xs={24} md={8}>
 <br></br>
 <br></br>
 <h3>Phần trăm doanh số theo Team</h3>
@@ -1283,13 +1348,13 @@ function getLast30Days() {
 
 </Row>
     <Row gutter={[16, 16]} style={{ marginTop: "2rem" }}>
-<Col xs={24} md={12}>
+<Col xs={24} md={15}>
 <h3 style={{ marginTop: "2rem" }}>Doanh số trung bình theo Nhân viên theo Team</h3>
       <BarChartComponent data={averageTeamChartData} />
 
 </Col>
 {/* <Col xs={24} md={1}></Col> */}
-<Col xs={24} md={12}>
+<Col xs={24} md={18}>
 <br></br>
 <h2 style={{ marginTop: "2rem" }}>Tổng</h2>
   <Table columns={totalColumns} dataSource={totalData} pagination={false} />
@@ -1353,7 +1418,16 @@ columns={dailySaleColumns}
 dataSource={[...saleDailyData].sort((a, b) => new Date(b.date) - new Date(a.date))} 
 pagination={7} 
 /> 
-<PieChartComponent data={salePieData} />
+
+<Row gutter={[16, 16]}>
+<Col xs={24} md={10}>
+
+</Col>
+<Col xs={24} md={10}>
+<PieChartComponent data={salePieData} />   
+
+</Col>
+</Row>
 </Col>
 <Col xs={24} md={10}>
 <br/>
