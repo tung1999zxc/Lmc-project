@@ -1156,7 +1156,7 @@ const selectedTableColumns = columns.filter((col) =>
       paymentStatus: values.paymentStatus || "",
       deliveryStatus: values.deliveryStatus || "",
       trackingCode: values.trackingCode || "",
-      orderDate: currentEditId ? values.orderDate : moment().format("YYYY-MM-DD"),
+      orderDate: values.orderDate || moment().format("YYYY-MM-DD"),
       shippingDate1: values.shippingDate1 || "",
       shippingDate2: values.shippingDate2 || "",
       employee_code_order: currentUser.employee_code,
