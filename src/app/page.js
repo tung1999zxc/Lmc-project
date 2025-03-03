@@ -91,7 +91,7 @@ const PieChartComponent = dynamic(
       const { PieChart, Pie, Cell, Tooltip, Legend } = require('recharts');
       const COLORS = ['#AA336A', ' #FFBB28', '#00C49F', '#FF8042', '#0088FA', '#5A2D82','#144523'];
       return (
-        <PieChart width={600} height={300}>
+        <PieChart width={300} height={300}>
           <Pie
             data={data}
             dataKey="profit"
@@ -904,10 +904,11 @@ function getLast30Days() {
   }
 
   const saleDailyData = saleDailyDates.map(date => {
-    let sangSom = 0, hanhChinh = 0, toi = 0;
+    let sangSom = 0, hanhChinh = 0, toi = 0, sodon = 0;
     filteredOrders.forEach(order => {
       if (order.orderDate === date) {
         let emp = saleEmployees.find(e => e.name === order.sale);
+        sodon += 1;
         if (emp) {
           if (emp.position_team2 === "onlinesang") {
             sangSom += order.profit;
@@ -926,7 +927,7 @@ function getLast30Days() {
     const percentSang = total > 0 ? (sangSom / total) * 100 : 0;
     const percentHanh = total > 0 ? (hanhChinh / total) * 100 : 0;
     const percentToi = total > 0 ? (toi / total) * 100 : 0;
-    return { key: date, date, sangSom, hanhChinh, toi, total, percentSang, percentHanh, percentToi };
+    return { key: date, date, sangSom, hanhChinh, toi, total, percentSang, percentHanh, percentToi,sodon };
   });
 
   const dailySaleColumns = [
@@ -935,6 +936,8 @@ function getLast30Days() {
     { title: "Hành chính", dataIndex: "hanhChinh", key: "hanhChinh", render: (value) => value.toLocaleString() },
     { title: "Tối", dataIndex: "toi", key: "toi", render: (value) => value.toLocaleString() },
     { title: "Tổng", dataIndex: "total", key: "total", render: (value) => value.toLocaleString() },
+    { title: "VNĐ", dataIndex: "total", key: "total", render: (value) => (value*17000).toLocaleString() },
+    { title: "Số đơn", dataIndex: "sodon", key: "sodon", render: (value) => value.toLocaleString() },
     { title: "% Ds ca Sáng sớm", dataIndex: "percentSang", key: "percentSang",   render: (percent) => {
       let bgColor;
       if (percent >50 ) {
@@ -1201,37 +1204,72 @@ function getLast30Days() {
       </div> */}
   </Col>
   
-  <Col xs={24} md={10}>
-        
-  </Col>
+ 
 </Row>)}
       
 {(currentUser.position === "admin" || currentUser.position === "managerMKT") ? (
   <Tabs defaultActiveKey="MKT">
   <Tabs.TabPane tab="MKT" key="MKT">
-  <div style={{ paddingLeft: '10px' }}>
-  <h3>Doanh số Nhân viên MKT</h3>
-  <div style={{ width: '100%' }}>
-    <GroupedDoubleBarChartComponent data={employeeChartDataNew} />
-  </div>
-  <h3 style={{ marginTop: '2rem' }}>
+ 
+ 
+    <Row gutter={[16, 16]} style={{ marginTop: "2rem" }}>
+<Col xs={24} md={24}>
+<h3>Doanh số Nhân viên MKT</h3>
+  
+  <GroupedDoubleBarChartComponent data={employeeChartDataNew} />
+
+</Col>
+{/* <Col xs={24} md={1}></Col> */}
+<Col xs={24} md={24}>
+<h3 style={{ marginTop: '2rem' }}>
     {isFilterApplied
       ? "Doanh số hàng ngày "
       : "Doanh số hàng ngày "}
   </h3>
   <GroupedDoubleBarChartComponent data={dailyChartDataNew} />
+</Col>
+
+</Row>
+  
+  <Row gutter={[16, 16]}>
+      <Col xs={24} md={24}>
+      
+      </Col>
+      <Col xs={24} md={24}>
+      
+      </Col>
+      
+    </Row>
+  <Row gutter={[16, 16]}>
+      <Col xs={24} md={24}>
+      
+      </Col>
+      
+      
+    </Row>
+  <Row gutter={[16, 16]}>
+      <Col xs={24} md={24}>
+      
+      </Col>
+      
+      
+    </Row>
+  
+ 
+ 
+  
     
  
-</div>
+
     {/* Báo cáo Marketing và các biểu đồ cũ */}
     <Row gutter={[16, 16]} style={{ marginTop: "2rem" }}>
-<Col xs={24} md={15}>
+<Col xs={24} md={14}>
 <h3>Doanh số theo Team</h3>
 <GroupedDoubleBarChartComponent3 data={teamChartDataNew} />
 
 </Col>
 {/* <Col xs={24} md={1}></Col> */}
-<Col xs={24} md={8}>
+<Col xs={24} md={10}>
 <br></br>
 <br></br>
 <h3>Phần trăm doanh số theo Team</h3>
@@ -1240,10 +1278,7 @@ function getLast30Days() {
 
        
         
-      {/* <h3 style={{ marginTop: "2rem" }}>
-      So sánh %ADS : Gồm Leader vs Các nhân viên khác trong Team
-    </h3>
-    <GroupedBarChartComponent data={leaderComparisonChartData} /> */}
+    
 </Col>
 
 </Row>
@@ -1254,7 +1289,7 @@ function getLast30Days() {
 
 </Col>
 {/* <Col xs={24} md={1}></Col> */}
-<Col xs={24} md={10}>
+<Col xs={24} md={12}>
 <br></br>
 <h2 style={{ marginTop: "2rem" }}>Tổng</h2>
   <Table columns={totalColumns} dataSource={totalData} pagination={false} />
@@ -1280,19 +1315,33 @@ function getLast30Days() {
       
       </Col>
     </Row>
-<h2>Báo cáo marketing</h2>
-<Table columns={marketingColumns} dataSource={marketingReportData} pagination={false} />   
+<Row gutter={[16, 16]}>
+      
+      <Col xs={24} md={24}>
+      <h2>Báo cáo marketing</h2>
+<Table columns={marketingColumns} dataSource={marketingReportData} pagination={false} />  
+      </Col>
+      
+    </Row>
+   {/* <h3 style={{ marginTop: "2rem" }}>
+      So sánh %ADS : Gồm Leader vs Các nhân viên khác trong Team
+    </h3>
+    <GroupedBarChartComponent data={leaderComparisonChartData} /> */}
    
-    
-    
-    
     
   </Tabs.TabPane>
   <Tabs.TabPane tab="SALE" key="SALE">
-  <h3>Doanh số Nhân viên SALE</h3>
-<div style={{ width: '100%' }}>
+  <Row gutter={[16, 16]}>
+      
+      <Col xs={24} md={24}>
+      <h3>Doanh số Nhân viên SALE</h3>
+
   <GroupedDoubleBarChartComponent2 data={employeeChartDataNewsale} />
-</div>
+
+      </Col>
+      
+    </Row>
+ 
     {/* Các bảng báo cáo SALE */}
     <Row gutter={[16, 16]}>
 <Col xs={24} md={14}>
@@ -1346,10 +1395,25 @@ pagination={7}
       dataSource={[...saleDailyData].sort((a, b) => new Date(b.date) - new Date(a.date))} 
       pagination={7} 
     /> 
-    <PieChartComponent data={salePieData} />
+   
+    <Row gutter={[16, 16]}>
+      
+      <Col xs={24} md={14}>
+      <h3>Doanh số Nhân viên SALE</h3>
+
+  <GroupedDoubleBarChartComponent2 data={employeeChartDataNewsale} />
+
+      </Col>
+      <Col xs={24} md={10}>
+      <PieChartComponent data={salePieData} />
+
+      </Col>
+      
+    </Row>
   </Col>
   <Col xs={24} md={10}>
   <br/>
+  
   <h2 style={{ marginTop: "2rem" }}>Báo cáo Doanh Số Nhân Viên</h2>
   <Table columns={saleColumns} dataSource={saleReportData} pagination={false} />
   </Col>
