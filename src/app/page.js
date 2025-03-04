@@ -1458,6 +1458,20 @@ pagination={7}
   <Tabs >
         
         <Tabs.TabPane tab="SALE" key="SALE">
+        <h3>Doanh số Nhân viên SALE</h3>
+
+<GroupedDoubleBarChartComponent2 data={employeeChartDataNewsale} />
+  <Row>
+        <Col xs={24} md={24}>
+<h3 style={{ marginTop: '2rem' }}>
+    {isFilterApplied
+      ? "Doanh số hàng ngày "
+      : "Doanh số hàng ngày "}
+  </h3>
+  <GroupedDoubleBarChartComponent data={dailyChartDataNew} />
+</Col>
+
+</Row>
           {/* Các bảng báo cáo SALE */}
           <Row gutter={[16, 16]}>
   <Col xs={24} md={14}>
@@ -1490,9 +1504,7 @@ pagination={7}
   <Table columns={saleColumns} dataSource={saleReportData} pagination={false} />
   </Col>
 </Row>
-<h3>Doanh số Nhân viên SALE</h3>
 
-  <GroupedDoubleBarChartComponent2 data={employeeChartDataNewsale} />
 
 
 

@@ -597,7 +597,7 @@ const adminSummaryColumns = [
       render: (date) => moment(date, 'YYYY-MM-DD').format('DD/MM/YYYY'),
     },
     {
-      title: 'Tiền ADS THỰC TẾ',
+      title: 'Tổng tiền đã tiêu',
       key: 'totalReceived',
       render: (_, record) => (
         <InputNumber

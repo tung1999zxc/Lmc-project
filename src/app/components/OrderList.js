@@ -250,7 +250,7 @@ const OrderList = () => {
     } else if (currentUser.position === "salexuly") {
       roleFilteredOrders = roleFilteredOrders.filter(
         (order) =>
-          order.salexuly === currentUser.name 
+          order.salexuly === currentUser.name && order.saleReport === "DONE"
       );
     } else if (currentUser.position_team === "kho") {
       roleFilteredOrders = roleFilteredOrders.filter(
