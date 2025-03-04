@@ -265,12 +265,15 @@ console.log(safeEmployees);
       adsMoney2: oldMoney + request1 + request2 - excessMoney,
       name: currentUser.name,
       userId: currentUser.employee_code, // gán mã nhân viên của người nhập
+      isLocked: totalReceived !== 0,
     };
   
     try {
       if (editingRecord) {
         const response = await axios.put(`/api/recordsMKT/${editingRecord.id}`, newRecord);
         message.success(response.data.message || 'Cập nhật thành công');
+      
+        fetchRecords();
       } else {
         const response = await axios.post('/api/recordsMKT', newRecord);
         message.success(response.data.message || 'Thêm mới thành công');
@@ -310,9 +313,13 @@ console.log(safeEmployees);
   };
   const onSave = async (record) => {
     try {
+      // Nếu record.totalReceived khác 0, cập nhật isLocked thành true
+      if (record.totalReceived !== 0) {
+        record.isLocked = true;
+      }else record.isLocked = false;
       const response = await axios.put(`/api/recordsMKT/${record.id}`, record);
       message.success(response.data.message || "Lưu thành công");
-      alert('Thao tác thành công!');  
+      alert("Thao tác thành công!");
       fetchRecords();
     } catch (error) {
       console.error(error);
@@ -601,6 +608,10 @@ const adminSummaryColumns = [
       key: 'totalReceived',
       render: (_, record) => (
         <InputNumber
+        disabled={
+          // Nếu record đã được đánh dấu locked và currentUser không phải là managerMKT hoặc admin
+          record.isLocked && currentUser.position !== "managerMKT" && currentUser.position !== "admin"
+        }
           value={record.totalReceived}
           onChange={(value) => handleInlineChange(record.id, 'totalReceived', value)}
           style={{ width: '100%' }}
@@ -614,6 +625,10 @@ const adminSummaryColumns = [
       key: 'request1',
       render: (_, record) => (
         <InputNumber
+        disabled={
+          // Nếu record đã được đánh dấu locked và currentUser không phải là managerMKT hoặc admin
+          record.isLocked && currentUser.position !== "managerMKT" && currentUser.position !== "admin"
+        }
           value={record.request1}
           onChange={(value) => handleInlineChange(record.id, 'request1', value)}
           style={{ width: '100%' }}
@@ -627,6 +642,10 @@ const adminSummaryColumns = [
       key: 'request2',
       render: (_, record) => (
         <InputNumber
+        disabled={
+          // Nếu record đã được đánh dấu locked và currentUser không phải là managerMKT hoặc admin
+          record.isLocked && currentUser.position !== "managerMKT" && currentUser.position !== "admin"
+        }
           value={record.request2}
           onChange={(value) => handleInlineChange(record.id, 'request2', value)}
           style={{ width: '100%' }}
@@ -690,13 +709,16 @@ const adminSummaryColumns = [
       render: (_, record) => {
         // Với lead và manager: chỉ cho phép sửa/xóa nếu record thuộc về chính họ, ngược lại chỉ xem
         if (currentUser.position === 'lead' ) {
-          // || currentUser.position === 'managerMKT '||currentUser.position === 'admin '
+          // || currentUser.position === 'managerMKT'||currentUser.position === 'admin'
           if (record.userId === currentUser.employee_code) {
             return (
               <>
                 <Button type="primary" onClick={() => onSave(record)}>Save</Button>
-                <Popconfirm title="Xóa bản ghi?" onConfirm={() => onDelete(record)}>
-                  <Button danger icon={<DeleteOutlined />} />
+                <Popconfirm title="Xóa bản ghi?" onConfirm={() => onDelete(record)} >
+                  <Button danger icon={<DeleteOutlined />}  disabled={
+          // Nếu record đã được đánh dấu locked và currentUser không phải là managerMKT hoặc admin
+          record.isLocked && currentUser.position !== "managerMKT" && currentUser.position !== "admin"
+        }/>
                 </Popconfirm>
               </>
             );
@@ -709,7 +731,10 @@ const adminSummaryColumns = [
           <>
             <Button type="primary" onClick={() => onSave(record)}>Save</Button>
             <Popconfirm title="Xóa bản ghi?" onConfirm={() => onDelete(record)}>
-              <Button danger icon={<DeleteOutlined />} />
+              <Button danger icon={<DeleteOutlined />}  disabled={
+          // Nếu record đã được đánh dấu locked và currentUser không phải là managerMKT hoặc admin
+          record.isLocked && currentUser.position !== "managerMKT" && currentUser.position !== "admin"
+        }/>
             </Popconfirm>
           </>
         );
