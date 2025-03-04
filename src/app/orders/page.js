@@ -3,8 +3,8 @@ import OrderList from '../components/OrderList';
 
 export default function OrderPage() {
   return (
-    <div style={{  }}>
-      <h1>Quản lý đơn hàng</h1>
+    <div style={{ }}>
+      
       <OrderForm />
       <OrderList />
     </div>

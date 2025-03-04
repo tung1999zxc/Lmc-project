@@ -56,6 +56,15 @@ const fetchEmployees = async () => {
    fetchRecords();
     fetchEmployees();
   }, []);
+
+// Nếu currentUser là team lead, chỉ hiển thị các nhân viên thuộc team của họ.
+  // Ví dụ, currentUser có cấu trúc { name: 'Nguyễn Văn A', position: 'lead', team_id: 'SON' }
+  const isTeamLead = currentUser.position === 'lead' ;
+  const filteredEmployees = isTeamLead
+    ? employees.filter(emp => emp.team_id === currentUser.team_id)
+    : employees;
+
+  
 const BarChartComponent = dynamic(
   () =>
     Promise.resolve(({ data }) => {
@@ -91,7 +100,7 @@ const PieChartComponent = dynamic(
       const { PieChart, Pie, Cell, Tooltip, Legend } = require('recharts');
       const COLORS = ['#AA336A', ' #FFBB28', '#00C49F', '#FF8042', '#0088FA', '#5A2D82','#144523'];
       return (
-        <PieChart width={300} height={300}>
+        <PieChart width={450} height={300}>
           <Pie
             data={data}
             dataKey="profit"
@@ -328,6 +337,58 @@ const GroupedDoubleBarChartComponent = dynamic(
             
           </BarChart>
         
+      );
+    }),
+  { ssr: false, loading: () => <p>Loading Grouped Chart...</p> }
+);
+const GroupedDoubleBarChartComponentTEAM = dynamic(
+  () =>
+    Promise.resolve(({ data }) => {
+      const {
+        ResponsiveContainer,
+        BarChart,
+        Bar,
+        LabelList,
+        XAxis,
+        YAxis,
+        CartesianGrid,
+        Tooltip,
+        Legend,
+      } = require("recharts");
+
+      return (
+        <ResponsiveContainer width="100%" height={400}>
+        <BarChart width={400} height={400} data={data}>
+            <CartesianGrid strokeDasharray="3 3" />
+            <XAxis 
+  dataKey="name" 
+  tickFormatter={(fullName) => formatEmployeeName(fullName)} 
+/>
+           
+            <YAxis tickFormatter={formatYAxisTick}  tickCount={6}/>
+
+            <Tooltip formatter={(value) => value.toLocaleString("vi-VN")} />
+            <Legend />
+            <Bar dataKey="profit" fill="#8884d8">
+              <LabelList
+                dataKey="profit"
+                formatter={formatYAxisTick }
+                
+                position="top"
+              />
+            </Bar>
+            <Bar dataKey="adsCost" fill="#FF8042">
+              <LabelList
+                dataKey="adsCost"
+                formatter={formatYAxisTick }
+                
+                position="top"
+              />
+            </Bar>
+           
+            
+          </BarChart>
+        </ResponsiveContainer>
       );
     }),
   { ssr: false, loading: () => <p>Loading Grouped Chart...</p> }
@@ -615,6 +676,9 @@ function getLast30Days() {
 
   // === Biểu đồ doanh số theo nhân viên (Grouped Double Bar Chart) ===
   const mktEmployees = employees.filter(emp => emp.position_team === "mkt");
+  
+ 
+
   const employeeChartDataNew = mktEmployees.map(emp => {
     const sales = filteredOrders
       .filter(order => order.mkt === emp.name)
@@ -624,6 +688,21 @@ function getLast30Days() {
       .reduce((sum, ad) => sum + (ad.request1 + ad.request2), 0);
     return { name: emp.name, profit: sales*17000, adsCost };
   });
+ 
+  const teamEmployees = mktEmployees.filter(emp => emp.team_id === currentUser.team_id);
+
+const employeeChartDataNewTEAM = teamEmployees.map(emp => {
+  const sales = filteredOrders
+    .filter(order => order.mkt === emp.name)
+    .reduce((sum, order) => sum + order.profit, 0);
+  const adsCost = filteredAds
+    .filter(ad => ad.name === emp.name)
+    .reduce((sum, ad) => sum + (ad.request1 + ad.request2), 0);
+  return { name: emp.name, profit: sales * 17000, adsCost };
+});
+ 
+ 
+ 
   const saleEmployees = employees.filter(emp => emp.position_team === "sale");
   const employeeChartDataNewsale = saleEmployees.map(emp => {
     const sales = filteredOrders
@@ -736,6 +815,60 @@ function getLast30Days() {
     });
   }
 
+// === Biểu đồ doanh số hàng ngày (Grouped Double Bar Chart) ===
+
+let dailyChartDataNewTEAM;
+// Nếu currentUser là team lead, lọc các đơn hàng và ads theo team
+if (isTeamLead) {
+  // Lấy danh sách tên nhân viên của team
+  const teamEmployeeNames = employees
+    .filter(emp => emp.team_id === currentUser.team_id && emp.position_team === "mkt")
+    .map(emp => emp.name);
+  
+  // Lọc đơn hàng và ads chỉ thuộc team đó
+  filteredOrders = filteredOrders.filter(order => teamEmployeeNames.includes(order.mkt));
+  filteredAds = filteredAds.filter(ad => teamEmployeeNames.includes(ad.name));
+}
+
+if (isFilterApplied && filteredOrders.length > 0) {
+  let minDate = new Date(filteredOrders[0].orderDate);
+  let maxDate = new Date(filteredOrders[0].orderDate);
+  
+  filteredOrders.forEach(order => {
+    const d = new Date(order.orderDate);
+    if (d < minDate) minDate = d;
+    if (d > maxDate) maxDate = d;
+  });
+  
+  const dateArray = [];
+  let currentDate = new Date(minDate);
+  while (currentDate <= maxDate) {
+    dateArray.push(currentDate.toISOString().split('T')[0]);
+    currentDate.setDate(currentDate.getDate() + 1);
+  }
+  
+  dailyChartDataNewTEAM = dateArray.map(date => {
+    const sales = filteredOrders
+      .filter(order => order.orderDate === date)
+      .reduce((sum, order) => sum + order.profit, 0);
+    const adsCost = filteredAds
+      .filter(ad => ad.date === date)
+      .reduce((sum, ad) => sum + (ad.request1 + ad.request2), 0);
+    return { name: date, profit: sales * 17000, adsCost };
+  });
+} else {
+  const last30Days = getLast30Days();
+  dailyChartDataNewTEAM = last30Days.map(date => {
+    const sales = orders
+      .filter(order => order.orderDate === date)
+      .reduce((sum, order) => sum + order.profit, 0);
+    const adsCost = adsMoneyData
+      .filter(ad => ad.date === date)
+      .reduce((sum, ad) => sum + (ad.request1 + ad.request2), 0);
+    return { name: date, profit: sales * 17000, adsCost };
+  });
+}
+
   // === Biểu đồ phần trăm doanh số theo team (PieChart) ===
   const totalCompanyProfit = filteredOrders.reduce((sum, order) => sum + order.profit, 0);
   const tcp=Number(totalCompanyProfit);
@@ -743,6 +876,20 @@ function getLast30Days() {
     ...item,
     percent: totalCompanyProfit > 0 ?Number( ((item.profit / tcp)) * 100).toFixed(2) : 0
   }));
+
+  // Tính tổng doanh số của các thành viên trong team
+const totalTeamProfit = employeeChartDataNewTEAM.reduce(
+  (sum, emp) => sum + emp.profit,
+  0
+);
+
+// Tạo dữ liệu cho PieChart dựa trên doanh số của từng thành viên
+const employeePieDataTEAM = employeeChartDataNewTEAM.map(emp => ({
+  ...emp,
+  percent: totalTeamProfit > 0
+    ? Number((emp.profit / totalTeamProfit) * 100).toFixed(2)
+    : 0
+}));
 
   // === Biểu đồ doanh số trung bình của nhân viên trong từng team (BarChart) ===
   const averageTeamChartData = teams.map(team => {
@@ -810,6 +957,28 @@ function getLast30Days() {
   });
   // Sắp xếp theo cột "Tiền VNĐ" giảm dần
   marketingReportData.sort((a, b) => b.tienVND - a.tienVND);
+
+// Lọc ra các thành viên mkt thuộc team của currentUser
+  const teamMktEmployees = mktEmployees.filter(emp => emp.team_id === currentUser.team_id);
+
+const marketingReportDataTEAM = teamMktEmployees.map((emp, index) => {
+  const paid = filteredOrders
+    .filter(order => order.mkt === emp.name && order.paymentStatus === "ĐÃ THANH TOÁN")
+    .reduce((sum, order) => sum + order.profit, 0);
+  const unpaid = filteredOrders
+    .filter(order => order.mkt === emp.name && order.paymentStatus === "CHƯA THANH TOÁN")
+    .reduce((sum, order) => sum + order.profit, 0);
+  const total = paid + unpaid;
+  const tienVND = total * exchangeRate;
+  const totalAds = filteredAds
+    .filter(ad => ad.name === emp.name)
+    .reduce((sum, ad) => sum + (ad.request1 + ad.request2), 0);
+  const adsPercent = tienVND ? ((totalAds / tienVND) * 100).toFixed(2) : "0.00";
+  return { key: index, name: emp.name, paid, unpaid, total, tienVND, totalAds, adsPercent };
+});
+
+// Sắp xếp theo cột "Tiền VNĐ" giảm dần
+marketingReportDataTEAM.sort((a, b) => b.tienVND - a.tienVND);
 
   const marketingColumns = [
     {
@@ -1118,6 +1287,29 @@ function getLast30Days() {
   const totalAdsKW = filteredAds.reduce((sum, ad) => sum + (ad.request1 + ad.request2), 0);
   const percentAds = tongKW > 0 ? Number(((totalAdsKW / (tongKW*exchangeRate)) * 100).toFixed(2)) : 0;
 
+
+  if (isTeamLead) {
+    const teamEmployeeNames = employees
+      .filter(emp => emp.team_id === currentUser.team_id)
+      .map(emp => emp.name);
+    
+    // Lọc các đơn hàng theo tên nhân viên thuộc team
+    filteredOrders = filteredOrders.filter(order => teamEmployeeNames.includes(order.mkt));
+    // Lọc chi phí ads theo tên nhân viên thuộc team
+    filteredAds = filteredAds.filter(ad => teamEmployeeNames.includes(ad.name));
+  }
+  
+  // Bảng Tổng chỉ của các thành viên trong team
+  const daThanhToanKW2 = filteredOrders
+    .filter(order => order.paymentStatus === "ĐÃ THANH TOÁN")
+    .reduce((sum, order) => sum + order.profit, 0);
+  const chuaThanhToanKW2 = filteredOrders
+    .filter(order => order.paymentStatus === "CHƯA THANH TOÁN")
+    .reduce((sum, order) => sum + order.profit, 0);
+  const tongKW2 = daThanhToanKW2 + chuaThanhToanKW2;
+  const thanhToanDat2 = tongKW2 > 0 ? (daThanhToanKW2 / tongKW2) * 100 : 0;
+  const totalAdsKW2 = filteredAds.reduce((sum, ad) => sum + (ad.request1 + ad.request2), 0);
+  const percentAds2 = tongKW2 > 0 ? Number(((totalAdsKW2 / (tongKW2 * exchangeRate)) * 100).toFixed(2)) : 0;
   const totalData = [
     {
       key: "KW",
@@ -1136,6 +1328,26 @@ function getLast30Days() {
       thanhToanDat: thanhToanDat,
       totalAds: totalAdsKW ,
       percentAds: percentAds
+    }
+  ];
+  const totalData2 = [
+    {
+      key: "KW",
+      daThanhToan: daThanhToanKW2,
+      chuaThanhToan: chuaThanhToanKW2,
+      tong: tongKW2,
+      thanhToanDat: thanhToanDat2,
+      totalAds: totalAdsKW2,
+      percentAds: percentAds2
+    },
+    {
+      key: "VND",
+      daThanhToan: daThanhToanKW2 * exchangeRate,
+      chuaThanhToan: chuaThanhToanKW2 * exchangeRate,
+      tong: tongKW2 * exchangeRate,
+      thanhToanDat: thanhToanDat2,
+      totalAds: totalAdsKW2 ,
+      percentAds: percentAds2
     }
   ];
 
@@ -1217,7 +1429,7 @@ function getLast30Days() {
     }}
     >
       {/* Bộ lọc */}
-      {(currentUser.position === "admin" || currentUser.position === "managerMKT"||currentUser.position === "leadSALE" || currentUser.position === "managerSALE"  ) && (
+      {(currentUser.position === "admin" || currentUser.position === "managerMKT"||currentUser.position === "leadSALE" || currentUser.position === "managerSALE" || currentUser.position === "lead"  ) && (
       <Row gutter={[16, 16]}  >
   <Col xs={24} md={12}>
   <Row>
@@ -1298,6 +1510,7 @@ function getLast30Days() {
       : "Doanh số hàng ngày "}
   </h3>
   <GroupedDoubleBarChartComponent data={dailyChartDataNew} />
+
 </Col>
 
 </Row>
@@ -1311,13 +1524,7 @@ function getLast30Days() {
       </Col>
       
     </Row>
-  <Row gutter={[16, 16]}>
-      <Col xs={24} md={24}>
-      
-      </Col>
-      
-      
-    </Row>
+  
   <Row gutter={[16, 16]}>
       <Col xs={24} md={24}>
       
@@ -1525,7 +1732,57 @@ pagination={7}
         </Tabs.TabPane>
       </Tabs>
 ): null}
+{currentUser.position === "lead" && (
+  <>
+
+<Row gutter={[16, 16]}>
+      <Col xs={24} md={14}>
+      <h2>Báo cáo marketing</h2>
+  <Table columns={marketingColumns} dataSource={marketingReportDataTEAM} pagination={false} />  
+      </Col>
+      <Col xs={24} md={10}><br></br>
+      <h3>Doanh số Nhân viên MKT</h3>
+  
+  <GroupedDoubleBarChartComponentTEAM data={employeeChartDataNewTEAM} />
+      
+      
+      </Col>
+      
+      
+    </Row>
+<Row gutter={[16, 16]}>
+      <Col xs={24} md={14}>
+      <h3 style={{ marginTop: '2rem' }}>
+      {isFilterApplied ? "Doanh số hàng ngày " : "Doanh số hàng ngày "}
+    </h3>
+    <GroupedDoubleBarChartComponentTEAM data={dailyChartDataNewTEAM} />
+      </Col>
+      <Col xs={24} md={10}>
+      <h2 style={{ marginTop: "2rem" }}>Tổng</h2>
+  <Table columns={totalColumns} dataSource={totalData2} pagination={false} />
+  <h3>Phần trăm doanh số thành viên</h3>
+  <PieChartComponent data={employeePieDataTEAM} />
+      </Col>
+      
+      
+    </Row>
+<Row gutter={[16, 16]}>
+      <Col xs={24} md={14}>
+      
+      </Col>
+      <Col xs={24} md={10}>
+      
+      </Col>
+      
+      
+    </Row>
+  
+  
     
+   
+    
+  </>
+)}
     </div>
   );
 };export default Dashboard;
