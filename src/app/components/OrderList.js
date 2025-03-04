@@ -411,6 +411,75 @@ const OrderList = () => {
     const totals = calculateTotalQuantities(filteredOrders);
     setTotalQuantities(totals);
   };
+
+  const colors = [
+    "#FFD700", // vàng
+    "#ADD8E6", // xanh nhạt
+    "#90EE90", // xanh lá nhạt
+    "#FFB6C1", // hồng nhạt
+    "#FFA500", // cam
+    "#00CED1",
+    "#FF5733", // màu đỏ cam
+  "#C70039", // đỏ thẫm
+  "#900C3F", // đỏ đậm
+  "#581845", // tím đậm
+  "#1F618D", // xanh đậm
+  "#2E86C1", // xanh sáng
+  "#28B463", // xanh lá đậm
+  "#239B56", // xanh lá đậm hơn
+  "#1E8449", // xanh lá rừng
+  "#F4D03F", // vàng sáng
+  "#F1C40F", // vàng óng ánh
+  "#F39C12", // cam sáng
+  "#E67E22", // cam đất
+  "#D35400", // cam đậm
+  "#BA4A00", // cam than
+  "#7D6608", // olive
+  "#6E2C00", // nâu sẫm
+  "#A04000", // nâu đỏ
+  "#6C3483", // tím trung
+  "#884EA0", // tím nhạt
+  "#A569BD", // tím nhẹ
+  "#BB8FCE", // tím mờ
+  "#7FB3D5", // xanh pastel
+  "#5499C7", // xanh trung
+  "#2980B9", // xanh dương
+  "#2471A3", // xanh dương đậm
+  "#1ABC9C", // xanh ngọc
+  "#16A085", // xanh lục đậm
+  "#117864", // xanh lục tối
+  "#2ECC71", // xanh mát
+  "#27AE60", // xanh lá sáng
+  "#229954", // xanh lá đậm
+  "#52BE80", // xanh mát nhẹ
+  "#82E0AA", // xanh pastel
+  "#ABEBC6", // xanh mờ
+  "#F1948A", // hồng đất
+  "#EC7063", // hồng đậm
+  "#E74C3C", // đỏ sáng
+  "#CB4335", // đỏ sẫm
+  "#F5B7B1", // hồng nhạt
+  "#FAD7A0", // vàng nhạt
+  "#F8C471", // cam nhạt
+  "#F7DC6F", // vàng nhẹ
+  "#F0B27A", // cam đào
+  "#D2B4DE", // tím nhạt
+  "#A9CCE3", // xanh nhẹ
+  "#AED6F1", // xanh pastel
+  "#D6EAF8", // xanh mờ
+  "#EDBB99", // nâu nhạt
+  "#CCD1D1", // xám nhạt // xanh nước biển
+  ];
+  
+  const getColorForCustomer = (customerName) => {
+    let hash = 0;
+    for (let i = 0; i < customerName.length; i++) {
+      hash = customerName.charCodeAt(i) + ((hash << 5) - hash);
+    }
+    const index = Math.abs(hash) % colors.length;
+    return colors[index];
+  };
+  
       
   const columns3 = Object.keys(totalQuantities).map((product) => ({
     title: product,          // Tiêu đề cột là tên sản phẩm
@@ -519,33 +588,16 @@ const OrderList = () => {
         dataIndex: "customerName",
         key: "customerName",
         render: (customerName, record) => {
-          // Lọc ra các đơn của khách hàng này
+          // Lọc ra các đơn hàng của khách hàng này
           const customerOrders = orders.filter(
             (order) => order.customerName === record.customerName
           );
           const count = customerOrders.length;
-          let bgColor = "";
-      
-          // if (count >1 && customerOrders.some((order) => order.saleReport === "DONE")) {
-          //   bgColor = "#71DB46";
-
-          // } else 
-          if (count > 1) {
-            // Nếu có nhiều đơn
-            // Kiểm tra xem có đơn nào trong 2 ngày gần nhất không
-            const recentOrders = customerOrders.filter((order) =>
-              moment(order.orderDate, "YYYY-MM-DD").isAfter(moment().subtract(1, "days"))
-            );
-            if (recentOrders.length > 0 ) {
-              bgColor = "#D57778";
-            } 
-            else {
-              bgColor = "yellow";
-            }
-          }
+          // Nếu có nhiều đơn, gán màu nền dựa trên tên khách
+          const bgColor = count > 1 ? getColorForCustomer(customerName) : "";
           
           return (
-            <div style={{ backgroundColor: bgColor, padding: "4px" ,borderRadius:'10px'}}>
+            <div style={{ backgroundColor: bgColor, padding: "4px" }}>
               {customerName}
             </div>
           );
@@ -1245,7 +1297,11 @@ const selectedTableColumns = columns.filter((col) =>
     category: order.category,
   })); 
   return (
-    <div style={{ padding: 24 }}>
+    <div  style={{
+      transform: "scale(1)", padding: 24,
+     fontSize: "5px"
+     
+    }}>
       
       <Row>
       <Col span={6}><div style={{ marginBottom: 16 }}>
@@ -1409,7 +1465,7 @@ const selectedTableColumns = columns.filter((col) =>
         <Col flex="auto">
        
         <Table 
-        
+          scroll={{ x: 3000 }}
         columns={
           currentUser.position_team === "kho"
             ? columnsKHO
