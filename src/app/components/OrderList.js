@@ -234,7 +234,10 @@ const OrderList = () => {
   // Lọc đơn hàng dựa trên vai trò và các filter được chọn
   const filteredOrders = useMemo(() => {
     let roleFilteredOrders = [...orders];
-
+    if (
+      !selectedFilters.includes("duplicate_name") &&
+      !selectedFilters.includes("duplicate_phone")
+    ) {
     if (currentUser.position === "mkt") {
       roleFilteredOrders = roleFilteredOrders.filter(
         (order) => order.mkt === currentUser.name
@@ -260,28 +263,31 @@ const OrderList = () => {
       roleFilteredOrders = roleFilteredOrders.filter((order) =>
         leadTeamMembers.includes(order.mkt)
       );
-    }
+    }}
 
     return roleFilteredOrders
-      .filter((order) => {
-        // Điều kiện lọc theo ngày
-        let dateMatch = true;
-        if (dateRange) {
-          const startDate = dayjs(dateRange[0]);
-          const endDate = dayjs(dateRange[1]);
-          const checkDate = (date) =>
-            date &&
-            dayjs(date).isValid() &&
-            dayjs(date).isBetween(startDate, endDate, "day", "[]");
-          if (!order.shippingDate1 && !order.shippingDate2) {
-            dateMatch = checkDate(order.orderDate);
-          } else {
-            dateMatch =
-              checkDate(order.orderDate) ||
-              checkDate(order.shippingDate1) ||
-              checkDate(order.shippingDate2);
-          }
+    .filter((order) => {
+      // Điều kiện lọc theo ngày
+      let dateMatch = true;
+      if (dateRange && searchText.trim() === "") {
+        const startDate = dayjs(dateRange[0]);
+        const endDate = dayjs(dateRange[1]);
+        const checkDate = (date) =>
+          date &&
+          dayjs(date).isValid() &&
+          dayjs(date).isBetween(startDate, endDate, "day", "[]");
+        if (!order.shippingDate1 && !order.shippingDate2) {
+          dateMatch = checkDate(order.orderDate);
+        } else {
+          dateMatch =
+            checkDate(order.orderDate) ||
+            checkDate(order.shippingDate1) ||
+            checkDate(order.shippingDate2);
         }
+      } else if (searchText.trim() !== "") {
+        // Nếu có từ khóa tìm kiếm, bỏ qua lọc theo ngày
+        dateMatch = true;
+      }
 
         // Điều kiện lọc theo từ khóa tìm kiếm
         const searchMatch = (() => {
@@ -501,18 +507,50 @@ const OrderList = () => {
       : []),
   
 
-    {
-      title: (
-        <Checkbox
-          checked={selectedColumns.includes("customerName")}
-          onChange={(e) => handleColumnSelect("customerName", e.target.checked)}
-        >
-          TÊN KHÁCH
-        </Checkbox>
-      ),
-      dataIndex: "customerName",
-      key: "customerName"
-    },
+      {
+        title: (
+          <Checkbox
+            checked={selectedColumns.includes("customerName")}
+            onChange={(e) => handleColumnSelect("customerName", e.target.checked)}
+          >
+            TÊN KHÁCH
+          </Checkbox>
+        ),
+        dataIndex: "customerName",
+        key: "customerName",
+        render: (customerName, record) => {
+          // Lọc ra các đơn của khách hàng này
+          const customerOrders = orders.filter(
+            (order) => order.customerName === record.customerName
+          );
+          const count = customerOrders.length;
+          let bgColor = "";
+      
+          // if (count >1 && customerOrders.some((order) => order.saleReport === "DONE")) {
+          //   bgColor = "#71DB46";
+
+          // } else 
+          if (count > 1) {
+            // Nếu có nhiều đơn
+            // Kiểm tra xem có đơn nào trong 2 ngày gần nhất không
+            const recentOrders = customerOrders.filter((order) =>
+              moment(order.orderDate, "YYYY-MM-DD").isAfter(moment().subtract(1, "days"))
+            );
+            if (recentOrders.length > 0 ) {
+              bgColor = "#D57778";
+            } 
+            else {
+              bgColor = "yellow";
+            }
+          }
+          
+          return (
+            <div style={{ backgroundColor: bgColor, padding: "4px" ,borderRadius:'10px'}}>
+              {customerName}
+            </div>
+          );
+        },
+      },
     {
       title: (
         <Checkbox

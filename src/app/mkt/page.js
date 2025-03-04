@@ -608,7 +608,7 @@ const adminSummaryColumns = [
       key: 'totalReceived',
       render: (_, record) => (
         <InputNumber
-        disabled={
+        readOnly={
           // Nếu record đã được đánh dấu locked và currentUser không phải là managerMKT hoặc admin
           record.isLocked && currentUser.position !== "managerMKT" && currentUser.position !== "admin"
         }
@@ -625,7 +625,7 @@ const adminSummaryColumns = [
       key: 'request1',
       render: (_, record) => (
         <InputNumber
-        disabled={
+        readOnly={
           // Nếu record đã được đánh dấu locked và currentUser không phải là managerMKT hoặc admin
           record.isLocked && currentUser.position !== "managerMKT" && currentUser.position !== "admin"
         }
@@ -642,7 +642,7 @@ const adminSummaryColumns = [
       key: 'request2',
       render: (_, record) => (
         <InputNumber
-        disabled={
+        readOnly={
           // Nếu record đã được đánh dấu locked và currentUser không phải là managerMKT hoặc admin
           record.isLocked && currentUser.position !== "managerMKT" && currentUser.position !== "admin"
         }
