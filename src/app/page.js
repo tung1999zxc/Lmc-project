@@ -686,7 +686,7 @@ function getLast30Days() {
     const adsCost = filteredAds
       .filter(ad => ad.name === emp.name)
       .reduce((sum, ad) => sum + (ad.request1 + ad.request2), 0);
-    return { name: emp.name, profit: sales*17000, adsCost };
+    return { name: emp.name, profit: sales*17000*0.95, adsCost };
   });
  
   const teamEmployees = mktEmployees.filter(emp => emp.team_id === currentUser.team_id);
@@ -698,7 +698,7 @@ const employeeChartDataNewTEAM = teamEmployees.map(emp => {
   const adsCost = filteredAds
     .filter(ad => ad.name === emp.name)
     .reduce((sum, ad) => sum + (ad.request1 + ad.request2), 0);
-  return { name: emp.name, profit: sales * 17000, adsCost };
+  return { name: emp.name, profit: sales * 17000*0.95, adsCost };
 });
  
  
@@ -737,7 +737,7 @@ const employeeChartDataNewTEAM = teamEmployees.map(emp => {
         .reduce((sum, ad) => sum + (ad.request1 + ad.request2), 0);
       return acc + empAds;
     }, 0);
-    return { name: team.label, profit: sales*17000, adsCost };
+    return { name: team.label, profit: sales*17000*0.95, adsCost };
   });
   // const teamChartDataNew = teams.map(team => {
   //   const teamEmps = employees.filter(emp => emp.position_team === "mkt" && emp.team_id === team.value);
@@ -800,7 +800,7 @@ const employeeChartDataNewTEAM = teamEmployees.map(emp => {
       const adsCost = filteredAds
         .filter(ad => ad.date === date)
         .reduce((sum, ad) => sum + (ad.request1 + ad.request2), 0);
-      return { name: date, profit: sales*17000, adsCost };
+      return { name: date, profit: sales*17000*0.95, adsCost };
     });
   } else {
     const last30Days = getLast30Days();
@@ -811,7 +811,7 @@ const employeeChartDataNewTEAM = teamEmployees.map(emp => {
       const adsCost = adsMoneyData
         .filter(ad => ad.date === date)
         .reduce((sum, ad) => sum + (ad.request1 + ad.request2), 0);
-      return { name: date, profit: sales*17000, adsCost };
+      return { name: date, profit: sales*17000*0.95, adsCost };
     });
   }
 
@@ -854,7 +854,7 @@ if (isFilterApplied && filteredOrders.length > 0) {
     const adsCost = filteredAds
       .filter(ad => ad.date === date)
       .reduce((sum, ad) => sum + (ad.request1 + ad.request2), 0);
-    return { name: date, profit: sales * 17000, adsCost };
+    return { name: date, profit: sales * 17000*0.95, adsCost };
   });
 } else {
   const last30Days = getLast30Days();
@@ -865,7 +865,7 @@ if (isFilterApplied && filteredOrders.length > 0) {
     const adsCost = adsMoneyData
       .filter(ad => ad.date === date)
       .reduce((sum, ad) => sum + (ad.request1 + ad.request2), 0);
-    return { name: date, profit: sales * 17000, adsCost };
+    return { name: date, profit: sales * 17000*0.95, adsCost };
   });
 }
 
@@ -901,7 +901,7 @@ const employeePieDataTEAM = employeeChartDataNewTEAM.map(emp => ({
       return acc + empSales;
     }, 0);
     const avgProfit = teamEmps.length > 0 ? teamProfit / teamEmps.length : 0;
-    return { name: team.label, profit: avgProfit*17000 };
+    return { name: team.label, profit: avgProfit*17000*0.95 };
   });
 
   // === Biểu đồ so sánh doanh số giữa leader và các nhân viên khác trong team (Grouped Bar Chart) ===
@@ -945,10 +945,10 @@ const employeePieDataTEAM = employeeChartDataNewTEAM.map(emp => ({
       .filter(order => order.mkt === emp.name && order.paymentStatus === "ĐÃ THANH TOÁN")
       .reduce((sum, order) => sum + order.profit, 0);
     const unpaid = filteredOrders
-      .filter(order => order.mkt === emp.name && order.paymentStatus === "CHƯA THANH TOÁN")
+      .filter(order => order.mkt === emp.name && (order.paymentStatus === "CHƯA THANH TOÁN"||order.paymentStatus === ""))
       .reduce((sum, order) => sum + order.profit, 0);
     const total = paid + unpaid;
-    const tienVND = total * exchangeRate;
+    const tienVND = total * exchangeRate*0.95;
     const totalAds = filteredAds
       .filter(ad => ad.name === emp.name)
       .reduce((sum, ad) => sum + (ad.request1 + ad.request2), 0);
@@ -966,10 +966,10 @@ const marketingReportDataTEAM = teamMktEmployees.map((emp, index) => {
     .filter(order => order.mkt === emp.name && order.paymentStatus === "ĐÃ THANH TOÁN")
     .reduce((sum, order) => sum + order.profit, 0);
   const unpaid = filteredOrders
-    .filter(order => order.mkt === emp.name && order.paymentStatus === "CHƯA THANH TOÁN")
+    .filter(order => order.mkt === emp.name && (order.paymentStatus === "CHƯA THANH TOÁN"||order.paymentStatus === ""))
     .reduce((sum, order) => sum + order.profit, 0);
   const total = paid + unpaid;
-  const tienVND = total * exchangeRate;
+  const tienVND = total*0.95 * exchangeRate;
   const totalAds = filteredAds
     .filter(ad => ad.name === emp.name)
     .reduce((sum, ad) => sum + (ad.request1 + ad.request2), 0);
@@ -1313,18 +1313,18 @@ marketingReportDataTEAM.sort((a, b) => b.tienVND - a.tienVND);
   const totalData = [
     {
       key: "KW",
-      daThanhToan: daThanhToanKW,
-      chuaThanhToan: chuaThanhToanKW,
-      tong: tongKW,
+      daThanhToan: daThanhToanKW*0.95,
+      chuaThanhToan: chuaThanhToanKW*0.95,
+      tong: tongKW*0.95,
       thanhToanDat: thanhToanDat,
       totalAds: totalAdsKW,
       percentAds: percentAds
     },
     {
       key: "VND",
-      daThanhToan: daThanhToanKW * exchangeRate,
-      chuaThanhToan: chuaThanhToanKW * exchangeRate,
-      tong: tongKW * exchangeRate,
+      daThanhToan: daThanhToanKW*0.95 * exchangeRate,
+      chuaThanhToan: chuaThanhToanKW*0.95 * exchangeRate,
+      tong: tongKW*0.95 * exchangeRate,
       thanhToanDat: thanhToanDat,
       totalAds: totalAdsKW ,
       percentAds: percentAds
@@ -1333,18 +1333,18 @@ marketingReportDataTEAM.sort((a, b) => b.tienVND - a.tienVND);
   const totalData2 = [
     {
       key: "KW",
-      daThanhToan: daThanhToanKW2,
-      chuaThanhToan: chuaThanhToanKW2,
-      tong: tongKW2,
+      daThanhToan: daThanhToanKW2*0.95,
+      chuaThanhToan: chuaThanhToanKW2*0.95,
+      tong: tongKW2*0.95,
       thanhToanDat: thanhToanDat2,
       totalAds: totalAdsKW2,
       percentAds: percentAds2
     },
     {
       key: "VND",
-      daThanhToan: daThanhToanKW2 * exchangeRate,
-      chuaThanhToan: chuaThanhToanKW2 * exchangeRate,
-      tong: tongKW2 * exchangeRate,
+      daThanhToan: daThanhToanKW2*0.95 * exchangeRate,
+      chuaThanhToan: chuaThanhToanKW2*0.95 * exchangeRate,
+      tong: tongKW2*0.95 * exchangeRate,
       thanhToanDat: thanhToanDat2,
       totalAds: totalAdsKW2 ,
       percentAds: percentAds2
