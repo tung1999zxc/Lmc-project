@@ -1758,14 +1758,15 @@ pagination={7}
     <GroupedDoubleBarChartComponentTEAM data={dailyChartDataNewTEAM} />
       </Col>
       <Col xs={24} md={10}>
-      <h2 style={{ marginTop: "2rem" }}>Tổng</h2>
-  <Table columns={totalColumns} dataSource={totalData2} pagination={false} />
+    <br></br>  
   <h3>Phần trăm doanh số thành viên</h3>
   <PieChartComponent data={employeePieDataTEAM} />
       </Col>
       
-      
+     
     </Row>
+    <h2 style={{ marginTop: "2rem" }}>Tổng</h2>
+    <Table columns={totalColumns} dataSource={totalData2} pagination={false} />    
 <Row gutter={[16, 16]}>
       <Col xs={24} md={14}>
       
