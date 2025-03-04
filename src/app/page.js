@@ -1083,10 +1083,20 @@ function getLast30Days() {
   const chuaGuiHangKW = filteredOrders
     .filter(order => order.paymentStatus === "CHƯA THANH TOÁN" && (order.deliveryStatus === ""||order.deliveryStatus === "BỊ BẮT CHỜ GỬI LẠI") && order.saleReport === "DONE" )
     .reduce((sum, order) => sum + order.profit, 0);
+  const SLgiaoThanhCongKW = filteredOrders
+    .filter(order => order.paymentStatus === "CHƯA THANH TOÁN" && order.deliveryStatus === "GIAO THÀNH CÔNG" &&order.saleReport === "DONE")
+    
+  const SLdaGuiHangKW = filteredOrders
+    .filter(order => order.paymentStatus === "CHƯA THANH TOÁN" && order.deliveryStatus === "ĐÃ GỬI HÀNG" &&order.saleReport === "DONE")
+   
+  const SLchuaGuiHangKW = filteredOrders
+    .filter(order => order.paymentStatus === "CHƯA THANH TOÁN" && (order.deliveryStatus === ""||order.deliveryStatus === "BỊ BẮT CHỜ GỬI LẠI") && order.saleReport === "DONE" )
+ 
 
   const transferData = [
     { key: "KW", currency: "KW", giaoThanhCong: giaoThanhCongKW, daGuiHang: daGuiHangKW ,chuaGuiHang:chuaGuiHangKW},
-    { key: "VND", currency: "VND", giaoThanhCong: giaoThanhCongKW * exchangeRate, daGuiHang: daGuiHangKW * exchangeRate,chuaGuiHang:chuaGuiHangKW*exchangeRate }
+    { key: "VND", currency: "VND", giaoThanhCong: giaoThanhCongKW * exchangeRate, daGuiHang: daGuiHangKW * exchangeRate,chuaGuiHang:chuaGuiHangKW*exchangeRate },
+    { key: "SL", currency: "SL ĐƠN", giaoThanhCong: SLgiaoThanhCongKW.length, daGuiHang: SLdaGuiHangKW.length,chuaGuiHang:SLchuaGuiHangKW.length }
   ];
 
   const transferColumns = [
@@ -1200,11 +1210,11 @@ function getLast30Days() {
   return (
     
     <div  
-    // style={{
-    //   transform: "scale(0.95)",
-    //   transformOrigin: "top left",
-    //   width: "105%" // Để bù lại không gian khi scale
-    // }}
+    style={{
+      transform: "scale(0.85)",
+      transformOrigin: "top left",
+      width: "115%" // Để bù lại không gian khi scale
+    }}
     >
       {/* Bộ lọc */}
       {(currentUser.position === "admin" || currentUser.position === "managerMKT"||currentUser.position === "leadSALE" || currentUser.position === "managerSALE"  ) && (
