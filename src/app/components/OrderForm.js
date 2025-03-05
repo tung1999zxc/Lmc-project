@@ -341,8 +341,8 @@ const productOptions = products.map((p) => p.name);
                 <Form.Item label="TÊN KHÁCH" name="customerName">
                   <Input />
                 </Form.Item>
-                <Form.Item label="TÊN PAGE" name="pageName">
-  <Select
+                <Form.Item  label="TÊN PAGE" name="pageName">
+  <Select allowClear
     disabled={currentUser.position === "salexuly" || currentUser.position === "salexacnhan"}
     showSearch
     onChange={handlePageNameChange}

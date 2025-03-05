@@ -1244,35 +1244,50 @@ marketingReportDataTEAM.sort((a, b) => b.tienVND - a.tienVND);
 
   // Thống kê để dục chuyển khoản
   const giaoThanhCongKW = filteredOrders
-    .filter(order => order.paymentStatus === "CHƯA THANH TOÁN" && order.deliveryStatus === "GIAO THÀNH CÔNG" &&order.saleReport === "DONE")
+    .filter(order => ( order.paymentStatus === "CHƯA THANH TOÁN" || order.paymentStatus === "" )&& order.deliveryStatus === "GIAO THÀNH CÔNG" &&order.saleReport === "DONE")
     .reduce((sum, order) => sum + order.revenue, 0);
   const daGuiHangKW = filteredOrders
-    .filter(order => order.paymentStatus === "CHƯA THANH TOÁN" && order.deliveryStatus === "ĐÃ GỬI HÀNG" &&order.saleReport === "DONE")
+    .filter(order => ( order.paymentStatus === "CHƯA THANH TOÁN" || order.paymentStatus === "" ) && order.deliveryStatus === "ĐÃ GỬI HÀNG" &&order.saleReport === "DONE")
     .reduce((sum, order) => sum + order.revenue, 0);
   const chuaGuiHangKW = filteredOrders
-    .filter(order => order.paymentStatus === "CHƯA THANH TOÁN" && (order.deliveryStatus === ""||order.deliveryStatus === "BỊ BẮT CHỜ GỬI LẠI") && order.saleReport === "DONE" )
+    .filter(order => ( order.paymentStatus === "CHƯA THANH TOÁN" || order.paymentStatus === "" ) && (order.deliveryStatus === ""||order.deliveryStatus === "BỊ BẮT CHỜ GỬI LẠI") && order.saleReport === "DONE" )
     .reduce((sum, order) => sum + order.revenue, 0);
   const SLgiaoThanhCongKW = filteredOrders
-    .filter(order => order.paymentStatus === "CHƯA THANH TOÁN" && order.deliveryStatus === "GIAO THÀNH CÔNG" &&order.saleReport === "DONE")
+    .filter(order => ( order.paymentStatus === "CHƯA THANH TOÁN" || order.paymentStatus === "" ) && order.deliveryStatus === "GIAO THÀNH CÔNG" &&order.saleReport === "DONE");
     
   const SLdaGuiHangKW = filteredOrders
-    .filter(order => order.paymentStatus === "CHƯA THANH TOÁN" && order.deliveryStatus === "ĐÃ GỬI HÀNG" &&order.saleReport === "DONE")
+    .filter(order => ( order.paymentStatus === "CHƯA THANH TOÁN" || order.paymentStatus === "" ) && order.deliveryStatus === "ĐÃ GỬI HÀNG" &&order.saleReport === "DONE");
    
   const SLchuaGuiHangKW = filteredOrders
-    .filter(order => order.paymentStatus === "CHƯA THANH TOÁN" && (order.deliveryStatus === ""||order.deliveryStatus === "BỊ BẮT CHỜ GỬI LẠI") && order.saleReport === "DONE" )
+    .filter(order => ( order.paymentStatus === "CHƯA THANH TOÁN" || order.paymentStatus === "" )&& (order.deliveryStatus === ""||order.deliveryStatus === "BỊ BẮT CHỜ GỬI LẠI") && order.saleReport === "DONE" );
  
+  const tong = giaoThanhCongKW+ daGuiHangKW +chuaGuiHangKW;
+  
 
   const transferData = [
-    { key: "KW", currency: "KW", giaoThanhCong: giaoThanhCongKW, daGuiHang: daGuiHangKW ,chuaGuiHang:chuaGuiHangKW},
-    { key: "VND", currency: "VND", giaoThanhCong: giaoThanhCongKW * exchangeRate, daGuiHang: daGuiHangKW * exchangeRate,chuaGuiHang:chuaGuiHangKW*exchangeRate },
-    { key: "SL", currency: "SL ĐƠN", giaoThanhCong: SLgiaoThanhCongKW.length, daGuiHang: SLdaGuiHangKW.length,chuaGuiHang:SLchuaGuiHangKW.length }
+    { key: "KW", currency: "KW", giaoThanhCong: giaoThanhCongKW, daGuiHang: daGuiHangKW ,chuaGuiHang:chuaGuiHangKW, tong :tong},
+    { key: "VND", currency: "VND", giaoThanhCong: giaoThanhCongKW * exchangeRate, daGuiHang: daGuiHangKW * exchangeRate,chuaGuiHang:chuaGuiHangKW*exchangeRate,tong :tong*exchangeRate },
+    { key: "SL", currency: "SL ĐƠN", giaoThanhCong: SLgiaoThanhCongKW.length, daGuiHang: SLdaGuiHangKW.length,chuaGuiHang:SLchuaGuiHangKW.length, tong:(SLgiaoThanhCongKW.length+SLdaGuiHangKW.length+SLchuaGuiHangKW.length) }
   ];
 
   const transferColumns = [
     { title: "Tiền tệ", dataIndex: "currency", key: "currency" },
     { title: "Giao thành công", dataIndex: "giaoThanhCong", key: "giaoThanhCong", render: (value) => value.toLocaleString() },
     { title: "Đã gửi hàng", dataIndex: "daGuiHang", key: "daGuiHang", render: (value) => value.toLocaleString() },
-    { title: "Chưa gửi hàng", dataIndex: "chuaGuiHang", key: "chuaGuiHang", render: (value) => value.toLocaleString() }
+    { title: "Chưa gửi hàng", dataIndex: "chuaGuiHang", key: "chuaGuiHang", render: (value) => value.toLocaleString() },
+    
+    {
+      title: "Tổng",
+      dataIndex: "tong",
+      key: "tong",
+      render: (value) => {
+        return (
+          <div>
+            <strong>{value.toLocaleString()}</strong>
+          </div>
+        );
+      }
+    },
   ];
 
   // Bảng Tổng
@@ -1354,7 +1369,7 @@ marketingReportDataTEAM.sort((a, b) => b.tienVND - a.tienVND);
   const totalColumns = [
     { title: "Đã thanh toán", dataIndex: "daThanhToan", key: "daThanhToán", render: (value) => value.toLocaleString() },
     { title: "Chưa thanh toán", dataIndex: "chuaThanhToan", key: "chuaThanhToán", render: (value) => value.toLocaleString() },
-    { title: "Tổng", dataIndex: "tong", key: "tong", render: (value) => value.toLocaleString() },
+    
     { title: "Thanh toán đạt", dataIndex: "thanhToanDat", key: "thanhToanDat",   render: (percent) => {
       let bgColor;
       if (percent >80 ) {
@@ -1375,6 +1390,18 @@ marketingReportDataTEAM.sort((a, b) => b.tienVND - a.tienVND);
           }}
         >
           {percent.toFixed(2)}%
+        </div>
+      );
+    }
+  },
+  {
+    title: "Tổng",
+    dataIndex: "tong",
+    key: "tong",
+    render: (value) => {
+      return (
+        <div>
+          <strong>{value.toLocaleString()}</strong>
         </div>
       );
     }
@@ -1749,9 +1776,22 @@ pagination={7}
 </Row>
           {/* Các bảng báo cáo SALE */}
           <Row gutter={[16, 16]}>
-  <Col xs={24} md={14}>
-  <h2 style={{ marginTop: "2rem" }}>Thống kê để giục chuyển khoản</h2>
+  <Col xs={24} md={15}>
+  
+  <Row gutter={[16, 16]}>
+      
+      <Col xs={24} md={13}>
+      <h2 style={{ marginTop: "2rem" }}>Thống kê để giục chuyển khoản</h2>
   <Table columns={transferColumns} dataSource={transferData} pagination={false} />
+      </Col>
+      <Col xs={24} md={10}>
+      <br></br><br></br><br></br><br></br>
+      <PieChartComponent data={salePieData} />
+
+      </Col>
+      
+    </Row>
+  
   <h2 style={{ marginTop: "2rem" }}>Báo cáo doanh số ngày</h2>
     <Table 
       columns={dailySaleColumns} 
@@ -1759,20 +1799,10 @@ pagination={7}
       pagination={7} 
     /> 
    
-    <Row gutter={[16, 16]}>
-      
-      <Col xs={24} md={8}>
-      
-      </Col>
-      <Col xs={24} md={10}>
-      <PieChartComponent data={salePieData} />
-
-      </Col>
-      
-    </Row>
+    
     
   </Col>
-  <Col xs={24} md={10}>
+  <Col xs={24} md={9}>
   <br/>
   
   <h2 style={{ marginTop: "2rem" }}>Báo cáo Doanh Số Nhân Viên</h2>
