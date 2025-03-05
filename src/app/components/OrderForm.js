@@ -51,22 +51,39 @@ const OrderForm = ({ visible, onCancel, onSubmit, initialValues, namesalexuly, e
     .map((order) => order.name);
 
   // Tạo mapping từ tên page (đã trim) sang nhân viên phụ trách (mkt)
-const pageMapping = dataPagename.reduce((acc, item) => {
-  const key = item.pageName.trim();
-  // Nếu có nhiều mục với cùng pageName, bạn có thể quyết định xem lấy mục nào (ở đây lấy mục cuối cùng)
-  acc[key] = item.employee;
-  return acc;
-}, {});
-
+  // const pageMapping = dataPagename.reduce((acc, item) => {
+  //   const key = item.pageName.trim();
+  //   if (!acc[key]) {
+  //     acc[key] = item.employee;
+  //   }
+  //   return acc;
+  // }, {});
+  const usedEmployees = new Set();
+  const pageMapping = dataPagename.reduce((acc, item) => {
+    const key = item.pageName.trim();
+    
+    if (!acc[key]) {
+      acc[key] = [];
+    }
+  
+    // Chỉ thêm employee nếu nó chưa được sử dụng ở bất kỳ pageName nào
+    if (!usedEmployees.has(item.employee)) {
+      acc[key].push(item.employee);
+      usedEmployees.add(item.employee);
+    }
+  
+    return acc;
+  }, {});
 // Hàm xử lý khi người dùng chọn tên page từ Select
 const handlePageNameChange = (value) => {
   // Đảm bảo value được trim để khớp với mapping
   const trimmedValue = value.trim();
-  const mappedEmployee = pageMapping[trimmedValue] || "";
+  const mappedEmployeeArr = pageMapping[trimmedValue] || [];
+  const mappedEmployee =
+    mappedEmployeeArr.length > 0 ? mappedEmployeeArr[0] : "";
   setEmployeeNamepage(mappedEmployee);
   form.setFieldsValue({ mkt: mappedEmployee });
 };
-
   // Nếu có mapping, tự động cập nhật tên nhân viên tương ứng
   const handleTTXLOptions = [
     "THIẾU/SAI",
@@ -86,7 +103,10 @@ const handlePageNameChange = (value) => {
   const saleOptions = employees
     .filter((order) => order.position_team === "sale")
     .map((order) => order.name);
-  const pageNameOptions = dataPagename.map((order) => order.pageName);
+
+
+    
+    
   const salexulyOptions = employees
     .filter((order) => order.position === "salexuly")
     .map((order) => order.name);
@@ -341,20 +361,34 @@ const productOptions = products.map((p) => p.name);
                 <Form.Item label="TÊN KHÁCH" name="customerName">
                   <Input />
                 </Form.Item>
-                <Form.Item  label="TÊN PAGE" name="pageName">
-  <Select allowClear
+                <Form.Item label="TÊN PAGE" name="pageName">
+  <Select
+    allowClear
     disabled={currentUser.position === "salexuly" || currentUser.position === "salexacnhan"}
     showSearch
-    onChange={handlePageNameChange}
+    onChange={(value) => {
+      // Giá trị nhận được có định dạng "pageName||employee"
+      const [pageName, employee] = value.split("||");
+      // Ví dụ: gán employee vào field "mkt"
+      form.setFieldsValue({ mkt: employee });
+    }}
+    filterOption={(input, option) =>
+      String(option.children)
+        .toLowerCase()
+        .includes(input.toLowerCase())
+    }
   >
     {dataPagename.map((item, index) => {
-  const trimmedPageName = item.pageName.trim();
-  return (
-    <Option key={`${trimmedPageName}-${index}`} value={trimmedPageName}>
-      {trimmedPageName}
-    </Option>
-  );
-})}
+      const trimmedPageName = item.pageName.trim();
+      return (
+        <Option
+          key={`${trimmedPageName}-${index}`}
+          value={`${trimmedPageName}||${item.employee}`}
+        >
+          {trimmedPageName} 
+        </Option>
+      );
+    })}
   </Select>
 </Form.Item>
                 <Form.Item label="SỐ ĐIỆN THOẠI" name="phone">
