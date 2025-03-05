@@ -1245,13 +1245,13 @@ marketingReportDataTEAM.sort((a, b) => b.tienVND - a.tienVND);
   // Thống kê để dục chuyển khoản
   const giaoThanhCongKW = filteredOrders
     .filter(order => order.paymentStatus === "CHƯA THANH TOÁN" && order.deliveryStatus === "GIAO THÀNH CÔNG" &&order.saleReport === "DONE")
-    .reduce((sum, order) => sum + order.profit, 0);
+    .reduce((sum, order) => sum + order.revenue, 0);
   const daGuiHangKW = filteredOrders
     .filter(order => order.paymentStatus === "CHƯA THANH TOÁN" && order.deliveryStatus === "ĐÃ GỬI HÀNG" &&order.saleReport === "DONE")
-    .reduce((sum, order) => sum + order.profit, 0);
+    .reduce((sum, order) => sum + order.revenue, 0);
   const chuaGuiHangKW = filteredOrders
     .filter(order => order.paymentStatus === "CHƯA THANH TOÁN" && (order.deliveryStatus === ""||order.deliveryStatus === "BỊ BẮT CHỜ GỬI LẠI") && order.saleReport === "DONE" )
-    .reduce((sum, order) => sum + order.profit, 0);
+    .reduce((sum, order) => sum + order.revenue, 0);
   const SLgiaoThanhCongKW = filteredOrders
     .filter(order => order.paymentStatus === "CHƯA THANH TOÁN" && order.deliveryStatus === "GIAO THÀNH CÔNG" &&order.saleReport === "DONE")
     
@@ -1429,7 +1429,7 @@ marketingReportDataTEAM.sort((a, b) => b.tienVND - a.tienVND);
     }}
     >
       {/* Bộ lọc */}
-      {(currentUser.position === "admin" || currentUser.position === "managerMKT"||currentUser.position === "leadSALE" || currentUser.position === "managerSALE" || currentUser.position === "lead"  ) && (
+      {( currentUser.position === "managerMKT"||currentUser.position === "leadSALE" || currentUser.position === "managerSALE" || currentUser.position === "lead"  ) && (
       <Row gutter={[16, 16]}  >
   <Col xs={24} md={12}>
   <Row>
@@ -1489,6 +1489,66 @@ marketingReportDataTEAM.sort((a, b) => b.tienVND - a.tienVND);
   
  
 </Row>)}
+      {(currentUser.position === "admin"  ) && (<>
+      <Row gutter={[16, 16]}  >
+  <Col xs={24} md={12}>
+  <Row>
+  <Col xs={24} md={8}><div style={{ marginBottom: "1rem" }}>
+        <label htmlFor="dateFilter" style={{ marginRight: "0.5rem", marginTop: "2rem" }}>Chọn ngày:</label>
+        <input
+          type="date"
+          id="dateFilter"
+          value={selectedDate}
+          onChange={(e) => {
+            setSelectedDate(e.target.value);
+            setSelectedPreset('');
+          }}
+        />
+      </div>
+      </Col>
+  <Col xs={24} md={12}><div style={{ marginBottom: "1rem" }}>
+        {/* <label htmlFor="presetFilter" style={{ marginRight: "0.5rem" }}>Chọn khoảng thời gian:</label> */}
+        
+        <Select
+          allowClear
+          id="presetFilter"
+          style={{ width: 300 }}
+          placeholder="Chọn khoảng thời gian"
+          value={selectedPreset || undefined}
+          onChange={(value) => {
+            setSelectedPreset(value);
+            setSelectedDate('');
+          }}
+        >
+          <Option value="today">Hôm Nay</Option>
+          <Option value="yesterday">Hôm Qua</Option>
+          <Option value="week">1 Tuần gần nhất</Option>
+          <Option value="currentMonth">1 Tháng (Từ đầu tháng đến hiện tại)</Option>
+          <Option value="lastMonth">Tháng trước</Option>
+          <Option value="twoMonthsAgo">2 Tháng trước</Option>
+          <Option value="threeMonthsAgo">3 Tháng trước</Option>
+        </Select>
+      </div>
+       </Col>
+   </Row>
+  
+    
+  </Col>
+ 
+ 
+</Row>
+<Row>
+<Col xs={24} md={12}>
+  <h2 style={{ marginTop: "2rem" }}>Tổng</h2>
+  <Table columns={totalColumns} dataSource={totalData} pagination={false} />
+  </Col>
+  <Col xs={24} md={2}></Col>
+  <Col xs={24} md={10}>
+  <h2 style={{ marginTop: "2rem" }}>Thống kê để giục chuyển khoản</h2>
+<Table columns={transferColumns} dataSource={transferData} pagination={false} /></Col>
+  
+</Row></>)}
+<br></br>
       
 {(currentUser.position === "admin" || currentUser.position === "managerMKT") ? (
   <Tabs defaultActiveKey="MKT">
@@ -1573,8 +1633,7 @@ marketingReportDataTEAM.sort((a, b) => b.tienVND - a.tienVND);
 {/* <Col xs={24} md={1}></Col> */}
 <Col xs={24} md={18}>
 <br></br>
-<h2 style={{ marginTop: "2rem" }}>Tổng</h2>
-  <Table columns={totalColumns} dataSource={totalData} pagination={false} />
+
 
 
        
@@ -1627,29 +1686,27 @@ marketingReportDataTEAM.sort((a, b) => b.tienVND - a.tienVND);
     {/* Các bảng báo cáo SALE */}
     <Row gutter={[16, 16]}>
 <Col xs={24} md={14}>
-<h2 style={{ marginTop: "2rem" }}>Thống kê để giục chuyển khoản</h2>
-<Table columns={transferColumns} dataSource={transferData} pagination={false} />
+
 <h2 style={{ marginTop: "2rem" }}>Báo cáo doanh số ngày</h2>
 <Table 
 columns={dailySaleColumns} 
 dataSource={[...saleDailyData].sort((a, b) => new Date(b.date) - new Date(a.date))} 
 pagination={7} 
-/> 
-
-<Row gutter={[16, 16]}>
-<Col xs={24} md={10}>
-
-</Col>
-<Col xs={24} md={10}>
-<PieChartComponent data={salePieData} />   
+/> </Col>
+<Col xs={24} md={1}>
+  
 
 </Col>
-</Row>
-</Col>
-<Col xs={24} md={10}>
+
+
+<Col xs={24} md={9}>
 <br/>
-<h2 style={{ marginTop: "2rem" }}>Báo cáo Doanh Số Nhân Viên Sale</h2>
-<Table columns={saleColumns} dataSource={saleReportData} pagination={false} />
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<PieChartComponent data={salePieData} /> 
 </Col>
 </Row>
 
@@ -1663,7 +1720,8 @@ pagination={7}
 
 </Col>
 </Row>
-
+<h2 style={{ marginTop: "2rem" }}>Báo cáo Doanh Số Nhân Viên Sale</h2>
+<Table columns={saleColumns} dataSource={saleReportData} pagination={false} />
 
    
 
@@ -1703,7 +1761,7 @@ pagination={7}
    
     <Row gutter={[16, 16]}>
       
-      <Col xs={24} md={10}>
+      <Col xs={24} md={8}>
       
       </Col>
       <Col xs={24} md={10}>

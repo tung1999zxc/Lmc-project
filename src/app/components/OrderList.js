@@ -519,11 +519,11 @@ const OrderList = () => {
       title: "Thao Tác",
       key: "action",
       render: (_, record) => {        
-        const disableEdit =
-      currentUser.position === "salenhapdon" && record.saleReport === "DONE";
+      //   const disableEdit =
+      // currentUser.position === "salenhapdon" && record.saleReport === "DONE";
       return (
         <Space>
-          <Button disabled={disableEdit} icon={<EditOutlined />} onClick={() => handleEdit(record)} />
+          <Button  icon={<EditOutlined />} onClick={() => handleEdit(record)} />
           <Popconfirm title="Xóa đơn hàng?" onConfirm={() => handleDeleteOrder(record.id)}>
             <Button
               danger
