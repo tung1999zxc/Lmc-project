@@ -729,7 +729,10 @@ const adminSummaryColumns = [
         // Với employee: hiển thị các thao tác sửa/xóa
         return (
           <>
-            <Button type="primary" onClick={() => onSave(record)}>Save</Button>
+            <Button type="primary" onClick={() => onSave(record)} disabled={
+          // Nếu record đã được đánh dấu locked và currentUser không phải là managerMKT hoặc admin
+          record.isLocked && currentUser.position !== "managerMKT" && currentUser.position !== "admin"
+        }>Save</Button>
             <Popconfirm title="Xóa bản ghi?" onConfirm={() => onDelete(record)}>
               <Button danger icon={<DeleteOutlined />}  disabled={
           // Nếu record đã được đánh dấu locked và currentUser không phải là managerMKT hoặc admin
