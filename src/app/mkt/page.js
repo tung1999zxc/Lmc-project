@@ -683,7 +683,7 @@ const adminSummaryColumns = [
         if (percent < 30) {
           bgColor = "#54DA1F"; // nền xanh lá (màu xanh nhạt)
         } else if (percent >= 30 && percent <= 35) {
-          bgColor = "##FF9501"; // nền vàng nhạt
+          bgColor = "#FF9501"; // nền vàng nhạt
         } else {
           bgColor = "#F999A8"; // nền đỏ nhạt
         }
@@ -746,8 +746,9 @@ const adminSummaryColumns = [
   const p = parseFloat(computePercentADS(employeeName));
   if (isNaN(p)) return "transparent";
   if (p < 30) return "#54DA1F"; // màu xanh (blue)
-  if (p >= 30 && p <= 35) return "##FF9501"; // màu cam (orange)
-  return "#F999A8"; // màu đỏ (red)
+  if (p >= 30 && p <= 35) return "#FF9501"; // màu cam (orange)
+  if (p > 35) return "#F999A8"; // màu cam (orange)
+  
 };
   return (  
     <div style={{ padding: 24 }}>
