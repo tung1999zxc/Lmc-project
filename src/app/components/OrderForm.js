@@ -176,12 +176,12 @@ const productOptions = products.map((p) => p.name);
               </Col>
               <Col span={8}>
                 <Form.Item label="NGÀY GỬI" name="shippingDate1">
-                  <DatePicker style={{ width: "100%" }} />
+                  <DatePicker style={{ width: "100%" }} format="YYYY-MM-DD HH:mm:ss" />
                 </Form.Item>
               </Col>
               <Col span={8}>
                 <Form.Item label="NGÀY NHẬN" name="shippingDate2">
-                  <DatePicker style={{ width: "100%" }} />
+                  <DatePicker style={{ width: "100%" }} format="YYYY-MM-DD HH:mm:ss" />
                 </Form.Item>
               </Col>
               <Col span={8}>
@@ -193,7 +193,7 @@ const productOptions = products.map((p) => p.name);
 
             {/* Các trường ẩn khi là kho */}
             <Form.Item label="NGÀY ĐẶT" name="orderDate" hidden={true}>
-              <DatePicker style={{ width: "100%" }} />
+              <DatePicker style={{ width: "100%" }} format="YYYY-MM-DD HH:mm:ss" />
             </Form.Item>
             <Form.Item label="STT" name="stt" hidden={true}>
               <Input type="number" />
@@ -347,7 +347,7 @@ const productOptions = products.map((p) => p.name);
               <Col span={8}>
                 <Form.Item  label="NGÀY ĐẶT" name="orderDate">
                   {/* <DatePicker style={{ width: "100%" }} disabled={true} /> */}
-                  <DatePicker style={{ width: "100%" }}  />
+                  <DatePicker style={{ width: "100%" }} format="YYYY-MM-DD HH:mm:ss" disabled={true} />
                 </Form.Item>
                 {/* <Form.Item label="Hàng nặng/nhẹ" name="mass">
                   <Select showSearch>
@@ -529,11 +529,11 @@ const productOptions = products.map((p) => p.name);
             <Form.Item label="MÃ VẬN ĐƠN" name="trackingCode" hidden={currentUser.position_team === "sale"}>
               <Input />
             </Form.Item>
-            <Form.Item label="NGÀY GỬI" name="shippingDate1" hidden={currentUser.position_team === "sale"}>
-              <DatePicker style={{ width: "100%" }} />
+            <Form.Item label="NGÀY GỬI" name="shippingDate1"  hidden={currentUser.position_team === "sale"}>
+              <DatePicker style={{ width: "100%" }} format="YYYY-MM-DD HH:mm:ss"/>
             </Form.Item>
             <Form.Item label="NGÀY NHẬN" name="shippingDate2" hidden={currentUser.position_team === "sale"}>
-              <DatePicker style={{ width: "100%" }} />
+              <DatePicker style={{ width: "100%" }} format="YYYY-MM-DD HH:mm:ss" />
             </Form.Item>
             <Form.Item label="GHI CHÚ KHO" name="noteKHO" hidden={currentUser.position_team === "sale"}>
               <Input.TextArea rows={3} />

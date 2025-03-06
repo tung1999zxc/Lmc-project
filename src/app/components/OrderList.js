@@ -540,7 +540,6 @@ const OrderList = () => {
       width: 50,
     },
     {
-      // Ví dụ với cột "NGÀY ĐẶT": thêm checkbox trong tiêu đề
       title: (
         <Checkbox
           checked={selectedColumns.includes("orderDate")}
@@ -551,13 +550,18 @@ const OrderList = () => {
       ),
       dataIndex: "orderDate",
       key: "orderDate",
-      render: (text) => dayjs(text).format("DD/MM"),
-      width: 50,
+      render: (text) => (
+        <div>
+          {dayjs(text).format("DD/MM")}
+          <br />
+          {dayjs(text).format("HH:mm:ss")}
+        </div>
+      ),
+      width: 80, // Tăng width nếu cần để hiển thị đủ thông tin
     },
     // Ví dụ cho một cột khác có checkbox trong tiêu đề
         
-    ...((currentUser.position === 'leadSALE' || currentUser.position === 'salexuly' || currentUser.position === 'managerSALE' || currentUser.position === 'admin')
-      ? [
+    
         {
           title: (
             <Checkbox
@@ -572,8 +576,7 @@ const OrderList = () => {
          
          
         },
-        ]
-      : []),
+     
   
 
       {
@@ -1246,7 +1249,7 @@ const selectedTableColumns = columns.filter((col) =>
       paymentStatus: values.paymentStatus || "",
       deliveryStatus: values.deliveryStatus || "",
       trackingCode: values.trackingCode || "",
-      orderDate: values.orderDate || moment().format("YYYY-MM-DD"),
+      orderDate: values.orderDate || moment().format("YYYY-MM-DD HH:mm:ss"),
       shippingDate1: values.shippingDate1 || "",
       shippingDate2: values.shippingDate2 || "",
       employee_code_order: currentUser.employee_code,
