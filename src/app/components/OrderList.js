@@ -1252,6 +1252,7 @@ const selectedTableColumns = columns.filter((col) =>
       deliveryStatus: values.deliveryStatus || "",
       trackingCode: values.trackingCode || "",
       orderDate: values.orderDate || moment().format("YYYY-MM-DD"),
+      orderDate4: values.orderDate || moment().format("YYYY-MM-DD HH:mm:ss"),
       shippingDate1: values.shippingDate1 || "",
       shippingDate2: values.shippingDate2 || "",
       employee_code_order: currentUser.employee_code,

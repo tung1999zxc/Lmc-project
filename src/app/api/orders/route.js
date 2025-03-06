@@ -22,6 +22,7 @@ export async function GET(req) {
 export async function POST(req) {
   try {
     const {
+      orderDate4,
       id,
       stt,
       orderDate,
@@ -87,6 +88,7 @@ export async function POST(req) {
       shippingDate2,
       employee_code_order,
       istick,
+      orderDate4,
       isShipping,
       createdAt: new Date(),
     };
