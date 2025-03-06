@@ -685,7 +685,7 @@ const adminSummaryColumns = [
             readOnly={
               record.isLocked &&
               currentUser.position !== "managerMKT" &&
-              currentUser.position !== "admin"
+              currentUser.position !== "admin" && !isFirstDayOfMonth
             }
             value={record.tiendu}
             onChange={(value) => handleInlineChange(record.id, "tiendu", value)}
@@ -741,6 +741,7 @@ const adminSummaryColumns = [
       title: 'Hành động',
       key: 'action',
       render: (_, record) => {
+        const isFirstDayOfMonth = dayjs(record.date).date() === 1; // Kiểm tra ngày đầu tháng
         // Với lead và manager: chỉ cho phép sửa/xóa nếu record thuộc về chính họ, ngược lại chỉ xem
         if (currentUser.position === 'lead' ) {
           // || currentUser.position === 'managerMKT'||currentUser.position === 'admin'
@@ -763,14 +764,16 @@ const adminSummaryColumns = [
         // Với employee: hiển thị các thao tác sửa/xóa
         return (
           <>
+      
+
             <Button type="primary" onClick={() => onSave(record)} disabled={
           // Nếu record đã được đánh dấu locked và currentUser không phải là managerMKT hoặc admin
-          record.isLocked && currentUser.position !== "managerMKT" && currentUser.position !== "admin"
+          record.isLocked && currentUser.position !== "managerMKT" && currentUser.position !== "admin" && !isFirstDayOfMonth
         }>Save</Button>
             <Popconfirm title="Xóa bản ghi?" onConfirm={() => onDelete(record)}>
               <Button danger icon={<DeleteOutlined />}  disabled={
           // Nếu record đã được đánh dấu locked và currentUser không phải là managerMKT hoặc admin
-          record.isLocked && currentUser.position !== "managerMKT" && currentUser.position !== "admin"
+          record.isLocked && currentUser.position !== "managerMKT" && currentUser.position !== "admin" 
         }/>
             </Popconfirm>
           </>
