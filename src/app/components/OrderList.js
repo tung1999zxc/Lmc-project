@@ -374,10 +374,13 @@ const OrderList = () => {
         }
 
         const saleMatch = selectedSale
-          ? order.sale === selectedSale ||
-            order.salexuly === selectedSale
-          : true;
-        const mktMatch = selectedMKT ? order.mkt === selectedMKT : true;
+        ? order.sale.trim().toLowerCase() === selectedSale.trim().toLowerCase() ||
+          order.salexuly.trim().toLowerCase() === selectedSale.trim().toLowerCase()
+        : true;
+      
+      const mktMatch = selectedMKT
+        ? order.mkt.trim().toLowerCase() === selectedMKT.trim().toLowerCase()
+        : true;
 
         return dateMatch && searchMatch && filterMatch && saleMatch && mktMatch;
       })
@@ -1241,9 +1244,11 @@ const selectedTableColumns = columns.filter((col) =>
       mass: values.mass || "",
       mkt: values.mkt || "",
       sale: values.sale || "",
+      sale: values.salexacnhan || "",
       salexuly: values.salexuly || "",
       phone: values.phone || "",
       address: values.address || "",
+      note: values.fb || "",
       note: values.note || "",
       noteKHO: values.noteKHO || "",
       processStatus: values.processStatus || "",
