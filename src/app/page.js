@@ -1290,13 +1290,24 @@ marketingReportDataTEAM.sort((a, b) => b.tienVND - a.tienVND);
     },
   ];
 
+  // THỰC TẾ ĐÃ TRỪ 5
+  const daThanhToanKW3 = filteredOrders
+  .filter(order => order.paymentStatus === "ĐÃ THANH TOÁN")
+  .reduce((sum, order) => sum + order.profit, 0);
+const chuaThanhToanKW3 = filteredOrders
+  .filter(order => order.paymentStatus === "CHƯA THANH TOÁN" || order.paymentStatus === "")
+  .reduce((sum, order) => sum + order.profit, 0);
+const tongKW3 = daThanhToanKW3 + chuaThanhToanKW3;
+
+const totalAdsKW3 = filteredAds.reduce((sum, ad) => sum + (ad.request1 + ad.request2), 0);
+const percentAds3 = tongKW3 > 0 ? Number(((totalAdsKW3 / (tongKW3*exchangeRate)) * 100).toFixed(2)) : 0;
   // Bảng Tổng
   const daThanhToanKW = filteredOrders
     .filter(order => order.paymentStatus === "ĐÃ THANH TOÁN")
-    .reduce((sum, order) => sum + order.profit, 0);
+    .reduce((sum, order) => sum + order.revenue, 0);
   const chuaThanhToanKW = filteredOrders
-    .filter(order => order.paymentStatus === "CHƯA THANH TOÁN")
-    .reduce((sum, order) => sum + order.profit, 0);
+    .filter(order => order.paymentStatus === "CHƯA THANH TOÁN" || order.paymentStatus === "")
+    .reduce((sum, order) => sum + order.revenue, 0);
   const tongKW = daThanhToanKW + chuaThanhToanKW;
   const thanhToanDat = tongKW > 0 ? (daThanhToanKW / tongKW) * 100 : 0;
   const totalAdsKW = filteredAds.reduce((sum, ad) => sum + (ad.request1 + ad.request2), 0);
@@ -1319,7 +1330,7 @@ marketingReportDataTEAM.sort((a, b) => b.tienVND - a.tienVND);
     .filter(order => order.paymentStatus === "ĐÃ THANH TOÁN")
     .reduce((sum, order) => sum + order.profit, 0);
   const chuaThanhToanKW2 = filteredOrders
-    .filter(order => order.paymentStatus === "CHƯA THANH TOÁN")
+    .filter(order => (order.paymentStatus === "CHƯA THANH TOÁN" || order.paymentStatus === ""))
     .reduce((sum, order) => sum + order.profit, 0);
   const tongKW2 = daThanhToanKW2 + chuaThanhToanKW2;
   const thanhToanDat2 = tongKW2 > 0 ? (daThanhToanKW2 / tongKW2) * 100 : 0;
@@ -1328,18 +1339,18 @@ marketingReportDataTEAM.sort((a, b) => b.tienVND - a.tienVND);
   const totalData = [
     {
       key: "KW",
-      daThanhToan: daThanhToanKW*0.95,
-      chuaThanhToan: chuaThanhToanKW*0.95,
-      tong: tongKW*0.95,
+      daThanhToan: daThanhToanKW,
+      chuaThanhToan: chuaThanhToanKW,
+      tong: tongKW,
       thanhToanDat: thanhToanDat,
       totalAds: totalAdsKW,
       percentAds: percentAds
     },
     {
       key: "VND",
-      daThanhToan: daThanhToanKW*0.95 * exchangeRate,
-      chuaThanhToan: chuaThanhToanKW*0.95 * exchangeRate,
-      tong: tongKW*0.95 * exchangeRate,
+      daThanhToan: daThanhToanKW * exchangeRate,
+      chuaThanhToan: chuaThanhToanKW* exchangeRate,
+      tong: tongKW* exchangeRate,
       thanhToanDat: thanhToanDat,
       totalAds: totalAdsKW ,
       percentAds: percentAds
@@ -1363,6 +1374,17 @@ marketingReportDataTEAM.sort((a, b) => b.tienVND - a.tienVND);
       thanhToanDat: thanhToanDat2,
       totalAds: totalAdsKW2 ,
       percentAds: percentAds2
+    }
+  ];
+  const totalData3 = [
+    
+    {
+      key: "VND",
+     
+      tong: tongKW3 *exchangeRate,
+     
+      totalAds: totalAdsKW3 ,
+      percentAds: percentAds3
     }
   ];
 
@@ -1394,6 +1416,22 @@ marketingReportDataTEAM.sort((a, b) => b.tienVND - a.tienVND);
       );
     }
   },
+  {
+    title: "Tổng",
+    dataIndex: "tong",
+    key: "tong",
+    render: (value) => {
+      return (
+        <div>
+          <strong>{value.toLocaleString()}</strong>
+        </div>
+      );
+    }
+  },
+   
+  ];
+  const totalColumns3 = [
+    
   {
     title: "Tổng",
     dataIndex: "tong",
@@ -1566,8 +1604,10 @@ marketingReportDataTEAM.sort((a, b) => b.tienVND - a.tienVND);
 </Row>
 <Row>
 <Col xs={24} md={12}>
-  <h2 style={{ marginTop: "2rem" }}>Tổng</h2>
+  <h2 style={{ marginTop: "2rem" }}>Tổng khách thanh toán</h2>
   <Table columns={totalColumns} dataSource={totalData} pagination={false} />
+  <h2 style={{ marginTop: "2rem" }}>Tổng</h2>
+  <Table columns={totalColumns3} dataSource={totalData3} pagination={false} />
   </Col>
   <Col xs={24} md={2}></Col>
   <Col xs={24} md={10}>
