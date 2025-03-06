@@ -58,7 +58,7 @@ const OrderList = () => {
   const [initialOrders, setInitialOrders] = useState([]);
   const [isdemkho, setIsdemkho] = useState(true);
   const [dataPagename, setdataPagename] = useState([]);
-
+  const [specificDate, setSpecificDate] = useState(null); // Ngày cụ thể
   const fetchEmployees = async () => {
       
       try {
@@ -275,25 +275,32 @@ const OrderList = () => {
     .filter((order) => {
       // Điều kiện lọc theo ngày
       let dateMatch = true;
-      if (dateRange && searchText.trim() === "") {
-        const startDate = dayjs(dateRange[0]);
-        const endDate = dayjs(dateRange[1]);
-        const checkDate = (date) =>
-          date &&
-          dayjs(date).isValid() &&
-          dayjs(date).isBetween(startDate, endDate, "day", "[]");
-        if (!order.shippingDate1 && !order.shippingDate2) {
-          dateMatch = checkDate(order.orderDate);
-        } else {
-          dateMatch =
-            checkDate(order.orderDate) ||
-            checkDate(order.shippingDate1) ||
-            checkDate(order.shippingDate2);
-        }
-      } else if (searchText.trim() !== "") {
-        // Nếu có từ khóa tìm kiếm, bỏ qua lọc theo ngày
-        dateMatch = true;
+
+    if (specificDate) {
+      // Nếu chọn ngày cụ thể, chỉ lọc theo ngày này
+      dateMatch = dayjs(order.orderDate).format("YYYY-MM-DD") === dayjs(specificDate).format("YYYY-MM-DD");
+    } else if (dateRange && searchText.trim() === "") {
+      // Nếu có khoảng thời gian, lọc theo range
+      const startDate = dayjs(dateRange[0]);
+      const endDate = dayjs(dateRange[1]);
+      const checkDate = (date) =>
+        date &&
+        dayjs(date).isValid() &&
+        dayjs(date).isBetween(startDate, endDate, "day", "[]");
+
+      if (!order.shippingDate1 && !order.shippingDate2) {
+        dateMatch = checkDate(order.orderDate);
+      } else {
+        dateMatch =
+          checkDate(order.orderDate) ||
+          checkDate(order.shippingDate1) ||
+          checkDate(order.shippingDate2);
       }
+    } else if (searchText.trim() !== "") {
+      dateMatch = true;
+    }
+
+ 
 
         // Điều kiện lọc theo từ khóa tìm kiếm
         const searchMatch = (() => {
@@ -1377,6 +1384,12 @@ const selectedTableColumns = columns.filter((col) =>
       
       <Row gutter={[16, 16]} style={{ marginBottom: 24 }}>
         <Col span={4}>
+        <DatePicker
+          style={{ width: "100%" }}
+          placeholder="Chọn ngày"
+          value={specificDate ? dayjs(specificDate) : null}
+          onChange={(date) => setSpecificDate(date)}
+        />
         <Select
           allowClear
           id="presetFilter"
@@ -1479,6 +1492,10 @@ const selectedTableColumns = columns.filter((col) =>
             showSearch
           />
         </Col>
+        <Col span={3}>
+        {currentUser.position_team!=="kho" ?( <div> SL ĐƠN : {filteredOrders.length} </div> )  : null }
+        </Col>
+       
         {currentUser.position_team==="kho" &&
         <Col span={2}>
         <ExportExcelButton orders={filteredOrdersForExcel} />
