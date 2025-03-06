@@ -685,7 +685,7 @@ const adminSummaryColumns = [
             readOnly={
               record.isLocked &&
               currentUser.position !== "managerMKT" &&
-              currentUser.position !== "admin" && !isFirstDayOfMonth
+              currentUser.position !== "admin"
             }
             value={record.tiendu}
             onChange={(value) => handleInlineChange(record.id, "tiendu", value)}
@@ -768,7 +768,7 @@ const adminSummaryColumns = [
 
             <Button type="primary" onClick={() => onSave(record)} disabled={
           // Nếu record đã được đánh dấu locked và currentUser không phải là managerMKT hoặc admin
-          record.isLocked && currentUser.position !== "managerMKT" && currentUser.position !== "admin" && !isFirstDayOfMonth
+          record.isLocked && currentUser.position !== "managerMKT" && currentUser.position !== "admin" 
         }>Save</Button>
             <Popconfirm title="Xóa bản ghi?" onConfirm={() => onDelete(record)}>
               <Button danger icon={<DeleteOutlined />}  disabled={
