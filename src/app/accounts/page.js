@@ -31,6 +31,7 @@
   
     const [editModalVisible, setEditModalVisible] = useState(false);
     const [loading, setLoading] = useState(false);
+    const [edit, setEdit] = useState(false);
     const [selectedEmployee, setSelectedEmployee] = useState(null);
     const [employees, setEmployees] = useState([]);
     const [createForm] = Form.useForm();
@@ -211,6 +212,7 @@
     const handleEdit = (employee) => {
       setSelectedEmployee(employee);
       setEditModalVisible(true);
+      setEdit(true);
       editForm.setFieldsValue({
         username: employee.username,
         name: employee.name,
@@ -245,6 +247,7 @@
         console.log('Update response:', response.data.message);
         message.success('Cập nhật nhân viên thành công');
         editForm.resetFields();
+        setEdit(false);
         // Làm mới danh sách nhân viên sau khi cập nhật
         await fetchEmployees();
       } catch (error) {
@@ -311,8 +314,9 @@
             label="Họ tên"
             name="name"
             rules={[{ required: true, message: 'Vui lòng nhập họ tên' }]}
+            
           >
-            <Input />
+            <Input disabled={edit}  />
           </Form.Item>
 
           <Form.Item
