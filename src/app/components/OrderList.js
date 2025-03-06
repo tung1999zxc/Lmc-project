@@ -234,13 +234,15 @@ const OrderList = () => {
   // Lọc đơn hàng dựa trên vai trò và các filter được chọn
   const filteredOrders = useMemo(() => {
     let roleFilteredOrders = [...orders];
+
+  
     if (
       !selectedFilters.includes("duplicate_name") &&
-      !selectedFilters.includes("duplicate_phone")
+      !selectedFilters.includes("duplicate_phone") && searchText.trim() === "" 
     ) {
     if (currentUser.position === "mkt") {
       roleFilteredOrders = roleFilteredOrders.filter(
-        (order) => order.mkt === currentUser.name
+        (order) => order.mkt.trim().toLowerCase() === currentUser.name.trim().toLowerCase()
       );
     } else if (currentUser.position === "salenhapdon") {
       roleFilteredOrders = roleFilteredOrders.filter(
@@ -1249,7 +1251,7 @@ const selectedTableColumns = columns.filter((col) =>
       paymentStatus: values.paymentStatus || "",
       deliveryStatus: values.deliveryStatus || "",
       trackingCode: values.trackingCode || "",
-      orderDate: values.orderDate || moment().format("YYYY-MM-DD HH:mm:ss"),
+      orderDate: values.orderDate || moment().format("YYYY-MM-DD"),
       shippingDate1: values.shippingDate1 || "",
       shippingDate2: values.shippingDate2 || "",
       employee_code_order: currentUser.employee_code,

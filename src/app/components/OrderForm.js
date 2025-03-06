@@ -347,7 +347,7 @@ const productOptions = products.map((p) => p.name);
               <Col span={8}>
                 <Form.Item  label="NGÀY ĐẶT" name="orderDate">
                   {/* <DatePicker style={{ width: "100%" }} disabled={true} /> */}
-                  <DatePicker style={{ width: "100%" }} format="YYYY-MM-DD HH:mm:ss" disabled={true} />
+                  <DatePicker style={{ width: "100%" }} disabled={true} />
                 </Form.Item>
                 {/* <Form.Item label="Hàng nặng/nhẹ" name="mass">
                   <Select showSearch>
