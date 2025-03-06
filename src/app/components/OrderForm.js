@@ -12,7 +12,7 @@ import {
   Modal,
   Space,
 } from "antd";
-import { MinusCircleOutlined, PlusOutlined } from "@ant-design/icons";
+import { MinusCircleOutlined,ReloadOutlined,PlusOutlined } from "@ant-design/icons";
 import dayjs from "dayjs";
 import moment from "moment";
 import { useDispatch, useSelector } from "react-redux";
@@ -399,6 +399,7 @@ const productOptions = products.map((p) => p.name);
       );
     })}
   </Select>
+  
 </Form.Item>
                 <Form.Item label="SỐ ĐIỆN THOẠI" name="phone">
                   <Input type="tel" />

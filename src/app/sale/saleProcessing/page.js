@@ -85,13 +85,13 @@ const Dashboard = () => {
     }
     const sharedOrders = ordersForDate.length;
     const completedOrders = ordersForDate.filter(order => order.paymentStatus === "ĐÃ THANH TOÁN").length;
-    const totalRevenue = ordersForDate.reduce((acc, order) => acc + Number(order.revenue || 0), 0);
+    const totalRevenue = ordersForDate.reduce((acc, order) => acc + Number(order.profit || 0), 0);
     const paidRevenue = ordersForDate
       .filter(order => order.paymentStatus === "ĐÃ THANH TOÁN")
-      .reduce((acc, order) => acc + Number(order.revenue || 0), 0);
+      .reduce((acc, order) => acc + Number(order.profit || 0), 0);
     const unpaidRevenue = ordersForDate
-      .filter(order => order.paymentStatus === "CHƯA THANH TOÁN")
-      .reduce((acc, order) => acc + Number(order.revenue || 0), 0);
+      .filter(order => (order.paymentStatus === "CHƯA THANH TOÁN"|| order.paymentStatus === ""))
+      .reduce((acc, order) => acc + Number(order.profit || 0), 0);
     const paymentRate = totalRevenue ? (paidRevenue / totalRevenue) : 0;
     return { sharedOrders, completedOrders, totalRevenue, paidRevenue, unpaidRevenue, paymentRate };
   };
@@ -182,10 +182,10 @@ const Dashboard = () => {
     );
     const paidRevenueSum = filtered
       .filter(order => order.paymentStatus === "ĐÃ THANH TOÁN")
-      .reduce((acc, order) => acc + Number(order.revenue || 0), 0);
+      .reduce((acc, order) => acc + Number(order.profit || 0), 0);
     const unpaidRevenueSum = filtered
-      .filter(order => order.paymentStatus === "CHƯA THANH TOÁN")
-      .reduce((acc, order) => acc + Number(order.revenue || 0), 0);
+      .filter(order => (order.paymentStatus === "CHƯA THANH TOÁN"|| order.paymentStatus === ""))
+      .reduce((acc, order) => acc + Number(order.profit || 0), 0);
     const summaryRate = totalRevenueSum ? paidRevenueSum / totalRevenueSum : 0;
     const ratePercentage = summaryRate * 100;
     
@@ -208,7 +208,7 @@ const Dashboard = () => {
         }}
       >
        
-        Chưa thanh toán: <strong>{unpaidRevenueSum}</strong> - Đã thanh toán: <strong>{paidRevenueSum}</strong> - % Thanh Toán Đạt: <strong>{ratePercentage.toFixed(2)}%</strong>
+        Chưa thanh toán: <strong>{unpaidRevenueSum}</strong> | Đã thanh toán: <strong>{paidRevenueSum}</strong> | TỔNG :<strong> {unpaidRevenueSum+ paidRevenueSum}</strong> |VNĐ :<strong> {((unpaidRevenueSum+ paidRevenueSum)*17000).toLocaleString('vi-VN')}</strong>| % Thanh Toán Đạt: <strong>{ratePercentage.toFixed(2)}%</strong>
       </div></>
     );
   };

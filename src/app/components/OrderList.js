@@ -339,11 +339,11 @@ const OrderList = () => {
                 return order.deliveryStatus === "GIAO THÀNH CÔNG";
               case "unpaid_success":
                 return (
-                  order.paymentStatus === "CHƯA THANH TOÁN" &&
+                  (order.paymentStatus === "CHƯA THANH TOÁN"|| order.paymentStatus === "") &&
                   order.deliveryStatus === "GIAO THÀNH CÔNG"
                 );
               case "unpaid":
-                return order.paymentStatus === "CHƯA THANH TOÁN";
+                return order.paymentStatus === "CHƯA THANH TOÁN"|| order.paymentStatus === "";
               case "paid":
                 return order.paymentStatus === "ĐÃ THANH TOÁN";
               case "duplicate_name":
@@ -1493,7 +1493,7 @@ const selectedTableColumns = columns.filter((col) =>
           />
         </Col>
         <Col span={3}>
-        {currentUser.position_team!=="kho" ?( <div> SL ĐƠN : {filteredOrders.length} </div> )  : null }
+         <div> SL ĐƠN : {filteredOrders.length} </div> 
         </Col>
        
         {currentUser.position_team==="kho" &&

@@ -1066,14 +1066,14 @@ marketingReportDataTEAM.sort((a, b) => b.tienVND - a.tienVND);
         .filter(order => order.sale === emp.name && order.paymentStatus === "ĐÃ THANH TOÁN")
         .reduce((sum, order) => sum + order.profit, 0);
       unpaid = filteredOrders
-        .filter(order => order.sale === emp.name && order.paymentStatus === "CHƯA THANH TOÁN")
+        .filter(order => order.sale === emp.name && ( order.paymentStatus === "CHƯA THANH TOÁN" || order.paymentStatus === "" ))
         .reduce((sum, order) => sum + order.profit, 0);
     } else if (emp.position === "salexuly") {
       paid = filteredOrders
         .filter(order => order.salexuly === emp.name && order.paymentStatus === "ĐÃ THANH TOÁN")
         .reduce((sum, order) => sum + order.profit, 0);
       unpaid = filteredOrders
-        .filter(order => order.salexuly === emp.name && order.paymentStatus === "CHƯA THANH TOÁN")
+        .filter(order => order.salexuly === emp.name && ( order.paymentStatus === "CHƯA THANH TOÁN" || order.paymentStatus === "" ))
         .reduce((sum, order) => sum + order.profit, 0);
     }
     const total = paid + unpaid;
