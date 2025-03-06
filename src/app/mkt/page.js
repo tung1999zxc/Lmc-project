@@ -60,9 +60,7 @@ const Dashboard = () => {
        
       }
     };
-   useEffect(() => {
-    fetchOrders();
-  }, []);
+  
 
   const fetchOrders = async () => {
     try {
@@ -74,7 +72,7 @@ const Dashboard = () => {
     }
   };
 
-console.log(safeEmployees);
+
   useEffect(() => {
     fetchRecords();
    fetchEmployees();
@@ -251,7 +249,7 @@ console.log(safeEmployees);
   };
   /*** Xử lý submit form (Thêm mới hoặc cập nhật) ***/
   const onFinish = async (values) => {
-    const { date, oldMoney = 0, request1 = 0, request2 = 0,  totalReceived=0, excessMoney = 0, sales = 0 } = values;
+    const { date, oldMoney = 0, tiendu=0, request1 = 0, request2 = 0,  totalReceived=0, excessMoney = 0, sales = 0 } = values;
     const newRecord = {
       id: editingRecord ? editingRecord.id : Date.now(),
       date: date.format('YYYY-MM-DD'),
@@ -260,6 +258,7 @@ console.log(safeEmployees);
       request2,
       excessMoney: oldMoney + request1 + request2 -totalReceived,
       totalReceived,
+      tiendu,
       teamnv: currentUser.team_id,
       adsMoney: request1 + request2,
       adsMoney2: oldMoney + request1 + request2 - excessMoney,
@@ -293,7 +292,7 @@ console.log(safeEmployees);
   const computeTotalExcess = (employeeName) => {
     const totalExcess = records
       .filter(p => p.name === employeeName && filterRecordsByPeriod(p))
-      .reduce((sum, p) => sum + (((p.oldMoney || 0) + p.request1 + p.request2) - p.totalReceived), 0);
+      .reduce((sum, p) => sum + (((p.oldMoney || 0) + p.request1 + p.request2+(p.tiendu || 0)) - p.totalReceived), 0);
     return totalExcess;
   };
   
@@ -404,9 +403,22 @@ const adminSummaryData = summaryDates.map(date => {
   };
 });
 
+const currentMonth = dayjs().month(); // Tháng hiện tại (0-11)
+const currentYear = dayjs().year();   // Năm hiện tại
+
+// Lọc records có tháng & năm trùng với hiện tại
+const totalTienDuThangNay = records
+  .filter(row => {
+    const recordDate = dayjs(row.date);
+    return recordDate.month() === currentMonth && recordDate.year() === currentYear;
+  })
+  .reduce((sum, row) => sum + (row.tiendu||0), 0);
+
+
+
 const totalDSTong = adminSummaryData.reduce((sum, row) => sum + row.dsTong, 0);
 const totalTongAdsXin = adminSummaryData.reduce((sum, row) => sum + row.tongAdsXin, 0);
-const totalTienThua = adminSummaryData.reduce((sum, row) => sum + row.tienThua, 0);
+const totalTienThua = adminSummaryData.reduce((sum, row) => sum + row.tienThua, 0) + totalTienDuThangNay ;
 const totalPercentAds = totalDSTong > 0 ? ((totalTongAdsXin / totalDSTong) * 100).toFixed(2) : 0;
 
 const adminSummaryColumns = [
@@ -661,6 +673,28 @@ const adminSummaryColumns = [
         const total =  record.request1 + record.request2;
         return (total - record.totalReceived)?(total - record.totalReceived).toLocaleString('vi-VN'):0;
       }
+    },
+    {
+      title: "Tiền dư tháng trước",
+      key: "tiendu",
+      render: (_, record) => {
+        const isFirstDayOfMonth = dayjs(record.date).date() === 1; // Kiểm tra ngày đầu tháng
+    
+        return isFirstDayOfMonth ? (
+          <InputNumber
+            readOnly={
+              record.isLocked &&
+              currentUser.position !== "managerMKT" &&
+              currentUser.position !== "admin"
+            }
+            value={record.tiendu}
+            onChange={(value) => handleInlineChange(record.id, "tiendu", value)}
+            style={{ width: "100%" }}
+            formatter={(value) => value.toLocaleString("vi-VN")}
+            parser={(value) => value.replace(/\$\s?|(,*)/g, "")}
+          />
+        ) : null; // Không hiển thị gì nếu không phải ngày đầu tháng
+      },
     },
     {
       title: 'Doanh số',
