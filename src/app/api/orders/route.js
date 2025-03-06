@@ -49,6 +49,8 @@ export async function POST(req) {
       shippingDate2,
       employee_code_order,
       istick,
+      fb,
+      salexacnhan,
       isShipping,
       // Các trường khác nếu cần
     } = await req.json();
@@ -75,6 +77,8 @@ export async function POST(req) {
       mkt,
       sale,
       salexuly,
+      salexacnhan,
+      fb,
       phone,
       address,
       note,

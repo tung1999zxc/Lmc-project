@@ -103,6 +103,9 @@ const handlePageNameChange = (value) => {
   const saleOptions = employees
     .filter((order) => order.position_team === "sale")
     .map((order) => order.name);
+  const salexacnhanOptions = employees
+    .filter((order) => order.position === "salexacnhan")
+    .map((order) => order.name);
 
 
     
@@ -328,6 +331,12 @@ const productOptions = products.map((p) => p.name);
                 ))}
               </Select>
             </Form.Item>
+            <Form.Item label="SALE XÁC NHẬN" hidden={true} name="salexacnhan"> 
+               
+                </Form.Item>
+                <Form.Item label="Link FB" hidden={true} name="fb">
+                <Input />
+                </Form.Item>
             <Form.Item style={{ marginTop: 24, textAlign: "right" }}>
               <Button style={{ marginRight: 8 }} onClick={onCancel}>
                 Hủy
@@ -397,6 +406,9 @@ const productOptions = products.map((p) => p.name);
                 <Form.Item label="ĐỊA CHỈ" name="address">
                   <Input.TextArea rows={2} />
                 </Form.Item>
+                <Form.Item label="MKT" name="mkt">
+                  <Input value={employeeNamepage} readOnly />
+                </Form.Item> 
               </Col>
               <Col span={9}>
                 {/* Thay đổi: dùng Form.List cho SẢN PHẨM và SỐ LƯỢNG SP */}
@@ -447,6 +459,7 @@ const productOptions = products.map((p) => p.name);
                   <Input type="number" />
                 </Form.Item>
                 <Form.Item label="SALE CHAT" name="sale" initialValue={currentUser.name}>
+               
                   <Select
                     disabled={currentUser.position === "salexuly" || currentUser.position === "salexacnhan"}
                     showSearch
@@ -458,6 +471,8 @@ const productOptions = products.map((p) => p.name);
                     ))}
                   </Select>
                 </Form.Item>
+                
+               
                 <Form.Item label="VẬN ĐƠN" name="salexuly" initialValue={namesalexuly}>
                   <Select disabled={currentUser.position === "salexuly" || currentUser.position === "salexacnhan" ||currentUser.position === "salefull" }>
                     {salexulyOptions.map((employee) => (
@@ -467,7 +482,18 @@ const productOptions = products.map((p) => p.name);
                     ))}
                   </Select>
                 </Form.Item>
-               
+                <Form.Item label="SALE XÁC NHẬN" name="salexacnhan" > 
+                <Select
+                    
+                    showSearch
+                  >
+                    {salexacnhanOptions.map((employee) => (
+                      <Option key={employee} value={employee}>
+                        {employee}
+                      </Option>
+                    ))}
+                  </Select>
+                </Form.Item>
               </Col>
               <Col span={7}>
                 
@@ -483,6 +509,10 @@ const productOptions = products.map((p) => p.name);
                       }
                     }}
                   />
+                </Form.Item>
+                
+                <Form.Item label="Link FB" name="fb">
+                <Input />
                 </Form.Item>
                 <Form.Item label="TT SALE XỬ LÍ ĐƠN" name="processStatus">
                   <Select>
@@ -511,9 +541,7 @@ const productOptions = products.map((p) => p.name);
                     ))}
                   </Select>
                 </Form.Item>
-                <Form.Item label="MKT" name="mkt">
-                  <Input value={employeeNamepage} readOnly />
-                </Form.Item>  
+                 
               </Col>
             </Row>
             

@@ -252,6 +252,10 @@ const OrderList = () => {
       roleFilteredOrders = roleFilteredOrders.filter(
         (order) => order.sale === currentUser.name
       );
+    } else if (currentUser.position === "salexacnhan") {
+      roleFilteredOrders = roleFilteredOrders.filter(
+        (order) => order.salexacnhan === currentUser.name
+      );
     } else if (currentUser.position === "salexuly") {
       roleFilteredOrders = roleFilteredOrders.filter(
         (order) =>
@@ -725,6 +729,18 @@ const OrderList = () => {
     {
       title: (
         <Checkbox
+          checked={selectedColumns.includes("salexacnhan")}
+          onChange={(e) => handleColumnSelect("salexacnhan", e.target.checked)}
+        >
+          SALE XÁC NHẬN
+        </Checkbox>
+      ),
+      dataIndex: "salexacnhan",
+      key: "salexacnhan",
+    },
+    {
+      title: (
+        <Checkbox
           checked={selectedColumns.includes("mkt")}
           onChange={(e) => handleColumnSelect("mkt", e.target.checked)}
         >
@@ -799,6 +815,19 @@ const OrderList = () => {
       dataIndex: "note",
       key: "note",
       render: (text) => <div style={{ width: 200,  }}><h3>{text} </h3></div>,
+    },
+    {
+      title: (
+        <Checkbox
+          checked={selectedColumns.includes("fb")}
+          onChange={(e) => handleColumnSelect("fb", e.target.checked)}
+        >
+          Link FB
+        </Checkbox>
+      ),
+      dataIndex: "fb",
+      key: "fb",
+      render: (text) => <div style={{ width: 200,  }}>{text} </div>,
     },
     {
       title: (
@@ -1244,7 +1273,7 @@ const selectedTableColumns = columns.filter((col) =>
       mass: values.mass || "",
       mkt: values.mkt || "",
       sale: values.sale || "",
-      sale: values.salexacnhan || "",
+      salexacnhan: values.salexacnhan || "",
       salexuly: values.salexuly || "",
       phone: values.phone || "",
       address: values.address || "",
