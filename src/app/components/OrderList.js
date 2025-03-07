@@ -147,7 +147,7 @@ const resetPagename =()=>{
 
   // Tính toán chọn nhân viên salexuly dựa trên số đơn hàng của hôm nay
   useEffect(() => {
-    if (currentUser.position === "salefull") {
+    if (currentUser.position === "salefull" ||currentUser.position === "salexuly") {
       setnamesalexuly(currentUser.name);
       return;
     }
@@ -1378,7 +1378,7 @@ const selectedTableColumns = columns.filter((col) =>
           disabled={
             currentUser.position_team === "mkt" ||
             currentUser.position_team === "kho" ||
-            currentUser.position === "salexuly" ||
+            // currentUser.position === "salexuly" ||
             currentUser.position === "salexacnhan"
           }
         >

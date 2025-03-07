@@ -356,7 +356,7 @@ const productOptions = products.map((p) => p.name);
               <Col span={8}>
                 <Form.Item  label="NGÀY ĐẶT" name="orderDate">
                   {/* <DatePicker style={{ width: "100%" }} disabled={true} /> */}
-                  <DatePicker style={{ width: "100%" }} disabled={true} />
+                  <DatePicker style={{ width: "100%" }}/>
                 </Form.Item>
                 {/* <Form.Item label="Hàng nặng/nhẹ" name="mass">
                   <Select showSearch>
@@ -379,7 +379,7 @@ const productOptions = products.map((p) => p.name);
                
   <Select style={{ width: 270 }}
     allowClear
-    disabled={currentUser.position === "salexuly" || currentUser.position === "salexacnhan"}
+    disabled={ currentUser.position === "salexacnhan"}
     showSearch
     onChange={(value) => {
       // Giá trị nhận được có định dạng "pageName||employee"
