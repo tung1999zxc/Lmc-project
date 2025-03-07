@@ -367,12 +367,15 @@ const productOptions = products.map((p) => p.name);
                     ))}
                   </Select>
                 </Form.Item> */}
-                <Form.Item label="TÊN KHÁCH" name="customerName">
+                <Form.Item label="TÊN KHÁCH" name="customerName"
+                rules={[{ required: true, message: 'Vui lòng nhập TÊN KHÁCH' }]}
+                >
                   <Input />
                 </Form.Item>
 
                 <div style={{ display: "flex", gap: 8 }}>
-                <Form.Item label="TÊN PAGE" name="pageName">
+                <Form.Item label="TÊN PAGE" name="pageName"
+                rules={[{ required: true, message: 'Vui lòng nhập TÊN PAGE' }]}>
                
   <Select style={{ width: 270 }}
     allowClear
@@ -469,7 +472,8 @@ const productOptions = products.map((p) => p.name);
                 <Form.Item label="QUÀ" name="category">
                   <Input />
                 </Form.Item>
-                <Form.Item label="DOANH SỐ" name="revenue">
+                <Form.Item label="DOANH SỐ" name="revenue"
+                rules={[{ required: true, message: 'Vui lòng nhập DOANH SỐ' }]}>
                   <Input type="number" />
                 </Form.Item>
                 <Form.Item label="SALE CHAT" name="sale" initialValue={currentUser.name}>
@@ -546,7 +550,8 @@ const productOptions = products.map((p) => p.name);
                     ))}
                   </Select>
                 </Form.Item>
-                <Form.Item label="THANH TOÁN" name="paymentStatus">
+                <Form.Item label="THANH TOÁN" name="paymentStatus"
+                rules={[{ required: true, message: 'Vui lòng nhập THANH TOÁN' }]}>
                   <Select>
                     {thanhToanOptions.map((status) => (
                       <Option key={status} value={status}>

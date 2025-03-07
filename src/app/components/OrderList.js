@@ -46,6 +46,7 @@ const OrderList = () => {
   const [dateRange2, setDateRange2] = useState('today');
   const [dateRange, setDateRange] = useState('undefined');
   const [searchText, setSearchText] = useState("");
+  const [searchValue, setSearchValue] = useState(""); // Lưu giá trị nhập vào
   const [namesalexuly, setnamesalexuly] = useState("");
   // Cho phép chọn nhiều filter
   const [employees, setEmployees] = useState([]);
@@ -134,6 +135,10 @@ const OrderList = () => {
     }
   };
   
+  const handleSearch = (value) => {
+    setSearchText(value); // Chỉ cập nhật khi nhấn Search
+  };
+
 const resetPagename =()=>{
   fetchNamePage();
 };
@@ -1429,12 +1434,13 @@ const selectedTableColumns = columns.filter((col) =>
         </Select>
         </Col>
         <Col span={4}>
-          <Search
-            placeholder="Tìm kiếm..."
-            allowClear
-            onSearch={setSearchText}
-            onChange={(e) => setSearchText(e.target.value)}
-          />
+        <Search
+      placeholder="Tìm kiếm..."
+      allowClear
+      value={searchValue} // Hiển thị giá trị nhập vào
+      onChange={(e) => setSearchValue(e.target.value)} // Cập nhật nhưng không tìm kiếm ngay
+      onSearch={handleSearch} // Chỉ tìm kiếm khi nhấn Enter hoặc nút Search
+    />
         
         </Col>
         <Col span={5}>
