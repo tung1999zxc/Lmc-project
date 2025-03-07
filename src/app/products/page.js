@@ -44,7 +44,7 @@ const InventoryPage = () => {
   useEffect(() => {
     if (!currentUser.name) {
       router.push("/login");
-    }if (currentUser.position==="kho1") {
+    }if (currentUser.position==="kho1"||currentUser.position_team ==="mkt") {
       router.push("/orders");}
   }, []);
 
@@ -361,6 +361,8 @@ const InventoryPage = () => {
     {
       title: 'SL Âm',
       key: 'SLAM',
+  //     sorter: (a, b) => a.slAm - b.slAm,
+  // sortDirections: ['descend', 'ascend'],
       render: (_, record) => {
         const totalImported = getTotalImportedQty(record);
         const ordersNotDone = orders
@@ -518,28 +520,66 @@ const InventoryPage = () => {
       
     },
     {
-      title: 'Hình ảnh',
-      key: 'images',
+      title: 'Tổng doanh số',
+      key: 'totalProfit',
+      
       render: (_, record) => {
-        return record.images && record.images.length > 0 ? (
+        // Tính tổng doanh số cho sản phẩm với tên record.name
+        const totalProfit = orders.reduce((acc, order) => {
+          if (order.products && Array.isArray(order.products)) {
+            if (order.products.some(item => item.product === record.name)) {
+              return acc + Number(order.profit || 0);
+            }
+          }
+          return acc;
+        }, 0);
+    
+        // Xác định màu nền dựa trên tổng doanh số
+        let bgColor = "";
+        if (totalProfit >= 100000000) {
+          bgColor = "blue"; // Trên 100 triệu: nền xanh
+        } else if (totalProfit >= 50000000) {
+          bgColor = "yellow"; // Trên 50 triệu: nền vàng
+        }
+    
+        return (
           <div
-            style={{ cursor: 'pointer' }}
-            onClick={() => {
-              setPreviewImage(record.images);
-              setPreviewVisible(true);
+            style={{
+              backgroundColor: bgColor,
+              padding: "4px 8px",
+              borderRadius: "4px",
+              textAlign: "center",
+              fontWeight: "bold"
             }}
           >
-            <img
-              src={record.images[0]}
-              alt={record.name}
-              style={{ width: 80, height: 'auto' }}
-            />
+            {(totalProfit*17000).toLocaleString()} VND
           </div>
-        ) : (
-          'Không có hình ảnh'
         );
-      },
-    },
+      }
+    }
+    // {
+    //   title: 'Hình ảnh',
+    //   key: 'images',
+    //   render: (_, record) => {
+    //     return record.images && record.images.length > 0 ? (
+    //       <div
+    //         style={{ cursor: 'pointer' }}
+    //         onClick={() => {
+    //           setPreviewImage(record.images);
+    //           setPreviewVisible(true);
+    //         }}
+    //       >
+    //         <img
+    //           src={record.images[0]}
+    //           alt={record.name}
+    //           style={{ width: 80, height: 'auto' }}
+    //         />
+    //       </div>
+    //     ) : (
+    //       'Không có hình ảnh'
+    //     );
+    //   },
+    // },
   ];
 
   return (
@@ -598,7 +638,9 @@ const InventoryPage = () => {
         style={{ width: 300, marginBottom: 16 }}
       />
 
-      <Table dataSource={filteredProducts} columns={columns} rowKey="key" />
+      <Table 
+      dataSource={filteredProducts}
+      columns={columns} rowKey="key" pagination={{ pageSize: 100 }} />
 
       <Modal
         title="Chỉnh sửa sản phẩm"

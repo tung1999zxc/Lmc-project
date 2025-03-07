@@ -163,7 +163,7 @@ const productOptions = products.map((p) => p.name);
             <Row gutter={16}>
               <Col span={8}>
                 <Form.Item label="TÌNH TRẠNG GIAO HÀNG" name="deliveryStatus">
-                  <Select>
+                  <Select allowClear>
                     {tinhTrangGHOptions.map((status) => (
                       <Option key={status} value={status}>
                         {status}
@@ -179,11 +179,11 @@ const productOptions = products.map((p) => p.name);
               </Col>
               <Col span={8}>
                 <Form.Item label="NGÀY GỬI" name="shippingDate1">
-                  <DatePicker style={{ width: "100%" }} format="YYYY-MM-DD HH:mm:ss" />
+                  <DatePicker allowClear style={{ width: "100%" }} format="YYYY-MM-DD HH:mm:ss" />
                 </Form.Item>
               </Col>
               <Col span={8}>
-                <Form.Item label="NGÀY NHẬN" name="shippingDate2">
+                <Form.Item allowClear label="NGÀY NHẬN" name="shippingDate2">
                   <DatePicker style={{ width: "100%" }} format="YYYY-MM-DD HH:mm:ss" />
                 </Form.Item>
               </Col>
@@ -236,6 +236,15 @@ const productOptions = products.map((p) => p.name);
             <Form.Item label="Phân loại" name="category" hidden={true}>
               <Input />
             </Form.Item>
+            <Form.Item label="in đơn" name="istick" hidden={true}>
+              <Input />
+            </Form.Item>
+            <Form.Item label="cty đóng hàng" name="isShipping" hidden={true}>
+              <Input />
+            </Form.Item>
+            {/* <Form.Item label="xác nhận giao thành công" name="istickdone" hidden={true}>
+              <Input />
+            </Form.Item> */}
             {/* <Form.Item label="Hàng nặng/nhẹ" name="mass" hidden={true}>
               <Input />
             </Form.Item> */}
@@ -576,6 +585,15 @@ const productOptions = products.map((p) => p.name);
             <Form.Item label="MÃ VẬN ĐƠN" name="trackingCode" hidden={currentUser.position_team === "sale"}>
               <Input />
             </Form.Item>
+            <Form.Item label="in đơn" name="istick" hidden={true}>
+              <Input />
+            </Form.Item>
+            <Form.Item label="cty đóng hàng" name="isShipping" hidden={true}>
+              <Input />
+            </Form.Item>
+            {/* <Form.Item label="xác nhận giao thành công" name="istickdone" hidden={true}>
+              <Input />
+            </Form.Item> */}
             <Form.Item label="NGÀY GỬI" name="shippingDate1"  hidden={currentUser.position_team === "sale"}>
               <DatePicker style={{ width: "100%" }} format="YYYY-MM-DD HH:mm:ss"/>
             </Form.Item>

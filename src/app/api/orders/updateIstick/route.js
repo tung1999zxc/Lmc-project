@@ -1,4 +1,5 @@
 import { connectToDatabase } from '../../../../app/lib/mongodb.js';
+import dayjs from 'dayjs';
 
 export async function POST(req) {
   try {
@@ -9,7 +10,20 @@ export async function POST(req) {
     const updates = orders.map(order => ({
       updateOne: {
         filter: { id: order.id },
-        update: { $set: { istick: order.istick } },
+        update: { 
+          $set: { 
+            istick: order.istick,
+            // Nếu đơn hàng được tích (istick === true) thì cập nhật shippingDate1 và deliveryStatus.
+            // shippingDate1 được định dạng bao gồm giờ, phút, giây.
+            ...(order.istick 
+              ? { 
+                  shippingDate1: dayjs().format("YYYY-MM-DD HH:mm:ss"), 
+                  deliveryStatus: "ĐÃ GỬI HÀNG" 
+                }
+              : {shippingDate1: "", 
+                deliveryStatus: ""})
+          }
+        }
       }
     }));
 
@@ -17,7 +31,7 @@ export async function POST(req) {
     await db.collection('orders').bulkWrite(updates);
 
     return new Response(
-      JSON.stringify({ message: "Đã cập nhật istick cho các đơn hàng thành công" }),
+      JSON.stringify({ message: "Đã cập nhật istick, shippingDate1 và deliveryStatus cho các đơn hàng thành công" }),
       { status: 200 }
     );
   } catch (error) {

@@ -47,6 +47,7 @@ const OrderList = () => {
   const [dateRange, setDateRange] = useState('undefined');
   const [searchText, setSearchText] = useState("");
   const [searchValue, setSearchValue] = useState(""); // Lưu giá trị nhập vào
+  const [searchValue2, setSearchValue2] = useState(""); // Lưu giá trị nhập vào
   const [namesalexuly, setnamesalexuly] = useState("");
   // Cho phép chọn nhiều filter
   const [employees, setEmployees] = useState([]);
@@ -56,12 +57,16 @@ const OrderList = () => {
   const [selectedColumns, setSelectedColumns] = useState([]);
   const bangphu= selectedColumns.length;
   const [totalQuantities, setTotalQuantities] = useState({});
+  const [totalQuantitiesINDON, setTotalQuantitiesINDON] = useState({});
+  const [totalQuantitiesCTYDONG, setTotalQuantitiesCTYDONG] = useState({});
   const [initialOrders, setInitialOrders] = useState([]);
   const [initialOrders2, setInitialOrders2] = useState([]);
   const [isdemkho, setIsdemkho] = useState(true);
   const [dataPagename, setdataPagename] = useState([]);
   const [loading, setLoading] = useState(false); 
   const [specificDate, setSpecificDate] = useState(null); // Ngày cụ thể
+  const [sttSearch, setSttSearch] = useState("");
+
   const fetchEmployees = async () => {
       
       try {
@@ -139,6 +144,9 @@ const OrderList = () => {
   
   const handleSearch = (value) => {
     setSearchText(value); // Chỉ cập nhật khi nhấn Search
+  };
+  const handleSearch2 = (value) => {
+    setSttSearch(value); // Chỉ cập nhật khi nhấn Search
   };
 
 const resetPagename =()=>{
@@ -286,7 +294,7 @@ const resetPagename =()=>{
     if (specificDate) {
       // Nếu chọn ngày cụ thể, chỉ lọc theo ngày này
       dateMatch = dayjs(order.orderDate).format("YYYY-MM-DD") === dayjs(specificDate).format("YYYY-MM-DD");
-    } else if (dateRange && searchText.trim() === "") {
+    } else if (dateRange && (searchText.trim() === "" || sttSearch.trim() === "")) {
       // Nếu có khoảng thời gian, lọc theo range
       const startDate = dayjs(dateRange[0]);
       const endDate = dayjs(dateRange[1]);
@@ -303,7 +311,7 @@ const resetPagename =()=>{
           checkDate(order.shippingDate1) ||
           checkDate(order.shippingDate2);
       }
-    } else if (searchText.trim() !== "") {
+    } else if (searchText.trim() !== ""|| sttSearch.trim() !== "") {
       dateMatch = true;
     }
 
@@ -372,18 +380,38 @@ const resetPagename =()=>{
                 return order.saleReport === "OK";
               case "istick":
                 return order.istick === true;
-              case "notick":
-                return order.istick === false;
+                case "notick": {
+                  // Tìm đơn hàng gốc từ initialOrders (đã lưu)
+                  const originalOrder = initialOrders.find((o) => o.id === order.id);
+                  // Nếu không có đơn gốc (đơn hàng mới) hoặc đơn hàng đã thay đổi so với gốc,
+                  // thì hiển thị đơn hàng đó (cho dù đã tick hay chưa)
+                  if (!originalOrder || order.istick !== originalOrder.istick) {
+                    return true;
+                  }
+                  // Nếu không có thay đổi, chỉ hiển thị khi istick là false
+                  return order.istick === false;
+                }
               case "ero":
                 return order.salexuly === "";
               case "waiting_done":
                 return order.saleReport !== "DONE";
               case "khoshiping":
                 return order.isShipping === false;
-              case "isshiping":
-                return order.isShipping === true;
+                case "isshiping": {
+                  // Tìm đơn hàng gốc từ initialOrders (đã lưu)
+                  const originalOrder = initialOrders2.find((o) => o.id === order.id);
+                  // Nếu không có đơn gốc (đơn hàng mới) hoặc đơn hàng đã thay đổi so với gốc,
+                  // thì hiển thị đơn hàng đó (cho dù đã tick hay chưa)
+                  if (!originalOrder || order.isshiping !== originalOrder.isshiping) {
+                    return true;
+                  }
+                  // Nếu không có thay đổi, chỉ hiển thị khi istick là false
+                  return order.isshiping === false;
+                };
               case "waitDelivered":
                 return order.deliveryStatus === "";
+              case "deliveredkomavandon":
+                return order.deliveryStatus === "ĐÃ GỬI HÀNG" && order.trackingCode ==="";
               
               default:
                 return true;
@@ -399,8 +427,17 @@ const resetPagename =()=>{
       const mktMatch = selectedMKT
         ? order.mkt.trim().toLowerCase() === selectedMKT.trim().toLowerCase()
         : true;
-
-        return dateMatch && searchMatch && filterMatch && saleMatch && mktMatch;
+        const sttMatch =
+        sttSearch.trim() === ""
+          ? true
+          : (
+              (order.stt != null &&
+               String(order.stt).toLowerCase().includes(sttSearch.toLowerCase()))
+              ||
+              (order.trackingCode != null &&
+               String(order.trackingCode).toLowerCase().includes(sttSearch.toLowerCase()))
+            );
+        return dateMatch && sttMatch && searchMatch && filterMatch && saleMatch && mktMatch;
       })
       .sort(
         (a, b) =>
@@ -408,6 +445,7 @@ const resetPagename =()=>{
       );
   }, [
     orders,
+    sttSearch,
     dateRange,
     searchText,
     selectedFilters,
@@ -416,6 +454,15 @@ const resetPagename =()=>{
     currentUser,
     leadTeamMembers
   ]);
+
+  
+  // const handleCalculateTotals = () => {
+  //   // Lọc ra các đơn hàng có istick === true
+  //   const tickedOrders = filteredOrders.filter(order => order.istick);
+  //   // Tính tổng số lượng sản phẩm cho các đơn đã tích
+  //   const totals = calculateTotalQuantities(tickedOrders);
+  //   setTotalQuantities(totals);
+  // };
   const calculateTotalQuantities = (orders) => {
     return orders.reduce((acc, order) => {
       if (order.products && Array.isArray(order.products)) {
@@ -430,9 +477,23 @@ const resetPagename =()=>{
     }, {});
   };
   // Hàm xử lý khi bấm nút tính tổng
+  const newTickedOrders = orders.filter(order => {
+    const originalOrder = initialOrders.find(o => o.id === order.id);
+    // Điều kiện: đơn hàng đã tồn tại ban đầu, ban đầu chưa tích nhưng hiện tại đã tích
+    return originalOrder && !originalOrder.istick && order.istick;
+  });
+
   const handleCalculateTotals = () => {
     const totals = calculateTotalQuantities(filteredOrders);
     setTotalQuantities(totals);
+      const tickedOrders = filteredOrders.filter(order => order.istick);
+      // Tính tổng số lượng sản phẩm cho các đơn đã tích
+      const totals2 = calculateTotalQuantities(tickedOrders);
+      setTotalQuantitiesINDON(totals2);
+      // const tickedOrders2 = filteredOrders.filter(order => order.isShipping);
+      // // Tính tổng số lượng sản phẩm cho các đơn đã tích
+      // const totals2 = calculateTotalQuantities(tickedOrders2);
+      // setTotalQuantitiesCTYDONG(totals2);
   };
 
   const colors = [
@@ -513,6 +574,12 @@ const resetPagename =()=>{
     {
       key: '1',
       ...totalQuantities,
+    },
+  ];
+  const dataSource4 = [
+    {
+      key: '1',
+      ...totalQuantitiesINDON,
     },
   ];
   // Hàm cập nhật checkbox "Công ty đóng hàng"
@@ -1023,6 +1090,17 @@ const selectedTableColumns = columns.filter((col) =>
     { title: "GHI CHÚ SALE", dataIndex: "note", key: "note" }
   ];
 
+
+
+
+  const handleIstickChange2 = (orderId, value) => {
+    setOrders((prevOrders) =>
+      prevOrders.map((order) =>
+        order.id === orderId ? { ...order, isShipping: value } : order
+      )
+    );
+  };
+
   const handleSelectAllIstick = (value) => {
     setOrders((prevOrders) =>
       prevOrders.map((order) =>
@@ -1033,7 +1111,6 @@ const selectedTableColumns = columns.filter((col) =>
     );
   };
  
-
   const handleIstickChange = (orderId, value) => {
     setOrders((prevOrders) =>
       prevOrders.map((order) =>
@@ -1041,14 +1118,6 @@ const selectedTableColumns = columns.filter((col) =>
       )
     );
   };
-  const handleIstickChange2 = (orderId, value) => {
-    setOrders((prevOrders) =>
-      prevOrders.map((order) =>
-        order.id === orderId ? { ...order, isShipping: value } : order
-      )
-    );
-  };
-  
   const allRowsSelected = filteredOrders.length > 0 && filteredOrders.every(order => order.istick);
   
   const handleSaveIstick = async () => {
@@ -1061,6 +1130,7 @@ const selectedTableColumns = columns.filter((col) =>
   
     if (ordersToUpdate.length === 0) {
       message.info("Không có đơn hàng nào thay đổi");
+      alert("Không có thay đổi nào!");
       return;
     }
   
@@ -1100,7 +1170,7 @@ const selectedTableColumns = columns.filter((col) =>
         >
           In đơn
         </Checkbox>
-        <Button disabled={!searchText} type="primary" onClick={handleSaveIstick}>
+        <Button type="primary" onClick={handleSaveIstick}>
         Lưu 
       </Button></>
       ),
@@ -1376,8 +1446,8 @@ const selectedTableColumns = columns.filter((col) =>
       shippingDate1: values.shippingDate1 || "",
       shippingDate2: values.shippingDate2 || "",
       employee_code_order: currentUser.employee_code,
-      istick: false,
-      isShipping: false,
+      istick: values.istick||false,
+      isShipping: values.isShipping||false,
     };
   
     try {
@@ -1399,29 +1469,56 @@ const selectedTableColumns = columns.filter((col) =>
       message.error("Lỗi khi lưu đơn hàng");
     }
   };
+
+  
   const filteredOrdersForExcel = orders
   .filter(order =>
     order.saleReport === "DONE" &&
     order.istick === true &&
-    order.deliveryStatus === ""
+    order.deliveryStatus === "ĐÃ GỬI HÀNG" &&
+    order.trackingCode === ""
   )
   .map(order => ({
     STT: order.stt,
     NAME: order.customerName,
     Address: order.address,
     Phone: order.phone,
-     products: order.products
+    Products: order.products
       ? order.products
-          .map(item => `${item.product} (${item.quantity})`)
+          .map(item => item.product)
           .join("\n")
       : "",
-      // Products: order.products
-      // ? order.products
-      //     .map(item => `${item.product} (SL: ${item.quantity})`)
-      //     .join(", ")
-      // : "",
+    Quantity: order.products
+      ? order.products
+          .map(item => item.quantity)
+          .join("\n")
+      : "",
     category: order.category,
-  })); 
+  }));
+
+
+  const countNewTickedProductQuantity = () => {
+    // Lọc ra những đơn hàng có giá trị istick mới được tích:
+    const newTickedOrders = orders.filter(order => {
+      const originalOrder = initialOrders.find(o => o.id === order.id);
+      // Điều kiện: đơn hàng đã tồn tại ban đầu, ban đầu chưa tích nhưng hiện tại đã tích
+      return originalOrder && !originalOrder.istick && order.istick;
+    });
+  
+    // Tính tổng số lượng sản phẩm của các đơn vừa được tích:
+    const totalQuantity = newTickedOrders.reduce((acc, order) => {
+      if (order.products && Array.isArray(order.products)) {
+        order.products.forEach(productItem => {
+          // Ép quantity về kiểu số để tính toán
+          acc += Number(productItem.quantity);
+        });
+      }
+      return acc;
+    }, 0);
+  
+    return totalQuantity;
+  };
+
   return (
     <div  style={{
       transform: "scale(1)", padding: 24,
@@ -1449,10 +1546,17 @@ const selectedTableColumns = columns.filter((col) =>
       
        
      
-      {(currentUser.position_team==="kho" ||currentUser.position ==="admin"||currentUser.position ==="managerSALE"||  currentUser.name ==="Hoàng Lan Phương"  )&& <Col span={5}>
+      {(currentUser.position_team==="kho" ||currentUser.position ==="leadSALE"||currentUser.position ==="admin"||currentUser.position ==="managerSALE"||  currentUser.name ==="Hoàng Lan Phương"  )&& <Col span={5}>
+     {/* Tổng số lượng sản phẩm (đơn vừa tích): {countNewTickedProductQuantity()} */}
       <Table 
       columns={columns3} 
       dataSource={dataSource3} 
+      pagination={false}  // Không hiển thị phân trang nếu chỉ có 1 dòng
+      bordered
+    />
+      <Table 
+      columns={columns3} 
+      dataSource={dataSource4} 
       pagination={false}  // Không hiển thị phân trang nếu chỉ có 1 dòng
       bordered
     />
@@ -1500,6 +1604,14 @@ const selectedTableColumns = columns.filter((col) =>
       onChange={(e) => setSearchValue(e.target.value)} // Cập nhật nhưng không tìm kiếm ngay
       onSearch={handleSearch} // Chỉ tìm kiếm khi nhấn Enter hoặc nút Search
     />
+        <Search
+  placeholder="Tìm kiếm STT"
+  allowClear
+  value={searchValue2}
+  onChange={(e) => setSearchValue2(e.target.value)}
+  onSearch={(value) => handleSearch2(value.trim())}
+  
+/>
         
         </Col>
         <Col span={5}>
@@ -1509,15 +1621,16 @@ const selectedTableColumns = columns.filter((col) =>
             placeholder="Chọn bộ lọc"
             allowClear
             options={[
-              { value: "istick", label: "ĐƠN ĐÃ IN" },
-              { value: "notick", label: "ĐƠN CHƯA IN" },
-              { value: "today", label: "Đơn mới trong ngày" },
-              { value: "khoshiping", label: "Kho đóng hàng" },
+              { value: "deliveredkomavandon", label: "Đã gửi hàng + chưa mã" },
               { value: "waitDelivered", label: "Chưa gửi hàng" },
+             
+              
               { value: "not_delivered", label: "Đã gửi hàng" },
+              { value: "khoshiping", label: "Kho đóng hàng" },
               { value: "delivered", label: "Giao thành công" },
               { value: "isshiping", label: "Công Ty đóng hàng" },
-              { value: "duplicate_name", label: "Trùng tên khách" },
+              
+             
               
             ]}
             onChange={(values) => setSelectedFilters(values)}
@@ -1535,7 +1648,7 @@ const selectedTableColumns = columns.filter((col) =>
               { value: "isshiping", label: "Công Ty đóng hàng" },
               { value: "khoshiping", label: "Kho đóng hàng" },
               { value: "waitDelivered", label: "Chưa gửi hàng" },
-             
+              { value: "deliveredkomavandon", label: "Đã gửi hàng + chưa mã" },
               { value: "not_delivered", label: "Đã gửi hàng" },
               { value: "delivered", label: "Giao thành công" },
               { value: "unpaid_success", label: "Chưa thanh toán & Giao Thành công" },
@@ -1549,8 +1662,10 @@ const selectedTableColumns = columns.filter((col) =>
           />) }
           
         </Col>
+        {currentUser.position_team!=="kho" &&(<>
         <Col span={4}>
           <Select style={{ width: "100%" }}
+         
             disabled={
               currentUser.position === "mkt" ||
               currentUser.position === "salenhapdon" ||
@@ -1565,6 +1680,7 @@ const selectedTableColumns = columns.filter((col) =>
         </Col>
         <Col span={4}>
           <Select style={{ width: "100%" }}
+           
             disabled={
               currentUser.position === "mkt" ||
               currentUser.position === "salenhapdon" ||
@@ -1579,7 +1695,7 @@ const selectedTableColumns = columns.filter((col) =>
         </Col>
         <Col span={3}>
          
-        </Col>
+        </Col></>)}
        
         {currentUser.position_team==="kho" &&
         <Col span={2}>

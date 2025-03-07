@@ -200,13 +200,13 @@ const Dashboard = () => {
   // Tính tổng doanh số cho một nhân viên dựa trên sampleOrders đã được lọc theo thời gian
   const computeTotalSales = (employeeName) => {
     const totalProfit = safeOrders
-      .filter((p) => p.mkt === employeeName && filterSampleOrdersByPeriod(p))
+      .filter((p) => p.mkt.trim().toLowerCase() === employeeName.trim().toLowerCase() && filterSampleOrdersByPeriod(p))
       .reduce((sum, p) => sum + p.profit, 0) * 17000;
     return totalProfit * 0.95;
   };
   const computeTotalADS = (employeeName) => {
     const totalADS = records
-      .filter((p) => p.name === employeeName && filterRecordsByPeriod(p))
+      .filter((p) => p.name.trim().toLowerCase() === employeeName.trim().toLowerCase() && filterRecordsByPeriod(p))
       .reduce((sum, p) => sum + (p.request1 + p.request2), 0);
     return totalADS;
   };
@@ -291,7 +291,7 @@ const Dashboard = () => {
   };
   const computeTotalExcess = (employeeName) => {
     const totalExcess = records
-      .filter(p => p.name === employeeName && filterRecordsByPeriod(p))
+      .filter(p => p.name.trim().toLowerCase() === employeeName.trim().toLowerCase() && filterRecordsByPeriod(p))
       .reduce((sum, p) => sum + (((p.oldMoney || 0) + p.request1 + p.request2+(p.tiendu || 0)) - p.totalReceived), 0);
     return totalExcess;
   };
@@ -602,7 +602,7 @@ const adminSummaryColumns = [
   const computeTotalSalesForDate = (date, recordname) => {
     return date
       ? safeOrders
-          .filter(p => p.orderDate === date && p.mkt === recordname)
+          .filter(p => p.orderDate === date && p.mkt.trim().toLowerCase() === recordname.trim().toLowerCase())
           .reduce((sum, p) => (sum + p.profit), 0)
       : 0;
   };

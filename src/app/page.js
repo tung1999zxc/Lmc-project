@@ -681,7 +681,7 @@ function getLast30Days() {
 
   const employeeChartDataNew = mktEmployees.map(emp => {
     const sales = filteredOrders
-      .filter(order => order.mkt === emp.name)
+      .filter(order => order.mkt.trim().toLowerCase() === emp.name.trim().toLowerCase())
       .reduce((sum, order) => sum + order.profit, 0);
     const adsCost = filteredAds
       .filter(ad => ad.name === emp.name)
@@ -693,7 +693,7 @@ function getLast30Days() {
 
 const employeeChartDataNewTEAM = teamEmployees.map(emp => {
   const sales = filteredOrders
-    .filter(order => order.mkt === emp.name)
+    .filter(order => order.mkt.trim().toLowerCase() === emp.name.trim().toLowerCase())
     .reduce((sum, order) => sum + order.profit, 0);
   const adsCost = filteredAds
     .filter(ad => ad.name === emp.name)
@@ -730,7 +730,7 @@ const employeeChartDataNewTEAM = teamEmployees.map(emp => {
     const teamEmps = employees.filter(emp => emp.position_team === "mkt" && emp.team_id === team.value);
     const sales = teamEmps.reduce((acc, emp) => {
       const empSales = filteredOrders
-        .filter(order => order.mkt === emp.name)
+        .filter(order => order.mkt.trim().toLowerCase() === emp.name.trim().toLowerCase())
         .reduce((sum, order) => sum + order.profit, 0);
       return acc + empSales;
     }, 0);
@@ -765,13 +765,13 @@ const employeeChartDataNewTEAM = teamEmployees.map(emp => {
     const teamEmps2 = employees.filter(emp => emp.position_team === "mkt" && emp.team_id === team.value && emp.position !=="lead" );
     const sales = teamEmps.reduce((acc, emp) => {
       const empSales = filteredOrders
-        .filter(order => order.mkt === emp.name)
+        .filter(order => order.mkt.trim().toLowerCase() === emp.name.trim().toLowerCase())
         .reduce((sum, order) => sum + order.profit, 0);
       return acc + empSales;
     }, 0);
     const members = teamEmps2.reduce((acc, emp) => {
       const empSales = filteredOrders
-        .filter(order => order.mkt === emp.name )
+        .filter(order => order.mkt.trim().toLowerCase() === emp.name.trim().toLowerCase() )
         .reduce((sum, order) => sum + order.profit, 0);
       return acc + empSales;
     }, 0);
@@ -899,7 +899,7 @@ const employeePieDataTEAM = employeeChartDataNewTEAM.map(emp => ({
     const teamEmps = employees.filter(emp => emp.position_team === "mkt" && emp.team_id === team.value);
     const teamProfit = teamEmps.reduce((acc, emp) => {
       const empSales = filteredOrders
-        .filter(order => order.mkt === emp.name)
+        .filter(order => order.mkt.trim().toLowerCase() === emp.name.trim().toLowerCase())
         .reduce((sum, order) => sum + order.profit, 0);
       return acc + empSales;
     }, 0);
@@ -915,7 +915,7 @@ const employeePieDataTEAM = employeeChartDataNewTEAM.map(emp => ({
 
     const leaderSales0 =   teamEmps.reduce((acc, emp) => {
       const empSales = filteredOrders
-        .filter(order => order.mkt === emp.name)
+        .filter(order => order.mkt.trim().toLowerCase() === emp.name.trim().toLowerCase())
         .reduce((sum, order) => sum + order.profit, 0);
       return acc + empSales;
     }, 0);
@@ -933,7 +933,7 @@ const employeePieDataTEAM = employeeChartDataNewTEAM.map(emp => ({
     }, 0);
     const othersSales0 = othersEmps.reduce((acc, emp) => {
       const empSales = filteredOrders
-        .filter(order => order.mkt === emp.name)
+        .filter(order => order.mkt.trim().toLowerCase() === emp.name.trim().toLowerCase())
         .reduce((sum, order) => sum + order.profit, 0);
       return acc + empSales;
     }, 0);
@@ -945,10 +945,10 @@ const employeePieDataTEAM = employeeChartDataNewTEAM.map(emp => ({
   // === Báo cáo Marketing ===
   const marketingReportData = mktEmployees.map((emp, index) => {
     const paid = filteredOrders
-      .filter(order => order.mkt === emp.name && order.paymentStatus === "ĐÃ THANH TOÁN")
+      .filter(order => order.mkt.trim().toLowerCase() === emp.name.trim().toLowerCase() && order.paymentStatus === "ĐÃ THANH TOÁN")
       .reduce((sum, order) => sum + order.profit, 0);
     const unpaid = filteredOrders
-      .filter(order => order.mkt === emp.name && (order.paymentStatus === "CHƯA THANH TOÁN"||order.paymentStatus === ""))
+      .filter(order => order.mkt.trim().toLowerCase() === emp.name.trim().toLowerCase() && (order.paymentStatus === "CHƯA THANH TOÁN"||order.paymentStatus === ""))
       .reduce((sum, order) => sum + order.profit, 0);
     const total = paid + unpaid;
     const tienVND = total * exchangeRate*0.95;
@@ -966,10 +966,10 @@ const employeePieDataTEAM = employeeChartDataNewTEAM.map(emp => ({
 
 const marketingReportDataTEAM = teamMktEmployees.map((emp, index) => {
   const paid = filteredOrders
-    .filter(order => order.mkt === emp.name && order.paymentStatus === "ĐÃ THANH TOÁN")
+    .filter(order => order.mkt.trim().toLowerCase() === emp.name.trim().toLowerCase() && order.paymentStatus === "ĐÃ THANH TOÁN")
     .reduce((sum, order) => sum + order.profit, 0);
   const unpaid = filteredOrders
-    .filter(order => order.mkt === emp.name && (order.paymentStatus === "CHƯA THANH TOÁN"||order.paymentStatus === ""))
+    .filter(order => order.mkt.trim().toLowerCase() === emp.name.trim().toLowerCase() && (order.paymentStatus === "CHƯA THANH TOÁN"||order.paymentStatus === ""))
     .reduce((sum, order) => sum + order.profit, 0);
   const total = paid + unpaid;
   const tienVND = total*0.95 * exchangeRate;
