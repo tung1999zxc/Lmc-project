@@ -568,6 +568,16 @@ const resetPagename =()=>{
       message.error("Lỗi khi lưu các đơn");
     }
   };
+  const handleSelectAllIstick2 = (value) => {
+    setOrders((prevOrders) =>
+      prevOrders.map((order) =>
+        filteredOrders.some((fOrder) => fOrder.id === order.id)
+          ? { ...order, isShipping: value }
+          : order
+      )
+    );
+  };
+const allRowsSelected2 = filteredOrders.length > 0 && filteredOrders.every(order => order.isShipping);
   // Các cột cho bảng (cho các vai trò khác nhau)
   const columns = [
     {
@@ -689,11 +699,12 @@ const resetPagename =()=>{
       ? [
           {
             title: (<>
-              <Checkbox
-               
-              >
-                Công ty đóng hàng
-              </Checkbox>
+             <Checkbox
+          checked={allRowsSelected2}
+          onChange={(e) => handleSelectAllIstick2(e.target.checked)}
+        >
+           CTY đóng hàng
+        </Checkbox>
               <Button  type="primary" onClick={handleSaveIstick2}>
               Lưu 
             </Button></>
@@ -1024,6 +1035,8 @@ const selectedTableColumns = columns.filter((col) =>
       )
     );
   };
+ 
+
   const handleIstickChange = (orderId, value) => {
     setOrders((prevOrders) =>
       prevOrders.map((order) =>
@@ -1060,6 +1073,7 @@ const selectedTableColumns = columns.filter((col) =>
         orders: ordersToUpdate.map(({ id, istick }) => ({ id, istick })),
       });
       message.success(response.data.message || "Đã lưu cập nhật các đơn");
+      alert("Thao tác thành công!");
       // Cập nhật lại initialOrders sau khi lưu để làm mốc mới
       setInitialOrders(orders);
       fetchOrders();
@@ -1438,7 +1452,7 @@ const selectedTableColumns = columns.filter((col) =>
       
        
      
-      {(currentUser.position_team==="kho" ||  currentUser.name ==="admin" )&& <Col span={5}>
+      {(currentUser.position_team==="kho" ||currentUser.position ==="admin"||currentUser.position ==="managerSALE"||  currentUser.name ==="Hoàng Lan Phương"  )&& <Col span={5}>
       <Table 
       columns={columns3} 
       dataSource={dataSource3} 
