@@ -569,14 +569,17 @@ const resetPagename =()=>{
       ),
       dataIndex: "orderDate4",
       key: "orderDate",
-      render: (text) => {
-        if (!text) return ""; // Kiểm tra nếu giá trị không hợp lệ
+      render: (text, record) => {
+        // Kiểm tra nếu orderDate4 không hợp lệ thì lấy orderDate
+        const dateValue = text || record.orderDate;
     
-        const formattedDate = dayjs(text).isValid()
-          ? dayjs(text).format("DD/MM")
+        if (!dateValue) return "N/A"; // Nếu không có cả hai giá trị, hiển thị "N/A"
+    
+        const formattedDate = dayjs(dateValue).isValid()
+          ? dayjs(dateValue).format("DD/MM")
           : "N/A";
-        const formattedTime = dayjs(text).isValid()
-          ? dayjs(text).format("HH:mm:ss")
+        const formattedTime = dayjs(dateValue).isValid()
+          ? dayjs(dateValue).format("HH:mm:ss")
           : "N/A";
     
         return (
@@ -589,7 +592,6 @@ const resetPagename =()=>{
       },
       width: 80, // Tăng width nếu cần để hiển thị đủ thông tin
     },
-        
     
         {
           title: (
