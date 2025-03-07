@@ -84,7 +84,7 @@ const InventoryPage = () => {
   
   const getTotalImportedQty = (product) => {
     if (product.imports && product.imports.length > 0) {
-      return product.imports.reduce((acc, cur) => acc + cur.importedQty, 0);
+      return (product.imports.reduce((acc, cur) => acc + cur.importedQty, 0)+(product.slvn||0)+(product.sltq||0));
     }
     return 0;
   };
@@ -111,6 +111,8 @@ const InventoryPage = () => {
       images: base64Images,
       description: values.description,
       importedQty: values.importedQty,
+      slvn: 0,
+      sltq: 0,
       imports: [
         {
           importedQty: values.importedQty,
@@ -135,7 +137,7 @@ const InventoryPage = () => {
 
   const handleEditProduct = (record) => {
     setEditingProduct(record);
-    editForm.setFieldsValue({ name: record.name, description: record.description ,images : record.images});
+    editForm.setFieldsValue({ name: record.name,slvn:record.slvn,sltq:record.sltq, description: record.description ,images : record.images});
     setEditModalVisible(true);
   };
 
@@ -147,7 +149,8 @@ const InventoryPage = () => {
       const updatedProduct = {
         name: values.name,
         description: values.description,
-      
+        slvn:values.slvn,
+        sltq:values.sltq
       };
   
       const response = await axios.put(`/api/products/${editingProduct.key}`, updatedProduct);
@@ -372,7 +375,7 @@ const InventoryPage = () => {
             return acc;
           }, 0);
         const ordersDone = orders
-          .filter((order) => order.saleReport === 'DONE')
+          .filter((order) => order.saleReport === 'DONE' && order.deliveryStatus === '')
           .reduce((acc, order) => {
             if (order.products && order.products.length > 0) {
               const orderQty = order.products
@@ -398,8 +401,8 @@ const InventoryPage = () => {
             }
             return acc;
           }, 0);
-        const inventoryTotal = totalImported - deliveredQty;
-        const slAm = inventoryTotal - ordersNotDone - ordersDone + deliveredQty;
+        
+        const slAm = totalImported - ordersNotDone - ordersDone - deliveredQty;
         let bgColor = "";
         if (slAm <= 0) {
           bgColor = "#F999A8";
@@ -422,6 +425,76 @@ const InventoryPage = () => {
           </div>
         );
       },
+    },
+    {
+      title: 'SL Âm Đơn Done',
+      key: 'SLAMDONE',
+      render: (_, record) => {
+        const totalImported = getTotalImportedQty(record);
+       
+        const ordersDone = orders
+          .filter((order) => order.saleReport === 'DONE' && order.deliveryStatus === '')
+          .reduce((acc, order) => {
+            if (order.products && order.products.length > 0) {
+              const orderQty = order.products
+                .filter((item) => item.product === record.name)
+                .reduce((sum, item) => sum + Number(item.quantity), 0);
+              return acc + orderQty;
+            }
+            return acc;
+          }, 0);
+        const deliveredQty = orders
+          .filter(
+            (order) =>
+              order.deliveryStatus === 'ĐÃ GỬI HÀNG' ||
+              order.deliveryStatus === 'GIAO THÀNH CÔNG'||
+              order.deliveryStatus === 'BỊ BẮT CHỜ GỬI LẠI'
+          )
+          .reduce((acc, order) => {
+            if (order.products && order.products.length > 0) {
+              const orderQty = order.products
+                .filter((item) => item.product === record.name)
+                .reduce((sum, item) => sum + Number(item.quantity), 0);
+              return acc + orderQty;
+            }
+            return acc;
+          }, 0);
+        
+        const slAm = totalImported  - ordersDone - deliveredQty;
+        let bgColor = "";
+        if (slAm <= 0) {
+          bgColor = "#F999A8";
+        } else if (slAm > 0 && slAm < 10) {
+          bgColor = "#FF9501";
+        } else {
+          bgColor = "#54DA1F";
+        }
+        return (
+          <div
+            style={{
+              backgroundColor: bgColor,
+              padding: "4px 8px",
+              borderRadius: "4px",
+              textAlign: "center",
+              fontWeight: "bold"
+            }}
+          >
+            {slAm}
+          </div>
+        );
+      },
+    },
+    {
+      title: 'Nhập VN',
+      dataIndex: 'slvn',
+      key: 'slvn'
+      
+    },
+    {
+      title: 'Nhập TQ',
+      dataIndex: 'sltq',
+      key: 'sltq'
+     
     },
     {
       title: 'Hành động',
@@ -547,6 +620,20 @@ const InventoryPage = () => {
             rules={[{ required: true, message: 'Vui lòng nhập kịch bản sản phẩm' }]}
           >
             <Input.TextArea rows={2} placeholder="Kịch bản sản phẩm" />
+          </Form.Item>
+          <Form.Item
+            label="Nhập VN"
+            name="slvn"
+            
+          >
+            <InputNumber   placeholder="nhập sl" />
+          </Form.Item>
+          <Form.Item
+            label="Nhập TQ"
+            name="sltq"
+           
+          >
+            <InputNumber   placeholder="nhập sl" />
           </Form.Item>
           
     

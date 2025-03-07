@@ -58,6 +58,7 @@ const OrderList = () => {
   const [initialOrders, setInitialOrders] = useState([]);
   const [isdemkho, setIsdemkho] = useState(true);
   const [dataPagename, setdataPagename] = useState([]);
+  const [loading, setLoading] = useState(false); 
   const [specificDate, setSpecificDate] = useState(null); // Ngày cụ thể
   const fetchEmployees = async () => {
       
@@ -79,10 +80,13 @@ const OrderList = () => {
   }, []);
   const fetchNamePage = async () => {
     try {
+      setLoading(true);
       const response = await axios.get('/api/pageName');
       setdataPagename(response.data.data); // Danh sách đơn hàng
     } catch (error) {
       console.error('Lỗi khi lấy đơn hàng:', error);
+    }finally {
+      setTimeout(() => setLoading(false), 500); // Tắt xoay sau 0.5s
     }
   };
   
@@ -130,7 +134,9 @@ const OrderList = () => {
     }
   };
   
-
+const resetPagename =()=>{
+  fetchNamePage();
+};
   // Lưu đơn hàng vào localStorage mỗi khi orders thay đổi
  
 
@@ -252,10 +258,7 @@ const OrderList = () => {
       roleFilteredOrders = roleFilteredOrders.filter(
         (order) => order.sale === currentUser.name
       );
-    } else if (currentUser.position === "salexacnhan") {
-      roleFilteredOrders = roleFilteredOrders.filter(
-        (order) => order.salexacnhan === currentUser.name
-      );
+    
     } else if (currentUser.position === "salexuly") {
       roleFilteredOrders = roleFilteredOrders.filter(
         (order) =>
@@ -564,18 +567,28 @@ const OrderList = () => {
           NGÀY ĐẶT
         </Checkbox>
       ),
-      dataIndex: "orderDate",
+      dataIndex: "orderDate4",
       key: "orderDate",
-      render: (text) => (
-        <div>
-          {dayjs(text).format("DD/MM")}
-          <br />
-          {dayjs(text).format("HH:mm:ss")}
-        </div>
-      ),
+      render: (text) => {
+        if (!text) return ""; // Kiểm tra nếu giá trị không hợp lệ
+    
+        const formattedDate = dayjs(text).isValid()
+          ? dayjs(text).format("DD/MM")
+          : "N/A";
+        const formattedTime = dayjs(text).isValid()
+          ? dayjs(text).format("HH:mm:ss")
+          : "N/A";
+    
+        return (
+          <div>
+            {formattedDate}
+            <br />
+            {formattedTime}
+          </div>
+        );
+      },
       width: 80, // Tăng width nếu cần để hiển thị đủ thông tin
     },
-    // Ví dụ cho một cột khác có checkbox trong tiêu đề
         
     
         {
@@ -1364,8 +1377,12 @@ const selectedTableColumns = columns.filter((col) =>
         >
           Thêm đơn hàng mới
         </Button>
-       
+        <span style={{  }}> |SL ĐƠN : {filteredOrders.length} </span>
       </div> </Col>
+      
+      
+       
+     
       {(currentUser.position_team==="kho" ||  currentUser.name ==="admin" )&& <Col span={5}>
       <Table 
       columns={columns3} 
@@ -1416,6 +1433,7 @@ const selectedTableColumns = columns.filter((col) =>
             onSearch={setSearchText}
             onChange={(e) => setSearchText(e.target.value)}
           />
+        
         </Col>
         <Col span={5}>
         {currentUser.position_team==="kho" ?(<Select
@@ -1493,7 +1511,7 @@ const selectedTableColumns = columns.filter((col) =>
           />
         </Col>
         <Col span={3}>
-         <div> SL ĐƠN : {filteredOrders.length} </div> 
+         
         </Col>
        
         {currentUser.position_team==="kho" &&
@@ -1546,6 +1564,8 @@ const selectedTableColumns = columns.filter((col) =>
         employees={employees}
         dataPagename={dataPagename}
         namesalexuly={namesalexuly}
+        resetPagename={resetPagename}
+        loading={loading}
       />
     </div>
   );

@@ -17,7 +17,7 @@ import dayjs from "dayjs";
 import moment from "moment";
 import { useDispatch, useSelector } from "react-redux";
 
-const OrderForm = ({ visible, onCancel, onSubmit, initialValues, namesalexuly, employees=[] ,dataPagename=[]}) => {
+const OrderForm = ({ visible, onCancel,loading, onSubmit, resetPagename,initialValues, namesalexuly, employees=[] ,dataPagename=[]}) => {
   const [form] = Form.useForm();
   const { Option } = Select;
   const currentUser = useSelector((state) => state.user.currentUser);
@@ -370,8 +370,11 @@ const productOptions = products.map((p) => p.name);
                 <Form.Item label="TÊN KHÁCH" name="customerName">
                   <Input />
                 </Form.Item>
+
+                <div style={{ display: "flex", gap: 8 }}>
                 <Form.Item label="TÊN PAGE" name="pageName">
-  <Select
+               
+  <Select style={{ width: 270 }}
     allowClear
     disabled={currentUser.position === "salexuly" || currentUser.position === "salexacnhan"}
     showSearch
@@ -398,9 +401,19 @@ const productOptions = products.map((p) => p.name);
         </Option>
       );
     })}
-  </Select>
+  </Select> 
   
-</Form.Item>
+</Form.Item>  <ReloadOutlined
+        style={{
+          fontSize: 24,
+          color: "#08c",
+          cursor: "pointer",
+          transition: "transform 0.5s",
+          transform: loading ? "rotate(360deg)" : "none",
+        }}
+        spin={loading} // Tự động xoay khi loading
+        onClick={resetPagename}
+      /></div>
                 <Form.Item label="SỐ ĐIỆN THOẠI" name="phone">
                   <Input type="tel" />
                 </Form.Item>

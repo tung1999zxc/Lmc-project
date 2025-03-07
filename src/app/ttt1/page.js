@@ -590,7 +590,7 @@ function getLast30Days() {
       .filter(order => order.mkt === emp.name && order.paymentStatus === "ĐÃ THANH TOÁN")
       .reduce((sum, order) => sum + order.profit, 0);
     const unpaid = filteredOrders
-      .filter(order => order.mkt === emp.name && order.paymentStatus === "CHƯA THANH TOÁN")
+      .filter(order => order.mkt === emp.name && (order.paymentStatus === "CHƯA THANH TOÁN"|| order.paymentStatus === ""))
       .reduce((sum, order) => sum + order.profit, 0);
     const total = paid + unpaid;
     const tienVND = total * exchangeRate;
@@ -689,14 +689,14 @@ function getLast30Days() {
         .filter(order => order.sale === emp.name && order.paymentStatus === "ĐÃ THANH TOÁN")
         .reduce((sum, order) => sum + order.profit, 0);
       unpaid = filteredOrders
-        .filter(order => order.sale === emp.name && order.paymentStatus === "CHƯA THANH TOÁN")
+        .filter(order => order.sale === emp.name && (order.paymentStatus === "CHƯA THANH TOÁN"|| order.paymentStatus === ""))
         .reduce((sum, order) => sum + order.profit, 0);
     } else if (emp.position === "salexuly") {
       paid = filteredOrders
         .filter(order => order.salexuly === emp.name && order.paymentStatus === "ĐÃ THANH TOÁN")
         .reduce((sum, order) => sum + order.profit, 0);
       unpaid = filteredOrders
-        .filter(order => order.salexuly === emp.name && order.paymentStatus === "CHƯA THANH TOÁN")
+        .filter(order => order.salexuly === emp.name && (order.paymentStatus === "CHƯA THANH TOÁN"|| order.paymentStatus === ""))
         .reduce((sum, order) => sum + order.profit, 0);
     }
     const total = paid + unpaid;
@@ -864,13 +864,13 @@ function getLast30Days() {
 
   // Thống kê để dục chuyển khoản
   const giaoThanhCongKW = filteredOrders
-    .filter(order => order.paymentStatus === "CHƯA THANH TOÁN" && order.deliveryStatus === "GIAO THÀNH CÔNG" &&order.saleReport === "DONE")
+    .filter(order => (order.paymentStatus === "CHƯA THANH TOÁN"|| order.paymentStatus === "") && order.deliveryStatus === "GIAO THÀNH CÔNG" &&order.saleReport === "DONE")
     .reduce((sum, order) => sum + order.profit, 0);
   const daGuiHangKW = filteredOrders
-    .filter(order => order.paymentStatus === "CHƯA THANH TOÁN" && order.deliveryStatus === "ĐÃ GỬI HÀNG" &&order.saleReport === "DONE")
+    .filter(order => (order.paymentStatus === "CHƯA THANH TOÁN"|| order.paymentStatus === "") && order.deliveryStatus === "ĐÃ GỬI HÀNG" &&order.saleReport === "DONE")
     .reduce((sum, order) => sum + order.profit, 0);
   const chuaGuiHangKW = filteredOrders
-    .filter(order => order.paymentStatus === "CHƯA THANH TOÁN" && (order.deliveryStatus === ""||order.deliveryStatus === "BỊ BẮT CHỜ GỬI LẠI") && order.saleReport === "DONE" )
+    .filter(order => (order.paymentStatus === "CHƯA THANH TOÁN"|| order.paymentStatus === "") && (order.deliveryStatus === ""||order.deliveryStatus === "BỊ BẮT CHỜ GỬI LẠI") && order.saleReport === "DONE" )
     .reduce((sum, order) => sum + order.profit, 0);
 
   const transferData = [
@@ -890,7 +890,7 @@ function getLast30Days() {
     .filter(order => order.paymentStatus === "ĐÃ THANH TOÁN")
     .reduce((sum, order) => sum + order.profit, 0);
   const chuaThanhToanKW = filteredOrders
-    .filter(order => order.paymentStatus === "CHƯA THANH TOÁN")
+    .filter(order => order.paymentStatus === "CHƯA THANH TOÁN" || order.paymentStatus === "")
     .reduce((sum, order) => sum + order.profit, 0);
   const tongKW = daThanhToanKW + chuaThanhToanKW;
   const thanhToanDat = tongKW > 0 ? (daThanhToanKW / tongKW) * 100 : 0;

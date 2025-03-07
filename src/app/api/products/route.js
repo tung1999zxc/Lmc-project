@@ -21,7 +21,7 @@ export async function GET(req) {
 
 export async function POST(req) {
   try {
-    const { name, images, description ,importedQty} = await req.json();
+    const { name, images, description ,importedQty, slvn,sltq} = await req.json();
 
     // Kiểm tra các trường bắt buộc (bạn có thể bổ sung thêm nếu cần)
     if (!name || !images || !description  === undefined) {
@@ -34,6 +34,8 @@ export async function POST(req) {
     const newProduct = {
       key: Date.now(), // Sử dụng timestamp làm định danh duy nhất (kiểu số)
       name,
+      slvn,
+      sltq,
       images, // mảng base64 strings
       description,
       imports: [

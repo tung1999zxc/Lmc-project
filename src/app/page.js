@@ -703,7 +703,10 @@ const employeeChartDataNewTEAM = teamEmployees.map(emp => {
  
  
  
-  const saleEmployees = employees.filter(emp => emp.position_team === "sale");
+  const saleEmployees = employees.filter(emp => emp.position_team === "sale" );
+  const saleEmployeesND = employees.filter(emp => emp.position_team === "sale"&& emp.position === "salenhapdon" );
+  const saleEmployeesOL = employees.filter(emp => emp.position_team === "sale"&& emp.position === "salefull" );
+  const saleEmployeesXL = employees.filter(emp => emp.position_team === "sale"&& emp.position === "salexuly" );
   const employeeChartDataNewsale = saleEmployees.map(emp => {
     const sales = filteredOrders
       .filter(order => order.sale === emp.name || order.salexuly === emp.name)
@@ -1059,6 +1062,72 @@ marketingReportDataTEAM.sort((a, b) => b.tienVND - a.tienVND);
 
   // Báo cáo sale: lấy các nhân viên có position_team === "sale"
   
+  const saleReportDataOL = saleEmployeesOL.map((emp, index) => {
+    let paid = 0, unpaid = 0;
+    if (emp.position === "salenhapdon" || emp.position === "salefull") {
+      paid = filteredOrders
+        .filter(order => order.sale === emp.name && order.paymentStatus === "ĐÃ THANH TOÁN")
+        .reduce((sum, order) => sum + order.profit, 0);
+      unpaid = filteredOrders
+        .filter(order => order.sale === emp.name && ( order.paymentStatus === "CHƯA THANH TOÁN" || order.paymentStatus === "" ))
+        .reduce((sum, order) => sum + order.profit, 0);
+    } else if (emp.position === "salexuly") {
+      paid = filteredOrders
+        .filter(order => order.salexuly === emp.name && order.paymentStatus === "ĐÃ THANH TOÁN")
+        .reduce((sum, order) => sum + order.profit, 0);
+      unpaid = filteredOrders
+        .filter(order => order.salexuly === emp.name && ( order.paymentStatus === "CHƯA THANH TOÁN" || order.paymentStatus === "" ))
+        .reduce((sum, order) => sum + order.profit, 0);
+    }
+    const total = paid + unpaid;
+    const tienVND = total * exchangeRate;
+    const percent = total > 0 ? (paid / total) * 100 : 0;
+    return { key: index, name: emp.name, paid, unpaid, total, tienVND, percent };
+  });
+  const saleReportDataND = saleEmployeesND.map((emp, index) => {
+    let paid = 0, unpaid = 0;
+    if (emp.position === "salenhapdon" || emp.position === "salefull") {
+      paid = filteredOrders
+        .filter(order => order.sale === emp.name && order.paymentStatus === "ĐÃ THANH TOÁN")
+        .reduce((sum, order) => sum + order.profit, 0);
+      unpaid = filteredOrders
+        .filter(order => order.sale === emp.name && ( order.paymentStatus === "CHƯA THANH TOÁN" || order.paymentStatus === "" ))
+        .reduce((sum, order) => sum + order.profit, 0);
+    } else if (emp.position === "salexuly") {
+      paid = filteredOrders
+        .filter(order => order.salexuly === emp.name && order.paymentStatus === "ĐÃ THANH TOÁN")
+        .reduce((sum, order) => sum + order.profit, 0);
+      unpaid = filteredOrders
+        .filter(order => order.salexuly === emp.name && ( order.paymentStatus === "CHƯA THANH TOÁN" || order.paymentStatus === "" ))
+        .reduce((sum, order) => sum + order.profit, 0);
+    }
+    const total = paid + unpaid;
+    const tienVND = total * exchangeRate;
+    const percent = total > 0 ? (paid / total) * 100 : 0;
+    return { key: index, name: emp.name, paid, unpaid, total, tienVND, percent };
+  });
+  const saleReportDataXL = saleEmployeesXL.map((emp, index) => {
+    let paid = 0, unpaid = 0;
+    if (emp.position === "salenhapdon" || emp.position === "salefull") {
+      paid = filteredOrders
+        .filter(order => order.sale === emp.name && order.paymentStatus === "ĐÃ THANH TOÁN")
+        .reduce((sum, order) => sum + order.profit, 0);
+      unpaid = filteredOrders
+        .filter(order => order.sale === emp.name && ( order.paymentStatus === "CHƯA THANH TOÁN" || order.paymentStatus === "" ))
+        .reduce((sum, order) => sum + order.profit, 0);
+    } else if (emp.position === "salexuly") {
+      paid = filteredOrders
+        .filter(order => order.salexuly === emp.name && order.paymentStatus === "ĐÃ THANH TOÁN")
+        .reduce((sum, order) => sum + order.profit, 0);
+      unpaid = filteredOrders
+        .filter(order => order.salexuly === emp.name && ( order.paymentStatus === "CHƯA THANH TOÁN" || order.paymentStatus === "" ))
+        .reduce((sum, order) => sum + order.profit, 0);
+    }
+    const total = paid + unpaid;
+    const tienVND = total * exchangeRate;
+    const percent = total > 0 ? (paid / total) * 100 : 0;
+    return { key: index, name: emp.name, paid, unpaid, total, tienVND, percent };
+  });
   const saleReportData = saleEmployees.map((emp, index) => {
     let paid = 0, unpaid = 0;
     if (emp.position === "salenhapdon" || emp.position === "salefull") {
@@ -1082,6 +1151,9 @@ marketingReportDataTEAM.sort((a, b) => b.tienVND - a.tienVND);
     return { key: index, name: emp.name, paid, unpaid, total, tienVND, percent };
   });
   saleReportData.sort((a, b) => b.tienVND - a.tienVND);
+  saleReportDataXL.sort((a, b) => b.tienVND - a.tienVND);
+  saleReportDataOL.sort((a, b) => b.tienVND - a.tienVND);
+  saleReportDataND.sort((a, b) => b.tienVND - a.tienVND);
   const saleColumns = [
     { title: "Tên", dataIndex: "name", key: "name" },
     { title: "Đã thanh toán", dataIndex: "paid", key: "paid", render: (value) => value.toLocaleString() },
@@ -1494,7 +1566,7 @@ const percentAds3 = tongKW3 > 0 ? Number(((totalAdsKW3 / (tongKW3*exchangeRate))
     }}
     >
       {/* Bộ lọc */}
-      {( currentUser.position === "managerMKT"||currentUser.position === "leadSALE" || currentUser.position === "managerSALE" || currentUser.position === "lead"  ) && (
+      { currentUser.position === "lead"  && (
       <Row gutter={[16, 16]}  >
   <Col xs={24} md={12}>
   <Row>
@@ -1554,7 +1626,7 @@ const percentAds3 = tongKW3 > 0 ? Number(((totalAdsKW3 / (tongKW3*exchangeRate))
   
  
 </Row>)}
-      {(currentUser.position === "admin"  ) && (<>
+      {(currentUser.position === "admin" ||currentUser.position === "managerMKT" ||currentUser.position === "managerSALE" ||currentUser.position === "leadSALE"   ) && (<>
       <Row gutter={[16, 16]}  >
   <Col xs={24} md={12}>
   <Row>
@@ -1606,8 +1678,9 @@ const percentAds3 = tongKW3 > 0 ? Number(((totalAdsKW3 / (tongKW3*exchangeRate))
 <Col xs={24} md={12}>
   <h2 style={{ marginTop: "2rem" }}>Tổng khách thanh toán</h2>
   <Table columns={totalColumns} dataSource={totalData} pagination={false} />
+  {(currentUser.position === "admin" ||currentUser.position === "managerMKT"  ) && (<>
   <h2 style={{ marginTop: "2rem" }}>Tổng</h2>
-  <Table columns={totalColumns3} dataSource={totalData3} pagination={false} />
+  <Table columns={totalColumns3} dataSource={totalData3} pagination={false} /></>)}
   </Col>
   <Col xs={24} md={2}></Col>
   <Col xs={24} md={10}>
@@ -1787,8 +1860,12 @@ pagination={7}
 
 </Col>
 </Row>
-<h2 style={{ marginTop: "2rem" }}>Báo cáo Doanh Số Nhân Viên Sale</h2>
-<Table columns={saleColumns} dataSource={saleReportData} pagination={false} />
+<h2 style={{ marginTop: "2rem" }}>Báo cáo Doanh Số Nhân Viên Sale XỬ LÝ</h2>
+<Table columns={saleColumns} dataSource={saleReportDataXL} pagination={false} />
+<h2 style={{ marginTop: "2rem" }}>Báo cáo Doanh Số Nhân Viên Sale ONLINE</h2>
+<Table columns={saleColumns} dataSource={saleReportDataOL} pagination={false} />
+<h2 style={{ marginTop: "2rem" }}>Báo cáo Doanh Số Nhân Viên Sale NHẬP ĐƠN</h2>
+<Table columns={saleColumns} dataSource={saleReportDataND} pagination={false} />
 
    
 
@@ -1800,37 +1877,13 @@ pagination={7}
   <Tabs >
         
         <Tabs.TabPane tab="SALE" key="SALE">
-        <h3>Doanh số Nhân viên SALE</h3>
+       
 
-<GroupedDoubleBarChartComponent2 data={employeeChartDataNewsale} />
-  <Row>
-        <Col xs={24} md={24}>
-<h3 style={{ marginTop: '2rem' }}>
-    {isFilterApplied
-      ? "Doanh số hàng ngày "
-      : "Doanh số hàng ngày "}
-  </h3>
-  <GroupedDoubleBarChartComponent data={dailyChartDataNew} />
-</Col>
-
-</Row>
           {/* Các bảng báo cáo SALE */}
           <Row gutter={[16, 16]}>
   <Col xs={24} md={15}>
   
-  <Row gutter={[16, 16]}>
-      
-      <Col xs={24} md={13}>
-      <h2 style={{ marginTop: "2rem" }}>Thống kê để giục chuyển khoản</h2>
-  <Table columns={transferColumns} dataSource={transferData} pagination={false} />
-      </Col>
-      <Col xs={24} md={10}>
-      <br></br><br></br><br></br><br></br>
-      <PieChartComponent data={salePieData} />
-
-      </Col>
-      
-    </Row>
+  
   
   <h2 style={{ marginTop: "2rem" }}>Báo cáo doanh số ngày</h2>
     <Table 
@@ -1839,17 +1892,40 @@ pagination={7}
       pagination={7} 
     /> 
    
-    
+   <Row gutter={[16, 16]}>
+      
+      <Col xs={24} md={10}>
+      
+      </Col>
+      <Col xs={24} md={10}>
+     
+      <PieChartComponent data={salePieData} />
+
+      </Col>
+      
+    </Row>
     
   </Col>
   <Col xs={24} md={9}>
   <br/>
   
-  <h2 style={{ marginTop: "2rem" }}>Báo cáo Doanh Số Nhân Viên</h2>
-  <Table columns={saleColumns} dataSource={saleReportData} pagination={false} />
+  <h2 style={{ marginTop: "2rem" }}>Báo cáo Doanh Số Nhân Viên Sale XỬ LÝ</h2>
+<Table columns={saleColumns} dataSource={saleReportDataXL} pagination={false} />
+<h2 style={{ marginTop: "2rem" }}>Báo cáo Doanh Số Nhân Viên Sale ONLINE</h2>
+<Table columns={saleColumns} dataSource={saleReportDataOL} pagination={false} />
+<h2 style={{ marginTop: "2rem" }}>Báo cáo Doanh Số Nhân Viên Sale NHẬP ĐƠN</h2>
+<Table columns={saleColumns} dataSource={saleReportDataND} pagination={false} />
   </Col>
 </Row>
+<h3>Doanh số Nhân viên SALE</h3>
 
+<GroupedDoubleBarChartComponent2 data={employeeChartDataNewsale} />
+<h3 style={{ marginTop: '2rem' }}>
+    {isFilterApplied
+      ? "Doanh số hàng ngày "
+      : "Doanh số hàng ngày "}
+  </h3>
+  <GroupedDoubleBarChartComponent data={dailyChartDataNew} />
 
 
 
