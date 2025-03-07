@@ -1602,8 +1602,8 @@ const selectedTableColumns = columns.filter((col) =>
     dataSource={[...filteredOrders].sort((a, b) => b.stt - a.stt)}
     rowKey="id"
     bordered
-    // pagination={{ pageSize: 50 }}
-    pagination={false}
+    pagination={{ pageSize: 100 }}
+    // pagination={false}
   />
 )}
         </Col>
@@ -1620,9 +1620,9 @@ const selectedTableColumns = columns.filter((col) =>
         }
         dataSource={[...filteredOrders].sort((a, b) => b.stt - a.stt)}
         rowKey="id"
-        
+        pagination={{ pageSize: 100 }}
         bordered
-        pagination={false}
+       
       />
         </Col>
       </Row>
