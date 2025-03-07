@@ -251,7 +251,7 @@ const resetPagename =()=>{
   
     if (
       !selectedFilters.includes("duplicate_name") &&
-      !selectedFilters.includes("duplicate_phone") && searchText.trim() === "" 
+      !selectedFilters.includes("duplicate_phone")  && currentUser.position_team === "kho"
     ) {
     if (currentUser.position === "mkt") {
       roleFilteredOrders = roleFilteredOrders.filter(
