@@ -57,6 +57,7 @@ const OrderList = () => {
   const bangphu= selectedColumns.length;
   const [totalQuantities, setTotalQuantities] = useState({});
   const [initialOrders, setInitialOrders] = useState([]);
+  const [initialOrders2, setInitialOrders2] = useState([]);
   const [isdemkho, setIsdemkho] = useState(true);
   const [dataPagename, setdataPagename] = useState([]);
   const [loading, setLoading] = useState(false); 
@@ -129,6 +130,7 @@ const OrderList = () => {
       const response = await axios.get("/api/orders");
       setOrders(response.data.data);
       setInitialOrders(response.data.data);
+      setInitialOrders2(response.data.data);
     } catch (error) {
       console.error(error);
       message.error("Lỗi khi lấy đơn hàng");
@@ -537,6 +539,35 @@ const resetPagename =()=>{
       setSelectedColumns((prev) => prev.filter((key) => key !== columnKey));
     }
   };
+
+  const handleSaveIstick2 = async () => {
+    // Lọc ra các đơn hàng mà giá trị istick đã thay đổi so với ban đầu
+    const ordersToUpdate = orders.filter((order) => {
+      const originalOrder = initialOrders2.find((o) => o.id === order.id);
+      // Nếu đơn hàng mới (không có trong initialOrders) hoặc có sự thay đổi về istick
+      return !originalOrder || order.isShipping !== originalOrder.isShipping;
+    });
+  
+    if (ordersToUpdate.length === 0) {
+      message.info("Không có đơn hàng nào thay đổi");
+      return;
+    }
+  
+    try {
+      // Gửi chỉ các trường cần cập nhật (id và istick)
+      const response = await axios.post("/api/orders/updateIstick2", {
+        orders: ordersToUpdate.map(({ id, isShipping }) => ({ id, isShipping })),
+      });
+      message.success(response.data.message || "Đã lưu cập nhật các đơn");
+      alert("Thao tác thành công!");
+      // Cập nhật lại initialOrders sau khi lưu để làm mốc mới
+      setInitialOrders2(orders);
+      fetchOrders();
+    } catch (error) {
+      console.error(error);
+      message.error("Lỗi khi lưu các đơn");
+    }
+  };
   // Các cột cho bảng (cho các vai trò khác nhau)
   const columns = [
     {
@@ -657,15 +688,23 @@ const resetPagename =()=>{
     ...(currentUser.position !== "salexuly"
       ? [
           {
-            title:"Công ty đóng hàng", 
+            title: (<>
+              <Checkbox
+               
+              >
+                Công ty đóng hàng
+              </Checkbox>
+              <Button  type="primary" onClick={handleSaveIstick2}>
+              Lưu 
+            </Button></>
+            ),
+            
             key: "isShipping",
             dataIndex: "isShipping",
             render: (_, record) => (
               <Checkbox
-                checked={record.isShipping}
-                onChange={(e) =>
-                  handleShippingChange(record.id, e.target.checked)
-                }
+                checked={record.isShipping || false}
+                onChange={(e) => handleIstickChange2(record.id, e.target.checked)}
               />
             ),
           },
@@ -992,6 +1031,13 @@ const selectedTableColumns = columns.filter((col) =>
       )
     );
   };
+  const handleIstickChange2 = (orderId, value) => {
+    setOrders((prevOrders) =>
+      prevOrders.map((order) =>
+        order.id === orderId ? { ...order, isShipping: value } : order
+      )
+    );
+  };
   
   const allRowsSelected = filteredOrders.length > 0 && filteredOrders.every(order => order.istick);
   
@@ -1022,6 +1068,8 @@ const selectedTableColumns = columns.filter((col) =>
       message.error("Lỗi khi lưu các đơn");
     }
   };
+
+  
 
   const columnsKHO = [
     {
@@ -1313,7 +1361,7 @@ const selectedTableColumns = columns.filter((col) =>
       deliveryStatus: values.deliveryStatus || "",
       trackingCode: values.trackingCode || "",
       orderDate: values.orderDate || moment().format("YYYY-MM-DD"),
-      orderDate4: values.orderDate || moment().format("YYYY-MM-DD HH:mm:ss"),
+      orderDate4: values.orderDate4 || moment().format("YYYY-MM-DD HH:mm:ss"),
       shippingDate1: values.shippingDate1 || "",
       shippingDate2: values.shippingDate2 || "",
       employee_code_order: currentUser.employee_code,
