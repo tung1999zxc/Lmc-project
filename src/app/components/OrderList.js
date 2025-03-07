@@ -249,10 +249,7 @@ const resetPagename =()=>{
     let roleFilteredOrders = [...orders];
 
   
-    if (
-      !selectedFilters.includes("duplicate_name") &&
-      !selectedFilters.includes("duplicate_phone")  && currentUser.position_team === "kho"
-    ) {
+  
     if (currentUser.position === "mkt") {
       roleFilteredOrders = roleFilteredOrders.filter(
         (order) => order.mkt.trim().toLowerCase() === currentUser.name.trim().toLowerCase()
@@ -279,7 +276,7 @@ const resetPagename =()=>{
       roleFilteredOrders = roleFilteredOrders.filter((order) =>
         leadTeamMembers.includes(order.mkt)
       );
-    }}
+    }
 
     return roleFilteredOrders
     .filter((order) => {
