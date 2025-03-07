@@ -1433,7 +1433,7 @@ const selectedTableColumns = columns.filter((col) =>
       salexuly: values.salexuly || "",
       phone: values.phone || "",
       address: values.address || "",
-      note: values.fb || "",
+      fb: values.fb || "",
       note: values.note || "",
       noteKHO: values.noteKHO || "",
       processStatus: values.processStatus || "",
