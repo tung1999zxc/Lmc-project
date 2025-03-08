@@ -966,15 +966,15 @@ const employeePieDataTEAM = employeeChartDataNewTEAM.map(emp => ({
 
 const marketingReportDataTEAM = teamMktEmployees.map((emp, index) => {
   const paid = filteredOrders
-    .filter(order => order.mkt.trim().toLowerCase() === emp.name.trim().toLowerCase() && order.paymentStatus === "ĐÃ THANH TOÁN")
-    .reduce((sum, order) => sum + order.profit, 0);
-  const unpaid = filteredOrders
-    .filter(order => order.mkt.trim().toLowerCase() === emp.name.trim().toLowerCase() && (order.paymentStatus === "CHƯA THANH TOÁN"||order.paymentStatus === ""))
-    .reduce((sum, order) => sum + order.profit, 0);
+  .filter(order => order.mkt.trim().toLowerCase() === emp.name.trim().toLowerCase() && order.paymentStatus === "ĐÃ THANH TOÁN")
+  .reduce((sum, order) => sum + order.profit, 0);
+const unpaid = filteredOrders
+  .filter(order => order.mkt.trim().toLowerCase() === emp.name.trim().toLowerCase() && (order.paymentStatus === "CHƯA THANH TOÁN"||order.paymentStatus === ""))
+  .reduce((sum, order) => sum + order.profit, 0);
   const total = paid + unpaid;
   const tienVND = total*0.95 * exchangeRate;
   const totalAds = filteredAds
-    .filter(ad => ad.name === emp.name)
+    .filter(ad => ad.name.trim().toLowerCase() === emp.name.trim().toLowerCase())
     .reduce((sum, ad) => sum + (ad.request1 + ad.request2), 0);
   const adsPercent = tienVND ? ((totalAds / tienVND) * 100).toFixed(2) : "0.00";
   return { key: index, name: emp.name, paid, unpaid, total, tienVND, totalAds, adsPercent };

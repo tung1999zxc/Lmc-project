@@ -274,7 +274,7 @@ const resetPagename =()=>{
     } else if (currentUser.position === "salexuly") {
       roleFilteredOrders = roleFilteredOrders.filter(
         (order) =>
-          order.salexuly === currentUser.name && order.saleReport === "DONE"
+           order.saleReport === "DONE"
       );
     } else if (currentUser.position_team === "kho") {
       roleFilteredOrders = roleFilteredOrders.filter(
@@ -659,7 +659,8 @@ const allRowsSelected2 = filteredOrders.length > 0 && filteredOrders.every(order
               disabled={
                 currentUser.position === "salenhapdon" ||
                 currentUser.position === "salexacnhan" ||
-                currentUser.position === "salexuly"
+                currentUser.position === "salexuly"||
+                currentUser.position === "salefull"
               }
               icon={<DeleteOutlined />}
             />
