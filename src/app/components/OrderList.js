@@ -61,7 +61,7 @@ const OrderList = () => {
   const [totalQuantitiesCTYDONG, setTotalQuantitiesCTYDONG] = useState({});
   const [initialOrders, setInitialOrders] = useState([]);
   const [initialOrders2, setInitialOrders2] = useState([]);
-  const [isdemkho, setIsdemkho] = useState(true);
+  const [isdem, setIsdem] = useState(false);
   const [dataPagename, setdataPagename] = useState([]);
   const [loading, setLoading] = useState(false); 
   const [specificDate, setSpecificDate] = useState(null); // Ngày cụ thể
@@ -490,6 +490,11 @@ const resetPagename =()=>{
       // Tính tổng số lượng sản phẩm cho các đơn đã tích
       const totals2 = calculateTotalQuantities(tickedOrders);
       setTotalQuantitiesINDON(totals2);
+
+      const CTYDONGOrders = filteredOrders.filter(order => order.isShipping);
+      const totals3 = calculateTotalQuantities(CTYDONGOrders);
+      setTotalQuantitiesCTYDONG(totals3);
+      setIsdem(true);
       // const tickedOrders2 = filteredOrders.filter(order => order.isShipping);
       // // Tính tổng số lượng sản phẩm cho các đơn đã tích
       // const totals2 = calculateTotalQuantities(tickedOrders2);
@@ -580,6 +585,12 @@ const resetPagename =()=>{
     {
       key: '1',
       ...totalQuantitiesINDON,
+    },
+  ];
+  const dataSourceCTYDONG = [
+    {
+      key: '1',
+      ...totalQuantitiesCTYDONG,
     },
   ];
   // Hàm cập nhật checkbox "Công ty đóng hàng"
@@ -1549,25 +1560,46 @@ const selectedTableColumns = columns.filter((col) =>
      
       {(currentUser.position_team==="kho" ||currentUser.position ==="leadSALE"||currentUser.position ==="admin"||currentUser.position ==="managerSALE"||  currentUser.name ==="Hoàng Lan Phương"  )&& <Col span={5}>
      {/* Tổng số lượng sản phẩm (đơn vừa tích): {countNewTickedProductQuantity()} */}
-      <Table 
-      columns={columns3} 
-      dataSource={dataSource3} 
-      pagination={false}  // Không hiển thị phân trang nếu chỉ có 1 dòng
-      bordered
-    />
-      <Table 
+     {currentUser.position_team==="kho" || currentUser.name ==="Hoàng Lan Phương" && <Table 
       columns={columns3} 
       dataSource={dataSource4} 
       pagination={false}  // Không hiển thị phân trang nếu chỉ có 1 dòng
       bordered
+    /> } 
+    {isdem && <> 
+    <Table 
+      columns={columns3} 
+      dataSource={dataSourceCTYDONG} 
+      pagination={false}  
+      bordered
     />
+    <Table 
+      columns={columns3} 
+      dataSource={dataSource3} 
+      pagination={false} 
+      bordered
+    /></>} 
+      
+    
       <Button
           type="primary"
           onClick={handleCalculateTotals}
           
         >
          Đếm SL 
-        </Button> </Col>}
+        </Button> 
+      {/* <Button
+          type="primary"
+          onClick={setIsdem(true)}
+          
+        >
+         Huỷ đếm 
+        </Button>  */}
+        
+        </Col>
+        
+        }
+
       </Row>
       
       <Row gutter={[16, 16]} style={{ marginBottom: 24 }}>
