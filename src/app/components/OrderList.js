@@ -66,7 +66,7 @@ const OrderList = () => {
   const [loading, setLoading] = useState(false); 
   const [specificDate, setSpecificDate] = useState(null); // Ngày cụ thể
   const [sttSearch, setSttSearch] = useState("");
-
+  const [exportDisabled, setExportDisabled] = useState(true);
   const fetchEmployees = async () => {
       
       try {
@@ -633,6 +633,7 @@ const resetPagename =()=>{
       const response = await axios.post("/api/orders/updateIstick2", {
         orders: ordersToUpdate.map(({ id, isShipping }) => ({ id, isShipping })),
       });
+  
       message.success(response.data.message || "Đã lưu cập nhật các đơn");
       alert("Thao tác thành công!");
       // Cập nhật lại initialOrders sau khi lưu để làm mốc mới
@@ -642,6 +643,8 @@ const resetPagename =()=>{
       console.error(error);
       message.error("Lỗi khi lưu các đơn");
     }
+ 
+  
   };
   const handleSelectAllIstick2 = (value) => {
     setOrders((prevOrders) =>
@@ -1159,6 +1162,12 @@ const selectedTableColumns = columns.filter((col) =>
     } catch (error) {
       console.error(error);
       message.error("Lỗi khi lưu các đơn");
+    }finally {
+      // Sau khi gọi API (dù thành công hay lỗi), disable nút ExportExcelButton trong 3 giây
+      setExportDisabled(false);
+      setTimeout(() => {
+        setExportDisabled(true);
+      }, 5000);
     }
   };
 
@@ -1730,14 +1739,14 @@ const selectedTableColumns = columns.filter((col) =>
          
         </Col></>)}
        
-        {currentUser.position_team==="kho" &&
+        {currentUser.position_team==="kho" && exportDisabled && 
         <Col span={2}>
-        <ExportExcelButton orders={filteredOrdersForExcel} />
+        <ExportExcelButton  orders={filteredOrdersForExcel} />
           
         </Col>}
       </Row>
-
-      
+     
+    
 <Row gutter={16} wrap={false} style={{ display: "flex", alignItems: "flex-start" }}>
         <Col flex="none">
         {(  selectedColumns.length > 0
