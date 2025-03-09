@@ -1,5 +1,5 @@
 'use client'
-import React, { useState,useEffect  } from 'react';
+import React, { useState,useEffect,useMemo  } from 'react';
 import dynamic from 'next/dynamic';
 import { Select, Row, Col, Table, Button, Input, Tabs ,message} from 'antd';
 import { useDispatch, useSelector } from 'react-redux';
@@ -10,16 +10,25 @@ const Dashboard = () => {
 
 const [employees, setEmployees] = useState([]);
 const [orders, setOrders] = useState([]);
+const currentTeamId = useSelector((state) => state.user.currentUser.team_id);
+const [selectedTeam, setSelectedTeam] = useState(currentTeamId);
 const [adsMoneyData, setAdsMoneyData] = useState([]);//mkt
 // Component biểu đồ Bar (Recharts) cho biểu đồ đơn (có 1 series)
 const router = useRouter(); 
-  const currentUser = useSelector((state) => state.user.currentUser);
+const reduxCurrentUser = useSelector((state) => state.user.currentUser) || {};
+
+const currentUser = useMemo(() => {
+  return {
+    ...reduxCurrentUser,
+    team_id: selectedTeam,
+  };
+}, [reduxCurrentUser, selectedTeam]);
   useEffect(() => {
     if (!currentUser.name) {
       router.push("/login");
     }
   }, []);
-
+  
   const fetchOrders = async () => {
     try {
       const response = await axios.get("/api/orders");
@@ -56,6 +65,7 @@ const fetchEmployees = async () => {
    fetchRecords();
     fetchEmployees();
   }, []);
+   
 
 // Nếu currentUser là team lead, chỉ hiển thị các nhân viên thuộc team của họ.
   // Ví dụ, currentUser có cấu trúc { name: 'Nguyễn Văn A', position: 'lead', team_id: 'SON' }
@@ -826,11 +836,11 @@ if (isTeamLead) {
   // Lấy danh sách tên nhân viên của team
   const teamEmployeeNames = employees
     .filter(emp => emp.team_id === currentUser.team_id && emp.position_team === "mkt")
-    .map(emp => emp.name);
+    .map(emp => emp.name.trim().toLowerCase());
   
   // Lọc đơn hàng và ads chỉ thuộc team đó
-  filteredOrders = filteredOrders.filter(order => teamEmployeeNames.includes(order.mkt));
-  filteredAds = filteredAds.filter(ad => teamEmployeeNames.includes(ad.name));
+  filteredOrders = filteredOrders.filter(order => teamEmployeeNames.includes(order.mkt.trim().toLowerCase()));
+  filteredAds = filteredAds.filter(ad => teamEmployeeNames.includes(ad.name.trim().toLowerCase()));
 }
 
 if (isFilterApplied && filteredOrders.length > 0) {
@@ -1386,15 +1396,20 @@ const percentAds3 = tongKW3 > 0 ? Number(((totalAdsKW3 / (tongKW3*exchangeRate))
   const percentAds = tongKW > 0 ? Number(((totalAdsKW / (tongKW*exchangeRate)) * 100).toFixed(2)) : 0;
 
 
-  if (isTeamLead) {
+  if (isTeamLead|| currentUser.position==="admin" || currentUser.position==="managerMKT") {
     const teamEmployeeNames = employees
       .filter(emp => emp.team_id === currentUser.team_id)
-      .map(emp => emp.name);
+      .map(emp => emp.name.trim().toLowerCase());
     
     // Lọc các đơn hàng theo tên nhân viên thuộc team
-    filteredOrders = filteredOrders.filter(order => teamEmployeeNames.includes(order.mkt));
+    filteredOrders = filteredOrders.filter(order =>
+      teamEmployeeNames.includes(order.mkt.trim().toLowerCase())
+    );
+    
     // Lọc chi phí ads theo tên nhân viên thuộc team
-    filteredAds = filteredAds.filter(ad => teamEmployeeNames.includes(ad.name));
+    filteredAds = filteredAds.filter(ad =>
+      teamEmployeeNames.includes(ad.name.trim().toLowerCase())
+    );
   }
   
   // Bảng Tổng chỉ của các thành viên trong team
@@ -1429,21 +1444,21 @@ const percentAds3 = tongKW3 > 0 ? Number(((totalAdsKW3 / (tongKW3*exchangeRate))
     }
   ];
   const totalData2 = [
-    {
-      key: "KW",
-      daThanhToan: daThanhToanKW2*0.95,
-      chuaThanhToan: chuaThanhToanKW2*0.95,
-      tong: tongKW2*0.95,
-      thanhToanDat: thanhToanDat2,
-      totalAds: totalAdsKW2,
-      percentAds: percentAds2
-    },
+    // {
+    //   key: "KW",
+    //   // daThanhToan: daThanhToanKW2*0.95,
+    //   // chuaThanhToan: chuaThanhToanKW2*0.95,
+    //   tong: tongKW2*0.95,
+    //   // thanhToanDat: thanhToanDat2,
+    //   totalAds: totalAdsKW2,
+    //   percentAds: percentAds2
+    // },
     {
       key: "VND",
-      daThanhToan: daThanhToanKW2*0.95 * exchangeRate,
-      chuaThanhToan: chuaThanhToanKW2*0.95 * exchangeRate,
+      // daThanhToan: daThanhToanKW2*0.95 * exchangeRate,
+      // chuaThanhToan: chuaThanhToanKW2*0.95 * exchangeRate,
       tong: tongKW2*0.95 * exchangeRate,
-      thanhToanDat: thanhToanDat2,
+      // thanhToanDat: thanhToanDat2,
       totalAds: totalAdsKW2 ,
       percentAds: percentAds2
     }
@@ -1566,71 +1581,101 @@ const percentAds3 = tongKW3 > 0 ? Number(((totalAdsKW3 / (tongKW3*exchangeRate))
     }}
     >
       {/* Bộ lọc */}
-      { currentUser.position === "lead"  && (
+      {( currentUser.position === "lead" || (currentUser.position === "admin" && selectedTeam) ||(currentUser.position === "managerMKT" && selectedTeam ))  && (
       <Row gutter={[16, 16]}  >
-  <Col xs={24} md={12}>
-  <Row>
-  <Col xs={24} md={8}><div style={{ marginBottom: "1rem" }}>
-        <label htmlFor="dateFilter" style={{ marginRight: "0.5rem", marginTop: "2rem" }}>Chọn ngày:</label>
-        <input
-          type="date"
-          id="dateFilter"
-          value={selectedDate}
-          onChange={(e) => {
-            setSelectedDate(e.target.value);
-            setSelectedPreset('');
-          }}
-        />
-      </div></Col>
-  <Col xs={24} md={12}><div style={{ marginBottom: "1rem" }}>
-        {/* <label htmlFor="presetFilter" style={{ marginRight: "0.5rem" }}>Chọn khoảng thời gian:</label> */}
-        <Select
-          allowClear
-          id="presetFilter"
-          style={{ width: 300 }}
-          placeholder="Chọn khoảng thời gian"
-          value={selectedPreset || undefined}
-          onChange={(value) => {
-            setSelectedPreset(value);
-            setSelectedDate('');
-          }}
-        >
-          <Option value="today">Hôm Nay</Option>
-          <Option value="yesterday">Hôm Qua</Option>
-          <Option value="week">1 Tuần gần nhất</Option>
-          <Option value="currentMonth">1 Tháng (Từ đầu tháng đến hiện tại)</Option>
-          <Option value="lastMonth">Tháng trước</Option>
-          <Option value="twoMonthsAgo">2 Tháng trước</Option>
-          <Option value="threeMonthsAgo">3 Tháng trước</Option>
-        </Select>
-      </div></Col>
-  </Row>
-  
+      <Col xs={24} md={16}>
+      <Row>
+      <Col xs={24} md={7}><div style={{ marginBottom: "1rem" }}>
+            <label htmlFor="dateFilter" style={{ marginRight: "0.5rem", marginTop: "2rem" }}>Chọn ngày:</label>
+            <input
+              type="date"
+              id="dateFilter"
+              value={selectedDate}
+              onChange={(e) => {
+                setSelectedDate(e.target.value);
+                setSelectedPreset('');
+              }}
+            />
+          </div>
+          </Col>
+      <Col xs={24} md={9}><div style={{ marginBottom: "1rem" }}>
+            {/* <label htmlFor="presetFilter" style={{ marginRight: "0.5rem" }}>Chọn khoảng thời gian:</label> */}
+            
+            <Select
+              allowClear
+              id="presetFilter"
+              style={{ width: 300 }}
+              placeholder="Chọn khoảng thời gian"
+              value={selectedPreset || undefined}
+              onChange={(value) => {
+                setSelectedPreset(value);
+                setSelectedDate('');
+              }}
+            >
+              <Option value="today">Hôm Nay</Option>
+              <Option value="yesterday">Hôm Qua</Option>
+              <Option value="week">1 Tuần gần nhất</Option>
+              <Option value="currentMonth">1 Tháng (Từ đầu tháng đến hiện tại)</Option>
+              <Option value="lastMonth">Tháng trước</Option>
+              <Option value="twoMonthsAgo">2 Tháng trước</Option>
+              <Option value="threeMonthsAgo">3 Tháng trước</Option>
+            </Select>
+          </div>
+           </Col>
+       {(currentUser.position === "admin"  || currentUser.position === "managerMKT") && (    <Col xs={24} sm={12} md={8}>
+           <div style={{ display: 'flex', alignItems: 'center' }}>
+                        <span style={{ marginRight: 8 }}>Chọn team: </span>
+                        <Select
+                        allowClear
+                          value={selectedTeam}
+                          style={{ width: '100%' }}
+                          onChange={(value) => setSelectedTeam(value)}
+                        >
+                          
+                          {teams.map(team => (
+                            <Option key={team.value} value={team.value}>
+                              {team.label}
+                            </Option>
+                          ))}
+                        </Select>
+                      </div>
+                    </Col>)}
+       {currentUser.position === "lead"   && (    <Col xs={24} sm={12} md={8}>
+           <div style={{ display: 'flex', alignItems: 'center' }}>
+                        <span style={{ marginRight: 8 }}>Chọn team: </span>
+                        <Select
+                        disabled={currentUser.employee_code !== 6518}
+                        allowClear
+                          value={selectedTeam}
+                          style={{ width: '100%' }}
+                          onChange={(value) => setSelectedTeam(value)}
+                        >
+                            <Option key={1234} value={"SON"}>
+                              TEAM SƠN
+                            </Option>
+                            <Option key={1235657} value={"QUAN"}>
+                              TEAM QUÂN
+                            </Option>
+                          
+                        </Select>
+                      </div>
+                    </Col>)}
+       </Row>
       
-
-      {/* Ô nhập Tỉ giá VNĐ */}
-      {/* <div style={{ marginBottom: "1rem" }}>
-        <label htmlFor="exchangeRate" style={{ marginRight: "0.5rem" }}>Tỉ giá VNĐ:</label>
-        <Input
-          type="number"
-          id="exchangeRate"
-          value={exchangeRateInput}
-          onChange={(e) => setExchangeRateInput(Number(e.target.value))}
-          style={{ width: "200px", marginRight: "1rem" }}
-        />
-        <Button type="primary" onClick={() => setExchangeRate(exchangeRateInput)}>
-          Sửa giá trị
-        </Button>
-      </div> */}
-  </Col>
-  
- 
-</Row>)}
-      {(currentUser.position === "admin" ||currentUser.position === "managerMKT" ||currentUser.position === "managerSALE" ||currentUser.position === "leadSALE"   ) && (<>
+        
+      </Col>
+      <Col xs={24} md={8}>
+      
+      <Table columns={totalColumns3} dataSource={totalData2} pagination={false} />
+      </Col>
+     
+     
+    </Row>)}
+      {((currentUser.position === "admin" && !selectedTeam) ||(currentUser.position === "managerMKT" && !selectedTeam )||currentUser.position === "managerSALE" ||currentUser.position === "leadSALE"   ) && (<>
       <Row gutter={[16, 16]}  >
-  <Col xs={24} md={12}>
+  <Col xs={24} md={16}>
   <Row>
-  <Col xs={24} md={8}><div style={{ marginBottom: "1rem" }}>
+  <Col xs={24} md={7}><div style={{ marginBottom: "1rem" }}>
         <label htmlFor="dateFilter" style={{ marginRight: "0.5rem", marginTop: "2rem" }}>Chọn ngày:</label>
         <input
           type="date"
@@ -1643,7 +1688,7 @@ const percentAds3 = tongKW3 > 0 ? Number(((totalAdsKW3 / (tongKW3*exchangeRate))
         />
       </div>
       </Col>
-  <Col xs={24} md={12}><div style={{ marginBottom: "1rem" }}>
+  <Col xs={24} md={9}><div style={{ marginBottom: "1rem" }}>
         {/* <label htmlFor="presetFilter" style={{ marginRight: "0.5rem" }}>Chọn khoảng thời gian:</label> */}
         
         <Select
@@ -1667,6 +1712,24 @@ const percentAds3 = tongKW3 > 0 ? Number(((totalAdsKW3 / (tongKW3*exchangeRate))
         </Select>
       </div>
        </Col>
+       <Col xs={24} sm={12} md={8}>
+       <div style={{ display: 'flex', alignItems: 'center' }}>
+                    <span style={{ marginRight: 8 }}>Chọn team: </span>
+                    <Select
+                    allowClear
+                      value={selectedTeam}
+                      style={{ width: '100%' }}
+                      onChange={(value) => setSelectedTeam(value)}
+                    >
+                      
+                      {teams.map(team => (
+                        <Option key={team.value} value={team.value}>
+                          {team.label}
+                        </Option>
+                      ))}
+                    </Select>
+                  </div>
+                </Col>
    </Row>
   
     
@@ -1690,7 +1753,7 @@ const percentAds3 = tongKW3 > 0 ? Number(((totalAdsKW3 / (tongKW3*exchangeRate))
 </Row></>)}
 <br></br>
       
-{(currentUser.position === "admin" || currentUser.position === "managerMKT") ? (
+{(currentUser.position === "admin" && !selectedTeam) ||(currentUser.position === "managerMKT" && !selectedTeam ) ? (
   <Tabs defaultActiveKey="MKT">
   <Tabs.TabPane tab="MKT" key="MKT">
  
@@ -1936,15 +1999,23 @@ pagination={7}
         </Tabs.TabPane>
       </Tabs>
 ): null}
-{currentUser.position === "lead" && (
+{(currentUser.position === "lead" ||(currentUser.position === "admin" && selectedTeam) ||(currentUser.position === "managerMKT" && selectedTeam ))&& (
   <>
-
+<Row gutter={[16, 16]}>
+      <Col xs={24} md={14}>
+        
+      </Col>
+      
+      
+      
+    </Row>
 <Row gutter={[16, 16]}>
       <Col xs={24} md={14}>
       <h2>Báo cáo marketing</h2>
   <Table columns={marketingColumns} dataSource={marketingReportDataTEAM} pagination={false} />  
       </Col>
       <Col xs={24} md={10}><br></br>
+      
       <h3>Doanh số Nhân viên MKT</h3>
   
   <GroupedDoubleBarChartComponentTEAM data={employeeChartDataNewTEAM} />
@@ -1969,18 +2040,8 @@ pagination={7}
       
      
     </Row>
-    <h2 style={{ marginTop: "2rem" }}>Tổng</h2>
-    <Table columns={totalColumns} dataSource={totalData2} pagination={false} />    
-<Row gutter={[16, 16]}>
-      <Col xs={24} md={14}>
-      
-      </Col>
-      <Col xs={24} md={10}>
-      
-      </Col>
-      
-      
-    </Row>
+    
+
   
   
     

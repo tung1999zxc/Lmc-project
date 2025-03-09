@@ -100,7 +100,7 @@ const OrderList = () => {
   // Danh sách thành viên team (dùng cho vai trò lead)
   const leadTeamMembers = employees
     .filter((employee) => employee.team_id === currentUser.team_id)
-    .map((employee) => employee.name);
+    .map((employee) => employee.name.trim().toLowerCase());
 
 
   const { RangePicker } = DatePicker;
@@ -264,25 +264,28 @@ const resetPagename =()=>{
       );
     } else if (currentUser.position === "salenhapdon") {
       roleFilteredOrders = roleFilteredOrders.filter(
-        (order) => order.sale === currentUser.name
+        (order) => order.sale.trim().toLowerCase() === currentUser.name.trim().toLowerCase()
       );
-    } else if (currentUser.position === "salefull") {
-      roleFilteredOrders = roleFilteredOrders.filter(
-        (order) => order.sale === currentUser.name
-      );
+    } 
+    // else if (currentUser.position === "salefull") {
+    //   roleFilteredOrders = roleFilteredOrders.filter(
+    //     (order) => order.sale === currentUser.name
+    //   );
     
-    } else if (currentUser.position === "salexuly") {
-      roleFilteredOrders = roleFilteredOrders.filter(
-        (order) =>
-           order.saleReport === "DONE"
-      );
-    } else if (currentUser.position_team === "kho") {
+    // } 
+    // else if (currentUser.position === "salexuly") {
+    //   roleFilteredOrders = roleFilteredOrders.filter(
+    //     (order) =>
+    //        order.saleReport === "DONE"
+    //   );
+    // }
+     else if (currentUser.position_team === "kho") {
       roleFilteredOrders = roleFilteredOrders.filter(
         (order) => order.saleReport === "DONE"
       );
     } else if (currentUser.position === "lead") {
       roleFilteredOrders = roleFilteredOrders.filter((order) =>
-        leadTeamMembers.includes(order.mkt)
+        leadTeamMembers.includes(order.mkt.trim().toLowerCase())
       );
     }
 
@@ -410,8 +413,8 @@ const resetPagename =()=>{
                 };
               case "waitDelivered":
                 return order.deliveryStatus === "";
-              case "deliveredkomavandon":
-                return order.deliveryStatus === "ĐÃ GỬI HÀNG" && order.trackingCode ==="";
+              case "deliveredcomavandon":
+                return order.deliveryStatus === "ĐÃ GỬI HÀNG" && order.trackingCode !=="";
               
               default:
                 return true;
@@ -1069,24 +1072,57 @@ const selectedTableColumns = columns.filter((col) =>
 );
   const columnsMKT = [
     {
-      title: "NGÀY ĐẶT",
-      dataIndex: "orderDate",
+      title: (
+        <Checkbox
+          checked={selectedColumns.includes("orderDate")}
+          onChange={(e) => handleColumnSelect("orderDate", e.target.checked)}
+        >
+          NGÀY ĐẶT
+        </Checkbox>
+      ),
+      dataIndex: "orderDate4",
       key: "orderDate",
-      render: (text) => dayjs(text).format("DD/MM/YYYY")
+      render: (text, record) => {
+        // Kiểm tra nếu orderDate4 không hợp lệ thì lấy orderDate
+        const dateValue = text || record.orderDate;
+    
+        if (!dateValue) return "N/A"; // Nếu không có cả hai giá trị, hiển thị "N/A"
+    
+        const formattedDate = dayjs(dateValue).isValid()
+          ? dayjs(dateValue).format("DD/MM")
+          : "N/A";
+        const formattedTime = dayjs(dateValue).isValid()
+          ? dayjs(dateValue).format("HH:mm:ss")
+          : "N/A";
+    
+        return (
+          <div>
+            {formattedDate}
+            <br />
+            {formattedTime}
+          </div>
+        );
+      },
+      width: 80, // Tăng width nếu cần để hiển thị đủ thông tin
     },
     {
-      title: "THANH TOÁN",
-      dataIndex: "paymentStatus",
-      key: "paymentStatus",
-      render: (text) => (
-        <Tag color={text === "ĐÃ THANH TOÁN" ? "green" : "red"}>{text}</Tag>
-      )
+      title: (
+        <Checkbox
+          checked={selectedColumns.includes("stt")}
+          onChange={(e) => handleColumnSelect("stt", e.target.checked)}
+        >
+          STT
+        </Checkbox>
+      ),
+      dataIndex: "stt",       
+      key: "stt",
+      width: 25,
+     
     },
-    { title: "TÊN KHÁCH", dataIndex: "customerName", key: "customerName" },
-    { title: "TÊN PAGE", dataIndex: "pageName", key: "pageName" },
     {
       title: "SẢN PHẨM",
       key: "products",
+      width: 80,
       render: (_, record) => (
         <>
           {record.products &&
@@ -1099,10 +1135,37 @@ const selectedTableColumns = columns.filter((col) =>
         </>
       )
     },
+    { title: "DOANH THU", dataIndex: "profit", key: "profit" ,width: 20,},
+    { title: "TÊN PAGE", dataIndex: "pageName", key: "pageName",width: 100, },
+    {
+      title: (
+        <Checkbox
+          checked={selectedColumns.includes("note")}
+          onChange={(e) => handleColumnSelect("note", e.target.checked)}
+        >
+          GHI CHÚ SALE
+        </Checkbox>
+      ),
+      dataIndex: "note",
+      width: 100,
+      key: "note",
+      render: (text) => <div style={{ width: 200,  }}><h3>{text} </h3></div>,
+    },
+    {
+      title: "THANH TOÁN",
+      dataIndex: "paymentStatus",
+      key: "paymentStatus",
+      render: (text) => (
+        <Tag color={text === "ĐÃ THANH TOÁN" ? "green" : "red"}>{text}</Tag>
+      )
+    },
+    { title: "TÊN KHÁCH", dataIndex: "customerName", key: "customerName" },
+    
+   
     { title: "MKT", dataIndex: "mkt", key: "mkt" },
     { title: "DOANH SỐ", dataIndex: "revenue", key: "revenue" },
-    { title: "DOANH THU", dataIndex: "profit", key: "profit" },
-    { title: "GHI CHÚ SALE", dataIndex: "note", key: "note" }
+    
+   
   ];
 
 
@@ -1377,6 +1440,7 @@ const selectedTableColumns = columns.filter((col) =>
       ),
       dataIndex: "note",
       key: "note",
+      render: (text) => <div style={{ width: 200,  }}><h3>{text} </h3></div>,
     },
     {
       title: (
@@ -1567,27 +1631,36 @@ const selectedTableColumns = columns.filter((col) =>
       
        
      
-      {(currentUser.position_team==="kho" ||currentUser.position ==="leadSALE"||currentUser.position ==="admin"||currentUser.position ==="managerSALE"||  currentUser.name ==="Hoàng Lan Phương"  )&& <Col span={5}>
+      {(currentUser.position_team==="kho"||currentUser.position_team==="mkt" ||currentUser.position ==="leadSALE"||currentUser.position ==="admin"||currentUser.position ==="managerSALE"||  currentUser.name ==="Hoàng Lan Phương"  )&& <Col span={8}>
      {/* Tổng số lượng sản phẩm (đơn vừa tích): {countNewTickedProductQuantity()} */}
-     {currentUser.position_team==="kho" || currentUser.name ==="Hoàng Lan Phương" && <Table 
+     
+    {isdem && <> 
+      <Table 
+      columns={columns3} 
+      dataSource={dataSource3} 
+      pagination={false} 
+      bordered
+    />
+    {currentUser.position_team==="kho" || currentUser.name ==="Hoàng Lan Phương" && (
+     <>
+      <h4>SL SẢN PHẨM ĐÃ TICK (XUẤT EXCELL)</h4>
+     <Table 
       columns={columns3} 
       dataSource={dataSource4} 
       pagination={false}  // Không hiển thị phân trang nếu chỉ có 1 dòng
       bordered
-    /> } 
-    {isdem && <> 
+    />
+    </>)} 
+    {currentUser.position_team !== "mkt"&&(<>
+     <h4>SL SẢN PHẨM ĐÃ TICK (CTY ĐÓNG) </h4>
     <Table 
       columns={columns3} 
       dataSource={dataSourceCTYDONG} 
       pagination={false}  
       bordered
-    />
-    <Table 
-      columns={columns3} 
-      dataSource={dataSource3} 
-      pagination={false} 
-      bordered
-    /></>} 
+    /></>)}
+    
+    </>} 
       
     
       <Button
@@ -1664,9 +1737,8 @@ const selectedTableColumns = columns.filter((col) =>
             allowClear
             options={[
               { value: "deliveredkomavandon", label: "Đã gửi hàng + chưa mã" },
+              { value: "deliveredcomavandon", label: "Đã gửi hàng + Có mã" },
               { value: "waitDelivered", label: "Chưa gửi hàng" },
-             
-              
               { value: "not_delivered", label: "Đã gửi hàng" },
               { value: "khoshiping", label: "Kho đóng hàng" },
               { value: "delivered", label: "Giao thành công" },
@@ -1682,23 +1754,27 @@ const selectedTableColumns = columns.filter((col) =>
             placeholder="Chọn bộ lọc"
             allowClear
             options={[
-              { value: "ero", label: "Đơn thiếu sale xử lý" },
-              { value: "today", label: "Đơn mới trong ngày" },
-              { value: "done", label: "Đơn đã Done" },
-              { value: "ok", label: "Đơn OK" },
+              
+              { value: "unpaid_success", label: "Chưa thanh toán & Giao Thành công" },     
               { value: "waiting_done", label: "Đơn chưa Done" },
+              { value: "ok", label: "Đơn OK" },
+              { value: "waiting_approval", label: "Đợi xác nhận" },
+              { value: "done", label: "Đơn đã Done" },
+              { value: "duplicate_name", label: "Trùng tên khách" },
+              { value: "duplicate_phone", label: "Trùng số điện thoại" },
+              { value: "unpaid", label: "Chưa thanh toán" },
+              { value: "paid", label: "Đã thanh toán" },
+              { value: "ero", label: "Đơn thiếu sale xử lý" },
               { value: "isshiping", label: "Công Ty đóng hàng" },
               { value: "khoshiping", label: "Kho đóng hàng" },
               { value: "waitDelivered", label: "Chưa gửi hàng" },
               { value: "deliveredkomavandon", label: "Đã gửi hàng + chưa mã" },
               { value: "not_delivered", label: "Đã gửi hàng" },
               { value: "delivered", label: "Giao thành công" },
-              { value: "unpaid_success", label: "Chưa thanh toán & Giao Thành công" },
-              { value: "unpaid", label: "Chưa thanh toán" },
-              { value: "paid", label: "Đã thanh toán" },
-              { value: "duplicate_name", label: "Trùng tên khách" },
-              { value: "duplicate_phone", label: "Trùng số điện thoại" },
-              { value: "waiting_approval", label: "Đợi xác nhận" }
+              
+             
+              
+          
             ]}
             onChange={(values) => setSelectedFilters(values)}
           />) }

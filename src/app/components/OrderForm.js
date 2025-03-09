@@ -388,7 +388,7 @@ const productOptions = products.map((p) => p.name);
 
                 <div style={{ display: "flex", gap: 8 }}>
                 <Form.Item label="TÊN PAGE" name="pageName"
-                rules={[{ required: true, message: 'Vui lòng nhập TÊN PAGE' }]}>
+               >
                
   <Select style={{ width: 270 }}
     allowClear
@@ -486,7 +486,7 @@ const productOptions = products.map((p) => p.name);
                   <Input />
                 </Form.Item>
                 <Form.Item label="DOANH SỐ" name="revenue"
-                rules={[{ required: true, message: 'Vui lòng nhập DOANH SỐ' }]}>
+                >
                   <Input type="number" />
                 </Form.Item>
                 <Form.Item label="SALE CHAT" name="sale" initialValue={currentUser.name}>
