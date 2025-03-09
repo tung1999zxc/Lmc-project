@@ -262,11 +262,12 @@ const resetPagename =()=>{
       roleFilteredOrders = roleFilteredOrders.filter(
         (order) => order.mkt.trim().toLowerCase() === currentUser.name.trim().toLowerCase()
       );
-    } else if (currentUser.position === "salenhapdon") {
-      roleFilteredOrders = roleFilteredOrders.filter(
-        (order) => order.sale.trim().toLowerCase() === currentUser.name.trim().toLowerCase()
-      );
     } 
+    // else if (currentUser.position === "salenhapdon") {
+    //   roleFilteredOrders = roleFilteredOrders.filter(
+    //     (order) => order.sale.trim().toLowerCase() === currentUser.name.trim().toLowerCase()
+    //   );
+    // } 
     // else if (currentUser.position === "salefull") {
     //   roleFilteredOrders = roleFilteredOrders.filter(
     //     (order) => order.sale === currentUser.name
