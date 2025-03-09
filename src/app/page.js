@@ -1628,7 +1628,7 @@ const percentAds3 = tongKW3 > 0 ? Number(((totalAdsKW3 / (tongKW3*exchangeRate))
                         <Select
                         allowClear
                           value={selectedTeam}
-                          style={{ width: '100%' }}
+                          style={{ width: '100%', maxWidth: "200px", }}
                           onChange={(value) => setSelectedTeam(value)}
                         >
                           
@@ -1647,7 +1647,7 @@ const percentAds3 = tongKW3 > 0 ? Number(((totalAdsKW3 / (tongKW3*exchangeRate))
                         disabled={currentUser.employee_code !== 6518}
                         allowClear
                           value={selectedTeam}
-                          style={{ width: '100%' }}
+                          style={{ width: '100%', maxWidth: "200px" }}
                           onChange={(value) => setSelectedTeam(value)}
                         >
                             <Option key={1234} value={"SON"}>
@@ -1718,7 +1718,7 @@ const percentAds3 = tongKW3 > 0 ? Number(((totalAdsKW3 / (tongKW3*exchangeRate))
                     <Select
                     allowClear
                       value={selectedTeam}
-                      style={{ width: '100%' }}
+                      style={{ width: '100%', maxWidth: "200px", }}
                       onChange={(value) => setSelectedTeam(value)}
                     >
                       

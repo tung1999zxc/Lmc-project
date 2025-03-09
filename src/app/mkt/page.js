@@ -907,14 +907,17 @@ const adminSummaryColumns = [
       {(currentUser.position === 'managerMKT'|| currentUser.position === 'admin' )&& (
   <>
    
-    <Table
+    <Table  style={{
+      minWidth: '800px', // Đặt min-width theo tổng độ rộng các cột
+      whiteSpace: 'nowrap'
+    }}
       dataSource={adminSummaryData.sort((a, b) => {
         return dayjs(b.date).valueOf() - dayjs(a.date).valueOf();
       })}
       columns={adminSummaryColumns}
       rowKey="date"
       pagination={{ pageSize: 10 }}
-      scroll={{ x: true }}
+      // scroll={{ x: true }}
     />
   </>
 )}
@@ -933,6 +936,10 @@ const adminSummaryColumns = [
                 <h4>Nhân viên: {userRecords?.[0]?.name}</h4>
                 <div
         style={{
+         
+            minWidth: '800px', // Đặt min-width theo tổng độ rộng các cột
+            whiteSpace: 'nowrap',
+        
           fontWeight: "bold",
           marginBottom: 8,
           padding: "4px 8px",
@@ -947,7 +954,11 @@ const adminSummaryColumns = [
                 
               </Col>
               <Col xs={24}>
-                <Table
+                <Table  
+                style={{
+      minWidth: '800px', // Đặt min-width theo tổng độ rộng các cột
+      whiteSpace: 'nowrap'
+    }}
                  dataSource={userRecords.sort((a, b) => {
                     return dayjs(b.date).valueOf() - dayjs(a.date).valueOf();
                   })}
@@ -999,7 +1010,7 @@ const adminSummaryColumns = [
       return dayjs(b.date).valueOf() - dayjs(a.date).valueOf();
     })}
     pagination={{ pageSize: 30 }}
-    scroll={{ x: true }}
+    // scroll={{ x: true }}
      rowKey="id"
     style={{
       minWidth: '800px', // Đặt min-width theo tổng độ rộng các cột
