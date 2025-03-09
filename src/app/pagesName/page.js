@@ -229,7 +229,8 @@ const EmployeePageTable = () => {
       <Table
         columns={columns}
         dataSource={filteredData .sort((a, b) => (a.employee?.localeCompare(b.employee) || 0))}
-        pagination={false}
+        pagination={{ pageSize: 10 }}
+
       />
     </div>  
   );

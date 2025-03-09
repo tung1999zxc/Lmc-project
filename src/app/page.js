@@ -694,7 +694,7 @@ function getLast30Days() {
       .filter(order => order.mkt.trim().toLowerCase() === emp.name.trim().toLowerCase())
       .reduce((sum, order) => sum + order.profit, 0);
     const adsCost = filteredAds
-      .filter(ad => ad.name === emp.name)
+      .filter(ad => ad.name.trim().toLowerCase() === emp.name.trim().toLowerCase())
       .reduce((sum, ad) => sum + (ad.request1 + ad.request2), 0);
     return { name: emp.name, profit: sales*17000*0.95, adsCost };
   });
@@ -706,7 +706,7 @@ const employeeChartDataNewTEAM = teamEmployees.map(emp => {
     .filter(order => order.mkt.trim().toLowerCase() === emp.name.trim().toLowerCase())
     .reduce((sum, order) => sum + order.profit, 0);
   const adsCost = filteredAds
-    .filter(ad => ad.name === emp.name)
+    .filter(ad => ad.name.trim().toLowerCase() === emp.name.trim().toLowerCase())
     .reduce((sum, ad) => sum + (ad.request1 + ad.request2), 0);
   return { name: emp.name, profit: sales * 17000*0.95, adsCost };
 });
@@ -719,7 +719,7 @@ const employeeChartDataNewTEAM = teamEmployees.map(emp => {
   const saleEmployeesXL = employees.filter(emp => emp.position_team === "sale"&& emp.position === "salexuly" );
   const employeeChartDataNewsale = saleEmployees.map(emp => {
     const sales = filteredOrders
-      .filter(order => order.sale === emp.name || order.salexuly === emp.name)
+      .filter(order => order.sale === emp.name.trim().toLowerCase() || order.salexuly === emp.name.trim().toLowerCase())
       .reduce((sum, order) => sum + order.profit, 0);
     
     let fillColor = "#8884d8"; // Màu mặc định
@@ -746,7 +746,7 @@ const employeeChartDataNewTEAM = teamEmployees.map(emp => {
     }, 0);
     const adsCost = teamEmps.reduce((acc, emp) => {
       const empAds = filteredAds
-        .filter(ad => ad.name === emp.name)
+        .filter(ad => ad.name.trim().toLowerCase() === emp.name.trim().toLowerCase())
         .reduce((sum, ad) => sum + (ad.request1 + ad.request2), 0);
       return acc + empAds;
     }, 0);
@@ -832,7 +832,7 @@ const employeeChartDataNewTEAM = teamEmployees.map(emp => {
 
 let dailyChartDataNewTEAM;
 // Nếu currentUser là team lead, lọc các đơn hàng và ads theo team
-if (isTeamLead) {
+if (isTeamLead|| ( currentUser.position==="admin" && selectedTeam)|| (currentUser.position==="managerMKT" && selectedTeam)) {
   // Lấy danh sách tên nhân viên của team
   const teamEmployeeNames = employees
     .filter(emp => emp.team_id === currentUser.team_id && emp.position_team === "mkt")
@@ -931,13 +931,13 @@ const employeePieDataTEAM = employeeChartDataNewTEAM.map(emp => ({
     }, 0);
     const adsCost = teamEmps.reduce((acc, emp) => {
       const empAds = filteredAds
-        .filter(ad => ad.name === emp.name)
+        .filter(ad => ad.name.trim().toLowerCase() === emp.name.trim().toLowerCase())
         .reduce((sum, ad) => sum + (ad.request1 + ad.request2), 0);
       return acc + empAds;
     }, 0);
     const adsCost2 = othersEmps.reduce((acc, emp) => {
       const empAds = filteredAds
-        .filter(ad => ad.name === emp.name)
+        .filter(ad => ad.name.trim().toLowerCase() === emp.name.trim().toLowerCase())
         .reduce((sum, ad) => sum + (ad.request1 + ad.request2), 0);
       return acc + empAds;
     }, 0);
@@ -963,7 +963,7 @@ const employeePieDataTEAM = employeeChartDataNewTEAM.map(emp => ({
     const total = paid + unpaid;
     const tienVND = total * exchangeRate*0.95;
     const totalAds = filteredAds
-      .filter(ad => ad.name === emp.name)
+      .filter(ad => ad.name.trim().toLowerCase() === emp.name.trim().toLowerCase())
       .reduce((sum, ad) => sum + (ad.request1 + ad.request2), 0);
     const adsPercent = tienVND ? ((totalAds / tienVND) * 100).toFixed(2) : "0.00";
     return { key: index, name: emp.name, paid, unpaid, total, tienVND, totalAds, adsPercent };
@@ -1076,17 +1076,17 @@ marketingReportDataTEAM.sort((a, b) => b.tienVND - a.tienVND);
     let paid = 0, unpaid = 0;
     if (emp.position === "salenhapdon" || emp.position === "salefull") {
       paid = filteredOrders
-        .filter(order => order.sale === emp.name && order.paymentStatus === "ĐÃ THANH TOÁN")
+        .filter(order => order.sale.trim().toLowerCase() === emp.name.trim().toLowerCase() && order.paymentStatus === "ĐÃ THANH TOÁN")
         .reduce((sum, order) => sum + order.profit, 0);
       unpaid = filteredOrders
-        .filter(order => order.sale === emp.name && ( order.paymentStatus === "CHƯA THANH TOÁN" || order.paymentStatus === "" ))
+        .filter(order => order.sale.trim().toLowerCase() === emp.name.trim().toLowerCase() && ( order.paymentStatus === "CHƯA THANH TOÁN" || order.paymentStatus === "" ))
         .reduce((sum, order) => sum + order.profit, 0);
     } else if (emp.position === "salexuly") {
       paid = filteredOrders
-        .filter(order => order.salexuly === emp.name && order.paymentStatus === "ĐÃ THANH TOÁN")
+        .filter(order => order.salexuly.trim().toLowerCase() === emp.name.trim().toLowerCase() && order.paymentStatus === "ĐÃ THANH TOÁN")
         .reduce((sum, order) => sum + order.profit, 0);
       unpaid = filteredOrders
-        .filter(order => order.salexuly === emp.name && ( order.paymentStatus === "CHƯA THANH TOÁN" || order.paymentStatus === "" ))
+        .filter(order => order.salexuly.trim().toLowerCase() === emp.name.trim().toLowerCase() && ( order.paymentStatus === "CHƯA THANH TOÁN" || order.paymentStatus === "" ))
         .reduce((sum, order) => sum + order.profit, 0);
     }
     const total = paid + unpaid;
@@ -1098,17 +1098,17 @@ marketingReportDataTEAM.sort((a, b) => b.tienVND - a.tienVND);
     let paid = 0, unpaid = 0;
     if (emp.position === "salenhapdon" || emp.position === "salefull") {
       paid = filteredOrders
-        .filter(order => order.sale === emp.name && order.paymentStatus === "ĐÃ THANH TOÁN")
+        .filter(order => order.sale.trim().toLowerCase() === emp.name.trim().toLowerCase() && order.paymentStatus === "ĐÃ THANH TOÁN")
         .reduce((sum, order) => sum + order.profit, 0);
       unpaid = filteredOrders
-        .filter(order => order.sale === emp.name && ( order.paymentStatus === "CHƯA THANH TOÁN" || order.paymentStatus === "" ))
+        .filter(order => order.sale.trim().toLowerCase() === emp.name.trim().toLowerCase() && ( order.paymentStatus === "CHƯA THANH TOÁN" || order.paymentStatus === "" ))
         .reduce((sum, order) => sum + order.profit, 0);
     } else if (emp.position === "salexuly") {
       paid = filteredOrders
-        .filter(order => order.salexuly === emp.name && order.paymentStatus === "ĐÃ THANH TOÁN")
+        .filter(order => order.salexuly.trim().toLowerCase() === emp.name.trim().toLowerCase() && order.paymentStatus === "ĐÃ THANH TOÁN")
         .reduce((sum, order) => sum + order.profit, 0);
       unpaid = filteredOrders
-        .filter(order => order.salexuly === emp.name && ( order.paymentStatus === "CHƯA THANH TOÁN" || order.paymentStatus === "" ))
+        .filter(order => order.salexuly.trim().toLowerCase() === emp.name.trim().toLowerCase() && ( order.paymentStatus === "CHƯA THANH TOÁN" || order.paymentStatus === "" ))
         .reduce((sum, order) => sum + order.profit, 0);
     }
     const total = paid + unpaid;
@@ -1120,17 +1120,17 @@ marketingReportDataTEAM.sort((a, b) => b.tienVND - a.tienVND);
     let paid = 0, unpaid = 0;
     if (emp.position === "salenhapdon" || emp.position === "salefull") {
       paid = filteredOrders
-        .filter(order => order.sale === emp.name && order.paymentStatus === "ĐÃ THANH TOÁN")
+        .filter(order => order.sale.trim().toLowerCase() === emp.name.trim().toLowerCase() && order.paymentStatus === "ĐÃ THANH TOÁN")
         .reduce((sum, order) => sum + order.profit, 0);
       unpaid = filteredOrders
-        .filter(order => order.sale === emp.name && ( order.paymentStatus === "CHƯA THANH TOÁN" || order.paymentStatus === "" ))
+        .filter(order => order.sale.trim().toLowerCase() === emp.name.trim().toLowerCase() && ( order.paymentStatus === "CHƯA THANH TOÁN" || order.paymentStatus === "" ))
         .reduce((sum, order) => sum + order.profit, 0);
     } else if (emp.position === "salexuly") {
       paid = filteredOrders
-        .filter(order => order.salexuly === emp.name && order.paymentStatus === "ĐÃ THANH TOÁN")
+        .filter(order => order.salexuly.trim().toLowerCase() === emp.name.trim().toLowerCase() && order.paymentStatus === "ĐÃ THANH TOÁN")
         .reduce((sum, order) => sum + order.profit, 0);
       unpaid = filteredOrders
-        .filter(order => order.salexuly === emp.name && ( order.paymentStatus === "CHƯA THANH TOÁN" || order.paymentStatus === "" ))
+        .filter(order => order.salexuly.trim().toLowerCase() === emp.name.trim().toLowerCase() && ( order.paymentStatus === "CHƯA THANH TOÁN" || order.paymentStatus === "" ))
         .reduce((sum, order) => sum + order.profit, 0);
     }
     const total = paid + unpaid;
@@ -1142,17 +1142,17 @@ marketingReportDataTEAM.sort((a, b) => b.tienVND - a.tienVND);
     let paid = 0, unpaid = 0;
     if (emp.position === "salenhapdon" || emp.position === "salefull") {
       paid = filteredOrders
-        .filter(order => order.sale === emp.name && order.paymentStatus === "ĐÃ THANH TOÁN")
+        .filter(order => order.sale.trim().toLowerCase() === emp.name.trim().toLowerCase() && order.paymentStatus === "ĐÃ THANH TOÁN")
         .reduce((sum, order) => sum + order.profit, 0);
       unpaid = filteredOrders
-        .filter(order => order.sale === emp.name && ( order.paymentStatus === "CHƯA THANH TOÁN" || order.paymentStatus === "" ))
+        .filter(order => order.sale.trim().toLowerCase() === emp.name.trim().toLowerCase() && ( order.paymentStatus === "CHƯA THANH TOÁN" || order.paymentStatus === "" ))
         .reduce((sum, order) => sum + order.profit, 0);
     } else if (emp.position === "salexuly") {
       paid = filteredOrders
-        .filter(order => order.salexuly === emp.name && order.paymentStatus === "ĐÃ THANH TOÁN")
+        .filter(order => order.salexuly.trim().toLowerCase() === emp.name.trim().toLowerCase() && order.paymentStatus === "ĐÃ THANH TOÁN")
         .reduce((sum, order) => sum + order.profit, 0);
       unpaid = filteredOrders
-        .filter(order => order.salexuly === emp.name && ( order.paymentStatus === "CHƯA THANH TOÁN" || order.paymentStatus === "" ))
+        .filter(order => order.salexuly.trim().toLowerCase() === emp.name.trim().toLowerCase() && ( order.paymentStatus === "CHƯA THANH TOÁN" || order.paymentStatus === "" ))
         .reduce((sum, order) => sum + order.profit, 0);
     }
     const total = paid + unpaid;
@@ -1396,7 +1396,7 @@ const percentAds3 = tongKW3 > 0 ? Number(((totalAdsKW3 / (tongKW3*exchangeRate))
   const percentAds = tongKW > 0 ? Number(((totalAdsKW / (tongKW*exchangeRate)) * 100).toFixed(2)) : 0;
 
 
-  if (isTeamLead|| currentUser.position==="admin" || currentUser.position==="managerMKT") {
+  if (isTeamLead|| ( currentUser.position==="admin" && selectedTeam)|| (currentUser.position==="managerMKT" && selectedTeam)) {
     const teamEmployeeNames = employees
       .filter(emp => emp.team_id === currentUser.team_id)
       .map(emp => emp.name.trim().toLowerCase());

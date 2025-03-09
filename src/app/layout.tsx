@@ -7,7 +7,7 @@ import { useRouter } from "next/navigation";
 import { Provider, useDispatch, useSelector } from "react-redux";
 import { store } from "./store/store";
 import { setCurrentUser } from "./store/userSlice";
-
+import { usePathname } from "next/navigation";
 import SidebarMenu from "./components/SidebarMenu";
 import CurrentUserSelector from "./components/CurrentUserSelector";
 
@@ -108,6 +108,12 @@ function InnerDashboardLayout({ children }: { children: ReactNode }) {
  * ✅ Bọc `<Provider>` bên ngoài để tránh lỗi Redux
  */
 export default function DashboardLayout({ children }: { children: ReactNode }) {
+  const pathname = usePathname();
+  if (pathname === "/login") {
+    return (<html lang="en">
+      <body>  <Provider store={store}>{children} </Provider> </body>
+      </html>);
+  }
   return (
     <html lang="en">
       <body>

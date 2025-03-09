@@ -584,7 +584,7 @@ const InventoryPage = () => {
 
   return (
     <div style={{ padding: 24 }}>
-      <h1>Quản lý sản phẩm</h1>
+    
       <Form
         form={form}
         layout="inline"

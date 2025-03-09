@@ -620,13 +620,17 @@ const adminSummaryColumns = [
       key: 'totalReceived',
       render: (_, record) => (
         <InputNumber
+        style={{ 
+          width: '100%',
+          minWidth: '100px' // Đặt min-width cho input
+        }}
         readOnly={
           // Nếu record đã được đánh dấu locked và currentUser không phải là managerMKT hoặc admin
           record.isLocked && currentUser.position !== "managerMKT" && currentUser.position !== "admin"
         }
           value={record.totalReceived}
           onChange={(value) => handleInlineChange(record.id, 'totalReceived', value)}
-          style={{ width: '100%' }}
+          
           formatter={value => value.toLocaleString('vi-VN')}
           parser={value => value.replace(/\$\s?|(,*)/g, '')}
         />
@@ -643,7 +647,10 @@ const adminSummaryColumns = [
         }
           value={record.request1}
           onChange={(value) => handleInlineChange(record.id, 'request1', value)}
-          style={{ width: '100%' }}
+          style={{ 
+            width: '100%',
+            minWidth: '100px' // Đặt min-width cho input
+          }}
           formatter={value => value.toLocaleString('vi-VN')}
           parser={value => value.replace(/\$\s?|(,*)/g, '')}
         />
@@ -660,7 +667,10 @@ const adminSummaryColumns = [
         }
           value={record.request2}
           onChange={(value) => handleInlineChange(record.id, 'request2', value)}
-          style={{ width: '100%' }}
+          style={{ 
+            width: '100%',
+            minWidth: '100px' // Đặt min-width cho input
+          }}
           formatter={value => value.toLocaleString('vi-VN')}
           parser={value => value.replace(/\$\s?|(,*)/g, '')}
         />
@@ -807,7 +817,7 @@ const adminSummaryColumns = [
           >
             <Row gutter={16}>
               <Col xs={24} sm={12} md={3} lg={6}>
-              <h4>NGÀY</h4>
+              
                 <Form.Item initialValue={moment()}
                   name="date"
                   rules={[{ required: true, message: 'Vui lòng chọn ngày' }]}
@@ -832,7 +842,7 @@ const adminSummaryColumns = [
                 </Form.Item>
               </Col>
               
-              <Col xs={24} sm={12} md={8} lg={10}>
+              <Col xs={24} sm={10} md={6} lg={8}>
 
               </Col>
               {(currentUser.position === 'managerMKT'|| currentUser.position === 'admin') && (
@@ -968,7 +978,7 @@ const adminSummaryColumns = [
           
           <Row gutter={[16, 16]}>
             <Col xs={24}>
-              <Table
+              {/* <Table
                 dataSource={filteredRecords.sort((a, b) => {
                   return dayjs(b.date).valueOf() - dayjs(a.date).valueOf();
                 })}
@@ -977,7 +987,26 @@ const adminSummaryColumns = [
                 
                 scroll={{ x: true }}
                 pagination={{ pageSize: 30 }}
-              />
+              /> */}
+              <div style={{ 
+  width: '100%',
+  overflowX: 'auto',
+  WebkitOverflowScrolling: 'touch' // Cho scroll mượt trên mobile
+}}>
+  <Table
+    columns={columns}
+    dataSource={filteredRecords.sort((a, b) => {
+      return dayjs(b.date).valueOf() - dayjs(a.date).valueOf();
+    })}
+    pagination={{ pageSize: 30 }}
+    scroll={{ x: true }}
+     rowKey="id"
+    style={{
+      minWidth: '800px', // Đặt min-width theo tổng độ rộng các cột
+      whiteSpace: 'nowrap'
+    }}
+  />
+</div>
             </Col>
           </Row>
         </>
