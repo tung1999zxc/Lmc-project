@@ -300,7 +300,7 @@
             name="username"
             rules={[{ required: true, message: 'Vui lòng nhập tài khoản' }]}
           >
-            <Input />
+            <Input disabled={edit} />
           </Form.Item>
 
           <Form.Item
@@ -324,28 +324,28 @@
             name="position"
             rules={[{ required: true, message: 'Vui lòng chọn chức vụ' }]}
           >
-            <Select options={positions.map(p => ({ label: p.label, value: p.value }))} />
+            <Select disabled={edit} options={positions.map(p => ({ label: p.label, value: p.value }))} />
           </Form.Item>
 
           <Form.Item
             label="Team"
             name="team_id"
           >
-            <Select options={teams} />
+            <Select disabled={edit} options={teams} />
           </Form.Item>
           <Form.Item
             label="Bộ phận"
             name="position_team"
             rules={[{ required: true, message: 'Vui lòng chọn' }]}
           >
-            <Select options={position_team.map(p => ({ label: p.label, value: p.value }))} />
+            <Select  disabled={edit} options={position_team.map(p => ({ label: p.label, value: p.value }))} />
           </Form.Item>
           <Form.Item
             label="Ca làm việc"
             name="position_team2"
           
           >
-            <Select options={position_team2.map(p => ({ label: p.label, value: p.value }))} />
+            <Select disabled={edit} options={position_team2.map(p => ({ label: p.label, value: p.value }))} />
           </Form.Item>
 
           <Form.Item>

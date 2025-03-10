@@ -968,8 +968,79 @@ const employeePieDataTEAM = employeeChartDataNewTEAM.map(emp => ({
     const adsPercent = tienVND ? ((totalAds / tienVND) * 100).toFixed(2) : "0.00";
     return { key: index, name: emp.name, paid, unpaid, total, tienVND, totalAds, adsPercent };
   });
-  // Sắp xếp theo cột "Tiền VNĐ" giảm dần
+
   marketingReportData.sort((a, b) => b.tienVND - a.tienVND);
+
+  const today2 = new Date();
+  const startOfToday = new Date(today2.getFullYear(), today2.getMonth(), today2.getDate());
+  const endOfToday = new Date(today2.getFullYear(), today2.getMonth(), today2.getDate() + 1);
+
+  const marketingReportData1 = mktEmployees.map((emp, index) => {
+    const total1 = orders
+    .filter(order => {
+      // Giả sử order.createdAt chứa thời gian tạo đơn hàng
+      const orderDate = new Date(order.createdAt);
+      return order.mkt.trim().toLowerCase() === emp.name.trim().toLowerCase() &&
+             orderDate >= startOfToday &&
+             orderDate < endOfToday;
+    })
+    .reduce((sum, order) => sum + order.profit, 0);
+  
+  // Tính tổng quảng cáo (tổng request1 + request2) trong ngày hôm nay
+  const totalAds1 = filteredAds
+    .filter(ad => {
+      // Giả sử ad.createdAt chứa thời gian tạo quảng cáo
+      const adDate = new Date(ad.createdAt);
+      return ad.name.trim().toLowerCase() === emp.name.trim().toLowerCase() &&
+             adDate >= startOfToday &&
+             adDate < endOfToday;
+    })
+    .reduce((sum, ad) => sum + (ad.request1 + ad.request2), 0);
+    
+    return { key: index, name: emp.name,  total1, totalAds1, };
+  });
+  // Sắp xếp theo cột "Tiền VNĐ" giảm dần
+ 
+  // Xác định thời gian bắt đầu và kết thúc của hôm nay
+
+
+const marketingReportData2 = mktEmployees.map((emp, index) => {
+  // Tính tổng tiền từ các đơn hàng đã thanh toán trong ngày hôm nay
+  const total2 = orders
+    .filter(order => {
+      // Giả sử order.createdAt chứa thời gian tạo đơn hàng
+      const orderDate = new Date(order.createdAt);
+      return order.mkt.trim().toLowerCase() === emp.name.trim().toLowerCase() &&
+             
+             orderDate >= startOfToday &&
+             orderDate < endOfToday;
+    })
+    .reduce((sum, order) => sum + order.profit, 0);
+  
+  // Tính tổng quảng cáo (tổng request1 + request2) trong ngày hôm nay
+  const totalAds2 = filteredAds
+    .filter(ad => {
+      // Giả sử ad.createdAt chứa thời gian tạo quảng cáo
+      const adDate = new Date(ad.createdAt);
+      return ad.name.trim().toLowerCase() === emp.name.trim().toLowerCase() &&
+             adDate >= startOfToday &&
+             adDate < endOfToday;
+    })
+    .reduce((sum, ad) => sum + (ad.request1 + ad.request2), 0);
+  
+  return { key: index, name: emp.name, total2, totalAds2 };
+});
+
+// Lọc ra 5 nhân viên có totalAds khác 0 và có total thấp nhất (sắp xếp theo total tăng dần)
+const top5CriticismEmployees = [...marketingReportData2]
+  .filter(emp => emp.totalAds2 !== 0)
+  .sort((a, b) => a.total2 - b.total2) // từ thấp đến cao
+  .slice(0, 5);
+
+  const top5Employees = [...marketingReportData1]
+  .sort((a, b) => b.total1 - a.total1)
+  .slice(0, 5);
+
 
 // Lọc ra các thành viên mkt thuộc team của currentUser
   const teamMktEmployees = mktEmployees.filter(emp => emp.team_id === currentUser.team_id);
@@ -1580,6 +1651,108 @@ const percentAds3 = tongKW3 > 0 ? Number(((totalAdsKW3 / (tongKW3*exchangeRate))
       width: "115%" // Để bù lại không gian khi scale
     }}
     >
+      <div className="criticism-container">
+      <h2>Phê Bình Top 5 Nhân Viên</h2>
+      <div className="marquee">
+        {top5CriticismEmployees.map((emp, index) => (
+          <div key={index} className="employee-item">
+            <img
+  src={`/${emp.name.trim()}.jpg`}
+  alt={emp.name.trim()}
+  className="employee-image"
+  onError={(e) => {
+    e.currentTarget.onerror = null; // Ngăn lặp lại nếu ảnh mặc định không tồn tại
+    e.currentTarget.src = "/1.png";
+  }}
+/>
+            <span className="employee-name">{emp.name}</span>
+          </div>
+        ))}
+      </div>
+      <style jsx>{`
+        .criticism-container {
+          padding: 20px;
+          background: #fce4ec;
+          text-align: center;
+          border: 2px solid #f06292;
+          border-radius: 10px;
+          margin: 20px;
+          overflow: hidden; /* Giới hạn marquee chỉ chạy trong khung */
+          position: relative;
+        }
+        .marquee {
+          display: inline-block;
+          white-space: nowrap;
+          animation: marquee 20s linear infinite;
+        }
+        .employee-item {
+          display: inline-block;
+          margin-right: 50px;
+          text-align: center;
+        }
+        .employee-image {
+          width: 120px;
+          height: 120px;
+          object-fit: cover;
+          border-radius: 20%;
+          margin-bottom: 10px;
+        }
+        .employee-name {
+          font-size: 1.5em;
+          font-weight: bold;
+          color: #c2185b;
+        }
+        @keyframes marquee {
+          0% {
+            transform: translateX(100%);
+          }
+          100% {
+            transform: translateX(-100%);
+          }
+        }
+      `}</style>
+    </div>
+      <div className="honor-container">
+      <h2>Vinh Danh Top 5 Nhân Viên</h2>
+      <div className="marquee">
+        {top5Employees.map((emp, index) => (
+          <span key={index} className="employee-name">
+            {emp.name}
+          </span>
+        ))}
+      </div>
+      <style jsx>{`
+        .honor-container {
+          padding: 20px;
+          background: #f7f7f7;
+          text-align: center;
+          border: 2px solid #ccc;
+          border-radius: 10px;
+          margin: 20px;
+          overflow: hidden; /* Giới hạn hiệu ứng marquee chỉ chạy bên trong khung */
+          position: relative;
+        }
+        .marquee {
+          display: inline-block;
+          white-space: nowrap;
+          animation: marquee 25s linear infinite;
+        }
+        .employee-name {
+          margin-right: 50px;
+          font-size: 1.5em;
+          font-weight: bold;
+          color: #ff4500;
+        }
+        @keyframes marquee {
+          0% {
+            transform: translateX(100%);
+          }
+          100% {
+            transform: translateX(-100%);
+          }
+        }
+      `}</style>
+    </div>
       {/* Bộ lọc */}
       {( currentUser.position === "lead" || (currentUser.position === "admin" && selectedTeam) ||(currentUser.position === "managerMKT" && selectedTeam ))  && (
       <Row gutter={[16, 16]}  >
@@ -2060,7 +2233,7 @@ pagination={7}
     <GroupedDoubleBarChartComponentTEAM data={dailyChartDataNewTEAM} />
       </Col>
       <Col xs={24} md={10}>
-    <br></br>  
+    <br></br>   <br></br>   <br></br>  
   <h3>Phần trăm doanh số thành viên</h3>
   <PieChartComponent data={employeePieDataTEAM} />
       </Col>
