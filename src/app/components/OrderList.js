@@ -1786,9 +1786,7 @@ const selectedTableColumns = columns.filter((col) =>
           <Select style={{ width: "100%" }}
          
             disabled={
-              currentUser.position === "mkt" ||
-              currentUser.position === "salenhapdon" ||
-              currentUser.position === "salexuly"
+              currentUser.position === "mkt"  
             }
             placeholder="Chọn Sale"
             options={saleOptions.map((s) => ({ value: s, label: s }))}
@@ -1801,9 +1799,8 @@ const selectedTableColumns = columns.filter((col) =>
           <Select style={{ width: "100%" }}
            
             disabled={
-              currentUser.position === "mkt" ||
-              currentUser.position === "salenhapdon" ||
-              currentUser.position === "salexuly"
+              currentUser.position === "mkt" 
+              
             }
             placeholder="Chọn MKT"
             options={mktOptions.map((m) => ({ value: m, label: m }))}
