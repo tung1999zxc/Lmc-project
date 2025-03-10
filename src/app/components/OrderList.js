@@ -1136,6 +1136,8 @@ const selectedTableColumns = columns.filter((col) =>
         </>
       )
     },
+    { title: "DOANH SỐ",width: 100, dataIndex: "revenue", key: "revenue" },
+
     { title: "DOANH THU", dataIndex: "profit", key: "profit" ,width: 20,},
     { title: "TÊN PAGE", dataIndex: "pageName", key: "pageName",width: 100, },
     {
@@ -1156,15 +1158,15 @@ const selectedTableColumns = columns.filter((col) =>
       title: "THANH TOÁN",
       dataIndex: "paymentStatus",
       key: "paymentStatus",
+      width: 100,
       render: (text) => (
         <Tag color={text === "ĐÃ THANH TOÁN" ? "green" : "red"}>{text}</Tag>
       )
     },
-    { title: "TÊN KHÁCH", dataIndex: "customerName", key: "customerName" },
+    { title: "TÊN KHÁCH", width: 100,dataIndex: "customerName", key: "customerName" },
     
    
     { title: "MKT", dataIndex: "mkt", key: "mkt" },
-    { title: "DOANH SỐ", dataIndex: "revenue", key: "revenue" },
     
    
   ];
