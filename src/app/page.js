@@ -832,7 +832,7 @@ const employeeChartDataNewTEAM = teamEmployees.map(emp => {
 
 let dailyChartDataNewTEAM;
 // Nếu currentUser là team lead, lọc các đơn hàng và ads theo team
-if (isTeamLead|| ( currentUser.position==="admin" && selectedTeam)|| (currentUser.position==="managerMKT" && selectedTeam)) {
+if (isTeamLead|| currentUser.position==="mkt" || ( currentUser.position==="admin" && selectedTeam)|| (currentUser.position==="managerMKT" && selectedTeam)) {
   // Lấy danh sách tên nhân viên của team
   const teamEmployeeNames = employees
     .filter(emp => emp.team_id === currentUser.team_id && emp.position_team === "mkt")
@@ -2025,6 +2025,33 @@ pagination={7}
       
       
     </Row>
+<Row gutter={[16, 16]}>
+      <Col xs={24} md={14}>
+      <h3 style={{ marginTop: '2rem' }}>
+      {isFilterApplied ? "Doanh số hàng ngày " : "Doanh số hàng ngày "}
+    </h3>
+    <GroupedDoubleBarChartComponentTEAM data={dailyChartDataNewTEAM} />
+      </Col>
+      <Col xs={24} md={10}>
+    <br></br>  
+  <h3>Phần trăm doanh số thành viên</h3>
+  <PieChartComponent data={employeePieDataTEAM} />
+      </Col>
+      
+     
+    </Row>
+    
+
+  
+  
+    
+   
+    
+  </>
+)}
+{currentUser.position === "mkt" && (
+  <>
+
 <Row gutter={[16, 16]}>
       <Col xs={24} md={14}>
       <h3 style={{ marginTop: '2rem' }}>

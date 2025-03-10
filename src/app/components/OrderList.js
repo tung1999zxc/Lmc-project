@@ -61,6 +61,7 @@ const OrderList = () => {
   const [totalQuantitiesCTYDONG, setTotalQuantitiesCTYDONG] = useState({});
   const [initialOrders, setInitialOrders] = useState([]);
   const [initialOrders2, setInitialOrders2] = useState([]);
+  const [initialOrders3, setInitialOrders3] = useState([]);
   const [isdem, setIsdem] = useState(false);
   const [dataPagename, setdataPagename] = useState([]);
   const [loading, setLoading] = useState(false); 
@@ -136,6 +137,8 @@ const OrderList = () => {
       setOrders(response.data.data);
       setInitialOrders(response.data.data);
       setInitialOrders2(response.data.data);
+      setInitialOrders3(response.data.data);
+      
     } catch (error) {
       console.error(error);
       message.error("Lỗi khi lấy đơn hàng");
@@ -416,6 +419,8 @@ const resetPagename =()=>{
                 return order.deliveryStatus === "";
               case "deliveredcomavandon":
                 return order.deliveryStatus === "ĐÃ GỬI HÀNG" && order.trackingCode !=="";
+              case "deliveredcomavandon2":
+                return order.deliveryStatus === "" && order.trackingCode !=="";
               
               default:
                 return true;
@@ -1237,6 +1242,53 @@ const selectedTableColumns = columns.filter((col) =>
     }
   };
 
+  const handleSelectAllIstickDONE = (value) => {
+    setOrders((prevOrders) =>
+      prevOrders.map((order) =>
+        filteredOrders.some((fOrder) => fOrder.id === order.id)
+          ? { ...order, istickDONE: value }
+          : order
+      )
+    );
+  };
+ 
+  const handleIstickChangeDONE = (orderId, value) => {
+    setOrders((prevOrders) =>
+      prevOrders.map((order) =>
+        order.id === orderId ? { ...order, istickDONE: value } : order
+      )
+    );
+  };
+  const allRowsSelectedDONE = filteredOrders.length > 0 && filteredOrders.every(order => order.istickDONE);
+  
+  const handleSaveIstickDONE = async () => {
+    // Lọc ra các đơn hàng mà giá trị istick đã thay đổi so với ban đầu
+    const ordersToUpdate = orders.filter((order) => {
+      const originalOrder = initialOrders3.find((o) => o.id === order.id);
+      // Nếu đơn hàng mới (không có trong initialOrders) hoặc có sự thay đổi về istick
+      return !originalOrder || order.istickDONE !== originalOrder.istickDONE;
+    });
+  
+    if (ordersToUpdate.length === 0) {
+      message.info("Không có đơn hàng nào thay đổi");
+      return;
+    }
+  
+    try {
+      // Gửi chỉ các trường cần cập nhật (id và istick)
+      const response = await axios.post("/api/orders/updateIstickDONE", {
+        orders: ordersToUpdate.map(({ id, istickDONE }) => ({ id, istickDONE })),
+      });
+      message.success(response.data.message || "Đã lưu cập nhật các đơn");
+      alert("Thao tác thành công!");
+      // Cập nhật lại initialOrders sau khi lưu để làm mốc mới
+      setInitialOrders3(orders);
+      fetchOrders();
+    } catch (error) {
+      console.error(error);
+      message.error("Lỗi khi lưu các đơn");
+    }
+  };
   
 
   const columnsKHO = [
@@ -1267,6 +1319,27 @@ const selectedTableColumns = columns.filter((col) =>
         <Checkbox
           checked={record.istick || false}
           onChange={(e) => handleIstickChange(record.id, e.target.checked)}
+        />
+      ),
+    },
+    {
+      title: (<>
+        <Checkbox
+          checked={allRowsSelectedDONE}
+          onChange={(e) => handleSelectAllIstickDONE(e.target.checked)}
+        >
+          Xác nhận Giao thành công
+        </Checkbox>
+        <Button type="primary" onClick={handleSaveIstickDONE}>
+        Lưu 
+      </Button></>
+      ),
+      key: "istickDONE",
+      dataIndex: "istickDONE",
+      render: (_, record) => (
+        <Checkbox
+          checked={record.istickDONE || false}
+          onChange={(e) => handleIstickChangeDONE(record.id, e.target.checked)}
         />
       ),
     },
@@ -1535,6 +1608,7 @@ const selectedTableColumns = columns.filter((col) =>
       shippingDate2: values.shippingDate2 || "",
       employee_code_order: currentUser.employee_code,
       istick: values.istick||false,
+      istickDONE: values.istickDONE||false,
       isShipping: values.isShipping||false,
     };
   
@@ -1741,6 +1815,7 @@ const selectedTableColumns = columns.filter((col) =>
             options={[
               { value: "deliveredkomavandon", label: "Đã gửi hàng + chưa mã" },
               { value: "deliveredcomavandon", label: "Đã gửi hàng + Có mã" },
+              { value: "deliveredcomavandon2", label: "Chưa giao hàng+Có mã" },
               { value: "waitDelivered", label: "Chưa gửi hàng" },
               { value: "not_delivered", label: "Đã gửi hàng" },
               { value: "khoshiping", label: "Kho đóng hàng" },

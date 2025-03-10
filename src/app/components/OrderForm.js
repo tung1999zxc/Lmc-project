@@ -246,9 +246,9 @@ const productOptions = products.map((p) => p.name);
             <Form.Item label="cty đóng hàng" name="isShipping" hidden={true}>
               <Input />
             </Form.Item>
-            {/* <Form.Item label="xác nhận giao thành công" name="istickdone" hidden={true}>
+            <Form.Item label="xác nhận giao thành công" name="istickDONE" hidden={true}>
               <Input />
-            </Form.Item> */}
+            </Form.Item>
             {/* <Form.Item label="Hàng nặng/nhẹ" name="mass" hidden={true}>
               <Input />
             </Form.Item> */}
@@ -595,9 +595,9 @@ const productOptions = products.map((p) => p.name);
             <Form.Item label="cty đóng hàng" name="isShipping" hidden={true}>
               <Input />
             </Form.Item>
-            {/* <Form.Item label="xác nhận giao thành công" name="istickdone" hidden={true}>
+            <Form.Item label="xác nhận giao thành công" name="istickDONE" hidden={true}>
               <Input />
-            </Form.Item> */}
+            </Form.Item>
             <Form.Item label="NGÀY GỬI" name="shippingDate1"  hidden={currentUser.position_team === "sale"}>
               <DatePicker style={{ width: "100%" }} format="YYYY-MM-DD HH:mm:ss"/>
             </Form.Item>
