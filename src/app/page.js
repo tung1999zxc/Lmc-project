@@ -735,7 +735,7 @@ const employeeChartDataNewTEAM = teamEmployees.map(emp => {
   const saleEmployeesXL = employees.filter(emp => emp.position_team === "sale"&& emp.position === "salexuly" );
   const employeeChartDataNewsale = saleEmployees.map(emp => {
     const sales = filteredOrders
-      .filter(order => order.sale === emp.name.trim().toLowerCase() || order.salexuly === emp.name.trim().toLowerCase())
+      .filter(order => order.sale.trim().toLowerCase() === emp.name.trim().toLowerCase() || order.salexuly.trim().toLowerCase() === emp.name.trim().toLowerCase())
       .reduce((sum, order) => sum + order.profit, 0);
     
     let fillColor = "#8884d8"; // Màu mặc định
