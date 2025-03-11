@@ -433,9 +433,21 @@ const resetPagename =()=>{
           order.salexuly.trim().toLowerCase() === selectedSale.trim().toLowerCase()
         : true;
       
-      const mktMatch = selectedMKT
-        ? order.mkt.trim().toLowerCase() === selectedMKT.trim().toLowerCase()
-        : true;
+        const mktMatch = (() => {
+          // Nếu có chọn marketing (và selectedMKT là mảng không rỗng) thì dùng nó để so sánh
+          if (selectedMKT && Array.isArray(selectedMKT) && selectedMKT.length > 0) {
+            return selectedMKT.some(
+              (mkt) => order.mkt.trim().toLowerCase() === mkt.trim().toLowerCase()
+            );
+          }
+          // Nếu không có selectedMKT, và nếu currentUser là marketing, thì chỉ lọc theo tên của user đó
+          if (currentUser.position === "mkt") {
+            return order.mkt.trim().toLowerCase() === currentUser.name.trim().toLowerCase();
+          }
+          // Nếu không có điều kiện nào, trả về true để không lọc theo marketing
+          return true;
+        })();
+
         const sttMatch =
         sttSearch.trim() === ""
           ? true
@@ -1873,19 +1885,17 @@ const selectedTableColumns = columns.filter((col) =>
           />
         </Col>
         <Col span={4}>
-          <Select style={{ width: "100%" }}
-           
-            disabled={
-              currentUser.position === "mkt" 
-              
-            }
-            placeholder="Chọn MKT"
-            options={mktOptions.map((m) => ({ value: m, label: m }))}
-            onChange={(value) => setSelectedMKT(value)}
-            allowClear
-            showSearch
-          />
-        </Col>
+  <Select
+    mode="multiple" // Cho phép chọn nhiều giá trị
+    style={{ width: "100%" }}
+    disabled={currentUser.position === "mkt"}
+    placeholder="Chọn MKT"
+    options={mktOptions.map((m) => ({ value: m, label: m }))}
+    onChange={(value) => setSelectedMKT(value)}
+    allowClear
+    showSearch
+  />
+</Col>
         <Col span={3}>
          
         </Col></>)}

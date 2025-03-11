@@ -117,6 +117,20 @@ const handleDelete = async (key) => {
   }
 };
 
+const computeAverageClosingRate = (employeeName) => {
+  const employeeRecords = filteredRecords.filter(
+    (record) => record.employeeName === employeeName
+  );
+  if (employeeRecords.length === 0) return "0%";
+  let totalNewMess = 0;
+  let totalClosedOrders = 0;
+  employeeRecords.forEach((record) => {
+    totalNewMess += record.newMess;
+    totalClosedOrders += computeTotalSalesNumberForDate(record.date, employeeName);
+  });
+  const avgRate = totalNewMess === 0 ? 0 : (totalClosedOrders / totalNewMess) * 100;
+  return avgRate.toFixed(2) + "%";
+};
 
   // Hàm xử lý sửa: nạp dữ liệu record vào form và thiết lập editingKey
   const handleEdit = (record) => {
@@ -434,27 +448,28 @@ const handleDelete = async (key) => {
             <div key={employeeName} style={{ marginBottom: 24 }}>
               <h4>NV: {employeeName}</h4>
               <div style={{ fontWeight: "bold", marginBottom: 8 }}>
-                Tổng doanh số: {computeTotalSales(employeeName)}
+              Tổng doanh số: {computeTotalSales(employeeName)} | Tỉ lệ chốt TB: {computeAverageClosingRate(employeeName)}
               </div>
               <Table
-                dataSource={userRecords}
-                columns={columns}
-                rowKey="key"
-                pagination={{ pageSize: 5 }}
-              />
+  dataSource={[...userRecords].sort((a, b) => moment(b.date).valueOf() - moment(a.date).valueOf())}
+  columns={columns}
+  rowKey="key"
+  pagination={{ pageSize: 5 }}
+/>
             </div>
           )
         )
       ) : (
         <>
           <div style={{ fontWeight: "bold", marginBottom: 8 }}>
-            Tổng doanh số: {computeTotalSales(currentUser.name)}
+          Tổng doanh số: {computeTotalSales(employeeName)} | Tỉ lệ chốt TB: {computeAverageClosingRate(employeeName)}
           </div>
           <Table
-            columns={columns}
-            dataSource={filteredRecords}
-            pagination={{ pageSize: 30 }}
-          />  
+  dataSource={[...userRecords].sort((a, b) => moment(b.date).valueOf() - moment(a.date).valueOf())}
+  columns={columns}
+  rowKey="key"
+  pagination={{ pageSize: 5 }}
+/>
         </>   
       )}
     </div>
