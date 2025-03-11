@@ -66,11 +66,22 @@ const LoginPage = () => {
 
   // Mảng chứa các hình ảnh rơi
   const fallingImages = [
-    "/1.png",
-    "/2.png",
-    "/3.png",
-    "/4.png",
-    "/5.png",
+    "/5.jpg",
+    "/6.jpg",
+    "/7.jpg",
+    "/8.jpg",
+    "/9.jpg",
+    "/10.jpg",
+    "/11.jpg",
+    "/12.jpg",
+    "/13.jpg",
+    "/14.jpg",
+    "/15.jpg",
+    "/16.jpg",
+    "/17.jpg",
+    "/18.jpg",
+    "/19.jpg",
+    "/20.jpg",
   ];
 
   // Tạo hiệu ứng rơi với nhiều loại ảnh (CHỈ CHẠY TRÊN CLIENT)
@@ -78,7 +89,7 @@ const LoginPage = () => {
     if (!isMounted) return null; // Không render gì nếu chưa mount
 
     const items = Array.from({ length: 50 }).map((_, index) => {
-      const size = Math.random() * 100 + 10;
+      const size = Math.random() * 300 + 10;
       const delay = Math.random() * 10;
       const duration = Math.random() * 15 + 5;
       const left = Math.random() * 100;
@@ -98,7 +109,7 @@ const LoginPage = () => {
             zIndex: 0,
           }}
           initial={{ y: -100, rotate: 0 }}
-          animate={{ y: "100vh", rotate: 360 }}
+          animate={{ y: "100vh", rotate: 0 }}
           transition={{
             duration: duration,
             delay: delay,

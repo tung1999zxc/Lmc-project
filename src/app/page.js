@@ -60,11 +60,27 @@ const fetchEmployees = async () => {
        
       }
     };
-   useEffect(() => {
-    fetchOrders();
-   fetchRecords();
-    fetchEmployees();
-  }, []);
+    useEffect(() => {
+      // Định nghĩa hàm gọi dữ liệu
+      const fetchData = () => {
+        fetchOrders();
+        fetchRecords();
+        fetchEmployees();
+      };
+    
+      // Gọi ngay lần đầu tiên
+      fetchData();
+    
+      // Thiết lập interval để gọi lại sau mỗi 1 giờ (3600000 ms)
+      const intervalId = setInterval(() => {
+        fetchData();
+      }, 1800000);
+    
+      // Hủy interval khi unmount component
+      return () => {
+        clearInterval(intervalId);
+      };
+    }, []);
    
 
 // Nếu currentUser là team lead, chỉ hiển thị các nhân viên thuộc team của họ.
@@ -987,7 +1003,7 @@ const employeePieDataTEAM = employeeChartDataNewTEAM.map(emp => ({
     .reduce((sum, order) => sum + order.profit, 0);
   
   // Tính tổng quảng cáo (tổng request1 + request2) trong ngày hôm nay
-  const totalAds1 = filteredAds
+  const totalAds1 = adsMoneyData
     .filter(ad => {
       // Giả sử ad.createdAt chứa thời gian tạo quảng cáo
       const adDate = new Date(ad.createdAt);
@@ -1018,7 +1034,7 @@ const marketingReportData2 = mktEmployees.map((emp, index) => {
     .reduce((sum, order) => sum + order.profit, 0);
   
   // Tính tổng quảng cáo (tổng request1 + request2) trong ngày hôm nay
-  const totalAds2 = filteredAds
+  const totalAds2 = adsMoneyData
     .filter(ad => {
       // Giả sử ad.createdAt chứa thời gian tạo quảng cáo
       const adDate = new Date(ad.createdAt);
@@ -1032,10 +1048,18 @@ const marketingReportData2 = mktEmployees.map((emp, index) => {
 });
 
 // Lọc ra 5 nhân viên có totalAds khác 0 và có total thấp nhất (sắp xếp theo total tăng dần)
-const top5CriticismEmployees = [...marketingReportData2]
+const sortedEmployees = [...marketingReportData2]
   .filter(emp => emp.totalAds2 !== 0)
-  .sort((a, b) => a.total2 - b.total2) // từ thấp đến cao
-  .slice(0, 5);
+  .sort((a, b) => a.total2 - b.total2);
+
+let top5CriticismEmployees = [];
+if (sortedEmployees.length <= 5) {
+  top5CriticismEmployees = sortedEmployees;
+} else {
+  // Lấy doanh số của nhân viên thứ 5 làm mức cắt
+  const cutoffValue = sortedEmployees[4].total2;
+  top5CriticismEmployees = sortedEmployees.filter(emp => emp.total2 <= cutoffValue);
+}
 
   const top5Employees = [...marketingReportData1]
   .sort((a, b) => b.total1 - a.total1)
@@ -1652,7 +1676,7 @@ const percentAds3 = tongKW3 > 0 ? Number(((totalAdsKW3 / (tongKW3*exchangeRate))
     }}
     >
       <div className="criticism-container">
-      <h2>Phê Bình Top 5 Nhân Viên</h2>
+      <h2>PHÊ BÌNH NHÂN VIÊN DOANH SỐ THẤP NHẤT</h2>
       <div className="marquee">
         {top5CriticismEmployees.map((emp, index) => (
           <div key={index} className="employee-item">
@@ -1683,7 +1707,7 @@ const percentAds3 = tongKW3 > 0 ? Number(((totalAdsKW3 / (tongKW3*exchangeRate))
         .marquee {
           display: inline-block;
           white-space: nowrap;
-          animation: marquee 20s linear infinite;
+          animation: marquee 35s linear infinite;
         }
         .employee-item {
           display: inline-block;
@@ -1700,7 +1724,7 @@ const percentAds3 = tongKW3 > 0 ? Number(((totalAdsKW3 / (tongKW3*exchangeRate))
         .employee-name {
           font-size: 1.5em;
           font-weight: bold;
-          color: #c2185b;
+          color: #51521c;
         }
         @keyframes marquee {
           0% {
@@ -1712,36 +1736,56 @@ const percentAds3 = tongKW3 > 0 ? Number(((totalAdsKW3 / (tongKW3*exchangeRate))
         }
       `}</style>
     </div>
-      <div className="honor-container">
-      <h2>Vinh Danh Top 5 Nhân Viên</h2>
+    <div className="criticism-container">
+      <h2>TOP 5 NHÂN VIÊN DOANH SỐ CAO NHẤT</h2>
       <div className="marquee">
         {top5Employees.map((emp, index) => (
-          <span key={index} className="employee-name">
-            {emp.name}
-          </span>
+          <div key={index} className="employee-item">
+            <img
+  src={`/${emp.name.trim()}.jpg`}
+  alt={emp.name.trim()}
+  className="employee-image"
+  onError={(e) => {
+    e.currentTarget.onerror = null; // Ngăn lặp lại nếu ảnh mặc định không tồn tại
+    e.currentTarget.src = "/1.png";
+  }}
+/>
+            <span className="employee-name">{emp.name}</span>
+          </div>
         ))}
       </div>
       <style jsx>{`
-        .honor-container {
+        .criticism-container {
           padding: 20px;
-          background: #f7f7f7;
+          background: #9fe09d;
           text-align: center;
-          border: 2px solid #ccc;
+          border: 2px solid #e2e612;
           border-radius: 10px;
           margin: 20px;
-          overflow: hidden; /* Giới hạn hiệu ứng marquee chỉ chạy bên trong khung */
+          overflow: hidden; /* Giới hạn marquee chỉ chạy trong khung */
           position: relative;
         }
         .marquee {
           display: inline-block;
           white-space: nowrap;
-          animation: marquee 25s linear infinite;
+          animation: marquee 30s linear infinite;
+        }
+        .employee-item {
+          display: inline-block;
+          margin-right: 50px;
+          text-align: center;
+        }
+        .employee-image {
+          width: 120px;
+          height: 120px;
+          object-fit: cover;
+          border-radius: 20%;
+          margin-bottom: 10px;
         }
         .employee-name {
-          margin-right: 50px;
           font-size: 1.5em;
           font-weight: bold;
-          color: #ff4500;
+          color: #c2185b ;
         }
         @keyframes marquee {
           0% {
