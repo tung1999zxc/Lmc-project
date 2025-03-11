@@ -701,7 +701,7 @@ const InventoryPage = () => {
             label="Số lượng nhập"
             rules={[{ required: true, message: 'Vui lòng nhập số lượng nhập' }]}
           >
-            <InputNumber min={0} style={{ width: '100%' }} />
+            <InputNumber style={{ width: '100%' }} />
           </Form.Item>
           <Form.Item
             name="importDate"
