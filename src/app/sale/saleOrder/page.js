@@ -462,7 +462,7 @@ const computeAverageClosingRate = (employeeName) => {
       ) : (
         <>
           <div style={{ fontWeight: "bold", marginBottom: 8 }}>
-          Tổng doanh số: {computeTotalSales(employeeName)} | Tỉ lệ chốt TB: {computeAverageClosingRate(employeeName)}
+          Tổng doanh số: {computeTotalSales(currentUser.name)} | Tỉ lệ chốt TB: {computeAverageClosingRate(currentUser.name)}
           </div>
           <Table
   dataSource={[...userRecords].sort((a, b) => moment(b.date).valueOf() - moment(a.date).valueOf())}
