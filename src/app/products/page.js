@@ -334,32 +334,33 @@ const InventoryPage = () => {
         return deliveredQty;
       },
     },
-    {
-      title: 'Tồn kho tổng',
-      key: 'inventoryTotal',
-      render: (_, record) => {
-        const totalImported = getTotalImportedQty(record);
-        const deliveredQty = orders
-          .filter(
-            (order) =>
-              order.deliveryStatus === 'ĐÃ GỬI HÀNG' ||
-              order.deliveryStatus === 'GIAO THÀNH CÔNG'||
-              order.deliveryStatus === 'BỊ BẮT CHỜ GỬI LẠI'
-          )
-          .reduce((acc, order) => {
-            if (order.products && order.products.length > 0) {
-              const orderQty = order.products
-                .filter((item) => item.product === record.name)
-                .reduce((sum, item) => sum + Number(item.quantity), 0);
-              return acc + orderQty;
-            }
-            return acc;
-          }, 0);
-        return totalImported - deliveredQty;
-      },
-    },
+    // {
+    //   title: 'Tồn kho tổng',
+    //   key: 'inventoryTotal',
+    //   render: (_, record) => {
+    //     const totalImported = getTotalImportedQty(record);
+    //     const deliveredQty = orders
+    //       .filter(
+    //         (order) =>
+    //           order.deliveryStatus === 'ĐÃ GỬI HÀNG' ||
+    //           order.deliveryStatus === 'GIAO THÀNH CÔNG'||
+    //           order.deliveryStatus === 'BỊ BẮT CHỜ GỬI LẠI'
+    //       )
+    //       .reduce((acc, order) => {
+    //         if (order.products && order.products.length > 0) {
+    //           const orderQty = order.products
+    //             .filter((item) => item.product === record.name)
+    //             .reduce((sum, item) => sum + Number(item.quantity), 0);
+    //           return acc + orderQty;
+    //         }
+    //         return acc;
+    //       }, 0);
+    //     return totalImported - deliveredQty;
+    //   },
+    // },
     {
       title: 'SL Âm',
+      width: 80,
       key: 'SLAM',
   //     sorter: (a, b) => a.slAm - b.slAm,
   // sortDirections: ['descend', 'ascend'],
@@ -431,6 +432,7 @@ const InventoryPage = () => {
     {
       title: 'SL Âm Đơn Done',
       key: 'SLAMDONE',
+      width: 80,
       render: (_, record) => {
         const totalImported = getTotalImportedQty(record);
        
@@ -489,18 +491,23 @@ const InventoryPage = () => {
     {
       title: 'Nhập VN',
       dataIndex: 'slvn',
-      key: 'slvn'
+      key: 'slvn',
+      width: 80,
+      
       
     },
     {
       title: 'Nhập TQ',
       dataIndex: 'sltq',
-      key: 'sltq'
+      key: 'sltq',
+      width: 80,
      
     },
     {
       title: 'Hành động',
       key: 'actions',
+      width: 120, // Đảm bảo có width
+    fixed: "left",
       render: (_, record) =>{
         if (
           currentUser.position === 'admin' ||
@@ -639,8 +646,11 @@ const InventoryPage = () => {
       />
 
       <Table 
+      sticky
       dataSource={filteredProducts}
-      columns={columns} rowKey="key" pagination={{ pageSize: 100 }} />
+      // dataSource={[...filteredProducts].sort((a, b) => b.SLAMDONE - a.SLAMDON)}
+      columns={columns} rowKey="key" pagination={{ pageSize: 100 }}
+     />  
 
       <Modal
         title="Chỉnh sửa sản phẩm"
@@ -659,7 +669,7 @@ const InventoryPage = () => {
           <Form.Item
             label="Kịch bản sản phẩm"
             name="description"
-            rules={[{ required: true, message: 'Vui lòng nhập kịch bản sản phẩm' }]}
+           
           >
             <Input.TextArea rows={2} placeholder="Kịch bản sản phẩm" />
           </Form.Item>
