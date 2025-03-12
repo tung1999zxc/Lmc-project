@@ -441,37 +441,43 @@ const computeAverageClosingRate = (employeeName) => {
       </div>
 
       {/* Render bảng và hiển thị tổng doanh số theo bộ lọc */}
-      {currentUser.position === "managerSALE" ||currentUser.position === "admin"||currentUser.position === "managerMKT"||
-      currentUser.position === "leadSALE" ? (
-        Object.entries(groupRecordsByUser(filteredRecords)).map(
-          ([employeeName, userRecords]) => (
-            <div key={employeeName} style={{ marginBottom: 24 }}>
-              <h4>NV: {employeeName}</h4>
-              <div style={{ fontWeight: "bold", marginBottom: 8 }}>
-              Tổng doanh số: {computeTotalSales(employeeName)} | Tỉ lệ chốt TB: {computeAverageClosingRate(employeeName)}
-              </div>
-              <Table
-  dataSource={[...userRecords].sort((a, b) => moment(b.date).valueOf() - moment(a.date).valueOf())}
-  columns={columns}
-  rowKey="key"
-  pagination={{ pageSize: 5 }}
-/>
-            </div>
-          )
-        )
-      ) : (
-        <>
-          <div style={{ fontWeight: "bold", marginBottom: 8 }}>
-          Tổng doanh số: {computeTotalSales(currentUser.name)} | Tỉ lệ chốt TB: {computeAverageClosingRate(currentUser.name)}
-          </div>
-          <Table
-  dataSource={[...userRecords].sort((a, b) => moment(b.date).valueOf() - moment(a.date).valueOf())}
-  columns={columns}
-  rowKey="key"
-  pagination={{ pageSize: 5 }}
-/>
-        </>   
-      )}
+      {currentUser.position === "managerSALE" ||
+currentUser.position === "admin" ||
+currentUser.position === "managerMKT" ||
+currentUser.position === "leadSALE" ? (
+  Object.entries(groupRecordsByUser(filteredRecords)).map(
+    ([employeeName, userRecords]) => (
+      <div key={employeeName} style={{ marginBottom: 24 }}>
+        <h4>NV: {employeeName}</h4>
+        <div style={{ fontWeight: "bold", marginBottom: 8 }}>
+          Tổng doanh số: {computeTotalSales(employeeName)} | Tỉ lệ chốt TB: {computeAverageClosingRate(employeeName)}
+        </div>
+        <Table
+          dataSource={[...userRecords].sort((a, b) => moment(b.date).valueOf() - moment(a.date).valueOf())}
+          columns={columns}
+          rowKey="key"
+          pagination={{ pageSize: 5 }}
+        />
+      </div>
+    )
+  )
+) : (
+  <>
+    <div style={{ fontWeight: "bold", marginBottom: 8 }}>
+      Tổng doanh số: {computeTotalSales(currentUser.name)} | Tỉ lệ chốt TB: {computeAverageClosingRate(currentUser.name)}
+    </div>
+    <Table
+      dataSource={
+        [...filteredRecords.filter(record => record.employeeName === currentUser.name)]
+          .sort((a, b) => moment(b.date).valueOf() - moment(a.date).valueOf())
+      }
+      columns={columns}
+      rowKey="key"
+      pagination={{ pageSize: 5 }}
+    />
+  </>
+)}
+
     </div>
   );
 };
