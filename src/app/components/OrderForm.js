@@ -243,6 +243,9 @@ const productOptions = products.map((p) => p.name);
             <Form.Item label="in đơn" name="istick" hidden={true}>
               <Input />
             </Form.Item>
+            <Form.Item label="ĐÃ in đơn" name="istick4" hidden={true}>
+              <Input />
+            </Form.Item>
             <Form.Item label="cty đóng hàng" name="isShipping" hidden={true}>
               <Input />
             </Form.Item>
@@ -590,6 +593,9 @@ const productOptions = products.map((p) => p.name);
               <Input />
             </Form.Item>
             <Form.Item label="in đơn" name="istick" hidden={true}>
+              <Input />
+            </Form.Item>
+            <Form.Item label="ĐÃ in đơn" name="istick4" hidden={true}>
               <Input />
             </Form.Item>
             <Form.Item label="cty đóng hàng" name="isShipping" hidden={true}>

@@ -18,10 +18,13 @@ export async function POST(req) {
             ...(order.istick 
               ? { 
                   shippingDate1: dayjs().format("YYYY-MM-DD HH:mm:ss"), 
-                  deliveryStatus: "ĐÃ GỬI HÀNG" 
+                  deliveryStatus: "ĐÃ GỬI HÀNG", 
+                  
                 }
               : {shippingDate1: "", 
-                deliveryStatus: ""})
+                deliveryStatus: "",
+                trackingCode: "",
+              istick4:false })
           }
         }
       }

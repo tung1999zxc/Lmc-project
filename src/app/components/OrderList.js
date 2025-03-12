@@ -11,10 +11,11 @@ import {
   Select,
   Row,
   Col,
-  Tag,
+  Tag,Spin,
   Checkbox
 } from "antd";
 import { EditOutlined, DeleteOutlined } from "@ant-design/icons";
+import FullScreenLoading from './FullScreenLoading';
 import dayjs from "dayjs";
 import OrderForm from "./OrderForm";
 import isBetween from "dayjs/plugin/isBetween";
@@ -48,6 +49,11 @@ const OrderList = () => {
   const [searchText, setSearchText] = useState("");
   const [searchValue, setSearchValue] = useState(""); // Lưu giá trị nhập vào
   const [searchValue2, setSearchValue2] = useState(""); // Lưu giá trị nhập vào
+  const [initialOrders4, setInitialOrders4] = useState([]); 
+  const [loading, setLoading] = useState(false);
+
+  
+  
   const [namesalexuly, setnamesalexuly] = useState("");
   // Cho phép chọn nhiều filter
   const [employees, setEmployees] = useState([]);
@@ -64,7 +70,7 @@ const OrderList = () => {
   const [initialOrders3, setInitialOrders3] = useState([]);
   const [isdem, setIsdem] = useState(false);
   const [dataPagename, setdataPagename] = useState([]);
-  const [loading, setLoading] = useState(false); 
+ 
   const [specificDate, setSpecificDate] = useState(null); // Ngày cụ thể
   const [sttSearch, setSttSearch] = useState("");
   const [exportDisabled, setExportDisabled] = useState(true);
@@ -132,16 +138,19 @@ const OrderList = () => {
   
 
   const fetchOrders = async () => {
+    setLoading(true);
     try {
       const response = await axios.get("/api/orders");
       setOrders(response.data.data);
       setInitialOrders(response.data.data);
       setInitialOrders2(response.data.data);
       setInitialOrders3(response.data.data);
-      
+      setInitialOrders4(response.data.data);
+      setLoading(false);
     } catch (error) {
       console.error(error);
       message.error("Lỗi khi lấy đơn hàng");
+      setLoading(false);
     }
   };
   
@@ -421,7 +430,9 @@ const resetPagename =()=>{
                 return order.deliveryStatus === "ĐÃ GỬI HÀNG" && order.trackingCode !=="";
               case "deliveredcomavandon2":
                 return order.deliveryStatus === "" && order.trackingCode !=="";
-              
+              case "deliveredkomavandon":
+                return order.deliveryStatus === "ĐÃ GỬI HÀNG" && order.trackingCode ==="";
+                
               default:
                 return true;
             }
@@ -476,7 +487,6 @@ const resetPagename =()=>{
     leadTeamMembers
   ]);
 
-  
   // const handleCalculateTotals = () => {
   //   // Lọc ra các đơn hàng có istick === true
   //   const tickedOrders = filteredOrders.filter(order => order.istick);
@@ -1271,6 +1281,58 @@ const selectedTableColumns = columns.filter((col) =>
       )
     );
   };
+  const allRowsSelected4 = filteredOrders.length > 0 && filteredOrders.every(order => order.istick4); 
+  const handleSelectAllIstick4 = (value) => {
+    setOrders((prevOrders) =>
+      prevOrders.map((order) =>
+        filteredOrders.some((fOrder) => fOrder.id === order.id)
+          ? { ...order, istick4: value }
+          : order
+      )
+    );
+  };
+ 
+  const handleIstickChange4 = (orderId, value) => {
+    setOrders((prevOrders) =>
+      prevOrders.map((order) =>
+        order.id === orderId ? { ...order, istick4: value } : order
+      )
+    );
+  };
+  
+  
+
+  
+  const handleSaveIstick4 = async () => {
+    // Lọc ra các đơn hàng mà giá trị istick đã thay đổi so với ban đầu
+    const ordersToUpdate = orders.filter((order) => {
+      const originalOrder = initialOrders4.find((o) => o.id === order.id);
+      // Nếu đơn hàng mới (không có trong initialOrders) hoặc có sự thay đổi về istick
+      return !originalOrder || order.istick4 !== originalOrder.istick4;
+    });
+  
+    if (ordersToUpdate.length === 0) {
+      message.info("Không có đơn hàng nào thay đổi");
+      return;
+    }
+  
+    try {
+      // Gửi chỉ các trường cần cập nhật (id và istick)
+      const response = await axios.post("/api/orders/updateIstick4", {
+        orders: ordersToUpdate.map(({ id, istick4 }) => ({ id, istick4 })),
+      });
+      message.success(response.data.message || "Đã lưu cập nhật các đơn");
+      alert("Thao tác thành công!");
+      // Cập nhật lại initialOrders sau khi lưu để làm mốc mới
+      setInitialOrders4(orders);
+      fetchOrders();
+    } catch (error) {
+      console.error(error);
+      message.error("Lỗi khi lưu các đơn");
+    }
+  };
+  
+
   const allRowsSelectedDONE = filteredOrders.length > 0 && filteredOrders.every(order => order.istickDONE);
   
   const handleSaveIstickDONE = async () => {
@@ -1331,6 +1393,27 @@ const selectedTableColumns = columns.filter((col) =>
         <Checkbox
           checked={record.istick || false}
           onChange={(e) => handleIstickChange(record.id, e.target.checked)}
+        />
+      ),
+    },
+    {
+      title: (<>
+        <Checkbox
+          checked={allRowsSelected4}
+          onChange={(e) => handleSelectAllIstick4(e.target.checked)}
+        >
+         ĐÁNH DẤU ĐÃ IN
+        </Checkbox>
+        <Button type="primary" onClick={handleSaveIstick4}>
+        Lưu 
+      </Button></>
+      ),
+      key: "istick4",
+      dataIndex: "istick4",
+      render: (_, record) => (
+        <Checkbox
+          checked={record.istick4 || false}
+          onChange={(e) => handleIstickChange4(record.id, e.target.checked)}
         />
       ),
     },
@@ -1620,6 +1703,7 @@ const selectedTableColumns = columns.filter((col) =>
       shippingDate2: values.shippingDate2 || "",
       employee_code_order: currentUser.employee_code,
       istick: values.istick||false,
+      istick4: values.istick4||false,
       istickDONE: values.istickDONE||false,
       isShipping: values.isShipping||false,
     };
@@ -1650,7 +1734,7 @@ const selectedTableColumns = columns.filter((col) =>
     order.saleReport === "DONE" &&
     order.istick === true &&
     order.deliveryStatus === "ĐÃ GỬI HÀNG" &&
-    order.trackingCode === ""
+    order.trackingCode === ""&& order.istick4 === false 
   )
   .map(order => ({
     STT: order.stt,
@@ -1693,12 +1777,19 @@ const selectedTableColumns = columns.filter((col) =>
     return totalQuantity;
   };
 
+ 
+      
+    
+   
+  
+
   return (
     <div  style={{
       transform: "scale(1)", padding: 24,
      fontSize: "5px"
      
     }}>
+      <FullScreenLoading loading={loading} tip="Đang tải dữ liệu..." />
       
       <Row>
       <Col span={6}><div style={{ marginBottom: 16 }}>
