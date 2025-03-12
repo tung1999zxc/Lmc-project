@@ -432,6 +432,8 @@ const resetPagename =()=>{
                 return order.deliveryStatus === "" && order.trackingCode !=="";
               case "deliveredkomavandon":
                 return order.deliveryStatus === "ĐÃ GỬI HÀNG" && order.trackingCode ==="";
+              case "deliveredchuatick":
+                return order.deliveryStatus === "ĐÃ GỬI HÀNG" && order.istick4 === false;
                 
               default:
                 return true;
@@ -1909,16 +1911,17 @@ const selectedTableColumns = columns.filter((col) =>
 />
         
         </Col>
-        <Col span={5}>
-        {currentUser.position_team==="kho" ?(<Select
+        
+        {currentUser.position_team==="kho" ?(<Col span={8}><Select
             mode="multiple"
             style={{ width: "100%" }}
             placeholder="Chọn bộ lọc"
             allowClear
             options={[
+              { value: "deliveredchuatick", label: "Đã gửi hàng + CẦN TÍCH ĐÃ IN" },
               { value: "deliveredkomavandon", label: "Đã gửi hàng + chưa mã" },
               { value: "deliveredcomavandon", label: "Đã gửi hàng + Có mã" },
-              { value: "deliveredcomavandon2", label: "Chưa giao hàng+Có mã" },
+              { value: "deliveredcomavandon2", label: "Chưa gửi hàng + Có mã" },
               { value: "waitDelivered", label: "Chưa gửi hàng" },
               { value: "not_delivered", label: "Đã gửi hàng" },
               { value: "khoshiping", label: "Kho đóng hàng" },
@@ -1929,7 +1932,7 @@ const selectedTableColumns = columns.filter((col) =>
               
             ]}
             onChange={(values) => setSelectedFilters(values)}
-          />) :(<Select
+          /></Col>) :(<Col span={5}> <Select
             mode="multiple"
             style={{ width: "100%" }}
             placeholder="Chọn bộ lọc"
@@ -1958,9 +1961,9 @@ const selectedTableColumns = columns.filter((col) =>
           
             ]}
             onChange={(values) => setSelectedFilters(values)}
-          />) }
+          /></Col> ) }
           
-        </Col>
+        
         {currentUser.position_team!=="kho" &&(<>
         <Col span={4}>
           <Select style={{ width: "100%" }}
