@@ -433,15 +433,97 @@ const InventoryPage = () => {
       title: 'SL Âm Đơn Done',
       key: 'SLAMDONE',
       width: 80,
+      // Hàm sorter để sắp xếp theo slAm (tính lại từ record)
+      sorter: (a, b) => {
+        // Tính totalImported cho từng record (giả sử getTotalImportedQty là hàm tính)
+        const aTotalImported = getTotalImportedQty(a);
+        const bTotalImported = getTotalImportedQty(b);
+        
+        // Tính ordersDone cho record a
+        const aOrdersDone = orders
+          .filter(
+            order =>
+              order.saleReport === 'DONE' &&
+              order.deliveryStatus === '' &&
+              order.products &&
+              order.products.length > 0 &&
+              order.products.some(item => item.product === a.name)
+          )
+          .reduce((acc, order) => {
+            const orderQty = order.products
+              .filter(item => item.product === a.name)
+              .reduce((sum, item) => sum + Number(item.quantity), 0);
+            return acc + orderQty;
+          }, 0);
+        
+        // Tính ordersDone cho record b
+        const bOrdersDone = orders
+          .filter(
+            order =>
+              order.saleReport === 'DONE' &&
+              order.deliveryStatus === '' &&
+              order.products &&
+              order.products.length > 0 &&
+              order.products.some(item => item.product === b.name)
+          )
+          .reduce((acc, order) => {
+            const orderQty = order.products
+              .filter(item => item.product === b.name)
+              .reduce((sum, item) => sum + Number(item.quantity), 0);
+            return acc + orderQty;
+          }, 0);
+        
+        // Tính deliveredQty cho record a
+        const aDeliveredQty = orders
+          .filter(
+            order =>
+              (order.deliveryStatus === 'ĐÃ GỬI HÀNG' ||
+               order.deliveryStatus === 'GIAO THÀNH CÔNG' ||
+               order.deliveryStatus === 'BỊ BẮT CHỜ GỬI LẠI') &&
+              order.products &&
+              order.products.length > 0 &&
+              order.products.some(item => item.product === a.name)
+          )
+          .reduce((acc, order) => {
+            const orderQty = order.products
+              .filter(item => item.product === a.name)
+              .reduce((sum, item) => sum + Number(item.quantity), 0);
+            return acc + orderQty;
+          }, 0);
+        
+        // Tính deliveredQty cho record b
+        const bDeliveredQty = orders
+          .filter(
+            order =>
+              (order.deliveryStatus === 'ĐÃ GỬI HÀNG' ||
+               order.deliveryStatus === 'GIAO THÀNH CÔNG' ||
+               order.deliveryStatus === 'BỊ BẮT CHỜ GỬI LẠI') &&
+              order.products &&
+              order.products.length > 0 &&
+              order.products.some(item => item.product === b.name)
+          )
+          .reduce((acc, order) => {
+            const orderQty = order.products
+              .filter(item => item.product === b.name)
+              .reduce((sum, item) => sum + Number(item.quantity), 0);
+            return acc + orderQty;
+          }, 0);
+        
+        // Tính giá trị slAm cho a và b
+        const aSlAm = aTotalImported - aOrdersDone - aDeliveredQty;
+        const bSlAm = bTotalImported - bOrdersDone - bDeliveredQty;
+        
+        // Sắp xếp từ âm nhiều (giá trị thấp hơn) đến âm ít (giá trị cao hơn)
+        return aSlAm - bSlAm;
+      },
       render: (_, record) => {
         const totalImported = getTotalImportedQty(record);
-       
         const ordersDone = orders
-          .filter((order) => order.saleReport === 'DONE' && order.deliveryStatus === '')
+          .filter(order => order.saleReport === 'DONE' && order.deliveryStatus === '')
           .reduce((acc, order) => {
             if (order.products && order.products.length > 0) {
               const orderQty = order.products
-                .filter((item) => item.product === record.name)
+                .filter(item => item.product === record.name)
                 .reduce((sum, item) => sum + Number(item.quantity), 0);
               return acc + orderQty;
             }
@@ -449,22 +531,22 @@ const InventoryPage = () => {
           }, 0);
         const deliveredQty = orders
           .filter(
-            (order) =>
+            order =>
               order.deliveryStatus === 'ĐÃ GỬI HÀNG' ||
-              order.deliveryStatus === 'GIAO THÀNH CÔNG'||
+              order.deliveryStatus === 'GIAO THÀNH CÔNG' ||
               order.deliveryStatus === 'BỊ BẮT CHỜ GỬI LẠI'
           )
           .reduce((acc, order) => {
             if (order.products && order.products.length > 0) {
               const orderQty = order.products
-                .filter((item) => item.product === record.name)
+                .filter(item => item.product === record.name)
                 .reduce((sum, item) => sum + Number(item.quantity), 0);
               return acc + orderQty;
             }
             return acc;
           }, 0);
         
-        const slAm = totalImported  - ordersDone - deliveredQty;
+        const slAm = totalImported - ordersDone - deliveredQty;
         let bgColor = "";
         if (slAm <= 0) {
           bgColor = "#F999A8";
