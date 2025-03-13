@@ -419,7 +419,7 @@ const totalTienDuThangNay = records
 const totalDSTong = adminSummaryData.reduce((sum, row) => sum + row.dsTong, 0);
 const totalTongAdsXin = adminSummaryData.reduce((sum, row) => sum + row.tongAdsXin, 0);
 const totalTienThua = adminSummaryData.reduce((sum, row) => sum + row.tienThua, 0) + totalTienDuThangNay ;
-const totalPercentAds = totalDSTong > 0 ? ((totalTongAdsXin / totalDSTong) * 100).toFixed(2) : 0;
+const totalPercentAds = totalDSTong > 0 ? ((totalTongAdsXin / (totalDSTong*0.95)) * 100).toFixed(2) : 0;
 
 const adminSummaryColumns = [
   {
@@ -499,7 +499,7 @@ const adminSummaryColumns = [
     const data2 = [
       {
         key: '1',
-        dsTong: totalDSTong,
+        dsTong: totalDSTong*0.95,
         tongCapADS: totalTongAdsXin,
         tienThuaTatCa: totalTienThua,
         percentADS: totalPercentAds,
