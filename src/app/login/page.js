@@ -66,7 +66,7 @@ const LoginPage = () => {
 
   // Mảng chứa các hình ảnh rơi
   const fallingImages = [
-    "/5.jpg",
+    
     "/6.jpg",
     "/7.jpg",
     "/8.jpg",
