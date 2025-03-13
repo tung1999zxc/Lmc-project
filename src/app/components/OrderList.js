@@ -415,14 +415,14 @@ const resetPagename =()=>{
               case "khoshiping":
                 return order.isShipping === false;
               case "ctyshiping":
-                return order.isShipping === true;
+                return order.isShipping !== false;
               
                 // case "isShipping": {
                 //   // Tìm đơn hàng gốc từ initialOrders (đã lưu)
-                //   const originalOrder = initialOrders2.find((o) => o.id === order.id);
+                //   const originalOrder2 = initialOrders2.find((o) => o.id === order.id);
                 //   // Nếu không có đơn gốc (đơn hàng mới) hoặc đơn hàng đã thay đổi so với gốc,
                 //   // thì hiển thị đơn hàng đó (cho dù đã tick hay chưa)
-                //   if (!originalOrder || order.isshiping !== originalOrder.isshiping) {
+                //   if (!originalOrder2 || order.isshiping !== originalOrder2.isshiping) {
                 //     return true;
                 //   }
                 //   // Nếu không có thay đổi, chỉ hiển thị khi istick là false
