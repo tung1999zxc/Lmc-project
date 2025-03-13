@@ -65,6 +65,7 @@ const OrderList = () => {
   const [totalQuantities, setTotalQuantities] = useState({});
   const [totalQuantitiesINDON, setTotalQuantitiesINDON] = useState({});
   const [totalQuantitiesCTYDONG, setTotalQuantitiesCTYDONG] = useState({});
+  const [totalQuantitiesKHODONG, setTotalQuantitiesKHODONG] = useState({});
   const [initialOrders, setInitialOrders] = useState([]);
   const [initialOrders2, setInitialOrders2] = useState([]);
   const [initialOrders3, setInitialOrders3] = useState([]);
@@ -144,7 +145,7 @@ const OrderList = () => {
       setOrders(response.data.data);
       setInitialOrders(response.data.data);
       setInitialOrders2(response.data.data);
-      setInitialOrders3(response.data.data);
+      setInitialOrders3(response.data.data);  
       setInitialOrders4(response.data.data);
       setLoading(false);
     } catch (error) {
@@ -318,15 +319,15 @@ const resetPagename =()=>{
         date &&
         dayjs(date).isValid() &&
         dayjs(date).isBetween(startDate, endDate, "day", "[]");
-
-      if (!order.shippingDate1 && !order.shippingDate2) {
         dateMatch = checkDate(order.orderDate);
-      } else {
-        dateMatch =
-          checkDate(order.orderDate) ||
-          checkDate(order.shippingDate1) ||
-          checkDate(order.shippingDate2);
-      }
+      // if (!order.shippingDate1 && !order.shippingDate2) {
+      //   dateMatch = checkDate(order.orderDate);
+      // } else {
+      //   dateMatch =
+      //     checkDate(order.orderDate) ||
+      //     checkDate(order.shippingDate1) ||
+      //     checkDate(order.shippingDate2);
+      // }
     } else if (searchText.trim() !== ""|| sttSearch.trim() !== "") {
       dateMatch = true;
     }
@@ -413,17 +414,20 @@ const resetPagename =()=>{
                 return order.saleReport !== "DONE";
               case "khoshiping":
                 return order.isShipping === false;
-                case "isshiping": {
-                  // Tìm đơn hàng gốc từ initialOrders (đã lưu)
-                  const originalOrder = initialOrders2.find((o) => o.id === order.id);
-                  // Nếu không có đơn gốc (đơn hàng mới) hoặc đơn hàng đã thay đổi so với gốc,
-                  // thì hiển thị đơn hàng đó (cho dù đã tick hay chưa)
-                  if (!originalOrder || order.isshiping !== originalOrder.isshiping) {
-                    return true;
-                  }
-                  // Nếu không có thay đổi, chỉ hiển thị khi istick là false
-                  return order.isshiping === false;
-                };
+              case "ctyshiping":
+                return order.isShipping === true;
+              
+                // case "isShipping": {
+                //   // Tìm đơn hàng gốc từ initialOrders (đã lưu)
+                //   const originalOrder = initialOrders2.find((o) => o.id === order.id);
+                //   // Nếu không có đơn gốc (đơn hàng mới) hoặc đơn hàng đã thay đổi so với gốc,
+                //   // thì hiển thị đơn hàng đó (cho dù đã tick hay chưa)
+                //   if (!originalOrder || order.isshiping !== originalOrder.isshiping) {
+                //     return true;
+                //   }
+                //   // Nếu không có thay đổi, chỉ hiển thị khi istick là false
+                //   return order.isshiping === false;
+                // };
               case "waitDelivered":
                 return order.deliveryStatus === "";
               case "deliveredcomavandon":
@@ -527,6 +531,9 @@ const resetPagename =()=>{
       const CTYDONGOrders = filteredOrders.filter(order => order.isShipping);
       const totals3 = calculateTotalQuantities(CTYDONGOrders);
       setTotalQuantitiesCTYDONG(totals3);
+      const KHODONGOrders = filteredOrders.filter(order => order.isShipping=== false);
+      const totals4 = calculateTotalQuantities(KHODONGOrders);
+      setTotalQuantitiesKHODONG(totals4);
       setIsdem(true);
       // const tickedOrders2 = filteredOrders.filter(order => order.isShipping);
       // // Tính tổng số lượng sản phẩm cho các đơn đã tích
@@ -624,6 +631,12 @@ const resetPagename =()=>{
     {
       key: '1',
       ...totalQuantitiesCTYDONG,
+    },
+  ];
+  const dataSourceKHODONG = [
+    {
+      key: '1',
+      ...totalQuantitiesKHODONG,
     },
   ];
   // Hàm cập nhật checkbox "Công ty đóng hàng"
@@ -1371,6 +1384,7 @@ const selectedTableColumns = columns.filter((col) =>
     {
       title: "Thao Tác",
       key: "action",
+      width: 30,
       render: (_, record) => (
         <Space>
           <Button icon={<EditOutlined />} onClick={() => handleEdit(record)} />
@@ -1391,6 +1405,7 @@ const selectedTableColumns = columns.filter((col) =>
       ),
       key: "istick",
       dataIndex: "istick",
+      width: 50,
       render: (_, record) => (
         <Checkbox
           checked={record.istick || false}
@@ -1412,6 +1427,7 @@ const selectedTableColumns = columns.filter((col) =>
       ),
       key: "istick4",
       dataIndex: "istick4",
+      width: 50,
       render: (_, record) => (
         <Checkbox
           checked={record.istick4 || false}
@@ -1432,6 +1448,7 @@ const selectedTableColumns = columns.filter((col) =>
       </Button></>
       ),
       key: "istickDONE",
+      width: 50,
       dataIndex: "istickDONE",
       render: (_, record) => (
         <Checkbox
@@ -1441,11 +1458,62 @@ const selectedTableColumns = columns.filter((col) =>
       ),
     },
     {
+      title: (
+        <Checkbox
+          checked={selectedColumns.includes("trackingCode")}
+          onChange={(e) => handleColumnSelect("trackingCode", e.target.checked)}
+        >
+          MÃ VẬN ĐƠN
+        </Checkbox>
+      ),
+      dataIndex: "trackingCode",
+      width: 90,
+      key: "trackingCode",
+    },
+    {
+      title: (
+        <Checkbox
+          checked={selectedColumns.includes("deliveryStatus")}
+          onChange={(e) => handleColumnSelect("deliveryStatus", e.target.checked)}
+        >
+          TÌNH TRẠNG GH
+        </Checkbox>
+      ),
+      dataIndex: "deliveryStatus",
+      width: 90,
+      key: "deliveryStatus",
+      render: (text) => (
+        <Tag color={text === "GIAO THÀNH CÔNG" ? "blue" : "orange"}>{text}</Tag>
+      ),
+    },
+    {
       title: "BÊN ĐÓNG HÀNG",
       key: "isShipping",
       dataIndex: "isShipping",
+      width: 90,
       render: (_, record) =>
         record.isShipping ? "Công ty đóng hàng" : "Kho đóng hàng",
+    },
+    {
+      title: (
+        <Checkbox
+          checked={selectedColumns.includes("products")}
+          onChange={(e) => handleColumnSelect("products", e.target.checked)}
+        >
+          SẢN PHẨM
+        </Checkbox>
+      ),
+      key: "products",
+      render: (_, record) => (
+        <>
+          {record.products &&
+            record.products.map((item, index) => (
+              <div key={index} style={{ whiteSpace: "nowrap" }}>
+                <strong>{item.product}</strong> - SL: <strong>{item.quantity}</strong>
+              </div>
+            ))}
+        </>
+      ),
     },
     
         {
@@ -1459,6 +1527,7 @@ const selectedTableColumns = columns.filter((col) =>
           ),
           dataIndex: "stt",       
           key: "stt",
+          width: 30,
         
          
         },
@@ -1499,27 +1568,7 @@ const selectedTableColumns = columns.filter((col) =>
       dataIndex: "address",
       key: "address",
     },
-    {
-      title: (
-        <Checkbox
-          checked={selectedColumns.includes("products")}
-          onChange={(e) => handleColumnSelect("products", e.target.checked)}
-        >
-          SẢN PHẨM
-        </Checkbox>
-      ),
-      key: "products",
-      render: (_, record) => (
-        <>
-          {record.products &&
-            record.products.map((item, index) => (
-              <div key={index} style={{ whiteSpace: "nowrap" }}>
-                <strong>{item.product}</strong> - SL: <strong>{item.quantity}</strong>
-              </div>
-            ))}
-        </>
-      ),
-    },
+   
     {
       title: (
         <Checkbox
@@ -1545,33 +1594,8 @@ const selectedTableColumns = columns.filter((col) =>
       key: "orderDate",
       render: (text) => dayjs(text).format("DD/MM"),
     },
-    {
-      title: (
-        <Checkbox
-          checked={selectedColumns.includes("deliveryStatus")}
-          onChange={(e) => handleColumnSelect("deliveryStatus", e.target.checked)}
-        >
-          TÌNH TRẠNG GH
-        </Checkbox>
-      ),
-      dataIndex: "deliveryStatus",
-      key: "deliveryStatus",
-      render: (text) => (
-        <Tag color={text === "GIAO THÀNH CÔNG" ? "blue" : "orange"}>{text}</Tag>
-      ),
-    },
-    {
-      title: (
-        <Checkbox
-          checked={selectedColumns.includes("trackingCode")}
-          onChange={(e) => handleColumnSelect("trackingCode", e.target.checked)}
-        >
-          MÃ VẬN ĐƠN
-        </Checkbox>
-      ),
-      dataIndex: "trackingCode",
-      key: "trackingCode",
-    },
+    
+    
     {
       title: (
         <Checkbox
@@ -1823,7 +1847,7 @@ const selectedTableColumns = columns.filter((col) =>
       pagination={false} 
       bordered
     />
-    {currentUser.position_team==="kho" || currentUser.name ==="Hoàng Lan Phương" && (
+    {(currentUser.position_team==="kho" || currentUser.name ==="Hoàng Lan Phương") && (
      <>
       <h4>SL SẢN PHẨM ĐÃ TICK (XUẤT EXCELL)</h4>
      <Table 
@@ -1833,11 +1857,19 @@ const selectedTableColumns = columns.filter((col) =>
       bordered
     />
     </>)} 
-    {currentUser.position_team !== "mkt"&&(<>
+    {(currentUser.position_team !== "mkt" && currentUser.position_team!=="kho" && currentUser.name !=="Hoàng Lan Phương")&&(<>
      <h4>SL SẢN PHẨM ĐÃ TICK (CTY ĐÓNG) </h4>
     <Table 
       columns={columns3} 
       dataSource={dataSourceCTYDONG} 
+      pagination={false}  
+      bordered
+    /></>)}
+    {( currentUser.position_team==="kho" || currentUser.name ==="Hoàng Lan Phương")&&(<>
+     <h4>SL SẢN PHẨM KHO ĐÓNG </h4>
+    <Table 
+      columns={columns3} 
+      dataSource={dataSourceKHODONG} 
       pagination={false}  
       bordered
     /></>)}
@@ -1926,7 +1958,7 @@ const selectedTableColumns = columns.filter((col) =>
               { value: "not_delivered", label: "Đã gửi hàng" },
               { value: "khoshiping", label: "Kho đóng hàng" },
               { value: "delivered", label: "Giao thành công" },
-              { value: "isshiping", label: "Công Ty đóng hàng" },
+              { value: "ctyshiping", label: "Công Ty đóng hàng" },
               
              
               
@@ -1949,7 +1981,7 @@ const selectedTableColumns = columns.filter((col) =>
               { value: "unpaid", label: "Chưa thanh toán" },
               { value: "paid", label: "Đã thanh toán" },
               { value: "ero", label: "Đơn thiếu sale xử lý" },
-              { value: "isshiping", label: "Công Ty đóng hàng" },
+              { value: "ctyshiping", label: "Công Ty đóng hàng" },
               { value: "khoshiping", label: "Kho đóng hàng" },
               { value: "waitDelivered", label: "Chưa gửi hàng" },
               { value: "deliveredkomavandon", label: "Đã gửi hàng + chưa mã" },

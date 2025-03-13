@@ -611,7 +611,6 @@ const InventoryPage = () => {
     {
       title: 'Tổng doanh số',
       key: 'totalProfit',
-      
       render: (_, record) => {
         // Tính tổng doanh số cho sản phẩm với tên record.name
         const totalProfit = orders.reduce((acc, order) => {
@@ -641,11 +640,39 @@ const InventoryPage = () => {
               fontWeight: "bold"
             }}
           >
-            {(totalProfit*17000).toLocaleString()} VND
+            {(totalProfit * 17000).toLocaleString()} VND
           </div>
         );
+      },
+      // Thêm phần sắp xếp theo tổng doanh số
+      sorter: (a, b) => {
+        // Tính tổng doanh số cho sản phẩm a
+        const totalProfitA = orders.reduce((acc, order) => {
+          if (order.products && Array.isArray(order.products)) {
+            if (order.products.some(item => item.product === a.name)) {
+              return acc + Number(order.profit || 0);
+            }
+          }
+          return acc;
+        }, 0);
+    
+        // Tính tổng doanh số cho sản phẩm b
+        const totalProfitB = orders.reduce((acc, order) => {
+          if (order.products && Array.isArray(order.products)) {
+            if (order.products.some(item => item.product === b.name)) {
+              return acc + Number(order.profit || 0);
+            }
+          }
+          return acc;
+        }, 0);
+    
+        // Sắp xếp theo doanh số tăng dần
+        return totalProfitA - totalProfitB; // Tăng dần
+        // Nếu muốn sắp xếp giảm dần, thay đổi thành:
+        // return totalProfitB - totalProfitA;
       }
     }
+    
     // {
     //   title: 'Hình ảnh',
     //   key: 'images',
