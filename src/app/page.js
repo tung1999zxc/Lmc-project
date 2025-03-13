@@ -731,10 +731,11 @@ const employeeChartDataNewTEAM = teamEmployees.map(emp => {
  
  
   const saleEmployees = employees.filter(emp => emp.position_team === "sale" );
+  const saleEmployees2 = employees.filter(emp => emp.position === "salenhapdon" ||emp.position === "salexuly" ||emp.position === "salefull" );
   const saleEmployeesND = employees.filter(emp => emp.position_team === "sale"&& emp.position === "salenhapdon" );
   const saleEmployeesOL = employees.filter(emp => emp.position_team === "sale"&& emp.position === "salefull" );
   const saleEmployeesXL = employees.filter(emp => emp.position_team === "sale"&& emp.position === "salexuly" );
-  const employeeChartDataNewsale = saleEmployees.map(emp => {
+  const employeeChartDataNewsale = saleEmployees2.map(emp => {
     const sales = filteredOrders
       .filter(order => order.sale.trim().toLowerCase() === emp.name.trim().toLowerCase() || order.salexuly.trim().toLowerCase() === emp.name.trim().toLowerCase())
       .reduce((sum, order) => sum + order.profit, 0);
@@ -1063,6 +1064,7 @@ if (sortedEmployees.length <= 5) {
 }
 
   const top5Employees = [...marketingReportData1]
+  .filter(emp => emp.total1 !== 0)
   .sort((a, b) => b.total1 - a.total1)
   .slice(0, 5);
 
