@@ -25,6 +25,9 @@ const EmployeePageTable = () => {
   const [employees, setEmployees] = useState([]);
   const [isEditing, setIsEditing] = useState(false);
   const [editingRecord, setEditingRecord] = useState(null);
+
+  const [searchText, setSearchText] = useState("");
+  const [appliedSearchText, setAppliedSearchText] = useState("");
  
  
   // Danh sách options
@@ -65,16 +68,31 @@ const EmployeePageTable = () => {
   }, [employees, currentUser.team_id]); 
 
   const filteredData = useMemo(() => {
-    if (currentUser.position === "admin" ||currentUser.position === "managerMKT" || currentUser.position_team==="sale") {
-      return data;
+    let tempData = []; // Khai báo biến tempData
+  
+    if (
+      currentUser.position === "admin" ||
+      currentUser.position === "managerMKT" ||
+      currentUser.position_team === "sale"
+    ) {
+      tempData = data;
     } else if (currentUser.position === "lead") {
-      // Hiển thị các bản ghi có employee thuộc leadTeamMembers
-      return data.filter((record) => leadTeamMembers.includes(record.employee));
+      tempData = data.filter((record) =>
+        leadTeamMembers.includes(record.employee)
+      );
     } else {
-      // Các nhân viên khác chỉ xem bản ghi của chính mình
-      return data.filter((record) => record.employee === currentUser.name);
+      tempData = data.filter((record) => record.employee === currentUser.name);
     }
-  }, [data, currentUser, leadTeamMembers]); 
+  
+    // Áp dụng lọc theo tên page nếu appliedSearchText có giá trị
+    if (appliedSearchText) {
+      tempData = tempData.filter((record) =>
+        record.pageName.toLowerCase().includes(appliedSearchText.toLowerCase())
+      );
+    }
+    return tempData;
+  }, [data, currentUser, leadTeamMembers, appliedSearchText]);
+  
 
   const mktOptions = employees
   .filter(order => order.position_team === 'mkt')
@@ -202,7 +220,8 @@ const EmployeePageTable = () => {
               } 
     },
   ];
-
+  
+  
   return (
     <div style={{ padding: 20 }}>
       <Space style={{ marginBottom: 20 }}>
@@ -224,7 +243,15 @@ const EmployeePageTable = () => {
         <Button style={{ width: 200 }} type="primary" onClick={isEditing ? handleSaveEdit : handleAdd}>
           {isEditing ? "Lưu" : "Thêm"}
         </Button>
+        
       </Space>
+      <Input
+  style={{ width: 300 }}
+  placeholder="Tìm kiếm tên page"
+  value={searchText}
+  onChange={(e) => setSearchText(e.target.value)}
+  onPressEnter={() => setAppliedSearchText(searchText)}
+   />
 
       <Table
         columns={columns}

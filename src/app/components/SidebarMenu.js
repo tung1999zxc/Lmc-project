@@ -39,17 +39,17 @@ const menuItems = [
     children: [
       {
         key: '99',
-        label: 'Sale nhập đơn',
+        label: 'Sale CHAT',
         href: '/sale/saleOrder',
       },
       {
         key: '699',
-        label: 'Sale Xác nhận',
+        label: 'Sale DONE',
         href: '/sale/saleConfirm',
       },
       {
         key: '799',
-        label: 'Sale xử lý',
+        label: 'Sale VẬN ĐƠN',
         href: '/sale/saleProcessing',
       },
     ],

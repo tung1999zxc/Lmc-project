@@ -339,8 +339,8 @@ const GroupedDoubleBarChartComponent = dynamic(
       } = require("recharts");
 
       return (
-       
-        <BarChart width={chartWidth} height={400} data={data}>
+        <ResponsiveContainer width="100%" height={400}>
+        <BarChart  data={data}>
             <CartesianGrid strokeDasharray="3 3" />
             <XAxis 
   dataKey="name" 
@@ -362,7 +362,7 @@ const GroupedDoubleBarChartComponent = dynamic(
            
             
           </BarChart>
-        
+          </ResponsiveContainer>
       );
     }),
   { ssr: false, loading: () => <p>Loading Grouped Chart...</p> }
@@ -384,7 +384,7 @@ const GroupedDoubleBarChartComponentTEAM = dynamic(
 
       return (
         <ResponsiveContainer width="100%" height={400}>
-        <BarChart width={400} height={400} data={data}>
+        <BarChart  data={data}>
             <CartesianGrid strokeDasharray="3 3" />
             <XAxis 
   dataKey="name" 
@@ -535,8 +535,8 @@ const GroupedDoubleBarChartComponent2 = dynamic(
     Promise.resolve(({ data }) => {
       const {ResponsiveContainer, BarChart,Cell,LabelList, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend } = require('recharts');
       return (
-       
-        <BarChart width={chartWidth} height={400} data={data}>
+        <ResponsiveContainer width="100%" height={400}>
+        <BarChart  data={data}>
           <CartesianGrid strokeDasharray="3 3" />
           <XAxis 
   dataKey="name" 
@@ -559,6 +559,7 @@ const GroupedDoubleBarChartComponent2 = dynamic(
             </Bar>
          
         </BarChart>
+        </ResponsiveContainer>
       );
     }),
   { ssr: false, loading: () => <p>Loading Grouped Chart...</p> }
@@ -1474,7 +1475,7 @@ marketingReportDataTEAM.sort((a, b) => b.tienVND - a.tienVND);
 const chuaThanhToanKW3 = filteredOrders
   .filter(order => order.paymentStatus === "CHƯA THANH TOÁN" || order.paymentStatus === "")
   .reduce((sum, order) => sum + order.profit, 0);
-const tongKW3 = daThanhToanKW3 + chuaThanhToanKW3;
+const tongKW3 = (daThanhToanKW3 + chuaThanhToanKW3)*0.95;
 
 const totalAdsKW3 = filteredAds.reduce((sum, ad) => sum + (ad.request1 + ad.request2), 0);
 const percentAds3 = tongKW3 > 0 ? Number(((totalAdsKW3 / (tongKW3*exchangeRate)) * 100).toFixed(2)) : 0;
@@ -1489,6 +1490,18 @@ const percentAds3 = tongKW3 > 0 ? Number(((totalAdsKW3 / (tongKW3*exchangeRate))
   const thanhToanDat = tongKW > 0 ? (daThanhToanKW / tongKW) * 100 : 0;
   const totalAdsKW = filteredAds.reduce((sum, ad) => sum + (ad.request1 + ad.request2), 0);
   const percentAds = tongKW > 0 ? Number(((totalAdsKW / (tongKW*exchangeRate)) * 100).toFixed(2)) : 0;
+
+
+  const daThanhToanKWSALE = filteredOrders
+    .filter(order => order.paymentStatus === "ĐÃ THANH TOÁN")
+    .reduce((sum, order) => sum + order.profit, 0);
+  const chuaThanhToanKWSALE = filteredOrders
+    .filter(order => order.paymentStatus === "CHƯA THANH TOÁN" || order.paymentStatus === "")
+    .reduce((sum, order) => sum + order.profit, 0);
+  const tongKWSALE = daThanhToanKWSALE + chuaThanhToanKWSALE;
+  const thanhToanDatSALE = tongKWSALE > 0 ? (daThanhToanKWSALE / tongKWSALE) * 100 : 0;
+  const totalAdsKWSALE = filteredAds.reduce((sum, ad) => sum + (ad.request1 + ad.request2), 0);
+  const percentAdsSALE = tongKWSALE > 0 ? Number(((totalAdsKWSALE / (tongKWSALE*exchangeRate)) * 100).toFixed(2)) : 0;
 
 
   if (isTeamLead|| ( currentUser.position==="admin" && selectedTeam)|| (currentUser.position==="managerMKT" && selectedTeam)) {
@@ -1538,6 +1551,18 @@ const percentAds3 = tongKW3 > 0 ? Number(((totalAdsKW3 / (tongKW3*exchangeRate))
       percentAds: percentAds
     }
   ];
+  const totalDataSALE = [
+   
+    {
+      key: "VND",
+      daThanhToan: daThanhToanKWSALE * exchangeRate,
+      chuaThanhToan: chuaThanhToanKWSALE* exchangeRate,
+      tong: tongKWSALE* exchangeRate,
+      thanhToanDat: thanhToanDatSALE,
+      totalAds: totalAdsKWSALE ,
+      percentAds: percentAdsSALE
+    }
+  ];
   const totalData2 = [
     // {
     //   key: "KW",
@@ -1573,7 +1598,18 @@ const percentAds3 = tongKW3 > 0 ? Number(((totalAdsKW3 / (tongKW3*exchangeRate))
   const totalColumns = [
     { title: "Đã thanh toán", dataIndex: "daThanhToan", key: "daThanhToán", render: (value) => value.toLocaleString() },
     { title: "Chưa thanh toán", dataIndex: "chuaThanhToan", key: "chuaThanhToán", render: (value) => value.toLocaleString() },
-    
+    {
+      title: "Tổng",
+      dataIndex: "tong",
+      key: "tong",
+      render: (value) => {
+        return (
+          <div>
+            <strong>{value.toLocaleString()}</strong>
+          </div>
+        );
+      }
+    },
     { title: "Thanh toán đạt", dataIndex: "thanhToanDat", key: "thanhToanDat",   render: (percent) => {
       let bgColor;
       if (percent >80 ) {
@@ -1598,35 +1634,25 @@ const percentAds3 = tongKW3 > 0 ? Number(((totalAdsKW3 / (tongKW3*exchangeRate))
       );
     }
   },
-  {
-    title: "Tổng",
-    dataIndex: "tong",
-    key: "tong",
-    render: (value) => {
-      return (
-        <div>
-          <strong>{value.toLocaleString()}</strong>
-        </div>
-      );
-    }
-  },
+  
    
   ];
   const totalColumns3 = [
     
-  {
-    title: "Tổng",
-    dataIndex: "tong",
-    key: "tong",
-    render: (value) => {
-      return (
-        <div>
-          <strong>{value.toLocaleString()}</strong>
-        </div>
-      );
-    }
-  },
+  
     { title: "Tổng chi phí ads", dataIndex: "totalAds", key: "totalAds", render: (value) => value.toLocaleString() },
+    {
+      title: "Tổng",
+      dataIndex: "tong",
+      key: "tong",
+      render: (value) => {
+        return (
+          <div>
+            <strong>{value.toLocaleString()}</strong>
+          </div>
+        );
+      }
+    },
     { title: "% chi phí ads", dataIndex: "percentAds", key: "percentAds",   render: (percent) => {
       let bgColor;
       if (percent < 30) {
@@ -1958,16 +1984,18 @@ const percentAds3 = tongKW3 > 0 ? Number(((totalAdsKW3 / (tongKW3*exchangeRate))
 <Col xs={24} md={12}>
   <h2 style={{ marginTop: "2rem" }}>Tổng khách thanh toán</h2>
   <Table columns={totalColumns} dataSource={totalData} pagination={false} />
-  {(currentUser.position === "admin" ||currentUser.position === "managerMKT"  ) && (<>
-  <h2 style={{ marginTop: "2rem" }}>Tổng</h2>
-  <Table columns={totalColumns3} dataSource={totalData3} pagination={false} /></>)}
+  <h2 style={{ marginTop: "2rem" }}>Doanh số (SALE)</h2>
+  <Table columns={totalColumns} dataSource={totalDataSALE} pagination={false} />
+  
   </Col>
   <Col xs={24} md={2}></Col>
   <Col xs={24} md={10}>
   <h2 style={{ marginTop: "2rem" }}>Thống kê để giục chuyển khoản</h2>
-<Table columns={transferColumns} dataSource={transferData} pagination={false} /></Col>
-  
-</Row></>)}
+<Table columns={transferColumns} dataSource={transferData} pagination={false} />
+{(currentUser.position === "admin" ||currentUser.position === "managerMKT"  ) && (<>
+  <h2 style={{ marginTop: "2rem" }}>Doanh Số (MKT)</h2>
+  <Table columns={totalColumns3} dataSource={totalData3} pagination={false} /></>)}
+  </Col></Row></>)}
 <br></br>
       
 {(currentUser.position === "admin" && !selectedTeam) ||(currentUser.position === "managerMKT" && !selectedTeam ) ? (
