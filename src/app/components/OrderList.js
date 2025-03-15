@@ -416,6 +416,8 @@ const resetPagename =()=>{
                 return order.isShipping === false;
               case "ctyshiping":
                 return order.isShipping !== false;
+              case "ctyshiping2":
+                return order.isShipping !== false && order.trackingCode ==="";
               
                 // case "isShipping": {
                 //   // Tìm đơn hàng gốc từ initialOrders (đã lưu)
@@ -1767,7 +1769,7 @@ const selectedTableColumns = columns.filter((col) =>
   
     try {
       if (currentEditId) {
-        const response = await axios.put(`/api/orders/${currentEditId}`, newOrder);
+        const response = await axios.put(`/api/orders/${currentEditId}`, newOrder,{ headers: { 'x-current-user': encodeURIComponent(currentUser.name) } });
         message.success(response.data.message || "Cập nhật thành công");
       } else {
         const response = await axios.post("/api/orders", newOrder);
@@ -1990,6 +1992,7 @@ const selectedTableColumns = columns.filter((col) =>
               { value: "khoshiping", label: "Kho đóng hàng" },
               { value: "delivered", label: "Giao thành công" },
               { value: "ctyshiping", label: "Công Ty đóng hàng" },
+             
               
              
               
@@ -2012,6 +2015,7 @@ const selectedTableColumns = columns.filter((col) =>
               { value: "unpaid", label: "Chưa thanh toán" },
               { value: "paid", label: "Đã thanh toán" },
               { value: "ero", label: "Đơn thiếu sale xử lý" },
+              { value: "ctyshiping2", label: "Công Ty đóng hàng + Chưa mã" },
               { value: "ctyshiping", label: "Công Ty đóng hàng" },
               { value: "khoshiping", label: "Kho đóng hàng" },
               { value: "waitDelivered", label: "Chưa gửi hàng" },

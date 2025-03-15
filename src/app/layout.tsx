@@ -11,6 +11,7 @@ import { usePathname } from "next/navigation";
 import SidebarMenu from "./components/SidebarMenu";
 import CurrentUserSelector from "./components/CurrentUserSelector";
 import { motion, useAnimation } from "framer-motion";
+import GlobalNotification from "./components/GlobalNotification";
 
 const { Content, Sider } = Layout;
 const MotionHeader = motion(Layout.Header);
@@ -59,9 +60,10 @@ function InnerDashboardLayout({ children }: { children: ReactNode }) {
         "linear-gradient(90deg, #4B0082, #9400D3)",
         "linear-gradient(90deg, #9400D3, #FF0000)",
       ],
-      transition: { duration: 50, repeat: Infinity, repeatType: "mirror" }
+      transition: { duration: 50, repeat: Infinity, repeatType: "mirror" },
     });
   }, [headerControls]);
+
   return (
     <>
       <div
@@ -71,7 +73,7 @@ function InnerDashboardLayout({ children }: { children: ReactNode }) {
           right: "2%",
           width: "10%",
           height: "10%",
-          backgroundImage: "url('/background.png')",
+          // backgroundImage: "url('/background.png')",
           backgroundSize: "cover",
           backgroundPosition: "center",
           opacity: 0.6,
@@ -122,6 +124,7 @@ function InnerDashboardLayout({ children }: { children: ReactNode }) {
             >
               {currentUser.name}
             </div>
+            {/* <CurrentUserSelector /> */}
             <Button
               type="primary"
               icon={<LogoutOutlined />}
@@ -134,6 +137,8 @@ function InnerDashboardLayout({ children }: { children: ReactNode }) {
           <Content style={{ margin: "16px", minWidth: "1000px" }}>
             {children}
           </Content>
+          {/* GlobalNotification luôn xuất hiện để thông báo mới đến cho người dùng */}
+          <GlobalNotification />
         </Layout>
       </Layout>
     </>

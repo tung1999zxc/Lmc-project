@@ -8,6 +8,8 @@ import {
   ShopOutlined,
   FileTextOutlined,
   UserOutlined,
+  BellOutlined ,
+  HistoryOutlined, 
 } from '@ant-design/icons';
 import Link from 'next/link';
 
@@ -71,6 +73,18 @@ const menuItems = [
     label: 'Quản lý tài khoản',
     icon: <UserOutlined />,
     href: '/accounts',
+  },
+  {
+    key: 'sub6',
+    label: 'Lịch sử chỉnh sửa đơn hàng',
+    icon: <HistoryOutlined />,
+    href: '/OrderHistory',
+  },
+  {
+    key: 'sub8',
+    label: 'Quản lý thông báo',
+    icon: <BellOutlined />,
+    href: '/NotificationManagement',
   },
 ];
 
