@@ -53,6 +53,7 @@ const NotificationManagement = () => {
 
   // Tùy chọn cho bộ phận thông báo: chỉ 2 lựa chọn
   const departmentOptions = [
+    // { value: "all", label: "TẤT CẢ" },
     { value: "mkt", label: "MKT" },
     { value: "sale", label: "SALE" },
   ];
@@ -131,7 +132,7 @@ const NotificationManagement = () => {
   };
 
   // Lọc danh sách thông báo
-  const allowedPositions = ["leadSALE", "admin", "managerSALE", "managerMKT"];
+  const allowedPositions = ["leadSALE", "admin", "managerSALE"];
   const filteredNotifications =
     allowedPositions.includes(currentUser.position)
       ? notifications
@@ -248,7 +249,7 @@ const NotificationManagement = () => {
               label="Bộ phận thông báo (Tùy chọn)"
               name="department"
             >
-              <Select placeholder="Chọn bộ phận thông báo (nếu muốn)">
+              <Select allowClear placeholder="Chọn bộ phận thông báo (nếu muốn)">
                 {departmentOptions.map((dep) => (
                   <Option key={dep.value} value={dep.value}>
                     {dep.label}
@@ -262,7 +263,7 @@ const NotificationManagement = () => {
               label="Đối tượng thông báo (Tùy chọn)"
               name="recipients"
             >
-              <Select
+              <Select allowClear
                 mode="multiple"
                 placeholder="Chọn đối tượng thông báo (nếu muốn)"
                 options={recipientOptions}
