@@ -114,7 +114,7 @@ const handlePageNameChange = (value) => {
     .filter((order) => order.position === "salexuly")
     .map((order) => order.name);
 
-  const saleBaoOptions = ["DONE","OK", "HỦY", "ĐỢI XN", "NGUY CƠ", "BÙNG", "ĐANG UP", "CHECK"];
+  const saleBaoOptions = ["DONE","OK", "HỦY", "ĐỢI XN", "BOOK TB", "NGUY CƠ", "BÙNG", "ĐANG UP", "CHECK"];
   const massOptions = ["Nặng", "Nhẹ"];
   const thanhToanOptions = ["ĐÃ THANH TOÁN", "CHƯA THANH TOÁN"];
   const tinhTrangGHOptions = ["ĐÃ GỬI HÀNG", "GIAO THÀNH CÔNG","BỊ BẮT CHỜ GỬI LẠI"];

@@ -395,6 +395,8 @@ const resetPagename =()=>{
                 return order.saleReport === "DONE";
               case "ok":
                 return order.saleReport === "OK";
+              case "booktb":
+                return order.saleReport === "BOOK TB";
               case "istick":
                 return order.istick === true;
                 case "notick": {
@@ -2008,6 +2010,7 @@ const selectedTableColumns = columns.filter((col) =>
               { value: "unpaid_success", label: "Chưa thanh toán & Giao Thành công" },     
               { value: "waiting_done", label: "Đơn chưa Done" },
               { value: "ok", label: "Đơn OK" },
+              { value: "booktb", label: "BOOK TB" },
               { value: "waiting_approval", label: "Đợi xác nhận" },
               { value: "done", label: "Đơn đã Done" },
               { value: "duplicate_name", label: "Trùng tên khách" },
