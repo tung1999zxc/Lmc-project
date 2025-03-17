@@ -38,8 +38,8 @@ const OrderList = () => {
     }
   }, []);
 
-  const lastFetchTime = useRef(0);
-  const THIRTY_MINUTES = 60 * 60 * 1000;  
+  // const lastFetchTime = useRef(0);
+  // const THIRTY_MINUTES = 60 * 60 * 1000;  
   // Các state quản lý đơn hàng, form, filter, …
   const [orders, setOrders] = useState([]);
   const [currentEditId, setCurrentEditId] = useState(null);
@@ -308,10 +308,12 @@ const resetPagename =()=>{
       // Điều kiện lọc theo ngày
       let dateMatch = true;
 
-    if (specificDate) {
-      // Nếu chọn ngày cụ thể, chỉ lọc theo ngày này
-      dateMatch = dayjs(order.orderDate).format("YYYY-MM-DD") === dayjs(specificDate).format("YYYY-MM-DD");
-    } else if (dateRange && (searchText.trim() === "" || sttSearch.trim() === "")) {
+      if (specificDate) {
+        // Kiểm tra ngày phù hợp theo vị trí của user
+        dateMatch = dayjs(
+          currentUser.position_team === "kho" ? order.shippingDate1 : order.orderDate
+        ).format("YYYY-MM-DD") === dayjs(specificDate).format("YYYY-MM-DD");
+      } else if (dateRange && (searchText.trim() === "" || sttSearch.trim() === "")) {
       // Nếu có khoảng thời gian, lọc theo range
       const startDate = dayjs(dateRange[0]);
       const endDate = dayjs(dateRange[1]);
@@ -1779,10 +1781,10 @@ const selectedTableColumns = columns.filter((col) =>
       }
       fetchOrders();
       setFormVisible(false);
-      const now = Date.now();
-    if (now - lastFetchTime.current >= THIRTY_MINUTES) {
-      fetchNamePage();
-      lastFetchTime.current = now;}
+    //   const now = Date.now();
+    // if (now - lastFetchTime.current >= THIRTY_MINUTES) {
+    //   fetchNamePage();
+    //   lastFetchTime.current = now;}
     } catch (error) {
       console.error(error);
       message.error("Lỗi khi lưu đơn hàng");
@@ -1993,6 +1995,7 @@ const selectedTableColumns = columns.filter((col) =>
               { value: "not_delivered", label: "Đã gửi hàng" },
               { value: "khoshiping", label: "Kho đóng hàng" },
               { value: "delivered", label: "Giao thành công" },
+              { value: "ctyshiping2", label: "Công Ty đóng hàng + Chưa mã" },
               { value: "ctyshiping", label: "Công Ty đóng hàng" },
              
               

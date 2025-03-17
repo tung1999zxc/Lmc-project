@@ -800,6 +800,23 @@ const adminSummaryColumns = [
   if (p > 35) return "#F999A8"; // màu cam (orange)
   
 };
+
+// const getLatestRecordByUser = (userId) => {
+//   const userRecords = records.filter(record => record.userId === userId);
+  
+//   if (userRecords.length === 0) return null;
+
+//   return userRecords.reduce((latest, record) => 
+//     dayjs(record.date).isAfter(dayjs(latest.date)) ? record : latest
+//   );
+// };
+
+// // Kiểm tra bản ghi cuối cùng của user hiện tại
+// const latestRecord = getLatestRecordByUser(currentUser.employee_code);
+// const isDisabled = latestRecord ? !latestRecord.isLocked : false;
+const hasUnlockedRecords = records.some(
+  (record) => record.userId === currentUser.employee_code && !record.isLocked
+);
   return (  
     <div style={{ padding: 24 }}>
       {/* Tiêu đề "Nhập thông tin" */}
@@ -831,7 +848,7 @@ const adminSummaryColumns = [
                 
                 <Form.Item>
                   <Button
-                    disabled={currentUser.position_team === 'sale' || currentUser.position_team === 'kho'}
+                    disabled={currentUser.position_team === 'sale' || currentUser.position_team === 'kho' || hasUnlockedRecords}
                     type="primary"
                     htmlType="submit"
                     style={{ width: '100%' }}

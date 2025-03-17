@@ -57,9 +57,11 @@ const NotificationManagement = () => {
     { value: "mkt", label: "MKT" },
     { value: "sale", label: "SALE" },
   ];
-
+  const filteredEmployees = employees.filter(
+    (emp) => emp.username.toLowerCase() !== "admin"
+  );
   // Tùy chọn cho đối tượng thông báo: hiển thị toàn bộ nhân viên
-  const recipientOptions = employees.map((emp) => ({
+  const recipientOptions = filteredEmployees.map((emp) => ({
     value: emp.name,
     label: emp.name,
   }));
