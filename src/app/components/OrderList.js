@@ -10,11 +10,12 @@ import {
   Input,
   Select,
   Row,
+
   Col,
   Tag,Spin,
   Checkbox
 } from "antd";
-import { EditOutlined, DeleteOutlined } from "@ant-design/icons";
+import { EditOutlined, DeleteOutlined ,SearchOutlined} from "@ant-design/icons";
 import FullScreenLoading from './FullScreenLoading';
 import dayjs from "dayjs";
 import OrderForm from "./OrderForm";
@@ -1963,20 +1964,29 @@ const selectedTableColumns = columns.filter((col) =>
         </Select>
         </Col>
         <Col span={4}>
-        <Search
+        <Input
       placeholder="Tìm kiếm..."
       allowClear
-      value={searchValue} // Hiển thị giá trị nhập vào
-      onChange={(e) => setSearchValue(e.target.value)} // Cập nhật nhưng không tìm kiếm ngay
-      onSearch={handleSearch} // Chỉ tìm kiếm khi nhấn Enter hoặc nút Search
+      // value={searchValue} // Hiển thị giá trị nhập vào
+      // onChange={(e) => setSearchValue(e.target.value)} // Cập nhật nhưng không tìm kiếm ngay
+      onPressEnter={(e) => handleSearch(e.target.value.trim())} // Chỉ tìm kiếm khi nhấn Enter hoặc nút Search
+      suffix={
+        <SearchOutlined
+          style={{  fontSize: "16px", color: "#1890ff" }}
+          
+        />}
     />
-        <Search
+ <Input
   placeholder="Tìm kiếm STT"
   allowClear
-  value={searchValue2}
-  onChange={(e) => setSearchValue2(e.target.value)}
-  onSearch={(value) => handleSearch2(value.trim())}
-  
+  onPressEnter={(e) => handleSearch2(e.target.value.trim())}
+  // onChange={(e) => setSearchValue2(e.target.value)}
+  suffix={
+    <SearchOutlined
+      style={{  fontSize: "16px", color: "#1890ff" }}
+      
+    />
+  }
 />
         
         </Col>
