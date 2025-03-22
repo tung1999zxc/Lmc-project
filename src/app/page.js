@@ -1714,7 +1714,7 @@ const percentAds3 = tongKW3 > 0 ? Number(((totalAdsKW3 / (tongKW3*exchangeRate))
   className="employee-image"
   onError={(e) => {
     e.currentTarget.onerror = null; // Ngăn lặp lại nếu ảnh mặc định không tồn tại
-    e.currentTarget.src = "/1.png";
+    e.currentTarget.src = "/images.jfif";
   }}
 />
             <span className="employee-name">{emp.name}</span>
