@@ -1776,11 +1776,18 @@ const selectedTableColumns = columns.filter((col) =>
       if (currentEditId) {
         const response = await axios.put(`/api/orders/${currentEditId}`, newOrder,{ headers: { 'x-current-user': encodeURIComponent(currentUser.name) } });
         message.success(response.data.message || "Cập nhật thành công");
+        setOrders((prevOrders) =>
+          prevOrders.map((order) => order.id === currentEditId ? newOrder : order)
+        );
+
       } else {
         const response = await axios.post("/api/orders", newOrder);
         message.success(response.data.message || "Thêm mới thành công");
+        const createdOrder = response.data.data;
+      // Thêm đơn hàng mới vào state orders (ví dụ thêm vào đầu mảng)
+      setOrders((prevOrders) => [createdOrder, ...prevOrders]);
       }
-      fetchOrders();
+      // fetchOrders();
       setFormVisible(false);
     //   const now = Date.now();
     // if (now - lastFetchTime.current >= THIRTY_MINUTES) {
@@ -1929,6 +1936,13 @@ const selectedTableColumns = columns.filter((col) =>
         >
          Huỷ đếm 
         </Button>  */}
+<Button
+  type="primary"
+  onClick={fetchOrders} // hoặc onClick={() => fetchOrders()}
+  style={{ float: 'right' }}
+>
+  Tải lại tất cả đơn hàng
+</Button>
         
         </Col>
         
@@ -2095,7 +2109,7 @@ const selectedTableColumns = columns.filter((col) =>
     dataSource={[...filteredOrders].sort((a, b) => b.stt - a.stt)}
     rowKey="id"
     bordered
-    pagination={{ pageSize: 100 }}
+    pagination={{ pageSize: searchText ? 100 : 20 }}
     // pagination={false}
   />
 )}
@@ -2113,7 +2127,7 @@ const selectedTableColumns = columns.filter((col) =>
         }
         dataSource={[...filteredOrders].sort((a, b) => b.stt - a.stt)}
         rowKey="id"
-        pagination={{ pageSize: 100 }}
+        pagination={{ pageSize: searchText ? 100 : 20 }}
         bordered
        
       />
