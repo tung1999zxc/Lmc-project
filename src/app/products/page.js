@@ -19,8 +19,9 @@ import {
   EditOutlined,
   DeleteOutlined,
   PlusOutlined,
-  UploadOutlined
+  UploadOutlined,SearchOutlined
 } from '@ant-design/icons';
+
 import axios from "axios";
 import { useDispatch, useSelector } from 'react-redux';
 
@@ -141,6 +142,8 @@ const InventoryPage = () => {
     setEditModalVisible(true);
   };
 
+ 
+
   const handleEditProductFinish = async (values) => {
     try {
       // Đảm bảo values.images là một mảng
@@ -223,6 +226,18 @@ const InventoryPage = () => {
   const filteredProducts = products.filter((product) =>
     product.name.toLowerCase().includes(searchText.toLowerCase())
   );
+
+  const totalRevenue = searchText.trim() !== "" ? filteredProducts.reduce((acc, product) => {
+    const productProfit = orders.reduce((sum, order) => {
+      if (order.products && Array.isArray(order.products)) {
+        if (order.products.some(item => item.product === product.name)) {
+          return sum + Number(order.profit || 0);
+        }
+      }
+      return sum;
+    }, 0);
+    return acc + productProfit;
+  }, 0) : 0; // Nếu `searchText` rỗng, tổng doanh số sẽ là 0
 
   const columns = [
     {
@@ -747,12 +762,21 @@ const InventoryPage = () => {
           </Button>
         </Form.Item>
       </Form>
-
-      <Search
-        placeholder="Tìm tên sản phẩm"
-        onChange={(e) => setSearchText(e.target.value)}
-        style={{ width: 300, marginBottom: 16 }}
-      />
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16 }}>
+      <Input
+  placeholder="Tìm tên sản phẩm"
+  onPressEnter={(e) => setSearchText(e.target.value.trim())} // Chỉ tìm kiếm khi nhấn Enter
+  style={{ width: 300 }}
+     suffix={
+          <SearchOutlined
+            style={{  fontSize: "16px", color: "#1890ff" }}
+            
+          />}
+/>
+  <div style={{ fontWeight: "bold", fontSize: "16px" }} >
+    Tổng: <span style={{ color: "blue" }}>{(totalRevenue * 17000).toLocaleString()} VND</span>
+  </div>
+</div>
 
       <Table 
       sticky

@@ -72,7 +72,7 @@ const OrderList = () => {
   const [initialOrders3, setInitialOrders3] = useState([]);
   const [isdem, setIsdem] = useState(false);
   const [dataPagename, setdataPagename] = useState([]);
- 
+  const [searchCustomerName, setSearchCustomerName] = useState("");
   const [specificDate, setSpecificDate] = useState(null); // Ngày cụ thể
   const [sttSearch, setSttSearch] = useState("");
   const [exportDisabled, setExportDisabled] = useState(true);
@@ -482,7 +482,12 @@ const resetPagename =()=>{
               (order.trackingCode != null &&
                String(order.trackingCode).toLowerCase().includes(sttSearch.toLowerCase()))
             );
-        return dateMatch && sttMatch && searchMatch && filterMatch && saleMatch && mktMatch;
+
+            const customerNameMatch = searchCustomerName.trim() === "" 
+            ? true 
+            : order.customerName.toLowerCase().includes(searchCustomerName.toLowerCase());
+
+        return dateMatch && sttMatch && searchMatch && customerNameMatch && filterMatch && saleMatch && mktMatch;
       })
       .sort(
         (a, b) =>
@@ -497,7 +502,8 @@ const resetPagename =()=>{
     selectedSale,
     selectedMKT,
     currentUser,
-    leadTeamMembers
+    leadTeamMembers,
+    searchCustomerName
   ]);
 
   // const handleCalculateTotals = () => {
@@ -894,18 +900,19 @@ const allRowsSelected2 = filteredOrders.length > 0 && filteredOrders.every(order
           );
         },
       },
-    {
-      title: (
-        <Checkbox
-          checked={selectedColumns.includes("pageName")}
-          onChange={(e) => handleColumnSelect("pageName", e.target.checked)}
-        >
-          TÊN PAGE
-        </Checkbox>
-      ),
-      dataIndex: "pageName",
-      key: "pageName",
-    },
+      {
+        title: (
+          <Checkbox
+            checked={selectedColumns.includes("pageName")}
+            onChange={(e) => handleColumnSelect("pageName", e.target.checked)}
+          >
+            TÊN PAGE
+          </Checkbox>
+        ),
+        dataIndex: "pageName",
+        key: "pageName",
+        render: (text) => text ? text.split("||")[0].trim() : "",
+      },
     ...(currentUser.position !== "salexuly"
       ? [
           {
@@ -1026,18 +1033,23 @@ const allRowsSelected2 = filteredOrders.length > 0 && filteredOrders.every(order
       dataIndex: "salexacnhan",
       key: "salexacnhan",
     },
-    {
-      title: (
-        <Checkbox
-          checked={selectedColumns.includes("mkt")}
-          onChange={(e) => handleColumnSelect("mkt", e.target.checked)}
-        >
-          MKT
-        </Checkbox>
-      ),
-      dataIndex: "mkt",
-      key: "mkt",
-    },
+    
+    ...(currentUser.position !== "salenhapdon"
+      ? [
+        {
+          title: (
+            <Checkbox
+              checked={selectedColumns.includes("mkt")}
+              onChange={(e) => handleColumnSelect("mkt", e.target.checked)}
+            >
+              MKT
+            </Checkbox>
+          ),
+          dataIndex: "mkt",
+          key: "mkt",
+        },
+        ]
+      : []),
     {
       title: (
         <Checkbox
@@ -1268,20 +1280,46 @@ const selectedTableColumns = columns.filter((col) =>
 
     { title: "DOANH THU", dataIndex: "profit", key: "profit" ,width: 20,},
     { title: "TÊN PAGE", dataIndex: "pageName", key: "pageName",width: 100, },
-    {
-      title: (
-        <Checkbox
-          checked={selectedColumns.includes("note")}
-          onChange={(e) => handleColumnSelect("note", e.target.checked)}
-        >
-          GHI CHÚ SALE
-        </Checkbox>
-      ),
-      dataIndex: "note",
-      width: 100,
-      key: "note",
-      render: (text) => <div style={{ width: 200,  }}><h3>{text} </h3></div>,
-    },
+    ...(currentUser.position === "mkt"
+      ? [
+        {
+          title: (
+            <Checkbox
+              checked={selectedColumns.includes("note")}
+              onChange={(e) => handleColumnSelect("note", e.target.checked)}
+            >
+              GHI CHÚ SALE
+            </Checkbox>
+          ),
+          dataIndex: "note",
+          key: "note",
+          width: 200,
+          render: (text) => {
+            if (!text) return ""; // Tránh lỗi nếu note rỗng hoặc null
+            const parts = text.split(":");
+            return <div style={{ width: 200 }}><h3>{parts.length > 1 ? parts.slice(1).join(":").trim() : text}</h3></div>;
+          },
+        },
+        ]
+      : []),
+    ...(currentUser.position === "lead"
+      ? [
+        {
+          title: (
+            <Checkbox
+              checked={selectedColumns.includes("note")}
+              onChange={(e) => handleColumnSelect("note", e.target.checked)}
+            >
+              GHI CHÚ SALE
+            </Checkbox>
+          ),
+          dataIndex: "note",
+          key: "note",
+          render: (text) => <div style={{ width: 200,  }}><h3>{text} </h3></div>,
+        },
+        ]
+      : []),
+    
     {
       title: "THANH TOÁN",
       dataIndex: "paymentStatus",
@@ -1293,8 +1331,14 @@ const selectedTableColumns = columns.filter((col) =>
     },
     { title: "TÊN KHÁCH", width: 100,dataIndex: "customerName", key: "customerName" },
     
-   
+    
+    ...(currentUser.position === "lead"
+      ? [
+        { title: "Sale", dataIndex: "sale", key: "sale",width: 100, },
+        ]
+      : []),
     { title: "MKT", dataIndex: "mkt", key: "mkt" },
+    
     
    
   ];
@@ -2002,6 +2046,14 @@ const selectedTableColumns = columns.filter((col) =>
     />
   }
 />
+{( currentUser.position_team==="kho" || currentUser.name ==="Trần Mỹ Hạnh" || currentUser.name ==="Diệp Anh")&&(<>
+  <Input
+    placeholder="Tìm tên khách hàng..."
+    allowClear
+    onPressEnter={(e) => setSearchCustomerName(e.target.value.trim())}
+    suffix={<SearchOutlined style={{ fontSize: "16px", color: "#1890ff" }} />}
+  /></>)}
+    
         
         </Col>
         

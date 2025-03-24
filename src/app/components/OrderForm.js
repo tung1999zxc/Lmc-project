@@ -439,8 +439,8 @@ const productOptions = products.map((p) => p.name);
                 <Form.Item label="ĐỊA CHỈ" name="address">
                   <Input.TextArea rows={2} />
                 </Form.Item>
-                <Form.Item label="MKT" name="mkt">
-                  <Input value={employeeNamepage} readOnly />
+                <Form.Item label="MKT" name="mkt" hidden={currentUser.position === "salenhapdon"} >
+                  <Input value={employeeNamepage} readOnly  />
                 </Form.Item> 
               </Col>
               <Col span={9}>
