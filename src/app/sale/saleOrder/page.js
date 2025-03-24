@@ -34,9 +34,22 @@ const Dashboard = () => {
   const [period, setPeriod] = useState("month");
   // editingKey dùng để xác định record nào đang được chỉnh sửa
   const [editingKey, setEditingKey] = useState(null);
+  const [shiftFilter, setShiftFilter] = useState(null);
+const [safeEmployees, setSafeEmployees] = useState([]);
 
-
-
+const fetchEmployees = async () => {
+      
+  try {
+    const response = await axios.get('/api/employees');
+    // response.data.data chứa danh sách nhân viên theo API đã viết
+    setSafeEmployees(response.data.data);
+  } catch (error) {
+    console.error('Lỗi khi lấy danh sách nhân viên:', error);
+    message.error('Lỗi khi lấy danh sách nhân viên');
+  } finally {
+   
+  }
+};
   const fetchOrders = async () => {
     try {
       const response = await axios.get("/api/orders");
@@ -49,6 +62,7 @@ const Dashboard = () => {
   useEffect(() => {
     fetchRecords();
     fetchOrders();
+    fetchEmployees();
   }, []);
 
  
@@ -330,6 +344,15 @@ const computeAverageClosingRate = (employeeName) => {
       },
     },
   ];
+  const filteredEmpIds = shiftFilter
+  ? safeEmployees
+      .filter(
+        (employee) =>
+          employee.position_team2 &&
+          employee.position_team2.toLowerCase() === shiftFilter.toLowerCase()
+      )
+      .map((employee) => employee.employee_code)
+  : safeEmployees.map((employee) => employee.employee_code);
 
   // Lọc dữ liệu record dựa trên vai trò của người dùng và bộ lọc thời gian
   const filteredRecords = records.filter((record) => {
@@ -344,7 +367,7 @@ const computeAverageClosingRate = (employeeName) => {
     ) {
       return false;
     }
-   
+    if (!filteredEmpIds.includes(record.employeeId)) return false;
     const recordDate = moment(record.date);
     const now = moment();
     if (period === "week") {
@@ -438,7 +461,19 @@ const computeAverageClosingRate = (employeeName) => {
           <Option value="lastMonth">Tháng Trước</Option>
           <Option value="twoMonthsAgo">2 Tháng Trước</Option>
         </Select>
+        <Select
+    value={shiftFilter}
+    onChange={(value) => setShiftFilter(value)}
+    style={{ width: 250, marginRight: 16 }}
+    placeholder="Chọn ca làm việc"
+    allowClear
+  >
+    <Option value="hanhchinh">Ca Hành Chính</Option>
+    <Option value="onlinetoi">Ca Online Tối</Option>
+    <Option value="onlinesang">Ca Online Sáng</Option>
+  </Select>
       </div>
+      
 
       {/* Render bảng và hiển thị tổng doanh số theo bộ lọc */}
       {currentUser.position === "managerSALE" ||

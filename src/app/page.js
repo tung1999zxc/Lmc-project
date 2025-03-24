@@ -680,6 +680,15 @@ function getLast30Days() {
     { label: 'TEAM DIỆN', value: 'DIEN' }, 
     { label: 'TEAM LẺ', value: 'LE' }, 
   ];
+  const teams2 = [
+    { label: 'TEAM SƠN', value: 'SON' },
+    { label: 'TEAM QUÂN', value: 'QUAN' },
+    { label: 'TEAM CHI', value: 'CHI' },
+    { label: 'TEAM PHONG', value: 'PHONG' },   
+    { label: 'TEAM TUẤN ANH', value: 'TUANANH' }, 
+   
+  ];
+  
 
   // Dữ liệu nhân viên (mẫu)
  
@@ -788,7 +797,7 @@ const employeeChartDataNewTEAM = teamEmployees.map(emp => {
   // });
 
 
-  const teamChartDataNew = teams.map(team => {
+  const teamChartDataNew = teams2.map(team => {
     const teamEmps = employees.filter(emp => emp.position_team === "mkt" && emp.team_id === team.value);
     const teamEmps2 = employees.filter(emp => emp.position_team === "mkt" && emp.team_id === team.value && emp.position !=="lead" );
     const sales = teamEmps.reduce((acc, emp) => {

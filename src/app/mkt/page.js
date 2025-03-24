@@ -801,19 +801,29 @@ const adminSummaryColumns = [
   
 };
 
-// const getLatestRecordByUser = (userId) => {
-//   const userRecords = records.filter(record => record.userId === userId);
-  
-//   if (userRecords.length === 0) return null;
+const getRecordFromRecentPast = (userId) => {
+  // Lặp qua các ngày từ hôm qua trở về quá khứ, giới hạn 30 ngày
+  for (let i = 1; i <= 30; i++) {
+    const targetDate = dayjs().subtract(i, "day");
+    // Lọc các record của user cho ngày targetDate
+    const userRecordsForDay = records.filter(
+      (record) =>
+        record.userId === userId &&
+        dayjs(record.date).isSame(targetDate, "day")
+    );
+    if (userRecordsForDay.length > 0) {
+      // Nếu có nhiều record, chọn record mới nhất trong ngày đó (hoặc bạn có thể chọn record đầu tiên)
+      return userRecordsForDay.reduce((latest, record) =>
+        dayjs(record.date).isAfter(dayjs(latest.date)) ? record : latest
+      );
+    }
+  }
+  return null;
+};
 
-//   return userRecords.reduce((latest, record) => 
-//     dayjs(record.date).isAfter(dayjs(latest.date)) ? record : latest
-//   );
-// };
-
-// // Kiểm tra bản ghi cuối cùng của user hiện tại
-// const latestRecord = getLatestRecordByUser(currentUser.employee_code);
-// const isDisabled = latestRecord ? !latestRecord.isLocked : false;
+// Kiểm tra bản ghi của user từ quá khứ gần đây
+const pastRecord = getRecordFromRecentPast(currentUser.employee_code);
+const isDisabled = pastRecord ? !pastRecord.isLocked : false;
 
   return (  
     <div style={{ padding: 24 }}>
@@ -846,7 +856,7 @@ const adminSummaryColumns = [
                 
                 <Form.Item>
                   <Button
-                    disabled={currentUser.position_team === 'sale' || currentUser.position_team === 'kho' }
+                    disabled={currentUser.position_team === 'sale' || currentUser.position_team === 'kho' || isDisabled }
                     type="primary"
                     htmlType="submit"
                     style={{ width: '100%' }}
