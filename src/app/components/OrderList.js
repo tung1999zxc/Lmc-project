@@ -1280,6 +1280,7 @@ const selectedTableColumns = columns.filter((col) =>
 
     { title: "DOANH THU", dataIndex: "profit", key: "profit" ,width: 20,},
     { title: "TÊN PAGE", dataIndex: "pageName", key: "pageName",width: 100, },
+    { title: "TÊN KHÁCH", width: 100,dataIndex: "customerName", key: "customerName" },
     ...(currentUser.position === "mkt"
       ? [
         {
@@ -1315,6 +1316,7 @@ const selectedTableColumns = columns.filter((col) =>
           ),
           dataIndex: "note",
           key: "note",
+          width: 200,
           render: (text) => <div style={{ width: 200,  }}><h3>{text} </h3></div>,
         },
         ]
@@ -1329,7 +1331,7 @@ const selectedTableColumns = columns.filter((col) =>
         <Tag color={text === "ĐÃ THANH TOÁN" ? "green" : "red"}>{text}</Tag>
       )
     },
-    { title: "TÊN KHÁCH", width: 100,dataIndex: "customerName", key: "customerName" },
+   
     
     
     ...(currentUser.position === "lead"
