@@ -170,7 +170,7 @@ const EmployeePageTable = () => {
       render: (_, record) =>{
                 // Nếu currentUser có vai trò admin, managerMKT, managerSALE → hiển thị đầy đủ nút chỉnh sửa và xóa
                 if (
-                  currentUser.position === 'admin' ||  currentUser.position === 'managerSALE'
+                  currentUser.position === 'admin' ||  currentUser.position === 'managerSALE' ||  currentUser.position === 'managerMKT'
                   
                   
                 ) {
