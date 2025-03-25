@@ -17,15 +17,7 @@
     useEffect(() => {
       if (!currentUser.name) {
         router.push("/login");
-      }if (currentUser.position==="kho1") {
-        router.push("/orders");}
-      // if (
-      //   currentUser.position !== 'admin' &&
-      //   currentUser.position !== 'managerMKT' &&
-      //   currentUser.position !== 'managerSALE'
-      // ) {
-      //   router.push("/");
-      // }
+      }
 
     }, []);
   
@@ -90,9 +82,9 @@
 
     // Gọi API khi component được mount
     useEffect(() => {
-      if (currentUser.position!=="kho1") {
+     
         fetchEmployees();
-      }
+      
      
     }, []);
 
