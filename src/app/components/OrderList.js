@@ -52,7 +52,8 @@ const OrderList = () => {
   const [searchValue2, setSearchValue2] = useState(""); // Lưu giá trị nhập vào
   const [initialOrders4, setInitialOrders4] = useState([]); 
   const [loading, setLoading] = useState(false);
-
+  const [shiftFilter, setShiftFilter] = useState(null);
+  const [totalRevenue, setTotalRevenue] = useState(0);
   
   
   const [namesalexuly, setnamesalexuly] = useState("");
@@ -266,7 +267,20 @@ const resetPagename =()=>{
     setDateRange(range);
     
   }, [dateRange2]);
+
+  const filteredEmpIds = shiftFilter
+  ? employees
+      .filter(
+        (employee) =>
+          employee.position_team2 &&
+          employee.position_team2.toLowerCase() === shiftFilter.toLowerCase()
+      )
+      .map((employee) => employee.name)
+  : employees.map((employee) => employee.name);  
   // Lọc đơn hàng dựa trên vai trò và các filter được chọn
+
+
+
   const filteredOrders = useMemo(() => {
     let roleFilteredOrders = [...orders];
 
@@ -322,7 +336,11 @@ const resetPagename =()=>{
         date &&
         dayjs(date).isValid() &&
         dayjs(date).isBetween(startDate, endDate, "day", "[]");
-        dateMatch = checkDate(order.orderDate);
+        if (currentUser.position_team === "kho") {
+    dateMatch = checkDate(order.shippingDate1);
+  } else {
+    dateMatch = checkDate(order.orderDate);
+  }
       // if (!order.shippingDate1 && !order.shippingDate2) {
       //   dateMatch = checkDate(order.orderDate);
       // } else {
@@ -336,6 +354,13 @@ const resetPagename =()=>{
     }
 
  
+    if (
+      !filteredEmpIds
+        .map((name) => name.trim().toLowerCase())
+        .includes(order.sale.trim().toLowerCase())
+    ) {
+      return false;
+    }
 
         // Điều kiện lọc theo từ khóa tìm kiếm
         const searchMatch = (() => {
@@ -396,6 +421,8 @@ const resetPagename =()=>{
                 return order.saleReport === "ĐỢI XN";
               case "done":
                 return order.saleReport === "DONE";
+              case "check":
+                return order.saleReport === "CHECK";
               case "ok":
                 return order.saleReport === "OK";
               case "booktb":
@@ -503,7 +530,8 @@ const resetPagename =()=>{
     selectedMKT,
     currentUser,
     leadTeamMembers,
-    searchCustomerName
+    searchCustomerName,
+    shiftFilter 
   ]);
 
   // const handleCalculateTotals = () => {
@@ -548,6 +576,11 @@ const resetPagename =()=>{
       const totals4 = calculateTotalQuantities(KHODONGOrders);
       setTotalQuantitiesKHODONG(totals4);
       setIsdem(true);
+      const revenueSum = filteredOrders.reduce((acc, order) => {
+        // Chuyển revenue về số nếu chưa phải số
+        return acc + (Number(order.revenue) || 0);
+      }, 0);
+      setTotalRevenue(revenueSum);
       // const tickedOrders2 = filteredOrders.filter(order => order.isShipping);
       // // Tính tổng số lượng sản phẩm cho các đơn đã tích
       // const totals2 = calculateTotalQuantities(tickedOrders2);
@@ -1895,7 +1928,7 @@ const selectedTableColumns = columns.filter((col) =>
   };
 
  
-      
+    
     
    
   
@@ -1998,12 +2031,18 @@ const selectedTableColumns = columns.filter((col) =>
       
       <Row gutter={[16, 16]} style={{ marginBottom: 24 }}>
         <Col span={4}>
-        <DatePicker
-          style={{ width: "100%" }}
-          placeholder="Chọn ngày"
-          value={specificDate ? dayjs(specificDate) : null}
-          onChange={(date) => setSpecificDate(date)}
-        />
+        <RangePicker
+  style={{ width: "100%" }}
+  placeholder={["Từ ngày", "Đến ngày"]}
+  value={
+    dateRange && Array.isArray(dateRange) && dateRange.length === 2
+      ? [dayjs(dateRange[0]), dayjs(dateRange[1])]
+      : []
+  }
+  onChange={(dates) =>
+    setDateRange(dates ? [dates[0].toDate(), dates[1].toDate()] : null)
+  }
+/>
         <Select
           allowClear
           id="presetFilter"
@@ -2091,6 +2130,7 @@ const selectedTableColumns = columns.filter((col) =>
               { value: "unpaid_success", label: "Chưa thanh toán & Giao Thành công" },     
               { value: "waiting_done", label: "Đơn chưa Done" },
               { value: "ok", label: "Đơn OK" },
+              { value: "check", label: "Đơn CHECK" },
               { value: "booktb", label: "BOOK TB" },
               { value: "waiting_approval", label: "Đợi xác nhận" },
               { value: "done", label: "Đơn đã Done" },
@@ -2112,7 +2152,20 @@ const selectedTableColumns = columns.filter((col) =>
           
             ]}
             onChange={(values) => setSelectedFilters(values)}
-          /></Col> ) }
+          />
+          <Select
+    value={shiftFilter}
+    onChange={(value) => setShiftFilter(value)}
+    style={{ width: 250, marginRight: 16 }}
+    placeholder="Chọn ca làm việc"
+    allowClear
+  >
+    <Option value="hanhchinh">Ca Hành Chính</Option>
+    <Option value="onlinetoi">Ca Online Tối</Option>
+    <Option value="onlinesang">Ca Online Sáng</Option>
+  </Select> <span>
+  Tổng Doanh Số: {(totalRevenue*17000).toLocaleString()}
+</span></Col> ) }
           
         
         {currentUser.position_team!=="kho" &&(<>
