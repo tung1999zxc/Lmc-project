@@ -1001,6 +1001,9 @@ const employeePieDataTEAM = employeeChartDataNewTEAM.map(emp => ({
   const today2 = new Date();
   const startOfToday = new Date(today2.getFullYear(), today2.getMonth(), today2.getDate());
   const endOfToday = new Date(today2.getFullYear(), today2.getMonth(), today2.getDate() + 1);
+  const today3 = new Date();
+  const startOfToday3 = new Date(today3.getFullYear(), today3.getMonth(), today3.getDate());
+  const endOfToday3 = new Date(today3.getFullYear(), today3.getMonth(), today3.getDate() + 3);
 
   const marketingReportData1 = mktEmployees.map((emp, index) => {
     const total1 = orders
@@ -1019,8 +1022,8 @@ const employeePieDataTEAM = employeeChartDataNewTEAM.map(emp => ({
       // Giả sử ad.createdAt chứa thời gian tạo quảng cáo
       const adDate = new Date(ad.createdAt);
       return ad.name.trim().toLowerCase() === emp.name.trim().toLowerCase() &&
-             adDate >= startOfToday &&
-             adDate < endOfToday;
+             adDate >= startOfToday3 &&
+             adDate < endOfToday3;
     })
     .reduce((sum, ad) => sum + (ad.request1 + ad.request2), 0);
     
@@ -1073,7 +1076,7 @@ if (sortedEmployees.length <= 5) {
 }
 
   const top5Employees = [...marketingReportData1]
-  .filter(emp => emp.total1 !== 0)
+  .filter(emp => (emp.total1 !== 0 && emp.totalAds1 !== 0))
   .sort((a, b) => b.total1 - a.total1)
   .slice(0, 5);
 
