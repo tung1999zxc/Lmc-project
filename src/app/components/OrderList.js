@@ -1336,7 +1336,7 @@ const selectedTableColumns = columns.filter((col) =>
         },
         ]
       : []),
-    ...(currentUser.position === "lead"
+    ...((currentUser.position === "lead" || currentUser.position === "managerMKT" )
       ? [
         {
           title: (
@@ -1367,7 +1367,7 @@ const selectedTableColumns = columns.filter((col) =>
    
     
     
-    ...(currentUser.position === "lead"
+    ...((currentUser.position === "lead" || currentUser.position === "managerMKT" )
       ? [
         { title: "Sale", dataIndex: "sale", key: "sale",width: 100, },
         ]
