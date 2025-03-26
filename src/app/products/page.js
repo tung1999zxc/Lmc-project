@@ -12,9 +12,11 @@ import {
   Popover,
   Select,
   Popconfirm,
-  Upload,message
+  Upload,message,Spin
 } from 'antd';
 import moment from 'moment';
+import FullScreenLoading from '../components/FullScreenLoading';
+
 import {
   EditOutlined,
   DeleteOutlined,
@@ -27,7 +29,6 @@ import { useDispatch, useSelector } from 'react-redux';
 
 const { Search } = Input;
 const { Option } = Select;
-
 // Hàm chuyển file sang base64
 const getBase64 = (file) => {
   return new Promise((resolve, reject) => {
@@ -42,12 +43,12 @@ import { useRouter } from 'next/navigation';
 const InventoryPage = () => {
   const router = useRouter(); 
   const currentUser = useSelector((state) => state.user.currentUser);
-  useEffect(() => {
-    if (!currentUser.name) {
-      router.push("/login");
-    }if (currentUser.position==="kho1"||currentUser.position_team ==="mkt") {
-      router.push("/orders");}
-  }, []);
+  // useEffect(() => {
+  //   if (!currentUser.name) {
+  //     router.push("/login");
+  //   }if (currentUser.position==="kho1"||currentUser.position_team ==="mkt") {
+  //     router.push("/orders");}
+  // }, []);
 
   const [orders, setOrders] = useState([]);
   const [products, setProducts] = useState([]);
@@ -61,6 +62,8 @@ const InventoryPage = () => {
   const [addImportModalVisible, setAddImportModalVisible] = useState(false);
   const [addingImportProduct, setAddingImportProduct] = useState(null);
   const [addImportForm] = Form.useForm();
+const [loading, setLoading] = useState(false);
+
 
   const [previewVisible, setPreviewVisible] = useState(false);
   // previewImage có thể là mảng ảnh (base64 strings)
@@ -68,6 +71,7 @@ const InventoryPage = () => {
 
 
   const fetchOrders = async () => {
+    setLoading(true);
     try {
       const response = await axios.get("/api/orders");
       setOrders(response.data.data);
@@ -75,6 +79,8 @@ const InventoryPage = () => {
     } catch (error) {
       console.error(error);
       message.error("Lỗi khi lấy đơn hàng");
+    }finally {
+      setLoading(false); // Tắt loading
     }
   };
   
@@ -101,15 +107,13 @@ const InventoryPage = () => {
   
   // Khi thêm sản phẩm mới, chuyển các file ảnh sang base64 trước lưu
   const onFinish = async (values) => {
-    const fileList = values.images || []; // Sửa ở đây
-    const base64Images = await Promise.all(
-      fileList.map((file) => getBase64(file.originFileObj))
-    );
-
+    const file = values.image?.[0]; // Lấy file duy nhất từ mảng
+    const base64Image = file ? await getBase64(file.originFileObj) : null;
+  
     const newProduct = {
       key: Date.now(),
       name: values.name,
-      images: base64Images,
+      image: base64Image,
       description: values.description,
       importedQty: values.importedQty,
       slvn: 0,
@@ -138,32 +142,61 @@ const InventoryPage = () => {
 
   const handleEditProduct = (record) => {
     setEditingProduct(record);
-    editForm.setFieldsValue({ name: record.name,slvn:record.slvn,sltq:record.sltq, description: record.description ,images : record.images});
+    editForm.setFieldsValue({
+      name: record.name,
+      
+      slvn: record.slvn,
+      sltq: record.sltq,
+      description: record.description,
+      image: record.image ? [{
+        uid: '-1',
+        name: 'image.png',
+        status: 'done',
+        url: record.image, // 🖼 Ảnh đã lưu từ database
+      }] : []
+    });
     setEditModalVisible(true);
   };
 
  
 
   const handleEditProductFinish = async (values) => {
+    setLoading(true); // Bật loading
+    setEditModalVisible(false);
     try {
-      // Đảm bảo values.images là một mảng
-     
+      const file = values.image?.[0]; // Lấy ảnh đầu tiên từ Upload
+      let imageValue = null;
+  
+      if (file) {
+        if (file.originFileObj) {
+          imageValue = await getBase64(file.originFileObj); // Nếu là file mới, chuyển base64
+        } else if (file.url) {
+          imageValue = file.url; // Nếu là ảnh cũ, giữ nguyên
+        }
+      }
   
       const updatedProduct = {
+        key: editingProduct.key,
         name: values.name,
         description: values.description,
-        slvn:values.slvn,
-        sltq:values.sltq
+        image: imageValue, // Lưu ảnh vào DB
+        slvn: values.slvn,
+        sltq: values.sltq
       };
   
-      const response = await axios.put(`/api/products/${editingProduct.key}`, updatedProduct);
-      message.success(response.data.message || "Cập nhật sản phẩm thành công");
-      fetchProducts();
-      setEditModalVisible(false);
+      await axios.put(`/api/products/${editingProduct.key}`, updatedProduct);
+      message.success("Cập nhật sản phẩm thành công");
+      
+      setProducts((prevOrders) =>
+        prevOrders.map((order) => order.key === editingProduct.key ? updatedProduct : order)
+      );
+      
       setEditingProduct(null);
     } catch (error) {
-      console.error(error.response?.data?.error || error.message);
+      console.error(error);
       message.error("Lỗi khi cập nhật sản phẩm");
+    }finally {
+      setLoading(false); // Tắt loading
     }
   };
   
@@ -686,36 +719,18 @@ const InventoryPage = () => {
         // Nếu muốn sắp xếp giảm dần, thay đổi thành:
         // return totalProfitB - totalProfitA;
       }
-    }
+    },
     
-    // {
-    //   title: 'Hình ảnh',
-    //   key: 'images',
-    //   render: (_, record) => {
-    //     return record.images && record.images.length > 0 ? (
-    //       <div
-    //         style={{ cursor: 'pointer' }}
-    //         onClick={() => {
-    //           setPreviewImage(record.images);
-    //           setPreviewVisible(true);
-    //         }}
-    //       >
-    //         <img
-    //           src={record.images[0]}
-    //           alt={record.name}
-    //           style={{ width: 80, height: 'auto' }}
-    //         />
-    //       </div>
-    //     ) : (
-    //       'Không có hình ảnh'
-    //     );
-    //   },
-    // },
+    {
+      title: 'Hình ảnh',
+      key: 'image',
+      render: (_, record) => record.image ? <img src={record.image} alt="product" style={{ width: 80 }} /> : 'Không có ảnh'
+    },
   ];
 
   return (
     <div style={{ padding: 24 }}>
-    
+     <FullScreenLoading loading={loading} tip="Đang tải dữ liệu..." />
       <Form
         form={form}
         layout="inline"
@@ -740,20 +755,19 @@ const InventoryPage = () => {
         >
           <Input.TextArea rows={1} placeholder="Kịch bản sản phẩm" />
         </Form.Item>
-        <Form.Item
-          name="images"
-          valuePropName="fileList"
-          getValueFromEvent={e => e && e.fileList}
-          // rules={[{ required: true, message: 'Vui lòng tải hình ảnh sản phẩm' }]}
-        >
-          <Upload
-            listType="picture"
-            multiple
-            beforeUpload={() => false}
-          >
-            <Button icon={<UploadOutlined />}>Chọn hình ảnh</Button>
-          </Upload>
-        </Form.Item>
+        <Form.Item 
+  name="image" 
+  valuePropName="fileList" 
+  getValueFromEvent={(e) => e?.fileList && e.fileList.length > 0 ? [e.fileList[0]] : []} // Chỉ giữ 1 file
+>
+  <Upload 
+    listType="picture" 
+    maxCount={1} 
+    beforeUpload={() => false}
+  >
+    <Button icon={<UploadOutlined />}>Chọn ảnh</Button>
+  </Upload>
+</Form.Item>
         <Form.Item>
           <Button disabled={currentUser.position !== 'admin' &&
           currentUser.position !== 'leadSALE' &&
@@ -806,6 +820,19 @@ const InventoryPage = () => {
           >
             <Input.TextArea rows={2} placeholder="Kịch bản sản phẩm" />
           </Form.Item>
+          <Form.Item 
+  name="image" 
+  valuePropName="fileList" 
+  getValueFromEvent={(e) => e?.fileList && e.fileList.length > 0 ? [e.fileList[0]] : []}// Chỉ giữ 1 file
+>
+  <Upload 
+    listType="picture" 
+    maxCount={1} 
+    beforeUpload={() => false}
+  >
+    <Button icon={<UploadOutlined />}>Chọn ảnh</Button>
+  </Upload>
+</Form.Item>
           <Form.Item
             label="Nhập VN"
             name="slvn"
@@ -824,7 +851,7 @@ const InventoryPage = () => {
     
           <Form.Item>
             <Button type="primary" htmlType="submit">
-              Lưu
+            {loading ? <Spin /> : "Lưu"}
             </Button>
           </Form.Item>
         </Form>

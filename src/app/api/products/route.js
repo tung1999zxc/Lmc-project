@@ -21,10 +21,10 @@ export async function GET(req) {
 
 export async function POST(req) {
   try {
-    const { name, images, description ,importedQty, slvn,sltq} = await req.json();
+    const { name, image, description ,importedQty, slvn,sltq} = await req.json();
 
     // Kiểm tra các trường bắt buộc (bạn có thể bổ sung thêm nếu cần)
-    if (!name || !images || !description  === undefined) {
+    if (!name || !image || !description  === undefined) {
       return new Response(
         JSON.stringify({ error: 'Thiếu thông tin bắt buộc' }),
         { status: 400 }
@@ -36,7 +36,7 @@ export async function POST(req) {
       name,
       slvn,
       sltq,
-      images, // mảng base64 strings
+      image, // mảng base64 strings
       description,
       imports: [
         {

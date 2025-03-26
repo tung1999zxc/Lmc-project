@@ -1002,8 +1002,8 @@ const employeePieDataTEAM = employeeChartDataNewTEAM.map(emp => ({
   const startOfToday = new Date(today2.getFullYear(), today2.getMonth(), today2.getDate());
   const endOfToday = new Date(today2.getFullYear(), today2.getMonth(), today2.getDate() + 1);
   const today3 = new Date();
-  const startOfToday3 = new Date(today3.getFullYear(), today3.getMonth(), today3.getDate());
-  const endOfToday3 = new Date(today3.getFullYear(), today3.getMonth(), today3.getDate() + 3);
+  const startOfToday3 = new Date(today3.getFullYear(), today3.getMonth(), today3.getDate()-3);
+  const endOfToday3 = new Date(today3.getFullYear(), today3.getMonth(), today3.getDate() -2 );
 
   const marketingReportData1 = mktEmployees.map((emp, index) => {
     const total1 = orders

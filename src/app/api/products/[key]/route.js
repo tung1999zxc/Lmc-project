@@ -7,6 +7,7 @@ export async function PUT(request, { params }) {
     const { key } = await params;
     let data = await request.json();
 
+    
     // Loại bỏ các trường không được phép cập nhật
     delete data._id;
     delete data.key;
