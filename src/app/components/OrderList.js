@@ -804,7 +804,14 @@ const allRowsSelected2 = filteredOrders.length > 0 && filteredOrders.every(order
  
   const columns = [
     {
-      title: "Thao Tác",
+      title: (
+        <Checkbox
+          checked={selectedColumns.includes("action")}
+          onChange={(e) => handleColumnSelect("action", e.target.checked)}
+        >
+          THAO TÁC
+        </Checkbox>
+      ),
       key: "action",
       render: (_, record) => {        
       //   const disableEdit =
