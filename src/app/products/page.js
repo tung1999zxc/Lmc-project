@@ -43,12 +43,12 @@ import { useRouter } from 'next/navigation';
 const InventoryPage = () => {
   const router = useRouter(); 
   const currentUser = useSelector((state) => state.user.currentUser);
-  // useEffect(() => {
-  //   if (!currentUser.name) {
-  //     router.push("/login");
-  //   }if (currentUser.position==="kho1"||currentUser.position_team ==="mkt") {
-  //     router.push("/orders");}
-  // }, []);
+  useEffect(() => {
+    if (!currentUser.name) {
+      router.push("/login");
+    }if (currentUser.position==="kho1"||currentUser.position_team ==="mkt") {
+      router.push("/orders");}
+  }, []);
 
   const [orders, setOrders] = useState([]);
   const [products, setProducts] = useState([]);
@@ -720,12 +720,15 @@ const [loading, setLoading] = useState(false);
         // return totalProfitB - totalProfitA;
       }
     },
-    
+    ...((currentUser.position === "managerSALE"|| currentUser.position === "leadSALE"||currentUser.name === "Tung99"||currentUser.name === "Hoàng Thị Trà My")
+    // ...((currentUser.position_team === "sale"|| currentUser.position === "leadSALE"||currentUser.name === "Tung99")
+      ? [ 
     {
       title: 'Hình ảnh',
       key: 'image',
       render: (_, record) => record.image ? <img src={record.image} alt="product" style={{ width: 80 }} /> : 'Không có ảnh'
-    },
+    },   ]
+    : []),
   ];
 
   return (

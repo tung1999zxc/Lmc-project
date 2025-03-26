@@ -103,7 +103,7 @@ const OrderList = () => {
     } catch (error) {
       console.error('Lỗi khi lấy đơn hàng:', error);
     }finally {
-      setTimeout(() => setLoading(false), 500); // Tắt xoay sau 0.5s
+       setLoading(false); // Tắt xoay sau 0.5s
     }
   };
   
@@ -818,7 +818,11 @@ const allRowsSelected2 = filteredOrders.length > 0 && filteredOrders.every(order
       // currentUser.position === "salenhapdon" && record.saleReport === "DONE";
       return (
         <Space>
-          <Button  icon={<EditOutlined />} onClick={() => handleEdit(record)} />
+          <Button disabled={
+                
+                currentUser.name === "Hoàng Công Phi"
+                
+              }  icon={<EditOutlined />} onClick={() => handleEdit(record)} />
           <Popconfirm title="Xóa đơn hàng?" onConfirm={() => handleDeleteOrder(record.id)}>
             <Button
               danger
@@ -826,6 +830,7 @@ const allRowsSelected2 = filteredOrders.length > 0 && filteredOrders.every(order
                 currentUser.position === "salenhapdon" ||
                 currentUser.position === "salexacnhan" ||
                 currentUser.position === "salexuly"||
+                currentUser.name === "Hoàng Công Phi"||
                 currentUser.position === "salefull"
               }
               icon={<DeleteOutlined />}

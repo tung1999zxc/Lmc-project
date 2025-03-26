@@ -1,13 +1,15 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import axios from "axios"; 
+import FullScreenLoading from './FullScreenLoading';
+
 import {
   Form,
   Input,
   DatePicker,
   Select,
   Button,
-  Row,
+  Row,Popover,
   Col,
   Modal,
   Space,
@@ -23,6 +25,7 @@ const OrderForm = ({ visible, onCancel,loading, onSubmit, resetPagename,initialV
   const currentUser = useSelector((state) => state.user.currentUser);
   // Giả sử: nếu mã nhân viên là 1 thì isEmployee1 = true
   
+  const [loading2, setLoading2] = useState(false);
   
    
 
@@ -31,12 +34,15 @@ const OrderForm = ({ visible, onCancel,loading, onSubmit, resetPagename,initialV
   const [employeeNamepage, setEmployeeNamepage] = useState("");
 
    const fetchProducts = async () => {
+    setLoading2(true);
     try {
       const response = await axios.get('/api/products');
       setProducts(response.data.data);
+      setLoading2(false);
     } catch (error) {
       console.error(error);
       message.error("Lỗi khi lấy danh sách sản phẩm");
+      setLoading2(false);
     }
   };
 
@@ -156,6 +162,8 @@ const productOptions = products.map((p) => p.name);
       width={1000}
       style={{ top: 20 }}
     >
+      <FullScreenLoading loading={loading2||loading} tip="Đang tải dữ liệu..." />
+
       {currentUser.position === "kho1" || currentUser.position === "kho2" ? (
         <>
           <Form form={form} layout="vertical" onFinish={onFinish}>
@@ -445,26 +453,53 @@ const productOptions = products.map((p) => p.name);
               </Col>
               <Col span={9}>
                 {/* Thay đổi: dùng Form.List cho SẢN PHẨM và SỐ LƯỢNG SP */}
-                <p style={{ marginBottom: 3, marginTop: 5  }}>SẢN PHẨM</p>
+                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+  <p style={{ margin: 0 }}>SẢN PHẨM</p>
+  <ReloadOutlined
+    style={{
+      fontSize: 24,
+      color: "#08c",
+      cursor: "pointer",
+      transition: "transform 0.5s",
+      transform: loading ? "rotate(360deg)" : "none",
+    }}
+    spin={loading}
+    onClick={fetchProducts}
+  />
+</div>
                 <Form.List name="products">
                   {(fields, { add, remove }) => (
                     <>
                       {fields.map((field,index) => (
                         <Space key={`${field.key}-${index}`} align="baseline">
                           <Form.Item
-                            {...field}
-                            name={[field.name, "product"]}
-                            fieldKey={[field.fieldKey, "product"]}
-                            rules={[{ required: true, message: "Chọn sản phẩm" }]}
-                          >
-                            <Select placeholder="Chọn sản phẩm" style={{ width: 270 }} showSearch>
-                              {productOptions.map((product) => (
-                                <Option key={product} value={product}>
-                                  {product}
-                                </Option>
-                              ))}
-                            </Select>
-                          </Form.Item>
+  {...field}
+  name={[field.name, "product"]}
+  fieldKey={[field.fieldKey, "product"]}
+  rules={[{ required: true, message: "Chọn sản phẩm" }]}
+>
+  <Select placeholder="Chọn sản phẩm" style={{ width: 270 }} showSearch>
+    {productOptions.map((product) => {
+      // Tìm sản phẩm tương ứng trong mảng products
+      const productObj = products.find((p) => p.name === product);
+      return (
+        <Option key={product} value={product}>
+          <Popover
+            content={
+              productObj && productObj.image ? (
+                <img src={productObj.image} alt={product} style={{ width: 150 }} />
+              ) : null
+            }
+            title={product}
+            trigger="hover"
+          >
+            <span>{product}</span>
+          </Popover>
+        </Option>
+      );
+    })}
+  </Select>
+</Form.Item>
                           <Form.Item
                             {...field}
                             name={[field.name, "quantity"]}
