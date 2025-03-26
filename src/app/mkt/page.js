@@ -15,6 +15,7 @@ import {
   notification ,
   Col
 } from 'antd';
+import FullScreenLoading from '../components/FullScreenLoading';
 
 import moment from 'moment';
 import { EditOutlined, DeleteOutlined } from '@ant-design/icons';
@@ -36,7 +37,7 @@ const Dashboard = () => {
 
   const [period, setPeriod] = useState("month");
   const [form] = Form.useForm();
-  
+  const [loading, setLoading] = useState(false);
   const [safeOrders, setSafeOrders] = useState([]);
   const [records, setRecords] = useState([]);
   const [safeEmployees, setSafeEmployees] = useState([]);
@@ -239,12 +240,15 @@ const Dashboard = () => {
     return grouped;
   };
   const fetchRecords = async () => {
+    if(currentUser.position !== "admin"&&currentUser.position !== "managerMKT"){setLoading(true)} ;
     try {
       const response = await axios.get('/api/recordsMKT');
       setRecords(response.data.data);
     } catch (error) {
       console.error(error);
       message.error("Lỗi khi lấy danh sách");
+    }finally {
+      setLoading(false); // Tắt loading
     }
   };
   /*** Xử lý submit form (Thêm mới hoặc cập nhật) ***/
@@ -829,6 +833,7 @@ const isDisabled = pastRecord ? !pastRecord.isLocked : false;
     <div style={{ padding: 24 }}>
       {/* Tiêu đề "Nhập thông tin" */}
       <Row gutter={[16, 16]}>
+             <FullScreenLoading loading={loading} tip="Đang tải dữ liệu..." />
         
       </Row>
       {/* Form nhập liệu */}

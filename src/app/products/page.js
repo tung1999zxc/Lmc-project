@@ -71,7 +71,7 @@ const [loading, setLoading] = useState(false);
 
 
   const fetchOrders = async () => {
-    setLoading(true);
+    
     try {
       const response = await axios.get("/api/orders");
       setOrders(response.data.data);
@@ -79,8 +79,6 @@ const [loading, setLoading] = useState(false);
     } catch (error) {
       console.error(error);
       message.error("Lỗi khi lấy đơn hàng");
-    }finally {
-      setLoading(false); // Tắt loading
     }
   };
   
@@ -96,12 +94,15 @@ const [loading, setLoading] = useState(false);
     return 0;
   };
   const fetchProducts = async () => {
+    setLoading(true);
     try {
       const response = await axios.get('/api/products');
       setProducts(response.data.data);
     } catch (error) {
       console.error(error);
       message.error("Lỗi khi lấy danh sách sản phẩm");
+    }finally {
+      setLoading(false); // Tắt loading
     }
   };
   
