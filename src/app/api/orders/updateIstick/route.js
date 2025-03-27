@@ -23,7 +23,7 @@ export async function POST(req) {
                 }
               : {shippingDate1: "", 
                 deliveryStatus: "",
-                trackingCode: "",
+                
               istick4:false })
           }
         }
