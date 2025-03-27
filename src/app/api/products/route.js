@@ -24,7 +24,7 @@ export async function POST(req) {
     const { name, image, description ,importedQty, slvn,sltq} = await req.json();
 
     // Kiểm tra các trường bắt buộc (bạn có thể bổ sung thêm nếu cần)
-    if (!name || !image || !description  === undefined) {
+    if (!name   === undefined) {
       return new Response(
         JSON.stringify({ error: 'Thiếu thông tin bắt buộc' }),
         { status: 400 }
