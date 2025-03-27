@@ -933,7 +933,7 @@ const employeePieDataTEAM = employeeChartDataNewTEAM.map(emp => ({
 
   // === Biểu đồ doanh số trung bình của nhân viên trong từng team (BarChart) ===
   const averageTeamChartData = teams2.map(team => {
-    const teamEmps = employees.filter(emp => emp.position_team === "mkt" && emp.team_id === team.value);
+    const teamEmps = employees.filter(emp => emp.position_team === "mkt" && emp.team_id === team.value &&  emp.position !== "lead");
     const teamProfit = teamEmps.reduce((acc, emp) => {
       const empSales = filteredOrders
         .filter(order => order.mkt.trim().toLowerCase() === emp.name.trim().toLowerCase())
