@@ -2098,16 +2098,26 @@ const selectedTableColumns = columns.filter((col) =>
       // value={searchValue} // Hiển thị giá trị nhập vào
       // onChange={(e) => setSearchValue(e.target.value)} // Cập nhật nhưng không tìm kiếm ngay
       onPressEnter={(e) => handleSearch(e.target.value.trim())} // Chỉ tìm kiếm khi nhấn Enter hoặc nút Search
+      onClear={() => {
+        setSearchValue("");
+        handleSearch(""); // Hiển thị lại danh sách đầy đủ khi nhấn X
+      }}
       suffix={
         <SearchOutlined
           style={{  fontSize: "16px", color: "#1890ff" }}
           
         />}
     />
+    
  <Input
   placeholder="Tìm kiếm STT"
   allowClear
   onPressEnter={(e) => handleSearch2(e.target.value.trim())}
+  
+  onClear={() => {
+    setSearchValue2("");
+    handleSearch2(""); // Hiển thị lại danh sách đầy đủ khi nhấn X
+  }}
   // onChange={(e) => setSearchValue2(e.target.value)}
   suffix={
     <SearchOutlined
@@ -2120,6 +2130,10 @@ const selectedTableColumns = columns.filter((col) =>
   <Input
     placeholder="Tìm tên khách hàng..."
     allowClear
+    onClear={() => {
+      setSearchCustomerName("");
+      // Hiển thị lại danh sách đầy đủ khi nhấn X
+    }}
     onPressEnter={(e) => setSearchCustomerName(e.target.value.trim())}
     suffix={<SearchOutlined style={{ fontSize: "16px", color: "#1890ff" }} />}
   /></>)}

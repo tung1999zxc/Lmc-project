@@ -244,12 +244,19 @@ const EmployeePageTable = () => {
           {isEditing ? "Lưu" : "Thêm"}
         </Button>
         
-      </Space>
-      <Input
+      </Space><br></br>
+      <Input.Search
   style={{ width: 300 }}
   placeholder="Tìm kiếm tên page"
   value={searchText}
+  allowClear
+  onClear={() => {
+    setSearchText("");
+    setAppliedSearchText("");
+    // Hiển thị lại danh sách đầy đủ khi nhấn X
+  }}
   onChange={(e) => setSearchText(e.target.value)}
+  onSearch={() => setAppliedSearchText(searchText)}
   onPressEnter={() => setAppliedSearchText(searchText)}
    />
 
