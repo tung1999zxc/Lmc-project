@@ -2182,7 +2182,9 @@ const selectedTableColumns = columns.filter((col) =>
               
             ]}
             onChange={(values) => setSelectedFilters(values)}
-          /></Col>) :(<Col span={5}> <Select
+          />  
+          
+        </Col>) :(<Col span={5}> <Select
             mode="multiple"
             style={{ width: "100%" }}
             placeholder="Chọn bộ lọc"
@@ -2225,9 +2227,7 @@ const selectedTableColumns = columns.filter((col) =>
     <Option value="hanhchinh">Ca Hành Chính</Option>
     <Option value="onlinetoi">Ca Online Tối</Option>
     <Option value="onlinesang">Ca Online Sáng</Option>
-  </Select> <span>
-  Tổng Doanh Số: {(totalRevenue*17000).toLocaleString()}
-</span></Col> ) }
+  </Select></Col> ) }
           
         
         {currentUser.position_team!=="kho" &&(<>
@@ -2255,6 +2255,12 @@ const selectedTableColumns = columns.filter((col) =>
     allowClear
     showSearch
   />
+   <span><strong>
+  Tổng Doanh Số: {(filteredOrders.reduce((acc, order) => {
+        // Chuyển revenue về số nếu chưa phải số
+        return acc + (Number(order.revenue) || 0);
+      }, 0)*17000).toLocaleString()}
+</strong></span>
 </Col>
         <Col span={3}>
          
@@ -2263,6 +2269,7 @@ const selectedTableColumns = columns.filter((col) =>
         {currentUser.position_team==="kho" && exportDisabled && 
         <Col span={2}>
         <ExportExcelButton  orders={filteredOrdersForExcel} />
+        
           
         </Col>}
       </Row>
