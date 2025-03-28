@@ -74,6 +74,7 @@ const OrderList = () => {
   const [isdem, setIsdem] = useState(false);
   const [dataPagename, setdataPagename] = useState([]);
   const [searchCustomerName, setSearchCustomerName] = useState("");
+  const [searchCustomerName2, setSearchCustomerName2] = useState("");
   const [specificDate, setSpecificDate] = useState(null); // Ngày cụ thể
   const [sttSearch, setSttSearch] = useState("");
   const [exportDisabled, setExportDisabled] = useState(true);
@@ -514,7 +515,13 @@ const resetPagename =()=>{
             ? true 
             : order.customerName.toLowerCase().includes(searchCustomerName.toLowerCase());
 
-        return dateMatch && sttMatch && searchMatch && customerNameMatch && filterMatch && saleMatch && mktMatch;
+            const customerNameMatch2 = searchCustomerName2.trim() === "" 
+            ? true 
+            : order.products.some((product) => 
+                product.product.toLowerCase().includes(searchCustomerName2.toLowerCase())
+              );
+
+        return dateMatch && sttMatch && searchMatch && customerNameMatch && customerNameMatch2 && filterMatch && saleMatch && mktMatch;
       })
       .sort(
         (a, b) =>
@@ -531,6 +538,7 @@ const resetPagename =()=>{
     currentUser,
     leadTeamMembers,
     searchCustomerName,
+    searchCustomerName2,
     shiftFilter 
   ]);
 
@@ -2126,7 +2134,7 @@ const selectedTableColumns = columns.filter((col) =>
     />
   }
 />
-{( currentUser.position_team==="kho" || currentUser.name ==="Trần Mỹ Hạnh" || currentUser.name ==="Diệp Anh")&&(<>
+{( currentUser.position_team==="kho" ||currentUser.position_team==="sale" )&&(<>
   <Input
     placeholder="Tìm tên khách hàng..."
     allowClear
@@ -2136,7 +2144,18 @@ const selectedTableColumns = columns.filter((col) =>
     }}
     onPressEnter={(e) => setSearchCustomerName(e.target.value.trim())}
     suffix={<SearchOutlined style={{ fontSize: "16px", color: "#1890ff" }} />}
-  /></>)}
+  />
+  <Input
+    placeholder="Tìm tên Sản Phẩm..."
+    allowClear
+    onClear={() => {
+      setSearchCustomerName2("");
+      // Hiển thị lại danh sách đầy đủ khi nhấn X
+    }}
+    onPressEnter={(e) => setSearchCustomerName2(e.target.value.trim())}
+    suffix={<SearchOutlined style={{ fontSize: "16px", color: "#1890ff" }} />}
+  />
+  </>)}
     
         
         </Col>
