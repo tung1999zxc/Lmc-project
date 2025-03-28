@@ -272,6 +272,37 @@ const [loading, setLoading] = useState(false);
     }, 0);
     return acc + productProfit;
   }, 0) : 0; // Nếu `searchText` rỗng, tổng doanh số sẽ là 0
+  const [editFileList, setEditFileList] = useState([]);
+  
+  useEffect(() => {
+    if (true) {
+      const handlePaste = (e) => {
+        const items = e.clipboardData.items;
+        for (let item of items) {
+          if (item.type.startsWith("image/")) {
+            const file = item.getAsFile();
+            if (file) {
+              const newFile = {
+                uid: "-1",
+                name: file.name,
+                status: "done",
+                originFileObj: file,
+                url: URL.createObjectURL(file),
+              };
+              setEditFileList([newFile]);
+              // Cập nhật giá trị cho form nếu cần:
+              editForm.setFieldsValue({ image: [newFile] });
+              form.setFieldsValue({ image: [newFile] });
+              break; // chỉ xử lý ảnh đầu tiên được paste
+            }
+          }
+        }
+      };
+      document.addEventListener("paste", handlePaste);
+      return () => document.removeEventListener("paste", handlePaste);
+    }
+  }, [editModalVisible, editForm]);
+  
 
   const columns = [
     {
@@ -759,19 +790,26 @@ const [loading, setLoading] = useState(false);
         >
           <Input.TextArea rows={1} placeholder="Kịch bản sản phẩm" />
         </Form.Item>
-        <Form.Item 
-  name="image" 
-  valuePropName="fileList" 
-  getValueFromEvent={(e) => e?.fileList && e.fileList.length > 0 ? [e.fileList[0]] : []} // Chỉ giữ 1 file
->
-  <Upload 
-    listType="picture" 
-    maxCount={1} 
-    beforeUpload={() => false}
-  >
-    <Button icon={<UploadOutlined />}>Chọn ảnh</Button>
-  </Upload>
-</Form.Item>
+        <Form.Item
+      name="image"
+      valuePropName="fileList"
+      getValueFromEvent={(e) =>
+        e?.fileList && e.fileList.length > 0 ? [e.fileList[0]] : []
+      } // Chỉ giữ 1 file
+    >
+      <Upload
+        listType="picture"
+        maxCount={1}
+        fileList={editFileList}
+        onChange={({ fileList }) => {
+          setEditFileList(fileList);
+          editForm.setFieldsValue({ image: fileList });
+        }}
+        beforeUpload={() => false}
+      >
+        <Button icon={<UploadOutlined />}>Chọn ảnh hoặc dán ảnh</Button>
+      </Upload>
+    </Form.Item>
         <Form.Item>
           <Button disabled={currentUser.position !== 'admin' &&
           currentUser.position !== 'leadSALE' &&
@@ -824,19 +862,26 @@ const [loading, setLoading] = useState(false);
           >
             <Input.TextArea rows={2} placeholder="Kịch bản sản phẩm" />
           </Form.Item>
-          <Form.Item 
-  name="image" 
-  valuePropName="fileList" 
-  getValueFromEvent={(e) => e?.fileList && e.fileList.length > 0 ? [e.fileList[0]] : []}// Chỉ giữ 1 file
->
-  <Upload 
-    listType="picture" 
-    maxCount={1} 
-    beforeUpload={() => false}
-  >
-    <Button icon={<UploadOutlined />}>Chọn ảnh</Button>
-  </Upload>
-</Form.Item>
+          <Form.Item
+      name="image"
+      valuePropName="fileList"
+      getValueFromEvent={(e) =>
+        e?.fileList && e.fileList.length > 0 ? [e.fileList[0]] : []
+      } // Chỉ giữ 1 file
+    >
+      <Upload
+        listType="picture"
+        maxCount={1}
+        fileList={editFileList}
+        onChange={({ fileList }) => {
+          setEditFileList(fileList);
+          editForm.setFieldsValue({ image: fileList });
+        }}
+        beforeUpload={() => false}
+      >
+        <Button icon={<UploadOutlined />}>Chọn ảnh hoặc dán ảnh</Button>
+      </Upload>
+    </Form.Item>
           <Form.Item
             label="Nhập VN"
             name="slvn"

@@ -966,8 +966,8 @@ const allRowsSelected2 = filteredOrders.length > 0 && filteredOrders.every(order
         key: "pageName",
         render: (text) => text ? text.split("||")[0].trim() : "",
       },
-    ...(currentUser.position !== "salexuly"
-      ? [
+    ...((currentUser.position === "managerSALE"||currentUser.position === "leadSALE"||currentUser.name === "Hoàng Lan Phương"||currentUser.name === "Đỗ Uyển Nhi"
+     ) ? [
           {
             title: (<>
             <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
@@ -1131,6 +1131,9 @@ const allRowsSelected2 = filteredOrders.length > 0 && filteredOrders.every(order
       ),
       dataIndex: "saleReport",
       key: "saleReport",
+      render: (text) => (
+        <Tag color={text === "DONE" ? "green" : "red"}>{text}</Tag>
+      ),
     },
     {
       title: (
