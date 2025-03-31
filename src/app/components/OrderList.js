@@ -2238,7 +2238,7 @@ const selectedTableColumns = columns.filter((col) =>
           <Select style={{ width: "100%" }}
          
             disabled={
-              currentUser.position === "mkt"  
+              currentUser.position === "mkt"  || currentUser.position === "salenhapdon"
             }
             placeholder="Chọn Sale"
             options={saleOptions.map((s) => ({ value: s, label: s }))}
@@ -2251,7 +2251,7 @@ const selectedTableColumns = columns.filter((col) =>
   <Select
     mode="multiple" // Cho phép chọn nhiều giá trị
     style={{ width: "100%" }}
-    disabled={currentUser.position === "mkt"}
+    disabled={currentUser.position === "mkt"|| currentUser.position === "salenhapdon"}
     placeholder="Chọn MKT"
     options={mktOptions.map((m) => ({ value: m, label: m }))}
     onChange={(value) => setSelectedMKT(value)}
