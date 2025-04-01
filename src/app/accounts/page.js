@@ -323,7 +323,7 @@
             label="Team"
             name="team_id"
           >
-            <Select disabled={edit} options={teams} />
+            <Select disabled={currentUser.name !== "Phi Navy" &&currentUser.name !== "Tung99"} options={teams} />
           </Form.Item>
           <Form.Item
             label="Bộ phận"
