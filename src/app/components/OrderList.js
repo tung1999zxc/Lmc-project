@@ -2238,7 +2238,7 @@ const selectedTableColumns = columns.filter((col) =>
           <Select style={{ width: "100%" }}
          
             disabled={
-              currentUser.position === "mkt"  || currentUser.position === "salenhapdon"
+              currentUser.position === "mkt" 
             }
             placeholder="Chọn Sale"
             options={saleOptions.map((s) => ({ value: s, label: s }))}
@@ -2255,15 +2255,16 @@ const selectedTableColumns = columns.filter((col) =>
     placeholder="Chọn MKT"
     options={mktOptions.map((m) => ({ value: m, label: m }))}
     onChange={(value) => setSelectedMKT(value)}
-    allowClear
+    allowClear 
     showSearch
   />
-   <span><strong>
+  {currentUser.position !=="salenhapdon" &&
+   <span ><strong>
   Tổng Doanh Số: {(filteredOrders.reduce((acc, order) => {
         // Chuyển revenue về số nếu chưa phải số
         return acc + (Number(order.revenue) || 0);
       }, 0)*17000).toLocaleString()}
-</strong></span>
+</strong></span>}
 </Col>
         <Col span={3}>
          
