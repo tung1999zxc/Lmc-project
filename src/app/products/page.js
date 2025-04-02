@@ -50,10 +50,11 @@ const InventoryPage = () => {
       router.push("/orders");}
   }, []);
 
-  const [orders, setOrders] = useState([]);
+  const [orders2, setOrders] = useState([]);
   const [products, setProducts] = useState([]);
   const [form] = Form.useForm();
   const [searchText, setSearchText] = useState('');
+  const [selectedPreset, setSelectedPreset] = useState("all");
 
   const [editModalVisible, setEditModalVisible] = useState(false);
   const [editingProduct, setEditingProduct] = useState(null);
@@ -709,7 +710,8 @@ const [loading, setLoading] = useState(false);
         } else if (totalProfit >= 50000000) {
           bgColor = "yellow"; // Trên 50 triệu: nền vàng
         }
-    
+
+      
         return (
           <div
             style={{
@@ -762,7 +764,57 @@ const [loading, setLoading] = useState(false);
     },   ]
     : []),
   ];
-
+  function filterByPreset(dataArray, preset) {
+    const now = new Date();
+    let start, end;
+    switch (preset) {  
+      case "today":
+        // Bắt đầu từ 00:00:00 đến 23:59:59 của hôm nay
+        start = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+        end = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999);
+        break;
+      case "yesterday":
+        // Hôm qua: từ 00:00:00 đến 23:59:59 của ngày hôm qua
+        start = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1);
+        end = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1, 23, 59, 59, 999);
+        break;
+      case "week":
+        // 7 ngày gần nhất: từ ngày 7 ngày trước (00:00:00) đến hôm nay (23:59:59)
+        start = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 7);
+        end = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999);
+        break;
+      case "currentMonth":
+        // Từ ngày 1 của tháng đến cuối ngày hôm nay
+        start = new Date(now.getFullYear(), now.getMonth(), 1);
+        end = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999);
+        break;
+      case "lastMonth":
+        start = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+        end = new Date(now.getFullYear(), now.getMonth(), 0, 23, 59, 59, 999);
+        break;
+      case "twoMonthsAgo":
+        start = new Date(now.getFullYear(), now.getMonth() - 2, 1);
+        end = new Date(now.getFullYear(), now.getMonth() - 1, 0, 23, 59, 59, 999);
+        break;
+      case "threeMonthsAgo":
+        start = new Date(now.getFullYear(), now.getMonth() - 3, 1);
+        end = new Date(now.getFullYear(), now.getMonth() - 2, 0, 23, 59, 59, 999);
+        break;
+      default:
+        return dataArray;
+    }
+    return dataArray.filter(item => {
+      // Sử dụng field 'orderDate' nếu có, nếu không thì dùng 'date'
+      const dateStr = item.orderDate || item.date;
+      const itemDate = new Date(dateStr);
+      return itemDate >= start && itemDate <= end;
+    });
+  }
+          // Lấy danh sách orders đã lọc theo preset
+          const orders = selectedPreset === "all" ? orders2 : filterByPreset(orders2, selectedPreset);
+        
+          // Ví dụ: cập nhật tính tổng doanh số dựa trên ordersFiltered thay vì orders
+       
   return (
     <div style={{ padding: 24 }}>
      <FullScreenLoading loading={loading} tip="Đang tải dữ liệu..." />
@@ -829,6 +881,17 @@ const [loading, setLoading] = useState(false);
             
           />}
 />
+<Select
+          value={selectedPreset}
+          onChange={(value) => setSelectedPreset(value)}
+          style={{ width: 200 }}
+        >
+          <Option value="all">Tất cả</Option>
+          <Option value="currentMonth">Tháng này</Option>
+          <Option value="lastMonth">Tháng trước</Option>
+          <Option value="twoMonthsAgo">2 tháng trước</Option>
+          <Option value="threeMonthsAgo">3 tháng trước</Option>
+        </Select>
   <div style={{ fontWeight: "bold", fontSize: "16px" }} >
     Tổng: <span style={{ color: "blue" }}>{(totalRevenue * 17000).toLocaleString()} VND</span>
   </div>
