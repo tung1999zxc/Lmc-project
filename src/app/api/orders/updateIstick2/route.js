@@ -4,12 +4,12 @@ export async function POST(req) {
   try {
     const { orders } = await req.json();
     const { db } = await connectToDatabase();
-
+    const currentUserName = decodeURIComponent(req.headers.get('x-current-user')) || data.isShippingname || 'Unknown';
     // Tạo danh sách các thao tác update cho từng đơn hàng
     const updates = orders.map(order => ({
       updateOne: {
         filter: { id: order.id },
-        update: { $set: { isShipping: order.isShipping } },
+        update: { $set: { isShipping: order.isShipping , isShippingname: currentUserName } },
       }
     }));
 

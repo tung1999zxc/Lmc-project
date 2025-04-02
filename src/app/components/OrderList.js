@@ -734,6 +734,9 @@ const resetPagename =()=>{
       // Gửi chỉ các trường cần cập nhật (id và istick)
       const response = await axios.post("/api/orders/updateIstick2", {
         orders: ordersToUpdate.map(({ id, isShipping }) => ({ id, isShipping })),
+      },
+      {
+        headers: { "x-current-user": encodeURIComponent(currentUser.name) },
       });
   
       message.success(response.data.message || "Đã lưu cập nhật các đơn");
@@ -1011,6 +1014,7 @@ const allRowsSelected2 = filteredOrders.length > 0 && filteredOrders.every(order
           },
         ]
       : []),
+    
     {
       title: (
         <Checkbox
@@ -1281,6 +1285,23 @@ const allRowsSelected2 = filteredOrders.length > 0 && filteredOrders.every(order
       dataIndex: "processStatus",
       key: "processStatus",
     },
+    ...((currentUser.name === "Tung99"
+    ) ? [
+         {
+           title: 
+
+
+             
+            " CTY ĐÓNG NAME"
+          
+           ,
+           
+           key: "isShippingname",
+           dataIndex: "isShippingname",
+         
+         },
+       ]
+     : []),
   ];
 // Lọc ra các cột đã được tick để hiển thị ở bảng phụ
 const selectedTableColumns = columns.filter((col) =>
@@ -1810,6 +1831,7 @@ const selectedTableColumns = columns.filter((col) =>
       dataIndex: "noteKHO",
       key: "noteKHO",
     },
+    
   ];
 
   // Xử lý mở form thêm mới, sửa và xóa đơn hàng
