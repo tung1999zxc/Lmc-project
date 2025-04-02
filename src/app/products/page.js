@@ -69,7 +69,54 @@ const [loading, setLoading] = useState(false);
   const [previewVisible, setPreviewVisible] = useState(false);
   // previewImage có thể là mảng ảnh (base64 strings)
   const [previewImage, setPreviewImage] = useState(null);
-
+  function filterByPreset(dataArray, preset) {
+    const now = new Date();
+    let start, end;
+    switch (preset) {  
+      case "today":
+        // Bắt đầu từ 00:00:00 đến 23:59:59 của hôm nay
+        start = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+        end = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999);
+        break;
+      case "yesterday":
+        // Hôm qua: từ 00:00:00 đến 23:59:59 của ngày hôm qua
+        start = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1);
+        end = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1, 23, 59, 59, 999);
+        break;
+      case "week":
+        // 7 ngày gần nhất: từ ngày 7 ngày trước (00:00:00) đến hôm nay (23:59:59)
+        start = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 7);
+        end = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999);
+        break;
+      case "currentMonth":
+        // Từ ngày 1 của tháng đến cuối ngày hôm nay
+        start = new Date(now.getFullYear(), now.getMonth(), 1);
+        end = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999);
+        break;
+      case "lastMonth":
+        start = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+        end = new Date(now.getFullYear(), now.getMonth(), 0, 23, 59, 59, 999);
+        break;
+      case "twoMonthsAgo":
+        start = new Date(now.getFullYear(), now.getMonth() - 2, 1);
+        end = new Date(now.getFullYear(), now.getMonth() - 1, 0, 23, 59, 59, 999);
+        break;
+      case "threeMonthsAgo":
+        start = new Date(now.getFullYear(), now.getMonth() - 3, 1);
+        end = new Date(now.getFullYear(), now.getMonth() - 2, 0, 23, 59, 59, 999);
+        break;
+      default:
+        return dataArray;
+    }
+    return dataArray.filter(item => {
+      // Sử dụng field 'orderDate' nếu có, nếu không thì dùng 'date'
+      const dateStr = item.orderDate || item.date;
+      const itemDate = new Date(dateStr);
+      return itemDate >= start && itemDate <= end;
+    });
+  }
+          // Lấy danh sách orders đã lọc theo preset
+          const orders = selectedPreset === "all" ? orders2 : filterByPreset(orders2, selectedPreset);
 
   const fetchOrders = async () => {
     
@@ -764,54 +811,7 @@ const [loading, setLoading] = useState(false);
     },   ]
     : []),
   ];
-  function filterByPreset(dataArray, preset) {
-    const now = new Date();
-    let start, end;
-    switch (preset) {  
-      case "today":
-        // Bắt đầu từ 00:00:00 đến 23:59:59 của hôm nay
-        start = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-        end = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999);
-        break;
-      case "yesterday":
-        // Hôm qua: từ 00:00:00 đến 23:59:59 của ngày hôm qua
-        start = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1);
-        end = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1, 23, 59, 59, 999);
-        break;
-      case "week":
-        // 7 ngày gần nhất: từ ngày 7 ngày trước (00:00:00) đến hôm nay (23:59:59)
-        start = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 7);
-        end = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999);
-        break;
-      case "currentMonth":
-        // Từ ngày 1 của tháng đến cuối ngày hôm nay
-        start = new Date(now.getFullYear(), now.getMonth(), 1);
-        end = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999);
-        break;
-      case "lastMonth":
-        start = new Date(now.getFullYear(), now.getMonth() - 1, 1);
-        end = new Date(now.getFullYear(), now.getMonth(), 0, 23, 59, 59, 999);
-        break;
-      case "twoMonthsAgo":
-        start = new Date(now.getFullYear(), now.getMonth() - 2, 1);
-        end = new Date(now.getFullYear(), now.getMonth() - 1, 0, 23, 59, 59, 999);
-        break;
-      case "threeMonthsAgo":
-        start = new Date(now.getFullYear(), now.getMonth() - 3, 1);
-        end = new Date(now.getFullYear(), now.getMonth() - 2, 0, 23, 59, 59, 999);
-        break;
-      default:
-        return dataArray;
-    }
-    return dataArray.filter(item => {
-      // Sử dụng field 'orderDate' nếu có, nếu không thì dùng 'date'
-      const dateStr = item.orderDate || item.date;
-      const itemDate = new Date(dateStr);
-      return itemDate >= start && itemDate <= end;
-    });
-  }
-          // Lấy danh sách orders đã lọc theo preset
-          const orders = selectedPreset === "all" ? orders2 : filterByPreset(orders2, selectedPreset);
+  
         
           // Ví dụ: cập nhật tính tổng doanh số dựa trên ordersFiltered thay vì orders
        
