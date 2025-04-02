@@ -626,15 +626,15 @@ function filterByPreset(dataArray, preset) {
       break;
     case "lastMonth":
       start = new Date(now.getFullYear(), now.getMonth() - 1, 1);
-      end = new Date(now.getFullYear(), now.getMonth(), 0);
+      end = new Date(now.getFullYear(), now.getMonth(), 0, 23, 59, 59, 999);
       break;
     case "twoMonthsAgo":
       start = new Date(now.getFullYear(), now.getMonth() - 2, 1);
-      end = new Date(now.getFullYear(), now.getMonth() - 1, 0);
+      end = new Date(now.getFullYear(), now.getMonth() - 1, 0, 23, 59, 59, 999);
       break;
     case "threeMonthsAgo":
       start = new Date(now.getFullYear(), now.getMonth() - 3, 1);
-      end = new Date(now.getFullYear(), now.getMonth() - 2, 0);
+      end = new Date(now.getFullYear(), now.getMonth() - 2, 0, 23, 59, 59, 999);
       break;
     default:
       return dataArray;
