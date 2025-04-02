@@ -422,6 +422,8 @@ const resetPagename =()=>{
                 return order.saleReport === "ĐỢI XN";
               case "done":
                 return order.saleReport === "DONE";
+              case "donechuaguichuagui":
+                return order.saleReport === "DONE" && order.deliveryStatus === "";
               case "check":
                 return order.saleReport === "CHECK";
               case "ok":
@@ -2194,7 +2196,9 @@ const selectedTableColumns = columns.filter((col) =>
             allowClear
             options={[
               
-              { value: "unpaid_success", label: "Chưa thanh toán & Giao Thành công" },     
+              { value: "unpaid_success", label: "Chưa thanh toán & Giao Thành công" },   
+              { value: "donechuaguichuagui", label: "Done + Chưa Gửi Hàng" },   
+
               { value: "waiting_done", label: "Đơn chưa Done" },
               { value: "ok", label: "Đơn OK" },
               { value: "check", label: "Đơn CHECK" },

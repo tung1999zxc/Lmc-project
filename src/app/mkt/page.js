@@ -346,34 +346,38 @@ const Dashboard = () => {
   const getDateRange = () => {
     let start, end;
     const now = moment();
+  
     if (period === "day") {
-      start = now.clone();
-      end = now.clone();
+      start = now.clone().startOf("day");
+      end = now.clone().endOf("day");
     } else if (period === "yesterday") {
-      start = now.clone().subtract(1, 'days');
-      end = now.clone();
+      start = now.clone().subtract(1, "days").startOf("day");
+      end = now.clone().subtract(1, "days").endOf("day");
     } else if (period === "week") {
-      start = now.clone().subtract(6, 'days');
-      end = now.clone();
+      start = now.clone().subtract(6, "days").startOf("day");
+      end = now.clone().endOf("day");
     } else if (period === "month") {
-      start = now.clone().startOf('month');
-      end = now.clone();
+      start = now.clone().startOf("month");
+      end = now.clone().endOf("day");
     } else if (period === "lastMonth") {
-      start = now.clone().subtract(1, 'months').startOf('month');
-      end = now.clone().subtract(1, 'months').endOf('month');
+      start = now.clone().subtract(1, "months").startOf("month");
+      end = now.clone().subtract(1, "months").endOf("month");
     } else if (period === "twoMonthsAgo") {
-      start = now.clone().subtract(2, 'months').startOf('month');
-      end = now.clone().subtract(2, 'months').endOf('month');
+      start = now.clone().subtract(2, "months").startOf("month");
+      end = now.clone().subtract(2, "months").endOf("month");
     } else {
-      start = now.clone().startOf('month');
-      end = now.clone();
+      start = now.clone().startOf("month");
+      end = now.clone().endOf("day");
     }
+  
     const dates = [];
-    for (let m = start.clone(); m.diff(end, 'days') <= 0; m.add(1, 'days')) {
-      dates.push(m.format('YYYY-MM-DD'));
+    let current = start.clone();
+    while (current.isSameOrBefore(end, "day")) {
+      dates.push(current.format("YYYY-MM-DD"));
+      current.add(1, "days");
     }
     return dates;
-  };  
+  };
 
 //Tạo dữ liệu tổng hợp cho từng ngày và tính các chỉ số tổng:
 const summaryDates = getDateRange();
