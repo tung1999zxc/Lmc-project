@@ -484,7 +484,7 @@ const productOptions = products.map((p) => p.name);
       const productObj = products.find((p) => p.name === product);
       return (
         <Option key={product} value={product}>
-          <Popover
+          {/* <Popover
             content={
               productObj && productObj.image ? (
                 <img src={productObj.image} alt={product} style={{ width: 150 }} />
@@ -494,7 +494,7 @@ const productOptions = products.map((p) => p.name);
             trigger="hover"
           >
             <span>{product}</span>
-          </Popover>
+          </Popover> */}
         </Option>
       );
     })}
