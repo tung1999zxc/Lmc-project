@@ -2171,7 +2171,17 @@ const selectedTableColumns = columns.filter((col) =>
     }}
     onPressEnter={(e) => setSearchCustomerName(e.target.value.trim())}
     suffix={<SearchOutlined style={{ fontSize: "16px", color: "#1890ff" }} />}
-  />
+  /><Input
+  placeholder="Tìm tên Sản Phẩm..."
+  allowClear
+  onClear={() => {
+    setSearchCustomerName2("");
+    // Hiển thị lại danh sách đầy đủ khi nhấn X
+  }}
+  onPressEnter={(e) => setSearchCustomerName2(e.target.value.trim())}
+  suffix={<SearchOutlined style={{ fontSize: "16px", color: "#1890ff" }} />}
+/></>)}
+  {( currentUser.position ==="admin" )&&(
   <Input
     placeholder="Tìm tên Sản Phẩm..."
     allowClear
@@ -2182,7 +2192,7 @@ const selectedTableColumns = columns.filter((col) =>
     onPressEnter={(e) => setSearchCustomerName2(e.target.value.trim())}
     suffix={<SearchOutlined style={{ fontSize: "16px", color: "#1890ff" }} />}
   />
-  </>)}
+  )}
     
         
         </Col>

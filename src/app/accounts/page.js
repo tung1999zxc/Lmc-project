@@ -322,15 +322,16 @@
           <Form.Item
             label="Team"
             name="team_id"
+            
           >
-            <Select disabled={currentUser.name !== "Phi Navy" &&currentUser.name !== "Tung99"} options={teams} />
+            <Select  allowClear disabled={currentUser.name !== "Phi Navy" &&currentUser.name !== "Tung99"} options={teams} />
           </Form.Item>
           <Form.Item
             label="Bộ phận"
             name="position_team"
-            rules={[{ required: true, message: 'Vui lòng chọn' }]}
+            // rules={[{ required: true, message: 'Vui lòng chọn' }]}
           >
-            <Select  disabled={edit} options={position_team.map(p => ({ label: p.label, value: p.value }))} />
+            <Select  allowClear disabled={currentUser.name !== "Phi Navy" &&currentUser.name !== "Tung99"} options={position_team.map(p => ({ label: p.label, value: p.value }))} />
           </Form.Item>
           <Form.Item
             label="Ca làm việc"
