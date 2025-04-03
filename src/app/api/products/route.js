@@ -4,8 +4,9 @@ import { connectToDatabase } from '../../../app/lib/mongodb.js';
 export async function GET(req) {
   try {
     const { db } = await connectToDatabase();
-    // Lấy toàn bộ sản phẩm từ collection "products"
-    const products = await db.collection('products').find({}).toArray();
+    // Lấy toàn bộ sản phẩm nhưng loại bỏ trường image
+    const products = await db.collection('products').find({}, { projection: { image: 0 } }).toArray();
+    
     return new Response(
       JSON.stringify({ message: 'Lấy danh sách sản phẩm thành công', data: products }),
       { status: 200 }
