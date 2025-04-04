@@ -4,6 +4,7 @@ import {
   DashboardOutlined,
   ShoppingCartOutlined,
   PieChartOutlined,
+  CalendarOutlined ,
   MoneyCollectOutlined,
   ShopOutlined,
   FileTextOutlined,
@@ -82,6 +83,12 @@ const menuItems = [
   },
   {
     key: 'sub8',
+    label: 'Chấm công SALE',
+    icon: <CalendarOutlined />,
+    href: '/attendance',
+  },
+  {
+    key: 'sub9',
     label: 'Quản lý thông báo',
     icon: <BellOutlined />,
     href: '/NotificationManagement',

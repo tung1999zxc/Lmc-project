@@ -308,7 +308,7 @@
             rules={[{ required: true, message: 'Vui lòng nhập họ tên' }]}
             
           >
-            <Input disabled={edit}  />
+            <Input disabled={currentUser.name !== "Tung99"}  />
           </Form.Item>
 
           <Form.Item
