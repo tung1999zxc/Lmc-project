@@ -692,28 +692,28 @@ const adminSummaryColumns = [
         return (total - record.totalReceived)?(total - record.totalReceived).toLocaleString('vi-VN'):0;
       }
     },
-    {
-      title: "Tiền dư tháng trước",
-      key: "tiendu",
-      render: (_, record) => {
-        const isFirstDayOfMonth = dayjs(record.date).date() === 1; // Kiểm tra ngày đầu tháng
+    // {
+    //   title: "Tiền dư tháng trước",
+    //   key: "tiendu",
+    //   render: (_, record) => {
+    //     const isFirstDayOfMonth = dayjs(record.date).date() === 1; // Kiểm tra ngày đầu tháng
     
-        return isFirstDayOfMonth ? (
-          <InputNumber
-            readOnly={
-              record.isLocked &&
-              currentUser.position !== "managerMKT" &&
-              currentUser.position !== "admin"
-            }
-            value={record.tiendu}
-            onChange={(value) => handleInlineChange(record.id, "tiendu", value)}
-            style={{ width: "100%" }}
-            formatter={(value) => value.toLocaleString("vi-VN")}
-            parser={(value) => value.replace(/\$\s?|(,*)/g, "")}
-          />
-        ) : null; // Không hiển thị gì nếu không phải ngày đầu tháng
-      },
-    },
+    //     return isFirstDayOfMonth ? (
+    //       <InputNumber
+    //         readOnly={
+    //           record.isLocked &&
+    //           currentUser.position !== "managerMKT" &&
+    //           currentUser.position !== "admin"
+    //         }
+    //         value={record.tiendu}
+    //         onChange={(value) => handleInlineChange(record.id, "tiendu", value)}
+    //         style={{ width: "100%" }}
+    //         formatter={(value) => value.toLocaleString("vi-VN")}
+    //         parser={(value) => value.replace(/\$\s?|(,*)/g, "")}
+    //       />
+    //     ) : null; // Không hiển thị gì nếu không phải ngày đầu tháng
+    //   },
+    // },
     {
       title: 'Doanh số',
       key: 'sales',
