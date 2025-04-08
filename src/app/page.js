@@ -864,8 +864,15 @@ let dailyChartDataNewTEAM;
 if (isTeamLead|| currentUser.position==="mkt" || ( currentUser.position==="admin" && selectedTeam)|| (currentUser.position==="managerMKT" && selectedTeam)) {
   // Lấy danh sách tên nhân viên của team
   const teamEmployeeNames = employees
-    .filter(emp => emp.team_id === currentUser.team_id && emp.position_team === "mkt")
-    .map(emp => emp.name.trim().toLowerCase());
+  .filter(emp => 
+    (emp.team_id === currentUser.team_id && emp.position_team === "mkt") ||
+    (
+      currentUser.team_id === "SON" &&
+      ["Nguyễn Thị Xuân Diệu", "Nguyễn Bá Quân"].includes((emp.name || "").trim())
+    )
+  )
+  .map(emp => (emp.name || "").trim().toLowerCase());
+
   
   // Lọc đơn hàng và ads chỉ thuộc team đó
   filteredOrders = filteredOrders.filter(order => teamEmployeeNames.includes(order.mkt.trim().toLowerCase()));
@@ -1084,7 +1091,7 @@ if (sortedEmployees.length <= 5) {
 
 
 // Lọc ra các thành viên mkt thuộc team của currentUser
-  const teamMktEmployees = mktEmployees.filter(emp => emp.team_id === currentUser.team_id);
+const teamMktEmployees = mktEmployees.filter(emp => emp.team_id === currentUser.team_id || (currentUser.team_id === 'SON' && (emp.name.trim() === "Nguyễn Thị Xuân Diệu" || emp.name.trim() === "Nguyễn Bá Quân")) );
 
 const marketingReportDataTEAM = teamMktEmployees.map((emp, index) => {
   const paid = filteredOrders
@@ -1521,15 +1528,15 @@ const percentAds3 = tongKW3 > 0 ? Number(((totalAdsKW3 / (tongKW3*exchangeRate))
 
 
   if (isTeamLead|| ( currentUser.position==="admin" && selectedTeam)|| (currentUser.position==="managerMKT" && selectedTeam)) {
-   const teamEmployeeNames = mktEmployees
-  .filter(emp => 
-    emp.team_id === currentUser.team_id ||
-    (currentUser.team_id === 'SON' && (
-      (emp.name || "").trim() === "Nguyễn Thị Xuân Diệu" ||
-      (emp.name || "").trim() === "Nguyễn Bá Quân"
-    ))
-  )
-  .map(emp => (emp.name || "").trim().toLowerCase());
+    const teamEmployeeNames = mktEmployees
+    .filter(emp => 
+      emp.team_id === currentUser.team_id ||
+      (currentUser.team_id === 'SON' && (
+        (emp.name || "").trim() === "Nguyễn Thị Xuân Diệu" ||
+        (emp.name || "").trim() === "Nguyễn Bá Quân"
+      ))
+    )
+    .map(emp => (emp.name || "").trim().toLowerCase());
     
   // Lọc các đơn hàng theo tên nhân viên thuộc team
   filteredOrders = filteredOrders.filter(order =>
