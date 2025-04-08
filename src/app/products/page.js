@@ -390,13 +390,29 @@ const [loading, setLoading] = useState(false);
     {
       title: 'SL sản phẩm đơn chưa DONE',
       key: 'ordersNotDone',
+      sorter: (a, b) => {
+        const getQty = (record) => {
+          return orders
+            .filter(order => order.saleReport !== 'DONE')
+            .reduce((acc, order) => {
+              if (order.products?.length) {
+                const qty = order.products
+                  .filter(item => item.product === record.name)
+                  .reduce((sum, item) => sum + Number(item.quantity), 0);
+                return acc + qty;
+              }
+              return acc;
+            }, 0);
+        };
+        return getQty(a) - getQty(b);
+      },
       render: (_, record) => {
         const ordersNotDone = orders
-          .filter((order) => order.saleReport !== 'DONE')
+          .filter(order => order.saleReport !== 'DONE')
           .reduce((acc, order) => {
-            if (order.products && order.products.length > 0) {
+            if (order.products?.length) {
               const orderQty = order.products
-                .filter((item) => item.product === record.name)
+                .filter(item => item.product === record.name)
                 .reduce((sum, item) => sum + Number(item.quantity), 0);
               return acc + orderQty;
             }
@@ -404,41 +420,74 @@ const [loading, setLoading] = useState(false);
           }, 0);
         return ordersNotDone;
       },
-    },
-    {
-      title: 'SL sản phẩm đơn Done /nhưng chưa gửi ',
+    },{
+      title: 'SL sản phẩm đơn Done /nhưng chưa gửi',
       key: 'ordersDone',
+      sorter: (a, b) => {
+        const getQty = (record) => {
+          const ordersDone = orders
+            .filter(order => order.saleReport === 'DONE')
+            .reduce((acc, order) => {
+              if (order.products?.length) {
+                const qty = order.products
+                  .filter(item => item.product === record.name)
+                  .reduce((sum, item) => sum + Number(item.quantity), 0);
+                return acc + qty;
+              }
+              return acc;
+            }, 0);
+    
+          const deliveredQty = orders
+            .filter(order =>
+              ['ĐÃ GỬI HÀNG', 'GIAO THÀNH CÔNG', 'BỊ BẮT CHỜ GỬI LẠI'].includes(order.deliveryStatus)
+            )
+            .reduce((acc, order) => {
+              if (order.products?.length) {
+                const qty = order.products
+                  .filter(item => item.product === record.name)
+                  .reduce((sum, item) => sum + Number(item.quantity), 0);
+                return acc + qty;
+              }
+              return acc;
+            }, 0);
+    
+          return ordersDone - deliveredQty;
+        };
+    
+        return getQty(a) - getQty(b);
+      },
       render: (_, record) => {
         const ordersDone = orders
-          .filter((order) => order.saleReport === 'DONE')
+          .filter(order => order.saleReport === 'DONE')
           .reduce((acc, order) => {
-            if (order.products && order.products.length > 0) {
+            if (order.products?.length) {
               const orderQty = order.products
-                .filter((item) => item.product === record.name)
+                .filter(item => item.product === record.name)
                 .reduce((sum, item) => sum + Number(item.quantity), 0);
               return acc + orderQty;
             }
             return acc;
           }, 0);
+    
         const deliveredQty = orders
-          .filter(
-            (order) =>
-              order.deliveryStatus === 'ĐÃ GỬI HÀNG' ||
-              order.deliveryStatus === 'GIAO THÀNH CÔNG'||
-              order.deliveryStatus === 'BỊ BẮT CHỜ GỬI LẠI'
+          .filter(order =>
+            ['ĐÃ GỬI HÀNG', 'GIAO THÀNH CÔNG', 'BỊ BẮT CHỜ GỬI LẠI'].includes(order.deliveryStatus)
           )
           .reduce((acc, order) => {
-            if (order.products && order.products.length > 0) {
+            if (order.products?.length) {
               const orderQty = order.products
-                .filter((item) => item.product === record.name)
+                .filter(item => item.product === record.name)
                 .reduce((sum, item) => sum + Number(item.quantity), 0);
               return acc + orderQty;
             }
             return acc;
           }, 0);
+    
         return ordersDone - deliveredQty;
       },
     },
+    
+    
     {
       title: 'SL đã gửi hàng/ Giao thành công',
       key: 'Totaldagui',
@@ -887,10 +936,13 @@ const [loading, setLoading] = useState(false);
           style={{ width: 200 }}
         >
           <Option value="all">Tất cả</Option>
-          <Option value="currentMonth">Tháng này</Option>
+          <Option value="today">Hôm Nay</Option>
+          <Option value="yesterday">Hôm Qua</Option>
+          <Option value="week">1 Tuần gần nhất</Option>
+          <Option value="currentMonth">1 Tháng (Từ đầu tháng đến hiện tại)</Option>
           <Option value="lastMonth">Tháng trước</Option>
-          <Option value="twoMonthsAgo">2 tháng trước</Option>
-          <Option value="threeMonthsAgo">3 tháng trước</Option>
+          <Option value="twoMonthsAgo">2 Tháng trước</Option>
+          <Option value="threeMonthsAgo">3 Tháng trước</Option>
         </Select>
   <div style={{ fontWeight: "bold", fontSize: "16px" }} >
     Tổng: <span style={{ color: "blue" }}>{(totalRevenue * 17000).toLocaleString()} VND</span>
