@@ -222,6 +222,11 @@ const resetPagename =()=>{
     const now = new Date();
     let start, end;
     switch (preset) {
+      case "all":
+        // Lấy toàn bộ thời gian: từ rất sớm đến rất muộn
+        start = new Date(2000, 0, 1); // Hoặc chọn một ngày bắt đầu sớm phù hợp với hệ thống
+        end = new Date(2100, 11, 31, 23, 59, 59, 999); // Ngày rất xa trong tương lai
+        break;
       case "today":
         // Từ 00:00:00 đến 23:59:59.999 của hôm nay
         start = new Date(now.getFullYear(), now.getMonth(), now.getDate());
@@ -2117,6 +2122,7 @@ const selectedTableColumns = columns.filter((col) =>
             setDateRange2(value);
           }}
         >
+          <Option value="all">Tất cả</Option>
           <Option value="today">Hôm Nay</Option>
           <Option value="yesterday">Hôm Qua</Option>
           <Option value="week">1 Tuần gần nhất</Option>
