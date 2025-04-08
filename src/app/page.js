@@ -727,7 +727,7 @@ function getLast30Days() {
     return { name: emp.name, profit: sales*17000*0.95, adsCost };
   });
  
-  const teamEmployees = mktEmployees.filter(emp => emp.team_id === currentUser.team_id);
+ const teamEmployees = mktEmployees.filter(emp => emp.team_id === currentUser.team_id || (currentUser.team_id === 'SON' && (emp.name.trim() === "Nguyễn Thị Xuân Diệu" || emp.name.trim() === "Nguyễn Bá Quân")) );
 
 const employeeChartDataNewTEAM = teamEmployees.map(emp => {
   const sales = filteredOrders
@@ -1521,19 +1521,25 @@ const percentAds3 = tongKW3 > 0 ? Number(((totalAdsKW3 / (tongKW3*exchangeRate))
 
 
   if (isTeamLead|| ( currentUser.position==="admin" && selectedTeam)|| (currentUser.position==="managerMKT" && selectedTeam)) {
-    const teamEmployeeNames = employees
-      .filter(emp => emp.team_id === currentUser.team_id)
-      .map(emp => emp.name.trim().toLowerCase());
+   const teamEmployeeNames = mktEmployees
+  .filter(emp => 
+    emp.team_id === currentUser.team_id ||
+    (currentUser.team_id === 'SON' && (
+      (emp.name || "").trim() === "Nguyễn Thị Xuân Diệu" ||
+      (emp.name || "").trim() === "Nguyễn Bá Quân"
+    ))
+  )
+  .map(emp => (emp.name || "").trim().toLowerCase());
     
-    // Lọc các đơn hàng theo tên nhân viên thuộc team
-    filteredOrders = filteredOrders.filter(order =>
-      teamEmployeeNames.includes(order.mkt.trim().toLowerCase())
-    );
-    
-    // Lọc chi phí ads theo tên nhân viên thuộc team
-    filteredAds = filteredAds.filter(ad =>
-      teamEmployeeNames.includes(ad.name.trim().toLowerCase())
-    );
+  // Lọc các đơn hàng theo tên nhân viên thuộc team
+  filteredOrders = filteredOrders.filter(order =>
+    ((order.mkt || "").trim().toLowerCase() && teamEmployeeNames.includes((order.mkt || "").trim().toLowerCase()))
+  );
+
+  // Lọc chi phí ads theo tên nhân viên thuộc team
+  filteredAds = filteredAds.filter(ad =>
+    ((ad.name || "").trim().toLowerCase() && teamEmployeeNames.includes((ad.name || "").trim().toLowerCase()))
+  );
   }
   
   // Bảng Tổng chỉ của các thành viên trong team
@@ -1914,6 +1920,9 @@ const percentAds3 = tongKW3 > 0 ? Number(((totalAdsKW3 / (tongKW3*exchangeRate))
                             </Option>
                             <Option key={1235657} value={"QUAN"}>
                               TEAM QUÂN
+                            </Option>
+                            <Option key={123565788} value={"DIEU"}>
+                              TEAM DIỆU
                             </Option>
                           
                         </Select>
