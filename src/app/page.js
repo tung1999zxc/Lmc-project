@@ -672,6 +672,7 @@ function getLast30Days() {
 
   // Dữ liệu teams
   const teams = [
+    { label: 'TEAM DIỆU', value: 'DIEU' }, 
     { label: 'TEAM SƠN', value: 'SON' },
     { label: 'TEAM QUÂN', value: 'QUAN' },
     { label: 'TEAM CHI', value: 'CHI' },
@@ -681,6 +682,7 @@ function getLast30Days() {
     { label: 'TEAM LẺ', value: 'LE' }, 
   ];
   const teams2 = [
+    { label: 'TEAM DIỆU', value: 'DIEU' }, 
     { label: 'TEAM SƠN', value: 'SON' },
     { label: 'TEAM QUÂN', value: 'QUAN' },
     { label: 'TEAM CHI', value: 'CHI' },
