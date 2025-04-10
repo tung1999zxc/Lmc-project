@@ -1087,7 +1087,7 @@ if (sortedEmployees.length <= 5) {
   const top5Employees = [...marketingReportData1]
   .filter(emp => (emp.total1 !== 0 && emp.totalAds1 !== 0))
   .sort((a, b) => b.total1 - a.total1)
-  .slice(0, 5);
+  .slice(0, 3);
 
 
 // Lọc ra các thành viên mkt thuộc team của currentUser
@@ -1730,69 +1730,9 @@ const percentAds3 = tongKW3 > 0 ? Number(((totalAdsKW3 / (tongKW3*exchangeRate))
       width: "115%" // Để bù lại không gian khi scale
     }}
     >
-      <div className="criticism-container">
-      <h2>PHÊ BÌNH NHÂN VIÊN DOANH SỐ THẤP NHẤT</h2>
-      <div className="marquee">
-        {top5CriticismEmployees.map((emp, index) => (
-          <div key={index} className="employee-item">
-            <img
-  src={`/${emp.name.trim()}.jpg`}
-  alt={emp.name.trim()}
-  className="employee-image"
-  onError={(e) => {
-    e.currentTarget.onerror = null; // Ngăn lặp lại nếu ảnh mặc định không tồn tại
-    e.currentTarget.src = "/vrut.jpg";
-  }}
-/>
-            <span className="employee-name">{emp.name}</span>
-          </div>
-        ))}
-      </div>
-      <style jsx>{`
-        .criticism-container {
-          padding: 20px;
-          background: #fce4ec;
-          text-align: center;
-          border: 2px solid #f06292;
-          border-radius: 10px;
-          margin: 20px;
-          overflow: hidden; /* Giới hạn marquee chỉ chạy trong khung */
-          position: relative;
-        }
-        .marquee {
-          display: inline-block;
-          white-space: nowrap;
-          animation: marquee 35s linear infinite;
-        }
-        .employee-item {
-          display: inline-block;
-          margin-right: 50px;
-          text-align: center;
-        }
-        .employee-image {
-          width: 120px;
-          height: 120px;
-          object-fit: cover;
-          border-radius: 20%;
-          margin-bottom: 10px;
-        }
-        .employee-name {
-          font-size: 1.5em;
-          font-weight: bold;
-          color: #51521c;
-        }
-        @keyframes marquee {
-          0% {
-            transform: translateX(100%);
-          }
-          100% {
-            transform: translateX(-100%);
-          }
-        }
-      `}</style>
-    </div>
+     
     <div className="criticism-container">
-      <h2>TOP 5 NHÂN VIÊN DOANH SỐ CAO NHẤT</h2>
+      <h2>TOP 3 NHÂN VIÊN DOANH SỐ CAO NHẤT</h2>
       <div className="marquee">
         {top5Employees.map((emp, index) => (
           <div key={index} className="employee-item">

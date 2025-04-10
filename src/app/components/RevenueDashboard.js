@@ -488,7 +488,67 @@ export default function HomePage() {
           <GroupedDoubleBarChartComponent data={employeeChartDataNew} />
         </Col>
       </Row>
-      
+      <div className="criticism-container">
+      <h2>PHÊ BÌNH NHÂN VIÊN DOANH SỐ THẤP NHẤT</h2>
+      <div className="marquee">
+        {top5CriticismEmployees.map((emp, index) => (
+          <div key={index} className="employee-item">
+            <img
+  src={`/${emp.name.trim()}.jpg`}
+  alt={emp.name.trim()}
+  className="employee-image"
+  onError={(e) => {
+    e.currentTarget.onerror = null; // Ngăn lặp lại nếu ảnh mặc định không tồn tại
+    e.currentTarget.src = "/vrut.jpg";
+  }}
+/>
+            <span className="employee-name">{emp.name}</span>
+          </div>
+        ))}
+      </div>
+      <style jsx>{`
+        .criticism-container {
+          padding: 20px;
+          background: #fce4ec;
+          text-align: center;
+          border: 2px solid #f06292;
+          border-radius: 10px;
+          margin: 20px;
+          overflow: hidden; /* Giới hạn marquee chỉ chạy trong khung */
+          position: relative;
+        }
+        .marquee {
+          display: inline-block;
+          white-space: nowrap;
+          animation: marquee 35s linear infinite;
+        }
+        .employee-item {
+          display: inline-block;
+          margin-right: 50px;
+          text-align: center;
+        }
+        .employee-image {
+          width: 120px;
+          height: 120px;
+          object-fit: cover;
+          border-radius: 20%;
+          margin-bottom: 10px;
+        }
+        .employee-name {
+          font-size: 1.5em;
+          font-weight: bold;
+          color: #51521c;
+        }
+        @keyframes marquee {
+          0% {
+            transform: translateX(100%);
+          }
+          100% {
+            transform: translateX(-100%);
+          }
+        }
+      `}</style>
+    </div>
       <h2 style={{ marginTop: "2rem" }}>
         {isFilterApplied ? "Doanh số &amp; Ads hàng ngày (theo bộ lọc)" : "Doanh số &amp; Ads hàng ngày (30 ngày gần nhất)"}
       </h2>
