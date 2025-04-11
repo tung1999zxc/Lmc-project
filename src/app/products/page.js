@@ -771,7 +771,7 @@ const [loading, setLoading] = useState(false);
         if (
           currentUser.position === 'admin' ||
           currentUser.position === 'leadSALE' ||
-          currentUser.position === 'managerSALE'
+          currentUser.position === 'managerSALE' || currentUser.name === "Đỗ Uyển Nhi"
         ) {
           return ( <Space>
             <Button icon={<PlusOutlined />} onClick={() => handleAddImport(record)} />
