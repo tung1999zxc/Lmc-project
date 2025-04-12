@@ -410,6 +410,10 @@ const resetPagename =()=>{
                 );
               case "unpaid":
                 return order.paymentStatus === "CHƯA THANH TOÁN"|| order.paymentStatus === "";
+              case "ds0":
+                return order.revenue === 0 ;
+              case "dskhac0":
+                return order.revenue !== 0 ;
               case "paid":
                 return order.paymentStatus === "ĐÃ THANH TOÁN";
               case "duplicate_name":
@@ -454,6 +458,10 @@ const resetPagename =()=>{
                 return order.saleReport !== "DONE";
               case "khoshiping":
                 return order.isShipping === false;
+                case "even_stt":
+  return order.stt % 2 === 0;
+case "odd_stt":
+  return order.stt % 2 !== 0;
               case "ctyshiping":
                 return order.isShipping !== false;
               case "ctyshiping2":
@@ -2240,6 +2248,12 @@ const selectedTableColumns = columns.filter((col) =>
               { value: "waiting_done", label: "Đơn chưa Done" },
               { value: "ok", label: "Đơn OK" },
               { value: "check", label: "Đơn CHECK" },
+              { value: "ds0", label: "Doanh số bằng 0" },
+              { value: "dskhac0", label: "Doanh số khác 0" },
+              
+              { value: "even_stt", label: "Đơn STT CHẴN" },
+              { value: "odd_stt", label: "Đơn STT LẺ" },
+
               { value: "booktb", label: "BOOK TB" },
               { value: "waiting_approval", label: "Đợi xác nhận" },
               { value: "done", label: "Đơn đã Done" },
