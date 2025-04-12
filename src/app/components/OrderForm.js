@@ -448,7 +448,7 @@ const productOptions = products.map((p) => p.name);
                   <Input.TextArea rows={2} />
                 </Form.Item>
                 <Form.Item label="MKT" name="mkt" hidden={currentUser.position === "salenhapdon"} >
-                  <Input value={employeeNamepage} readOnly  />
+                  <Input value={employeeNamepage} disable ={currentUser.position !== "salexuly"||currentUser.position !== "managerSALE"||currentUser.position !== "leadSALE"||currentUser.position !== "salefull"}  />
                 </Form.Item> 
               </Col>
               <Col span={9}>
