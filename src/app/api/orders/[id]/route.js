@@ -16,7 +16,14 @@ export async function PUT(request, { params }) {
     // Giả sử id được tạo bằng Date.now().toString(), so sánh trực tiếp
     const filter = { id };
 
-    // Lấy đơn hàng cũ từ cơ sở dữ liệu
+
+
+    // Lấy tên người chỉnh sửa từ header (currentUser.name) hoặc data.updatedBy nếu có
+    const currentUserName = decodeURIComponent(request.headers.get('x-current-user')) || data.updatedBy || 'Unknown';
+    const exemptUsers = ['TK KHO', 'Nguyễn Diệp Anh', 'Trần Mỹ Hạnh'];
+
+    if (!exemptUsers.includes(currentUserName)   ){
+          // Lấy đơn hàng cũ từ cơ sở dữ liệu
     const oldOrder = await db.collection('orders').findOne(filter);
     if (!oldOrder) {
       return new Response(
@@ -24,10 +31,6 @@ export async function PUT(request, { params }) {
         { status: 404 }
       );
     }
-
-    // Lấy tên người chỉnh sửa từ header (currentUser.name) hoặc data.updatedBy nếu có
-    const currentUserName = decodeURIComponent(request.headers.get('x-current-user')) || data.updatedBy || 'Unknown';
-
     // So sánh dữ liệu cũ và mới để ghi nhận lịch sử chỉnh sửa
     const changes = [];
     Object.keys(data).forEach((key) => {
@@ -51,7 +54,7 @@ export async function PUT(request, { params }) {
         changes,
         timestamp: new Date(),
       });
-    }
+    }}    
 
     // Cập nhật đơn hàng với dữ liệu mới
     const result = await db.collection('orders').updateOne(filter, { $set: data });
