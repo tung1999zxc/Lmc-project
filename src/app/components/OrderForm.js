@@ -117,7 +117,7 @@ const handlePageNameChange = (value) => {
     
     
   const salexulyOptions = employees
-    .filter((order) => order.position === "salexuly")
+    .filter((order) => order.position_team === "sale")
     .map((order) => order.name);
 
   const saleBaoOptions = ["DONE","OK", "HỦY", "ĐỢI XN", "BOOK TB", "NGUY CƠ", "BÙNG", "ĐANG UP", "CHECK"];
@@ -543,14 +543,22 @@ const productOptions = products.map((p) => p.name);
                 
                
                 <Form.Item label="VẬN ĐƠN" name="salexuly" initialValue={namesalexuly}>
-                  <Select disabled={currentUser.position === "salexuly" || currentUser.position === "salexacnhan" ||currentUser.position === "salefull" }>
-                    {salexulyOptions.map((employee) => (
-                      <Option key={employee} value={employee}>
-                        {employee}
-                      </Option>
-                    ))}
-                  </Select>
-                </Form.Item>
+  <Select
+    disabled={
+      (currentUser.position === "salexuly" ||
+        currentUser.position === "salexacnhan" ||
+        currentUser.position === "salefull") &&
+      currentUser.name !== "Lê Linh Chi" &&
+      currentUser.name !== "Trần Thị Hồng Nhung"
+    }
+  >
+    {salexulyOptions.map((employee) => (
+      <Option key={employee} value={employee}>
+        {employee}
+      </Option>
+    ))}
+  </Select>
+</Form.Item>
                 <Form.Item label="SALE XÁC NHẬN" name="salexacnhan" > 
                 <Select
                     
