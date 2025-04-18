@@ -93,13 +93,15 @@ const handlePageNameChange = (value) => {
   // Nếu có mapping, tự động cập nhật tên nhân viên tương ứng
   const handleTTXLOptions = [
     "THIẾU/SAI",
+    "KHO SAI",
+    "SALE SAI",
     "TÌM HÀNG",
     "LỖI SP",
     "CHẶN KHÁCH",
     "BOOK ĐƠN",
     "GỬI LẠI",
     "MUA LẠI",
-    "HẸN THIẾU/SAI",
+    "HẸN",
     "ĐỢI GỬI LẠI",
     "ĐỔI Đ.CHỈ",
     "HOÀN",

@@ -2017,7 +2017,19 @@ const selectedTableColumns = columns.filter((col) =>
      
     }}>
       <FullScreenLoading loading={loading} tip="Đang tải dữ liệu..." />
-      
+      {/* <Button
+  type="primary"
+  danger
+  onClick={async () => {
+    const res = await fetch('/api/orders/batchUpdateSalexuly', { method: 'POST' });
+    const data = await res.json();
+    message.success(data.message || "Cập nhật xong!");
+    fetchOrders(); // Gọi lại để load đơn mới
+  }}
+>
+  Cập nhật Salexuly cho Đỗ Uyển Nhi
+</Button> */}
+
       <Row>
       <Col span={6}><div style={{ marginBottom: 16 }}>
         <Button
