@@ -342,7 +342,7 @@ const resetPagename =()=>{
         date &&
         dayjs(date).isValid() &&
         dayjs(date).isBetween(startDate, endDate, "day", "[]");
-        if (currentUser.position_team === "kho") {
+        if (currentUser.position_team === "kho" || currentUser.position === "salexuly") {
           dateMatch = checkDate(order.shippingDate1 ? order.shippingDate1 : order.orderDate);
       } else {
     dateMatch = checkDate(order.orderDate);
