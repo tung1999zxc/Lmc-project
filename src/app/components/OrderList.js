@@ -56,6 +56,7 @@ const OrderList = () => {
   const [totalRevenue, setTotalRevenue] = useState(0);
   const [sttInput, setSttInput] = useState("");
   const [codeInput, setCodeInput] = useState("");
+  const [sttDoneInput, setSttDoneInput] = useState("");
   
   
   const [namesalexuly, setnamesalexuly] = useState("");
@@ -2108,7 +2109,7 @@ onChange={(e) => handleColumnSelect("istick", e.target.checked)}
 
     } catch (error) {
       console.error(error);
-      message.error("Cập nhật thất bại");
+      alert("Cập nhật thất bại");
     }
   };
   const countNewTickedProductQuantity = () => {
@@ -2139,7 +2140,23 @@ onChange={(e) => handleColumnSelect("istick", e.target.checked)}
     return [...filteredOrders].sort((a, b) => b.stt - a.stt);
   }, [filteredOrders]);
    
-  
+  const handleUpdateDeliveredStatus = async () => {
+    const sttList = sttDoneInput.trim().split(/\s+/).map(Number);
+    if (!sttList.length) {
+      alert("Vui lòng nhập STT đơn hàng");
+      return;
+    }
+
+    try {
+      await axios.post("/api/orders/mark-done", { sttList });
+      alert("Cập nhật thành công");
+      fetchOrders();
+    } catch (error) {
+      console.error(error);
+      alert("Lỗi khi cập nhật trạng thái");
+    }
+  };
+
 
   return (
     <div  style={{
@@ -2502,9 +2519,25 @@ onChange={(e) => handleColumnSelect("istick", e.target.checked)}
 </Row>
 <Button type="dashed" onClick={handleBatchUpdateTrackingCodes}>
   Cập nhật mã đơn hàng hàng loạt
-</Button></>
+</Button>
+<br></br>  <br></br> <br></br> 
+<Row gutter={10} style={{ marginBottom: 10 }}>
+        <Col span={24}>
+          <Input.TextArea
+            rows={2}
+            placeholder="Nhập STT đơn hàng cần đánh dấu đã giao thành công (cách nhau bằng dấu cách)"
+            value={sttDoneInput}
+            onChange={(e) => setSttDoneInput(e.target.value)}
+          />
+        </Col>
+      </Row>
+      <Button type="primary" danger onClick={handleUpdateDeliveredStatus} style={{ marginBottom: 20 }}>
+        Đánh dấu GIAO THÀNH CÔNG 
+      </Button></>
 )}
    <br></br>   <br></br>   <br></br>  
+
+  
     
 <Row gutter={16} wrap={false} style={{ display: "flex", alignItems: "flex-start" }}>
         <Col flex="none">
