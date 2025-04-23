@@ -137,7 +137,15 @@ const [loading, setLoading] = useState(false);
   
   const getTotalImportedQty = (product) => {
     if (product.imports && product.imports.length > 0) {
+      // return (product.imports.reduce((acc, cur) => acc + cur.importedQty, 0)+(product.slvn||0)+(product.sltq||0));
       return (product.imports.reduce((acc, cur) => acc + cur.importedQty, 0)+(product.slvn||0)+(product.sltq||0));
+    }
+    return 0;
+  };
+  const getTotalImportedQty22 = (product) => {
+    if (product.imports && product.imports.length > 0) {
+      // return (product.imports.reduce((acc, cur) => acc + cur.importedQty, 0)+(product.slvn||0)+(product.sltq||0));
+      return (product.imports.reduce((acc, cur) => acc + cur.importedQty, 0));
     }
     return 0;
   };
@@ -236,11 +244,14 @@ const [loading, setLoading] = useState(false);
       await axios.put(`/api/products/${editingProduct.key}`, updatedProduct);
       message.success("Cập nhật sản phẩm thành công");
       
-      setProducts((prevOrders) =>
-        prevOrders.map((order) => order.key === editingProduct.key ? updatedProduct : order)
-      );
-      
+      // setProducts((prevOrders) =>
+      //   prevOrders.map((order) => order.key === editingProduct.key ? updatedProduct : order)
+      // );
+      setAddImportModalVisible(false);
+      setAddingImportProduct(null);
       setEditingProduct(null);
+      fetchProducts();
+      
     } catch (error) {
       console.error(error);
       message.error("Lỗi khi cập nhật sản phẩm");
@@ -284,13 +295,16 @@ const [loading, setLoading] = useState(false);
   
       message.success(response.data.message || "Cập nhật số lượng nhập thành công");
       // Làm mới danh sách sản phẩm từ API
+      setAddImportModalVisible(false);
+      setAddingImportProduct(null);
       fetchProducts();
     } catch (error) {
       console.error(error.response?.data?.error || error.message);
       message.error("Lỗi khi cập nhật số lượng nhập hàng");
-    } finally {
       setAddImportModalVisible(false);
       setAddingImportProduct(null);
+    } finally {
+      
     }
   };
 
@@ -367,7 +381,7 @@ const [loading, setLoading] = useState(false);
       title: 'SL nhập hàng',
       key: 'importedQty',
       render: (_, record) => {
-        const totalImported = getTotalImportedQty(record);
+        const totalImported = getTotalImportedQty22(record);
         const historyContent =
           record.imports && record.imports.length > 0 ? (
             <ul style={{ padding: 0, margin: 0, listStyle: 'none' }}>
@@ -426,7 +440,7 @@ const [loading, setLoading] = useState(false);
       sorter: (a, b) => {
         const getQty = (record) => {
           const ordersDone = orders
-            .filter(order => order.saleReport === 'DONE')
+            .filter(order => order.saleReport === 'DONE' && order.deliveryStatus === "" )
             .reduce((acc, order) => {
               if (order.products?.length) {
                 const qty = order.products
@@ -439,7 +453,7 @@ const [loading, setLoading] = useState(false);
     
           const deliveredQty = orders
             .filter(order =>
-              ['ĐÃ GỬI HÀNG', 'GIAO THÀNH CÔNG', 'BỊ BẮT CHỜ GỬI LẠI'].includes(order.deliveryStatus)
+              ['ĐÃ GỬI HÀNG', 'GIAO THÀNH CÔNG'].includes(order.deliveryStatus)
             )
             .reduce((acc, order) => {
               if (order.products?.length) {
@@ -451,27 +465,28 @@ const [loading, setLoading] = useState(false);
               return acc;
             }, 0);
     
-          return ordersDone - deliveredQty;
+          // return ordersDone - deliveredQty;
+          return ordersDone ;
         };
     
         return getQty(a) - getQty(b);
       },
       render: (_, record) => {
         const ordersDone = orders
-          .filter(order => order.saleReport === 'DONE')
-          .reduce((acc, order) => {
-            if (order.products?.length) {
-              const orderQty = order.products
-                .filter(item => item.product === record.name)
-                .reduce((sum, item) => sum + Number(item.quantity), 0);
-              return acc + orderQty;
-            }
-            return acc;
-          }, 0);
+        .filter(order => order.saleReport === 'DONE' && order.deliveryStatus === "")
+        .reduce((acc, order) => {
+          if (order.products && order.products.length > 0) {
+            const orderQty = order.products
+              .filter(item => item.product === record.name)
+              .reduce((sum, item) => sum + Number(item.quantity), 0);
+            return acc + orderQty;
+          }
+          return acc;
+        }, 0);
     
         const deliveredQty = orders
           .filter(order =>
-            ['ĐÃ GỬI HÀNG', 'GIAO THÀNH CÔNG', 'BỊ BẮT CHỜ GỬI LẠI'].includes(order.deliveryStatus)
+            ['ĐÃ GỬI HÀNG', 'GIAO THÀNH CÔNG'].includes(order.deliveryStatus)
           )
           .reduce((acc, order) => {
             if (order.products?.length) {
@@ -483,7 +498,8 @@ const [loading, setLoading] = useState(false);
             return acc;
           }, 0);
     
-        return ordersDone - deliveredQty;
+        // return ordersDone - deliveredQty;
+        return ordersDone;
       },
     },
     
