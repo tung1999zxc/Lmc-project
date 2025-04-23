@@ -733,41 +733,7 @@ case "odd_stt":
       setSelectedColumns((prev) => prev.filter((key) => key !== columnKey));
     }
   };
-
-  const handleSaveIstick2 = async () => {
-    // Lọc ra các đơn hàng mà giá trị istick đã thay đổi so với ban đầu
-    const ordersToUpdate = orders.filter((order) => {
-      const originalOrder = initialOrders2.find((o) => o.id === order.id);
-      // Nếu đơn hàng mới (không có trong initialOrders) hoặc có sự thay đổi về istick
-      return !originalOrder || order.isShipping !== originalOrder.isShipping;
-    });
   
-    if (ordersToUpdate.length === 0) {
-      message.info("Không có đơn hàng nào thay đổi");
-      return;
-    }
-  
-    try {
-      // Gửi chỉ các trường cần cập nhật (id và istick)
-      const response = await axios.post("/api/orders/updateIstick2", {
-        orders: ordersToUpdate.map(({ id, isShipping }) => ({ id, isShipping })),
-      },
-      {
-        headers: { "x-current-user": encodeURIComponent(currentUser.name) },
-      });
-  
-      message.success(response.data.message || "Đã lưu cập nhật các đơn");
-      alert("Thao tác thành công!");
-      // Cập nhật lại initialOrders sau khi lưu để làm mốc mới
-      setInitialOrders2(orders);
-      fetchOrders();
-    } catch (error) {
-      console.error(error);
-      message.error("Lỗi khi lưu các đơn");
-    }
- 
-  
-  };
   const handleSelectAllIstick2 = (value) => {
     setOrders((prevOrders) =>
       prevOrders.map((order) =>
@@ -777,10 +743,84 @@ case "odd_stt":
       )
     );
   };
-const allRowsSelected2 = filteredOrders.length > 0 && filteredOrders.every(order => order.isShipping);
   // Các cột cho bảng (cho các vai trò khác nhau)
  
  
+  
+ 
+
+  const MemoizedCheckbox = React.memo(({ checked, onChange }) => (
+    <Checkbox checked={checked} onChange={onChange} />
+  ));
+
+  const useDebouncedUpdate = (updateFn, delay = 2000) => {
+    const timeoutRef = useRef(null);
+    const draftChanges = useRef({});
+  
+    const scheduleUpdate = () => {
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+      timeoutRef.current = setTimeout(() => {
+        updateFn(draftChanges.current);
+        draftChanges.current = {};
+      }, delay);
+    };
+  
+    const addChange = (id, value) => {
+      draftChanges.current[id] = value;
+      scheduleUpdate();
+    };
+  
+    return addChange;
+  };
+  const handleIstickChange = useCallback((orderId, value) => {
+    debouncedChange(orderId, value);
+  }, []);
+
+  const debouncedChange = useDebouncedUpdate((changes) => {
+    setOrders(prev => {
+      const copy = [...prev];
+      Object.entries(changes).forEach(([id, value]) => {
+        const index = copy.findIndex(o => o.id === id);
+        if (index !== -1) {
+          copy[index] = { ...copy[index], istick: value };
+        }
+      });
+      return copy;
+    });
+  }, 3000);
+
+  const handleIstickChange2 = useCallback((orderId, value) => {
+    debouncedChangeShipping(orderId, value);
+  }, []);
+  const debouncedChangeShipping = useDebouncedUpdate((changes) => {
+    setOrders(prev => {
+      const copy = [...prev];
+      Object.entries(changes).forEach(([id, value]) => {
+        const index = copy.findIndex(o => o.id === id);
+        if (index !== -1) {
+          copy[index] = { ...copy[index], isShipping: value };
+        }
+      });
+      return copy;
+    });
+  }, 3000);
+
+  const handleIstickChangeDONE = useCallback((orderId, value) => {
+    debouncedChangeDONE(orderId, value);
+  }, []);
+  const debouncedChangeDONE = useDebouncedUpdate((changes) => {
+    setOrders(prev => {
+      const copy = [...prev];
+      Object.entries(changes).forEach(([id, value]) => {
+        const index = copy.findIndex(o => o.id === id);
+        if (index !== -1) {
+          copy[index] = { ...copy[index], istickDONE: value };
+        }
+      });
+      return copy;
+    });
+  }, 3000);
+
   const allRowsSelectedDONE = filteredOrders.length > 0 && filteredOrders.every(order => order.istickDONE);
   
   const handleSaveIstickDONE = async () => {
@@ -823,67 +863,15 @@ const allRowsSelected2 = filteredOrders.length > 0 && filteredOrders.every(order
       )
     );
   };
- 
-  const handleIstickChangeDONE = (orderId, value) => {
+  const handleSelectAllIstick = (value) => {
     setOrders((prevOrders) =>
       prevOrders.map((order) =>
-        order.id === orderId ? { ...order, istickDONE: value } : order
+        filteredOrders.some((fOrder) => fOrder.id === order.id)
+          ? { ...order, istick: value }
+          : order
       )
     );
   };
-  const MemoizedCheckbox = React.memo(({ checked, onChange }) => (
-    <Checkbox checked={checked} onChange={onChange} />
-  ));
-
-  const useDebouncedUpdate = (updateFn, delay = 2000) => {
-    const timeoutRef = useRef(null);
-    const draftChanges = useRef({});
-  
-    const scheduleUpdate = () => {
-      if (timeoutRef.current) clearTimeout(timeoutRef.current);
-      timeoutRef.current = setTimeout(() => {
-        updateFn(draftChanges.current);
-        draftChanges.current = {};
-      }, delay);
-    };
-  
-    const addChange = (id, value) => {
-      draftChanges.current[id] = value;
-      scheduleUpdate();
-    };
-  
-    return addChange;
-  };
-  const handleIstickChange = useCallback((orderId, value) => {
-    debouncedChange(orderId, value);
-  }, []);
-
-  const debouncedChange = useDebouncedUpdate((changes) => {
-    setOrders(prev => {
-      const copy = [...prev];
-      Object.entries(changes).forEach(([id, value]) => {
-        const index = copy.findIndex(o => o.id === id);
-        if (index !== -1) {
-          copy[index] = { ...copy[index], istick: value };
-        }
-      });
-      return copy;
-    });
-  }, 3000);
-
-  // const handleIstickChange = (orderId, value) => {
-  //   setOrders(prevOrders => {
-  //     const index = prevOrders.findIndex(order => order.id === orderId);
-  //     if (index === -1) return prevOrders;
-  
-  //     const newOrders = [...prevOrders];
-  //     newOrders[index] = {
-  //       ...newOrders[index],
-  //       istick: value,
-  //     };
-  //     return newOrders;
-  //   });
-  // };
   const allRowsSelected = filteredOrders.length > 0 && filteredOrders.every(order => order.istick);
   
   const handleSaveIstick = async () => {
@@ -920,6 +908,43 @@ const allRowsSelected2 = filteredOrders.length > 0 && filteredOrders.every(order
         setExportDisabled(true);
       }, 5000);
     }
+  };
+
+  const allRowsSelected2 = filteredOrders.length > 0 && filteredOrders.every(order => order.isShipping);
+
+  const handleSaveIstick2 = async () => {
+    // Lọc ra các đơn hàng mà giá trị istick đã thay đổi so với ban đầu
+    const ordersToUpdate = orders.filter((order) => {
+      const originalOrder = initialOrders2.find((o) => o.id === order.id);
+      // Nếu đơn hàng mới (không có trong initialOrders) hoặc có sự thay đổi về istick
+      return !originalOrder || order.isShipping !== originalOrder.isShipping;
+    });
+  
+    if (ordersToUpdate.length === 0) {
+      message.info("Không có đơn hàng nào thay đổi");
+      return;
+    }
+  
+    try {
+      // Gửi chỉ các trường cần cập nhật (id và istick)
+      const response = await axios.post("/api/orders/updateIstick2", {
+        orders: ordersToUpdate.map(({ id, isShipping }) => ({ id, isShipping })),
+      },
+      {
+        headers: { "x-current-user": encodeURIComponent(currentUser.name) },
+      });
+  
+      message.success(response.data.message || "Đã lưu cập nhật các đơn");
+      alert("Thao tác thành công!");
+      // Cập nhật lại initialOrders sau khi lưu để làm mốc mới
+      setInitialOrders2(orders);
+      fetchOrders();
+    } catch (error) {
+      console.error(error);
+      message.error("Lỗi khi lưu các đơn");
+    }
+ 
+  
   };
   const columns = [
     {
@@ -1147,10 +1172,10 @@ onChange={(e) => handleColumnSelect("istick", e.target.checked)}
             key: "isShipping",
             dataIndex: "isShipping",
             render: (_, record) => (
-              <Checkbox
-                checked={record.isShipping || false}
-                onChange={(e) => handleIstickChange2(record.id, e.target.checked)}
-              />
+              <MemoizedCheckbox
+              checked={record.isShipping}
+              onChange={e => handleIstickChange2(record.id, e.target.checked)}
+            />
             ),
           },
         ]
@@ -1585,23 +1610,9 @@ const selectedTableColumns = columns.filter((col) =>
 
 
 
-  const handleIstickChange2 = (orderId, value) => {
-    setOrders((prevOrders) =>
-      prevOrders.map((order) =>
-        order.id === orderId ? { ...order, isShipping: value } : order
-      )
-    );
-  };
 
-  const handleSelectAllIstick = (value) => {
-    setOrders((prevOrders) =>
-      prevOrders.map((order) =>
-        filteredOrders.some((fOrder) => fOrder.id === order.id)
-          ? { ...order, istick: value }
-          : order
-      )
-    );
-  };
+
+ 
 
 
   const allRowsSelected4 = filteredOrders.length > 0 && filteredOrders.every(order => order.istick4); 
@@ -1739,10 +1750,10 @@ onChange={(e) => handleColumnSelect("istick", e.target.checked)}
       width: 50,
       dataIndex: "istickDONE",
       render: (_, record) => (
-        <Checkbox
-          checked={record.istickDONE || false}
-          onChange={(e) => handleIstickChangeDONE(record.id, e.target.checked)}
-        />
+        <MemoizedCheckbox
+        checked={record.istickDONE}
+        onChange={e => handleIstickChangeDONE(record.id, e.target.checked)}
+      />
       ),
     },
     {
@@ -2350,6 +2361,8 @@ onChange={(e) => handleColumnSelect("istick", e.target.checked)}
             allowClear
             options={[
               { value: "deliveredchuatick", label: "Đã gửi hàng + CẦN TÍCH ĐÃ IN" },
+              { value: "unpaid", label: "Chưa thanh toán" },
+              { value: "paid", label: "Đã thanh toán" },
               { value: "deliveredkomavandon", label: "Đã gửi hàng + chưa mã" },
               { value: "deliveredcomavandon", label: "Đã gửi hàng + Có mã" },
               { value: "deliveredcomavandon2", label: "Chưa gửi hàng + Có mã" },
