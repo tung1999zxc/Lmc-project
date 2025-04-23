@@ -1,5 +1,5 @@
 "use client";
-import React, { useState,useRef, useMemo, useEffect } from "react";
+import React, { useState,useRef, useCallback,useMemo, useEffect } from "react";
 import {
   Table,
   Space,
@@ -54,6 +54,8 @@ const OrderList = () => {
   const [loading, setLoading] = useState(false);
   const [shiftFilter, setShiftFilter] = useState(null);
   const [totalRevenue, setTotalRevenue] = useState(0);
+  const [sttInput, setSttInput] = useState("");
+  const [codeInput, setCodeInput] = useState("");
   
   
   const [namesalexuly, setnamesalexuly] = useState("");
@@ -433,6 +435,8 @@ const resetPagename =()=>{
                 return order.saleReport === "DONE";
               case "donechuaguichuagui":
                 return order.saleReport === "DONE" && order.deliveryStatus === "";
+              case "donechuaguichuagui2":
+                return order.saleReport !== "DONE" && order.deliveryStatus === "ĐÃ GỬI HÀNG";
               case "check":
                 return order.saleReport === "CHECK";
               case "ok":
@@ -709,19 +713,19 @@ case "odd_stt":
     },
   ];
   // Hàm cập nhật checkbox "Công ty đóng hàng"
-  const handleShippingChange = async (orderId, checked) => {
-    try {
-      const response = await axios.patch(`/api/orders/${orderId}/shipping`, {
-        isShipping: checked,
-      });
-      message.success(response.data.message);
-      // Sau khi cập nhật thành công, bạn có thể làm mới danh sách đơn hàng từ API
-      fetchOrders();
-    } catch (error) {
-      console.error(error.response?.data?.error || error.message);
-      message.error("Lỗi khi cập nhật trạng thái đóng hàng");
-    }
-  };
+  // const handleShippingChange = async (orderId, checked) => {
+  //   try {
+  //     const response = await axios.patch(`/api/orders/${orderId}/shipping`, {
+  //       isShipping: checked,
+  //     });
+  //     message.success(response.data.message);
+  //     // Sau khi cập nhật thành công, bạn có thể làm mới danh sách đơn hàng từ API
+  //     fetchOrders();
+  //   } catch (error) {
+  //     console.error(error.response?.data?.error || error.message);
+  //     message.error("Lỗi khi cập nhật trạng thái đóng hàng");
+  //   }
+  // };
   const handleColumnSelect = (columnKey, checked) => {
     if (checked) {
       setSelectedColumns((prev) => [...prev, columnKey]);
@@ -827,7 +831,96 @@ const allRowsSelected2 = filteredOrders.length > 0 && filteredOrders.every(order
       )
     );
   };
- 
+  const MemoizedCheckbox = React.memo(({ checked, onChange }) => (
+    <Checkbox checked={checked} onChange={onChange} />
+  ));
+
+  const useDebouncedUpdate = (updateFn, delay = 2000) => {
+    const timeoutRef = useRef(null);
+    const draftChanges = useRef({});
+  
+    const scheduleUpdate = () => {
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+      timeoutRef.current = setTimeout(() => {
+        updateFn(draftChanges.current);
+        draftChanges.current = {};
+      }, delay);
+    };
+  
+    const addChange = (id, value) => {
+      draftChanges.current[id] = value;
+      scheduleUpdate();
+    };
+  
+    return addChange;
+  };
+  const handleIstickChange = useCallback((orderId, value) => {
+    debouncedChange(orderId, value);
+  }, []);
+
+  const debouncedChange = useDebouncedUpdate((changes) => {
+    setOrders(prev => {
+      const copy = [...prev];
+      Object.entries(changes).forEach(([id, value]) => {
+        const index = copy.findIndex(o => o.id === id);
+        if (index !== -1) {
+          copy[index] = { ...copy[index], istick: value };
+        }
+      });
+      return copy;
+    });
+  }, 3000);
+
+  // const handleIstickChange = (orderId, value) => {
+  //   setOrders(prevOrders => {
+  //     const index = prevOrders.findIndex(order => order.id === orderId);
+  //     if (index === -1) return prevOrders;
+  
+  //     const newOrders = [...prevOrders];
+  //     newOrders[index] = {
+  //       ...newOrders[index],
+  //       istick: value,
+  //     };
+  //     return newOrders;
+  //   });
+  // };
+  const allRowsSelected = filteredOrders.length > 0 && filteredOrders.every(order => order.istick);
+  
+  const handleSaveIstick = async () => {
+    // Lọc ra các đơn hàng mà giá trị istick đã thay đổi so với ban đầu
+    const ordersToUpdate = orders.filter((order) => {
+      const originalOrder = initialOrders.find((o) => o.id === order.id);
+      // Nếu đơn hàng mới (không có trong initialOrders) hoặc có sự thay đổi về istick
+      return !originalOrder || order.istick !== originalOrder.istick;
+    });
+  
+    if (ordersToUpdate.length === 0) {
+      message.info("Không có đơn hàng nào thay đổi");
+      alert("Không có thay đổi nào!");
+      return;
+    }
+  
+    try {
+      // Gửi chỉ các trường cần cập nhật (id và istick)
+      const response = await axios.post("/api/orders/updateIstick", {
+        orders: ordersToUpdate.map(({ id, istick }) => ({ id, istick })),
+      });
+      message.success(response.data.message || "Đã lưu cập nhật các đơn");
+      alert("Thao tác thành công!");
+      // Cập nhật lại initialOrders sau khi lưu để làm mốc mới
+      setInitialOrders(orders);
+      fetchOrders();
+    } catch (error) {
+      console.error(error);
+      message.error("Lỗi khi lưu các đơn");
+    }finally {
+      // Sau khi gọi API (dù thành công hay lỗi), disable nút ExportExcelButton trong 3 giây
+      setExportDisabled(false);
+      setTimeout(() => {
+        setExportDisabled(true);
+      }, 5000);
+    }
+  };
   const columns = [
     {
       title: (
@@ -866,6 +959,41 @@ const allRowsSelected2 = filteredOrders.length > 0 && filteredOrders.every(order
       },
       width: 50,
     },
+    ...((currentUser.position_team === "kho")
+    ? [
+    {
+      title: (<>
+     
+       <Checkbox
+checked={selectedColumns.includes("istick")}
+onChange={(e) => handleColumnSelect("istick", e.target.checked)}
+>
+
+</Checkbox>
+
+
+        <Checkbox
+          checked={allRowsSelected}
+          onChange={(e) => handleSelectAllIstick(e.target.checked)}
+        >
+          In đơn
+        </Checkbox>
+        <Button type="primary" onClick={handleSaveIstick}>
+        Lưu 
+      </Button></>
+      ),
+      key: "istick",
+      dataIndex: "istick",
+      width: 50,
+      render: (_, record) => (
+       <MemoizedCheckbox
+    checked={record.istick || false}
+    onChange={(e) => handleIstickChange(record.id, e.target.checked)}
+  />
+      ),
+    },
+  ]
+  : []),
     ...((currentUser.position === "salexuly" ||currentUser.position === "salefull")
       ? [
         {
@@ -1474,51 +1602,7 @@ const selectedTableColumns = columns.filter((col) =>
       )
     );
   };
- 
-  const handleIstickChange = (orderId, value) => {
-    setOrders((prevOrders) =>
-      prevOrders.map((order) =>
-        order.id === orderId ? { ...order, istick: value } : order
-      )
-    );
-  };
-  const allRowsSelected = filteredOrders.length > 0 && filteredOrders.every(order => order.istick);
-  
-  const handleSaveIstick = async () => {
-    // Lọc ra các đơn hàng mà giá trị istick đã thay đổi so với ban đầu
-    const ordersToUpdate = orders.filter((order) => {
-      const originalOrder = initialOrders.find((o) => o.id === order.id);
-      // Nếu đơn hàng mới (không có trong initialOrders) hoặc có sự thay đổi về istick
-      return !originalOrder || order.istick !== originalOrder.istick;
-    });
-  
-    if (ordersToUpdate.length === 0) {
-      message.info("Không có đơn hàng nào thay đổi");
-      alert("Không có thay đổi nào!");
-      return;
-    }
-  
-    try {
-      // Gửi chỉ các trường cần cập nhật (id và istick)
-      const response = await axios.post("/api/orders/updateIstick", {
-        orders: ordersToUpdate.map(({ id, istick }) => ({ id, istick })),
-      });
-      message.success(response.data.message || "Đã lưu cập nhật các đơn");
-      alert("Thao tác thành công!");
-      // Cập nhật lại initialOrders sau khi lưu để làm mốc mới
-      setInitialOrders(orders);
-      fetchOrders();
-    } catch (error) {
-      console.error(error);
-      message.error("Lỗi khi lưu các đơn");
-    }finally {
-      // Sau khi gọi API (dù thành công hay lỗi), disable nút ExportExcelButton trong 3 giây
-      setExportDisabled(false);
-      setTimeout(() => {
-        setExportDisabled(true);
-      }, 5000);
-    }
-  };
+
 
   const allRowsSelected4 = filteredOrders.length > 0 && filteredOrders.every(order => order.istick4); 
   const handleSelectAllIstick4 = (value) => {
@@ -1586,6 +1670,15 @@ const selectedTableColumns = columns.filter((col) =>
     },
     {
       title: (<>
+     
+       <Checkbox
+checked={selectedColumns.includes("istick")}
+onChange={(e) => handleColumnSelect("istick", e.target.checked)}
+>
+
+</Checkbox>
+
+
         <Checkbox
           checked={allRowsSelected}
           onChange={(e) => handleSelectAllIstick(e.target.checked)}
@@ -1600,12 +1693,14 @@ const selectedTableColumns = columns.filter((col) =>
       dataIndex: "istick",
       width: 50,
       render: (_, record) => (
-        <Checkbox
-          checked={record.istick || false}
-          onChange={(e) => handleIstickChange(record.id, e.target.checked)}
-        />
+       <MemoizedCheckbox
+    checked={record.istick || false}
+    onChange={(e) => handleIstickChange(record.id, e.target.checked)}
+  />
       ),
     },
+  
+   
     {
       title: (<>
         <Checkbox
@@ -1818,7 +1913,6 @@ const selectedTableColumns = columns.filter((col) =>
     // Cột TÊN KHÁCH đã có checkbox, giữ nguyên:
   
     
-    
     {
       title: (
         <Checkbox
@@ -1981,7 +2075,31 @@ const selectedTableColumns = columns.filter((col) =>
     category: order.category,
   }));
 
+  const handleBatchUpdateTrackingCodes = async () => {
+    const sttList = sttInput.trim().split(/\s+/);
+    const codeList = codeInput.trim().split(/\s+/);
 
+    if (sttList.length !== codeList.length) {
+      alert("Số lượng STT và Mã đơn không khớp");
+      
+      return;
+    }
+
+    const updates = sttList.map((stt, idx) => ({
+      stt: Number(stt),
+      trackingCode: codeList[idx],
+    }));
+
+    try {
+      await axios.post("/api/orders/batch-update-tracking", { updates });
+      alert("Cập nhật mã đơn hàng thành công");
+      fetchOrders();
+
+    } catch (error) {
+      console.error(error);
+      message.error("Cập nhật thất bại");
+    }
+  };
   const countNewTickedProductQuantity = () => {
     // Lọc ra những đơn hàng có giá trị istick mới được tích:
     const newTickedOrders = orders.filter(order => {
@@ -2006,7 +2124,9 @@ const selectedTableColumns = columns.filter((col) =>
 
  
     
-    
+  const sortedOrders = useMemo(() => {
+    return [...filteredOrders].sort((a, b) => b.stt - a.stt);
+  }, [filteredOrders]);
    
   
 
@@ -2281,6 +2401,8 @@ const selectedTableColumns = columns.filter((col) =>
               { value: "deliveredkomavandon", label: "Đã gửi hàng + chưa mã" },
               { value: "not_delivered", label: "Đã gửi hàng" },
               { value: "delivered", label: "Giao thành công" },
+              { value: "donechuaguichuagui2", label: "Khác Done + Đã Gửi Hàng" },  
+
               
              
               
@@ -2345,7 +2467,31 @@ const selectedTableColumns = columns.filter((col) =>
           
         </Col>}
       </Row>
-     
+      {( currentUser.position_team==="kho"
+ ) && (<>
+  <Row gutter={10} style={{ marginBottom: 10 }}>
+  <Col span={12}>
+    <Input.TextArea
+      rows={3}
+      placeholder="Nhập STT (cách nhau bằng dấu cách)"
+      value={sttInput}
+      onChange={(e) => setSttInput(e.target.value)}
+    />
+  </Col>
+  <Col span={12}>
+    <Input.TextArea
+      rows={3}
+      placeholder="Nhập mã đơn hàng (cách nhau bằng dấu cách)"
+      value={codeInput}
+      onChange={(e) => setCodeInput(e.target.value)}
+    />
+  </Col>
+</Row>
+<Button type="dashed" onClick={handleBatchUpdateTrackingCodes}>
+  Cập nhật mã đơn hàng hàng loạt
+</Button></>
+)}
+   <br></br>   <br></br>   <br></br>  
     
 <Row gutter={16} wrap={false} style={{ display: "flex", alignItems: "flex-start" }}>
         <Col flex="none">
@@ -2354,7 +2500,7 @@ const selectedTableColumns = columns.filter((col) =>
   <Table  
   
     columns={selectedTableColumns}
-    dataSource={[...filteredOrders].sort((a, b) => b.stt - a.stt)}
+    dataSource={sortedOrders}
     rowKey="id"
     bordered
     pagination={{ pageSize: searchText ? 100 : 20 }}
@@ -2365,20 +2511,19 @@ const selectedTableColumns = columns.filter((col) =>
         <Col flex="auto">
        
         <Table 
-          scroll={{ x: 3000 }}
-        columns={
-          currentUser.position_team === "kho"
-            ? columnsKHO
-            : currentUser.position_team === "mkt"
-            ? columnsMKT
-            : columns
-        }
-        dataSource={[...filteredOrders].sort((a, b) => b.stt - a.stt)}
-        rowKey="id"
-        pagination={{ pageSize: searchText ? 100 : 20 }}
-        bordered
-       
-      />
+  scroll={{ x: 3000}}
+  columns={
+    currentUser.position_team === "kho"
+      ? columnsKHO
+      : currentUser.position_team === "mkt"
+      ? columnsMKT
+      : columns
+  }
+  dataSource={sortedOrders}
+  rowKey="id"
+  pagination={{ pageSize: searchText ? 100 : 20 }}
+  bordered
+/>
         </Col>
       </Row>
       <OrderForm
