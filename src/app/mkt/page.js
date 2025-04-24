@@ -65,7 +65,7 @@ const Dashboard = () => {
 
   const fetchOrders = async () => {
     try {
-      const response = await axios.get("/api/orders");
+      const response = await axios.get("/api/orders3");
       setSafeOrders(response.data.data);
     } catch (error) {
       console.error(error);

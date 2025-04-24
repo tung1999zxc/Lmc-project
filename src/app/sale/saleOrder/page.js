@@ -50,18 +50,22 @@ const fetchEmployees = async () => {
    
   }
 };
-  const fetchOrders = async () => {
-    try {
-      const response = await axios.get("/api/orders");
-      setSampleOrders(response.data.data);
-    } catch (error) {
-      console.error(error);
-      message.error("Lỗi khi lấy đơn hàng");
-    }
-  };
+const fetchOrders = async () => {
+  try {
+    const response = await axios.get(`/api/orders2?selectedPreset=${period}`);
+    setSampleOrders(response.data.data);
+  } catch (error) {
+    console.error(error);
+    message.error("Lỗi khi lấy đơn hàng");
+  }
+};
+useEffect(() => {
+  fetchOrders();
+}, [period]);
+
   useEffect(() => {
     fetchRecords();
-    fetchOrders();
+
     fetchEmployees();
   }, []);
 

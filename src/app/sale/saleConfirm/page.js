@@ -12,7 +12,7 @@ dayjs.extend(isSameOrBefore); // Mở rộng dayjs với plugin
 const OrdersTable = () => {
   const [sampleOrders, setSampleOrders] = useState([]);
   const [safeEmployees, setSafeEmployees] = useState([]);
-  const [filterType, setFilterType] = useState("thisWeek");
+  const [filterType, setFilterType] = useState("week");
   const currentUser = useSelector((state) => state.user.currentUser);
   const router = useRouter();
 
@@ -23,19 +23,22 @@ const OrdersTable = () => {
   }, [currentUser.name, router]);
 
   useEffect(() => {
-    fetchOrders();
+   
     fetchEmployees();
   }, []);
 
   const fetchOrders = async () => {
     try {
-      const response = await axios.get("/api/orders");
+      const response = await axios.get(`/api/orders2?selectedPreset=${filterType}`);
       setSampleOrders(response.data.data);
     } catch (error) {
       console.error(error);
       message.error("Lỗi khi lấy đơn hàng");
     }
   };
+  useEffect(() => {
+    fetchOrders();
+  }, [filterType]);
 
   const fetchEmployees = async () => {
     try {
@@ -64,10 +67,10 @@ const OrdersTable = () => {
     if (filterType === "today") {
       start = dayjs().startOf("day");
       end = dayjs().endOf("day");
-    } else if (filterType === "thisWeek") {
+    } else if (filterType === "week") {
       start = dayjs().startOf("week");
       end = dayjs().endOf("week");
-    } else if (filterType === "thisMonth") {
+    } else if (filterType === "currentMonth") {
       start = dayjs().startOf("month");
       end = dayjs().endOf("month");
     } else if (filterType === "lastMonth") {
@@ -222,8 +225,8 @@ const OrdersTable = () => {
           style={{ width: 200 }}
         >
           <Select.Option value="today">Hôm nay</Select.Option>
-          <Select.Option value="thisWeek">Tuần này</Select.Option>
-          <Select.Option value="thisMonth">Tháng này</Select.Option>
+          <Select.Option value="week">Tuần này</Select.Option>
+          <Select.Option value="currentMonth">Tháng này</Select.Option>
           <Select.Option value="lastMonth">Tháng trước</Select.Option>
           <Select.Option value="twoMonthsAgo">2 tháng trước</Select.Option>
         </Select>

@@ -15,6 +15,18 @@ const [selectedTeam, setSelectedTeam] = useState(currentTeamId);
 const [adsMoneyData, setAdsMoneyData] = useState([]);//mkt
 // Component biểu đồ Bar (Recharts) cho biểu đồ đơn (có 1 series)
 const router = useRouter(); 
+const today = new Date().toISOString().split('T')[0];
+const [selectedDate, setSelectedDate] = useState(today);
+const [selectedPreset, setSelectedPreset] = useState('currentMonth');
+ // Ngày hiện tại định dạng YYYY-MM-DD
+
+
+ // State cho bộ lọc: selectedDate mặc định là ngày hiện tại, và preset
+ 
+
+ // State cho tỉ giá VNĐ và ô nhập giá trị
+ const [exchangeRate, setExchangeRate] = useState(17000);
+ const [exchangeRateInput, setExchangeRateInput] = useState(17000);
 const reduxCurrentUser = useSelector((state) => state.user.currentUser) || {};
 
 const currentUser = useMemo(() => {
@@ -31,7 +43,15 @@ const currentUser = useMemo(() => {
   
   const fetchOrders = async () => {
     try {
-      const response = await axios.get("/api/orders");
+      let url = "/api/orders2";
+  
+      if (selectedPreset && selectedPreset !== "all") {
+        url += `?selectedPreset=${selectedPreset}`;
+      } else if (selectedDate) {
+        url += `?selectedDate=${selectedDate}`;
+      }
+  
+      const response = await axios.get(url);
       setOrders(response.data.data);
     } catch (error) {
       console.error(error);
@@ -63,7 +83,7 @@ const fetchEmployees = async () => {
     useEffect(() => {
       // Định nghĩa hàm gọi dữ liệu
       const fetchData = () => {
-        fetchOrders();
+       
         fetchRecords();
         fetchEmployees();
       };
@@ -81,6 +101,10 @@ const fetchEmployees = async () => {
         clearInterval(intervalId);
       };
     }, []);
+
+    useEffect(() => {
+      fetchOrders();
+    }, [selectedDate, selectedPreset]);
    
 
 // Nếu currentUser là team lead, chỉ hiển thị các nhân viên thuộc team của họ.
@@ -659,16 +683,7 @@ function getLast30Days() {
 }
 
 
-  // Ngày hiện tại định dạng YYYY-MM-DD
-  const today = new Date().toISOString().split('T')[0];
-
-  // State cho bộ lọc: selectedDate mặc định là ngày hiện tại, và preset
-  const [selectedDate, setSelectedDate] = useState(today);
-  const [selectedPreset, setSelectedPreset] = useState('currentMonth');
-
-  // State cho tỉ giá VNĐ và ô nhập giá trị
-  const [exchangeRate, setExchangeRate] = useState(17000);
-  const [exchangeRateInput, setExchangeRateInput] = useState(17000);
+ 
 
   // Dữ liệu teams
   const teams = [

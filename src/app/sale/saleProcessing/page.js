@@ -7,7 +7,7 @@ import axios from "axios";
 import { useRouter } from 'next/navigation';
 
 const Dashboard = () => {
-  const [filterRange, setFilterRange] = useState("all");
+  const [filterRange, setFilterRange] = useState("week");
   const [orders, setOrders] = useState([]);
   const router = useRouter(); 
   
@@ -20,7 +20,7 @@ const Dashboard = () => {
   // Dữ liệu orders mẫu; bạn có thể thay thế bằng dữ liệu thật từ API hay nguồn khác.
   const fetchOrders = async () => {
     try {
-      const response = await axios.get("/api/orders");
+      const response = await axios.get(`/api/orders2?selectedPreset=${filterRange}`);
       setOrders(response.data.data);
     } catch (error) {
       console.error(error);
@@ -28,9 +28,10 @@ const Dashboard = () => {
     }
   };
   useEffect(() => {
-    
     fetchOrders();
-  }, []);
+  }, [filterRange]);
+  
+  
 
 
   // Lọc orders theo bộ lọc thời gian được chọn
@@ -42,13 +43,13 @@ const Dashboard = () => {
       switch(filterRange) {
         case "all":
           return true;
-        case "day":
+        case "today":
           return orderDate.isSame(today, "day");
         case "week":
           return orderDate.isAfter(today.subtract(7, "day"));
-        case "month":
+        case "currentMonth":
           return orderDate.isAfter(today.startOf("month"));
-        case "previousMonth": {
+        case "lastMonth": {
           const prevMonth = today.subtract(1, "month");
           return orderDate.isAfter(prevMonth.startOf("month")) && orderDate.isBefore(prevMonth.endOf("month"));
         }
@@ -219,11 +220,11 @@ const Dashboard = () => {
       <div style={{ marginBottom: 16 }}>
         <span style={{ marginRight: 8 }}>Bộ lọc theo khoảng thời gian: </span>
         <Select value={filterRange} onChange={setFilterRange} style={{ width: 250 }}>
-          <Select.Option value="all">Tất cả</Select.Option>
-          <Select.Option value="day">1 Ngày</Select.Option>
+          {/* <Select.Option value="all">Tất cả</Select.Option> */}
+          <Select.Option value="today">1 Ngày</Select.Option>
           <Select.Option value="week">1 Tuần</Select.Option>
-          <Select.Option value="month">1 Tháng (từ đầu tháng)</Select.Option>
-          <Select.Option value="previousMonth">Tháng trước</Select.Option>
+          <Select.Option value="currentMonth">1 Tháng (từ đầu tháng)</Select.Option>
+          <Select.Option value="lastMonth">Tháng trước</Select.Option>
           <Select.Option value="twoMonthsAgo">2 tháng trước</Select.Option>
           <Select.Option value="threeMonthsAgo">3 tháng trước</Select.Option>
         </Select>
