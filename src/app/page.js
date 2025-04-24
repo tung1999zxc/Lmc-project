@@ -19,10 +19,7 @@ const today = new Date().toISOString().split('T')[0];
 const [selectedDate, setSelectedDate] = useState(null);
 const [selectedPreset, setSelectedPreset] = useState('currentMonth');
  // Ngày hiện tại định dạng YYYY-MM-DD
- const handlePresetChange = (preset) => {
-  setSelectedPreset(preset);
-  setSelectedDate(null); // Xoá selectedDate để tránh override filter
-};
+
 
  // State cho bộ lọc: selectedDate mặc định là ngày hiện tại, và preset
  
@@ -1931,7 +1928,8 @@ const percentAds3 = tongKW3 > 0 ? Number(((totalAdsKW3 / (tongKW3*exchangeRate))
           placeholder="Chọn khoảng thời gian"
           value={selectedPreset || undefined}
           onChange={(value) => {
-            handlePresetChange
+            setSelectedPreset(value);
+            setSelectedDate(null);
           }}
         >
           <Option value="today">Hôm Nay</Option>
