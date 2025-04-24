@@ -146,6 +146,7 @@ const OrderList = () => {
 
   const fetchOrders = async () => {
     setLoading(true);
+    
     try {
       const response = await axios.get("/api/orders");
       setOrders(response.data.data);
@@ -335,7 +336,7 @@ const resetPagename =()=>{
       if (specificDate) {
         // Kiểm tra ngày phù hợp theo vị trí của user
         dateMatch = dayjs(
-          currentUser.position_team === "kho" ? order.shippingDate1 : order.orderDate
+          currentUser.position_team === "kho" ? order.shippingDate2 : order.orderDate
         ).format("YYYY-MM-DD") === dayjs(specificDate).format("YYYY-MM-DD");
       } else if (dateRange && (searchText.trim() === "" || sttSearch.trim() === "")) {
       // Nếu có khoảng thời gian, lọc theo range
@@ -346,7 +347,7 @@ const resetPagename =()=>{
         dayjs(date).isValid() &&
         dayjs(date).isBetween(startDate, endDate, "day", "[]");
         if (currentUser.position_team === "kho" || currentUser.position === "salexuly") {
-          dateMatch = checkDate(order.shippingDate1 ? order.shippingDate1 : order.orderDate);
+          dateMatch = checkDate(order.shippingDate2 ? order.shippingDate2 : order.orderDate);
       } else {
     dateMatch = checkDate(order.orderDate);
   }
