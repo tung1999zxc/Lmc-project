@@ -16,7 +16,7 @@ const [adsMoneyData, setAdsMoneyData] = useState([]);//mkt
 // Component biểu đồ Bar (Recharts) cho biểu đồ đơn (có 1 series)
 const router = useRouter(); 
 const today = new Date().toISOString().split('T')[0];
-const [selectedDate, setSelectedDate] = useState(today);
+const [selectedDate, setSelectedDate] = useState(null);
 const [selectedPreset, setSelectedPreset] = useState('currentMonth');
  // Ngày hiện tại định dạng YYYY-MM-DD
 
