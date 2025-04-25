@@ -361,7 +361,7 @@ const resetPagename =()=>{
       if (specificDate) {
         // Kiểm tra ngày phù hợp theo vị trí của user
         dateMatch = dayjs(
-          currentUser.position_team === "kho" ? order.shippingDate2 : order.orderDate
+          currentUser.position_team === "kho" ? order.shippingDate1 : order.orderDate
         ).format("YYYY-MM-DD") === dayjs(specificDate).format("YYYY-MM-DD");
       } else if (dateRange && (searchText.trim() === "" || sttSearch.trim() === "")) {
       // Nếu có khoảng thời gian, lọc theo range
@@ -2342,7 +2342,7 @@ onChange={(e) => handleColumnSelect("istick", e.target.checked)}
           <Option value="lastMonth">Tháng trước</Option>
           <Option value="twoMonthsAgo">2 Tháng trước</Option>
           <Option value="threeMonthsAgo">3 Tháng trước</Option>
-          { !(currentUser.position === "salenhapdon" || currentUser.position === "salexuly" || currentUser.position === "salexacnhan") && (
+          { !(currentUser.position === "salenhapdon" || currentUser.position === "salexacnhan") && (
   <Option value="all">Tất cả (hạn chế dùng)</Option>
 )}
         </Select>
