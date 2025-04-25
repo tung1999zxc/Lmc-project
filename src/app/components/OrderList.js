@@ -95,7 +95,7 @@ const OrderList = () => {
       }
     };
    useEffect(() => {
-    fetchOrders();
+    
     fetchEmployees();
     fetchNamePage();
   }, []);
@@ -146,21 +146,46 @@ const OrderList = () => {
 
   const fetchOrders = async () => {
     setLoading(true);
-    
     try {
-      const response = await axios.get("/api/orders");
-      setOrders(response.data.data);
-      setInitialOrders(response.data.data);
-      setInitialOrders2(response.data.data);
-      setInitialOrders3(response.data.data);  
-      setInitialOrders4(response.data.data);
-      setLoading(false);
+      const startDateObj = (Array.isArray(dateRange2) && dateRange2.length === 2) ? dateRange2[0] : (Array.isArray(dateRange) && dateRange.length === 2 ? dateRange[0] : null);
+      const endDateObj = (Array.isArray(dateRange2) && dateRange2.length === 2) ? dateRange2[1] : (Array.isArray(dateRange) && dateRange.length === 2 ? dateRange[1] : null);
+      
+      const params = {};
+      if (startDateObj && endDateObj) {
+        params.startDate = dayjs(startDateObj).format('YYYY-MM-DD');
+        params.endDate = dayjs(endDateObj).format('YYYY-MM-DD');
+      }
+      // if (searchText) {
+      //   params.search = searchText.trim();
+      // }
+  
+      const response = await axios.get('/api/orders', { params });
+      const data = response.data.data || [];
+  
+      setOrders(data);
+      setInitialOrders(data);
+      setInitialOrders2(data);
+      setInitialOrders3(data);
+      setInitialOrders4(data);
     } catch (error) {
       console.error(error);
       message.error("Lỗi khi lấy đơn hàng");
+    } finally {
       setLoading(false);
     }
   };
+  useEffect(() => {
+    const range = getDateRangeByPreset(dateRange2);
+    if (range) {
+      setDateRange(range);
+    }
+  }, [dateRange2]);
+  useEffect(() => {
+    const isValidRange = (dateRange && dateRange.length === 2) || (dateRange2 && dateRange2.length === 2);
+    if (isValidRange) {
+      fetchOrders();
+    }
+  }, [dateRange, dateRange2]);
   
   const handleSearch = (value) => {
     setSearchText(value); // Chỉ cập nhật khi nhấn Search
@@ -2039,16 +2064,32 @@ onChange={(e) => handleColumnSelect("istick", e.target.checked)}
       if (currentEditId) {
         const response = await axios.put(`/api/orders/${currentEditId}`, newOrder,{ headers: { 'x-current-user': encodeURIComponent(currentUser.name) } });
         message.success(response.data.message || "Cập nhật thành công");
-        setOrders((prevOrders) =>
+        // setOrders((prevOrders) =>
+        //   prevOrders.map((order) => order.id === currentEditId ? newOrder : order)
+        // );
+        if (dateRange2 !== "all") {
+          // Lọc lại danh sách theo khoảng ngày đã chọn
+          fetchOrders();
+        } else {
+          // Thêm đơn hàng mới vào đầu danh sách cũ
+           setOrders((prevOrders) =>
           prevOrders.map((order) => order.id === currentEditId ? newOrder : order)
         );
+        }
 
       } else {
         const response = await axios.post("/api/orders", newOrder);
         message.success(response.data.message || "Thêm mới thành công");
         const createdOrder = response.data.data;
       // Thêm đơn hàng mới vào state orders (ví dụ thêm vào đầu mảng)
-      setOrders((prevOrders) => [createdOrder, ...prevOrders]);
+      // setOrders((prevOrders) => [createdOrder, ...prevOrders]);
+      if (dateRange2 !== "all") {
+        // Lọc lại danh sách theo khoảng ngày đã chọn
+        fetchOrders();
+      } else {
+        // Thêm đơn hàng mới vào đầu danh sách cũ
+        setOrders((prevOrders) => [createdOrder, ...prevOrders]);
+      }
       }
       // fetchOrders();
       setFormVisible(false);
@@ -2253,6 +2294,11 @@ onChange={(e) => handleColumnSelect("istick", e.target.checked)}
         >
          Huỷ đếm 
         </Button>  */}
+
+        
+        </Col>
+        
+        }
 <Button
   type="primary"
   onClick={fetchOrders} // hoặc onClick={() => fetchOrders()}
@@ -2260,11 +2306,6 @@ onChange={(e) => handleColumnSelect("istick", e.target.checked)}
 >
   Tải lại tất cả đơn hàng
 </Button>
-        
-        </Col>
-        
-        }
-
       </Row>
       
       <Row gutter={[16, 16]} style={{ marginBottom: 24 }}>
@@ -2291,7 +2332,7 @@ onChange={(e) => handleColumnSelect("istick", e.target.checked)}
             setDateRange2(value);
           }}
         >
-          <Option value="all">Tất cả</Option>
+     
           <Option value="today">Hôm Nay</Option>
           <Option value="yesterday">Hôm Qua</Option>
           <Option value="week">1 Tuần gần nhất</Option>
@@ -2299,6 +2340,9 @@ onChange={(e) => handleColumnSelect("istick", e.target.checked)}
           <Option value="lastMonth">Tháng trước</Option>
           <Option value="twoMonthsAgo">2 Tháng trước</Option>
           <Option value="threeMonthsAgo">3 Tháng trước</Option>
+          { !(currentUser.position === "salenhapdon" || currentUser.position === "salexuly" || currentUser.position === "salexacnhan") && (
+  <Option value="all">Tất cả (hạn chế dùng)</Option>
+)}
         </Select>
         </Col>
         <Col span={4}>

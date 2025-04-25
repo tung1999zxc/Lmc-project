@@ -4,8 +4,43 @@ import { connectToDatabase } from '../../../app/lib/mongodb.js';
 export async function GET(req) {
   try {
     const { db } = await connectToDatabase();
-    // Lấy tất cả đơn hàng từ collection "orders"
-    const orders = await db.collection('orders').find({}).toArray();
+    const url = new URL(req.url);
+    const params = url.searchParams;
+
+    const query = {};
+
+    if (params.has('startDate') && params.has('endDate')) {
+      const startDate = params.get('startDate');
+      const endDate = params.get('endDate');
+    
+      query.$or = [
+        {
+          orderDate: {
+            $gte: startDate,
+            $lte: endDate
+          }
+        },
+        {
+          shippingDate2: {
+            $gte: startDate,
+            $lte: endDate
+          }
+        }
+      ];
+    }
+
+    // if (params.has('search')) {
+    //   const keyword = params.get('search');
+    //   query.$or = [
+    //     { customerName: { $regex: keyword, $options: 'i' } },
+    //     { phone: { $regex: keyword, $options: 'i' } },
+    //     { address: { $regex: keyword, $options: 'i' } },
+    //     { pageName: { $regex: keyword, $options: 'i' } },
+    //     { trackingCode: { $regex: keyword, $options: 'i' } },
+    //   ];
+    // }
+
+    const orders = await db.collection('orders').find(query).toArray();
     return new Response(
       JSON.stringify({ message: 'Lấy danh sách đơn hàng thành công', data: orders }),
       { status: 200 }

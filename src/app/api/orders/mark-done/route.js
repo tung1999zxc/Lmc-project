@@ -9,7 +9,10 @@ export async function POST(req) {
     const bulkOps = sttList.map((stt) => ({
       updateOne: {
         filter: { stt: Number(stt) },
-        update: { $set: { istickDONE: true } },
+        update: {  $set: {
+          istickDONE: true,
+          deliveryStatus: "GIAO THÀNH CÔNG",
+        }, },
       },
     }));
 
