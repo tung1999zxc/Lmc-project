@@ -371,9 +371,11 @@ const resetPagename =()=>{
         date &&
         dayjs(date).isValid() &&
         dayjs(date).isBetween(startDate, endDate, "day", "[]");
-        if (currentUser.position_team === "kho" || currentUser.position === "salexuly") {
+        if (currentUser.position_team === "kho") {
+          dateMatch = checkDate(order.shippingDate1 ? order.shippingDate1 : order.orderDate);
+        } else if (currentUser.position === "salexuly") {
           dateMatch = checkDate(order.shippingDate2 ? order.shippingDate2 : order.orderDate);
-      } else {
+        } else {
     dateMatch = checkDate(order.orderDate);
   }
       // if (!order.shippingDate1 && !order.shippingDate2) {

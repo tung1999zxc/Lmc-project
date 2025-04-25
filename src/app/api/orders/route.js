@@ -25,6 +25,12 @@ export async function GET(req) {
             $gte: startDate,
             $lte: endDate
           }
+        },
+        {
+          shippingDate1: {
+            $gte: startDate,
+            $lte: endDate
+          }
         }
       ];
     }
