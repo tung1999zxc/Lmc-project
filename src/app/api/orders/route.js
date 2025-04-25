@@ -7,19 +7,46 @@ export async function GET(req) {
     const url = new URL(req.url);
     const params = url.searchParams;
 
-    const query = {}; // ← mặc định lấy tất cả đơn
+    const query = {};
 
-    // Giữ code lọc ngày ở đây nếu sau này cần dùng
     if (params.has('startDate') && params.has('endDate')) {
       const startDate = params.get('startDate');
       const endDate = params.get('endDate');
-
-      // Không thêm vào query → giữ nguyên query = {}
-      console.log("Đã truyền khoảng ngày:", startDate, "→", endDate);
+    
+      query.$or = [
+        {
+          orderDate: {
+            $gte: startDate,
+            $lte: endDate
+          }
+        },
+        {
+          shippingDate2: {
+            $gte: startDate,
+            $lte: endDate
+          }
+        },
+        {
+          shippingDate1: {
+            $gte: startDate,
+            $lte: endDate
+          }
+        }
+      ];
     }
 
-    const orders = await db.collection('orders').find(query).toArray();
+    // if (params.has('search')) {
+    //   const keyword = params.get('search');
+    //   query.$or = [
+    //     { customerName: { $regex: keyword, $options: 'i' } },
+    //     { phone: { $regex: keyword, $options: 'i' } },
+    //     { address: { $regex: keyword, $options: 'i' } },
+    //     { pageName: { $regex: keyword, $options: 'i' } },
+    //     { trackingCode: { $regex: keyword, $options: 'i' } },
+    //   ];
+    // }
 
+    const orders = await db.collection('orders').find(query).toArray();
     return new Response(
       JSON.stringify({ message: 'Lấy danh sách đơn hàng thành công', data: orders }),
       { status: 200 }
@@ -32,7 +59,6 @@ export async function GET(req) {
     );
   }
 }
-
 
 export async function POST(req) {
   try {
