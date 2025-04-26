@@ -95,7 +95,10 @@ const OrderList = () => {
       }
     };
    useEffect(() => {
-    
+    if (currentUser.position_team === "kho" ) {
+      
+      fetchOrders();
+    }
     fetchEmployees();
     fetchNamePage();
   }, []);
@@ -159,14 +162,26 @@ const OrderList = () => {
       //   params.search = searchText.trim();
       // }
   
-      const response = await axios.get('/api/orders', { params });
-      const data = response.data.data || [];
+      if (currentUser.position_team === "kho" ) {
+          const response = await axios.get('/api/orderskho');
+          const data = response.data.data || [];
+  
+          setOrders(data);
+          setInitialOrders(data);
+          setInitialOrders2(data);
+          setInitialOrders3(data);
+          setInitialOrders4(data);
+        } else{
+          const response = await axios.get('/api/orders', { params });
+          const data = response.data.data || [];
   
       setOrders(data);
       setInitialOrders(data);
       setInitialOrders2(data);
       setInitialOrders3(data);
       setInitialOrders4(data);
+        }
+     
     } catch (error) {
       console.error(error);
       message.error("Lỗi khi lấy đơn hàng");
@@ -181,6 +196,9 @@ const OrderList = () => {
     }
   }, [dateRange2]);
   useEffect(() => {
+    if (currentUser.position_team === "kho" ) {
+      return
+    }
     const isValidRange = (dateRange && dateRange.length === 2) || (dateRange2 && dateRange2.length === 2);
     if (isValidRange) {
       fetchOrders();
@@ -2069,15 +2087,22 @@ onChange={(e) => handleColumnSelect("istick", e.target.checked)}
         // setOrders((prevOrders) =>
         //   prevOrders.map((order) => order.id === currentEditId ? newOrder : order)
         // );
-        if (dateRange2 !== "all") {
-          // Lọc lại danh sách theo khoảng ngày đã chọn
-          fetchOrders();
-        } else {
-          // Thêm đơn hàng mới vào đầu danh sách cũ
-           setOrders((prevOrders) =>
-          prevOrders.map((order) => order.id === currentEditId ? newOrder : order)
-        );
+        if (currentUser.position_team === "kho" ) {
+          setOrders((prevOrders) =>
+            prevOrders.map((order) => order.id === currentEditId ? newOrder : order)
+          );
+        } else{
+          if (dateRange2 !== "all") {
+            // Lọc lại danh sách theo khoảng ngày đã chọn
+            fetchOrders();
+          } else {
+            // Thêm đơn hàng mới vào đầu danh sách cũ
+             setOrders((prevOrders) =>
+            prevOrders.map((order) => order.id === currentEditId ? newOrder : order)
+          );
+          }
         }
+        
 
       } else {
         const response = await axios.post("/api/orders", newOrder);
@@ -2347,7 +2372,7 @@ onChange={(e) => handleColumnSelect("istick", e.target.checked)}
 )}
         </Select>
         </Col>
-        <Col span={4}>
+        <Col span={6}>
         <Input
       placeholder="Tìm kiếm..."
       allowClear
