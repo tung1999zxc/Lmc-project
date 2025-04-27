@@ -581,10 +581,10 @@ case "odd_stt":
             ? true 
             : order.customerName.toLowerCase().includes(searchCustomerName.toLowerCase());
 
-            const customerNameMatch2 = searchCustomerName2.trim() === "" 
-            ? true 
-            : order.products.some((product) => 
-                product.product.toLowerCase().includes(searchCustomerName2.toLowerCase())
+            const customerNameMatch2 = searchCustomerName2.trim() === ""
+            ? true
+            : order.products.some((product) =>
+                product.product.toLowerCase().trim() === searchCustomerName2.toLowerCase().trim()
               );
 
         return dateMatch && sttMatch && searchMatch && customerNameMatch && customerNameMatch2 && filterMatch && saleMatch && mktMatch;
