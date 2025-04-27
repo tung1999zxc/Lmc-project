@@ -4,7 +4,8 @@ import { Table, Input, Select, Button, Space, Popconfirm , message, Modal } from
 import { EditOutlined, DeleteOutlined } from "@ant-design/icons";
 import { useDispatch, useSelector } from 'react-redux';
 import axios from "axios";
-
+import { DatePicker } from "antd";
+import dayjs from "dayjs"; // Cài thêm dayjs để so sánh ngày
 const { Option } = Select;
 import { useRouter } from 'next/navigation';
 
@@ -25,7 +26,7 @@ const EmployeePageTable = () => {
   const [employees, setEmployees] = useState([]);
   const [isEditing, setIsEditing] = useState(false);
   const [editingRecord, setEditingRecord] = useState(null);
-
+  const [dateRange, setDateRange] = useState([]);
   const [searchText, setSearchText] = useState("");
   const [appliedSearchText, setAppliedSearchText] = useState("");
  
@@ -87,11 +88,20 @@ const EmployeePageTable = () => {
     // Áp dụng lọc theo tên page nếu appliedSearchText có giá trị
     if (appliedSearchText) {
       tempData = tempData.filter((record) =>
-        record.pageName.toLowerCase().includes(appliedSearchText.toLowerCase())
+        record.pageName.toLowerCase().includes(appliedSearchText.toLowerCase())||
+        record.employee.toLowerCase().includes(appliedSearchText.toLowerCase())
       );
     }
+    if (dateRange && dateRange.length === 2) {
+      const [startDate, endDate] = dateRange;
+      tempData = tempData.filter((record) => {
+        const recordDate = dayjs(record.createdAt);
+        return recordDate.isAfter(startDate.startOf('day')) && recordDate.isBefore(endDate.endOf('day'));
+      });
+    }
+  
     return tempData;
-  }, [data, currentUser, leadTeamMembers, appliedSearchText]);
+  }, [data, currentUser, leadTeamMembers, appliedSearchText,dateRange]);
   
 
   const mktOptions = employees
@@ -164,6 +174,16 @@ const EmployeePageTable = () => {
   const columns = [
     { title: "Tên Page", dataIndex: "pageName", key: "pageName" },
     { title: "Tên Nhân Viên", dataIndex: "employee", key: "employee" },
+    {
+      title: "Thời gian",
+      dataIndex: "createdAt",
+      key: "createdAt",
+      render: (value) => {
+        const date = new Date(value);
+        return date.toLocaleDateString('vi-VN'); 
+      }
+    },
+    
     {
       title: "Thao Tác",
       key: "action",
@@ -247,7 +267,7 @@ const EmployeePageTable = () => {
       </Space><br></br>
       <Input.Search
   style={{ width: 300 }}
-  placeholder="Tìm kiếm tên page"
+  placeholder="Tìm kiếm tên page / tên nhân viên"
   value={searchText}
   allowClear
   onClear={() => {
@@ -259,6 +279,11 @@ const EmployeePageTable = () => {
   onSearch={() => setAppliedSearchText(searchText)}
   onPressEnter={() => setAppliedSearchText(searchText)}
    />
+ <DatePicker.RangePicker
+    onChange={(dates) => setDateRange(dates)}
+    style={{ width: 300 }}
+    format="DD/MM/YYYY"
+  />
 
       <Table
         columns={columns}
