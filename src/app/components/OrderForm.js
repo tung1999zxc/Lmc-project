@@ -122,7 +122,7 @@ const handlePageNameChange = (value) => {
     .filter((order) => order.position_team === "sale")
     .map((order) => order.name);
 
-  const saleBaoOptions = ["DONE","OK", "HỦY", "ĐỢI XN", "BOOK TB", "NGUY CƠ", "BÙNG", "ĐANG UP", "CHECK"];
+  const saleBaoOptions = ["DONE","OK", "HỦY", "ĐỢI XN", "BOOK TB","THIẾU TT","50/50", "NGUY CƠ", "BÙNG", "ĐANG UP", "CHECK"];
   const massOptions = ["Nặng", "Nhẹ"];
   const thanhToanOptions = ["ĐÃ THANH TOÁN", "CHƯA THANH TOÁN"];
   const tinhTrangGHOptions = ["ĐÃ GỬI HÀNG", "GIAO THÀNH CÔNG","BỊ BẮT CHỜ GỬI LẠI","CHECK ĐỊA CHỈ"];
