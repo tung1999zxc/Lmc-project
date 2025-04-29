@@ -29,7 +29,7 @@ const EmployeePageTable = () => {
   const [dateRange, setDateRange] = useState([]);
   const [searchText, setSearchText] = useState("");
   const [appliedSearchText, setAppliedSearchText] = useState("");
- 
+  const [selectedTeam, setSelectedTeam] = useState(null);
  
   // Danh sách options
   useEffect(() => {
@@ -51,6 +51,64 @@ const EmployeePageTable = () => {
     };
 
     // Gọi API khi component được mount
+    const teamsList = [
+      {
+        id: 1,
+        name: `TEAM SƠN `,
+        members: employees
+          .filter(employee => employee.team_id === 'SON')
+          .map(employee => employee.employee_code)
+      },
+      {
+        id: 2,
+        name: `TEAM QUÂN `,
+        members: employees
+          .filter(employee => employee.team_id === 'QUAN')
+          .map(employee => employee.employee_code)
+      },
+      {
+        id: 3,
+        name: `TEAM CHI `,
+        members: employees
+          .filter(employee => employee.team_id === 'CHI')
+          .map(employee => employee.employee_code)
+      },
+      {
+        id: 4,
+        name: `TEAM PHONG `,
+        members: employees
+          .filter(employee => employee.team_id === 'PHONG')
+          .map(employee => employee.employee_code)
+      },
+      {
+        id: 5,
+        name: `TEAM TUẤN ANH `,
+        members: employees
+          .filter(employee => employee.team_id === 'TUANANH')
+          .map(employee => employee.employee_code)
+      },
+      {
+        id: 6,
+        name: `TEAM DIỆN `,
+        members: employees
+          .filter(employee => employee.team_id === 'DIEN')
+          .map(employee => employee.employee_code)
+      },
+      {
+        id: 7,
+        name: `TEAM LẺ `,
+        members: employees
+          .filter(employee => employee.team_id === 'LE')
+          .map(employee => employee.employee_code)
+      },
+      {
+        id: 8,
+        name: `TEAM DIỆU`,
+        members: employees
+          .filter(employee => employee.team_id === 'DIEU')
+          .map(employee => employee.employee_code)
+      },
+    ];
 
   const fetchNamePage = async () => {
     try {
@@ -69,8 +127,8 @@ const EmployeePageTable = () => {
   }, [employees, currentUser.team_id]); 
 
   const filteredData = useMemo(() => {
-    let tempData = []; // Khai báo biến tempData
-  
+    let tempData = []; 
+    
     if (
       currentUser.position === "admin" ||
       currentUser.position === "managerMKT" ||
@@ -85,13 +143,13 @@ const EmployeePageTable = () => {
       tempData = data.filter((record) => record.employee === currentUser.name);
     }
   
-    // Áp dụng lọc theo tên page nếu appliedSearchText có giá trị
     if (appliedSearchText) {
       tempData = tempData.filter((record) =>
-        record.pageName.toLowerCase().includes(appliedSearchText.toLowerCase())||
+        record.pageName.toLowerCase().includes(appliedSearchText.toLowerCase()) ||
         record.employee.toLowerCase().includes(appliedSearchText.toLowerCase())
       );
     }
+  
     if (dateRange && dateRange.length === 2) {
       const [startDate, endDate] = dateRange;
       tempData = tempData.filter((record) => {
@@ -100,8 +158,16 @@ const EmployeePageTable = () => {
       });
     }
   
+    if (selectedTeam) {
+      // lọc theo team_id
+      const teamMembers = employees
+        .filter(emp => emp.team_id === selectedTeam)
+        .map(emp => emp.name);
+      tempData = tempData.filter(record => teamMembers.includes(record.employee));
+    }
+  
     return tempData;
-  }, [data, currentUser, leadTeamMembers, appliedSearchText,dateRange]);
+  }, [data, currentUser, leadTeamMembers, appliedSearchText, dateRange, selectedTeam, employees]);
   
 
   const mktOptions = employees
@@ -284,6 +350,23 @@ const EmployeePageTable = () => {
     style={{ width: 300 }}
     format="DD/MM/YYYY"
   />
+  <Select
+  style={{ width: 300 }}
+  placeholder="Chọn team"
+  value={selectedTeam}
+  allowClear
+  onClear={() => setSelectedTeam(null)}
+  onChange={(value) => setSelectedTeam(value)}
+>
+  <Option value="SON">TEAM SƠN</Option>
+  <Option value="QUAN">TEAM QUÂN</Option>
+  <Option value="CHI">TEAM CHI</Option>
+  <Option value="PHONG">TEAM PHONG</Option>
+  <Option value="TUANANH">TEAM TUẤN ANH</Option>
+  <Option value="DIEN">TEAM DIỆN</Option>
+  <Option value="LE">TEAM LẺ</Option>
+  <Option value="DIEU">TEAM DIỆU</Option>
+</Select>
 
       <Table
         columns={columns}
