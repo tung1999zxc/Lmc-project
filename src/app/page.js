@@ -16,7 +16,7 @@ const [adsMoneyData, setAdsMoneyData] = useState([]);//mkt
 // Component biểu đồ Bar (Recharts) cho biểu đồ đơn (có 1 series)
 const router = useRouter(); 
 const today = new Date().toISOString().split('T')[0];
-const [selectedDate, setSelectedDate] = useState(null);
+const [selectedDate, setSelectedDate] = useState(today);
 const [selectedPreset, setSelectedPreset] = useState('currentMonth');
  // Ngày hiện tại định dạng YYYY-MM-DD
 
@@ -720,6 +720,8 @@ function getLast30Days() {
 
   // Lọc chi phí ads theo cùng bộ lọc (dùng field 'date')
   let filteredAds = adsMoneyData;
+  let filteredOrdersOriginal = filteredOrders;
+let filteredAdsOriginal = filteredAds;
   if (selectedPreset) {
     filteredAds = filterByPreset(adsMoneyData.map(ad => ({ ...ad, orderDate: ad.date })), selectedPreset)
       .map(ad => ({ ...ad, date: ad.orderDate }));
@@ -1760,7 +1762,9 @@ const percentAds3 = tongKW3 > 0 ? Number(((totalAdsKW3 / (tongKW3*exchangeRate))
     e.currentTarget.src = "/ngockem.jpg";
   }}
 />
-            <span className="employee-name">{emp.name}</span>
+            <span className="employee-name">{emp.name}  </span><br></br>
+            <span className="employee-name2">{((emp.total1 * 17000 * 0.95).toLocaleString())} VNĐ  </span>
+            
           </div>
         ))}
       </div>
@@ -1796,6 +1800,11 @@ const percentAds3 = tongKW3 > 0 ? Number(((totalAdsKW3 / (tongKW3*exchangeRate))
           font-size: 1.5em;
           font-weight: bold;
           color: #c2185b ;
+        }
+        .employee-name2 {
+          font-size: 1.5em;
+          font-weight: bold;
+          color:rgb(26, 47, 235) ;
         }
         @keyframes marquee {
           0% {
@@ -1929,7 +1938,7 @@ const percentAds3 = tongKW3 > 0 ? Number(((totalAdsKW3 / (tongKW3*exchangeRate))
           value={selectedPreset || undefined}
           onChange={(value) => {
             setSelectedPreset(value);
-            setSelectedDate(null);
+            setSelectedDate('');
           }}
         >
           <Option value="today">Hôm Nay</Option>
