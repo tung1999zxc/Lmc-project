@@ -76,6 +76,7 @@ export async function GET(req) {
       employee_code_order: 1,
       stt: 1,
       _id: 0,
+      createdAt:1
     };
 
     const orders = await db.collection('orders').find(query, { projection }).toArray();

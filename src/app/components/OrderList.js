@@ -220,7 +220,7 @@ const resetPagename =()=>{
 
   // Tính toán chọn nhân viên salexuly dựa trên số đơn hàng của hôm nay
   useEffect(() => {
-    if (currentUser.position === "salefull" ||currentUser.position === "salexuly") {
+    if (currentUser.position === "salexuly") {
       setnamesalexuly(currentUser.name);
       return;
     }
