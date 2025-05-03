@@ -1065,7 +1065,7 @@ const marketingReportData2 = mktEmployees.map((emp, index) => {
   const total2 = orders
     .filter(order => {
       // Giả sử order.createdAt chứa thời gian tạo đơn hàng
-      const orderDate = new Date(order.createdAt);
+      const orderDate =  new Date(order.createdAt);
       return order.mkt.trim().toLowerCase() === emp.name.trim().toLowerCase() &&
              
              orderDate >= startOfToday &&
@@ -1105,6 +1105,8 @@ if (sortedEmployees.length <= 5) {
   .filter(emp => (emp.total1 !== 0 && emp.totalAds1 !== 0))
   .sort((a, b) => b.total1 - a.total1)
   .slice(0, 3);
+
+  
 
 
 // Lọc ra các thành viên mkt thuộc team của currentUser
@@ -1751,7 +1753,7 @@ const percentAds3 = tongKW3 > 0 ? Number(((totalAdsKW3 / (tongKW3*exchangeRate))
     <div className="criticism-container">
       <h2>TOP 3 NHÂN VIÊN DOANH SỐ CAO NHẤT</h2>
       <div className="marquee">
-        {top5Employees.map((emp, index) => (
+        { currentUser.name!=="Quốc Hiếu" && top5Employees.map((emp, index) => (
           <div key={index} className="employee-item">
             <img
   src={`/${emp.name.trim()}.jpg`}
