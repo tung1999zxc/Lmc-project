@@ -1753,7 +1753,7 @@ const percentAds3 = tongKW3 > 0 ? Number(((totalAdsKW3 / (tongKW3*exchangeRate))
     <div className="criticism-container">
       <h2>TOP 3 NHÂN VIÊN DOANH SỐ CAO NHẤT</h2>
       <div className="marquee">
-        { currentUser.name!=="Quốc Hiếu" && top5Employees.map((emp, index) => (
+        { currentUser.name!=="" && top5Employees.map((emp, index) => (
           <div key={index} className="employee-item">
             <img
   src={`/${emp.name.trim()}.jpg`}
