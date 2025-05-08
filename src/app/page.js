@@ -2219,7 +2219,7 @@ pagination={7}
   <Col xs={24} md={9}>
   <br/>
   
-  <h2 style={{ marginTop: "2rem" }}>Báo cáo Doanh Số Nhân Viên Sale XỬ LÝ</h2>
+  <h2 style={{ marginTop: "2rem" }}>Báo cáo Doanh Số Nhân Viên Sale Vận Đơn</h2>
 <Table columns={saleColumns} dataSource={saleReportDataXL} pagination={false} />
 <h2 style={{ marginTop: "2rem" }}>Báo cáo Doanh Số Nhân Viên Sale ONLINE</h2>
 <Table columns={saleColumns} dataSource={saleReportDataOL} pagination={false} />
