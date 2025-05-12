@@ -2232,7 +2232,36 @@ onChange={(e) => handleColumnSelect("istick", e.target.checked)}
     }
   };
 
-
+  const handleCopy = () => {
+    // 1. Lấy tiêu đề cột (chỉ lấy .title nếu là string)
+    const headers = selectedTableColumns.map(col => {
+      return typeof col.title === 'string' ? col.title : col.dataIndex;
+    }).join('\t');
+  
+    // 2. Lấy dữ liệu từng dòng
+    const rows = sortedOrders.map(order => {
+      return selectedTableColumns.map(col => {
+        const value = order[col.dataIndex];
+        if (Array.isArray(value)) {
+          // xử lý mảng (vd: sản phẩm)
+          return value.map(v => `${v.product || ''} ${v.quantity || ''}`).join(", ");
+        }
+        if (typeof value === 'object' && value !== null) {
+          return JSON.stringify(value); // hoặc bỏ nếu không cần
+        }
+        return value ?? ''; // fallback nếu null/undefined
+      }).join('\t');
+    });
+  
+    // 3. Gộp lại
+    const finalText = [headers, ...rows].join('\n');
+   
+    // 4. Copy
+    navigator.clipboard.writeText(finalText)
+      .then(() =>  alert("Thao tác thành công!"))
+      .catch(() => message.error("Không thể sao chép."));
+  };
+  
   return (
     <div  style={{
       transform: "scale(1)", padding: 24,
@@ -2621,7 +2650,9 @@ onChange={(e) => handleColumnSelect("istick", e.target.checked)}
 <Row gutter={16} wrap={false} style={{ display: "flex", alignItems: "flex-start" }}>
         <Col flex="none">
         {(  selectedColumns.length > 0
- ) && (
+ ) && (<><Button onClick={handleCopy} type="primary" style={{ marginBottom: 16 }}>
+  Copy toàn bộ dữ liệu
+</Button>
   <Table  
   
     columns={selectedTableColumns}
@@ -2630,7 +2661,7 @@ onChange={(e) => handleColumnSelect("istick", e.target.checked)}
     bordered
     pagination={{ pageSize: searchText ? 100 : 20 }}
     // pagination={false}
-  />
+  /></>
 )}
         </Col>
         <Col flex="auto">
