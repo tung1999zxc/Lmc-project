@@ -2232,34 +2232,38 @@ onChange={(e) => handleColumnSelect("istick", e.target.checked)}
     }
   };
 
+  
   const handleCopy = () => {
-    // 1. Lấy tiêu đề cột (chỉ lấy .title nếu là string)
+    // Lấy tiêu đề (dùng col.key hoặc col.title nếu có)
     const headers = selectedTableColumns.map(col => {
-      return typeof col.title === 'string' ? col.title : col.dataIndex;
+      if (typeof col.title === 'string') return col.title;
+      if (typeof col.title?.props?.children === 'string') return col.title.props.children;
+      return col.key || '';
     }).join('\t');
   
-    // 2. Lấy dữ liệu từng dòng
     const rows = sortedOrders.map(order => {
       return selectedTableColumns.map(col => {
-        const value = order[col.dataIndex];
-        if (Array.isArray(value)) {
-          // xử lý mảng (vd: sản phẩm)
-          return value.map(v => `${v.product || ''} ${v.quantity || ''}`).join(", ");
+        const key = col.dataIndex || col.key;
+  
+        // Cột sản phẩm
+        if (key === "products" && Array.isArray(order.products)) {
+          return order.products
+            .map(p => `${p.product || ''} (SL: ${p.quantity || ''})`)
+            .join(", ");
         }
-        if (typeof value === 'object' && value !== null) {
-          return JSON.stringify(value); // hoặc bỏ nếu không cần
-        }
-        return value ?? ''; // fallback nếu null/undefined
+  
+        // Nếu là object hoặc không rõ ràng, bỏ qua
+        const value = order[key];
+        if (typeof value === 'object' && value !== null) return '';
+        return value ?? '';
       }).join('\t');
     });
   
-    // 3. Gộp lại
     const finalText = [headers, ...rows].join('\n');
-   
-    // 4. Copy
+  
     navigator.clipboard.writeText(finalText)
-      .then(() =>  alert("Thao tác thành công!"))
-      .catch(() => message.error("Không thể sao chép."));
+      .then(() => alert("✅ Đã sao chép toàn bộ dữ liệu!"))
+      .catch(() => message.error("❌ Lỗi sao chép."));
   };
   
   return (
