@@ -1,5 +1,6 @@
 // /app/api/orders/mark-done/route.js
 import { connectToDatabase } from '../../../../app/lib/mongodb.js';
+import dayjs from 'dayjs';
 
 export async function POST(req) {
   try {
@@ -12,6 +13,8 @@ export async function POST(req) {
         update: {  $set: {
           istickDONE: true,
           deliveryStatus: "GIAO THÀNH CÔNG",
+          shippingDate2: dayjs().format("YYYY-MM-DD"), 
+
         }, },
       },
     }));
