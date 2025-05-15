@@ -93,6 +93,16 @@ const [loading, setLoading] = useState(false);
         start = new Date(now.getFullYear(), now.getMonth(), 1);
         end = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999);
         break;
+      case "2currentMonth":
+        // Từ ngày 1 của tháng đến cuối ngày hôm nay
+        start = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+        end = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999);
+        break;
+      case "3currentMonth":
+        // Từ ngày 1 của tháng đến cuối ngày hôm nay
+        start = new Date(now.getFullYear(), now.getMonth() - 2, 1);
+        end = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999);
+        break;
       case "lastMonth":
         start = new Date(now.getFullYear(), now.getMonth() - 1, 1);
         end = new Date(now.getFullYear(), now.getMonth(), 0, 23, 59, 59, 999);
@@ -946,6 +956,7 @@ const [loading, setLoading] = useState(false);
             
           />}
 />
+
 <Select
           value={selectedPreset}
           onChange={(value) => setSelectedPreset(value)}
@@ -956,6 +967,8 @@ const [loading, setLoading] = useState(false);
           <Option value="yesterday">Hôm Qua</Option>
           <Option value="week">1 Tuần gần nhất</Option>
           <Option value="currentMonth">1 Tháng (Từ đầu tháng đến hiện tại)</Option>
+          <Option value="2currentMonth">2 Tháng (Từ đầu tháng đến hiện tại)</Option>
+          <Option value="3currentMonth">3 Tháng (Từ đầu tháng đến hiện tại)</Option>
           <Option value="lastMonth">Tháng trước</Option>
           <Option value="twoMonthsAgo">2 Tháng trước</Option>
           <Option value="threeMonthsAgo">3 Tháng trước</Option>
