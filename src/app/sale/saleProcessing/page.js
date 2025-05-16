@@ -6,6 +6,9 @@ import { useSelector } from "react-redux";
 import axios from "axios"; 
 import { useRouter } from 'next/navigation';
 
+import isSameOrAfter from "dayjs/plugin/isSameOrAfter";
+dayjs.extend(isSameOrAfter);
+
 const Dashboard = () => {
   const [filterRange, setFilterRange] = useState("week");
   const [orders, setOrders] = useState([]);
@@ -48,7 +51,7 @@ const Dashboard = () => {
         case "week":
           return orderDate.isAfter(today.subtract(7, "day"));
         case "currentMonth":
-          return orderDate.isAfter(today.startOf("month"));
+          return orderDate.isSameOrAfter(today.startOf("month"));
         case "lastMonth": {
           const prevMonth = today.subtract(1, "month");
           return orderDate.isAfter(prevMonth.startOf("month")) && orderDate.isBefore(prevMonth.endOf("month"));
@@ -178,7 +181,7 @@ const Dashboard = () => {
       filtered = filtered.filter(order => order.salexuly === user);
     }
     const totalRevenueSum = filtered.reduce(
-      (acc, order) => acc + Number(order.revenue || 0),
+      (acc, order) => acc + Number(order.profit || 0),
       0
     );
     const paidRevenueSum = filtered
