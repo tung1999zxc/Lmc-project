@@ -1072,32 +1072,32 @@ onChange={(e) => handleColumnSelect("istick", e.target.checked)}
     },
   ]
   : []),
-    ...((currentUser.position === "salexuly" ||currentUser.position === "salefull")
-      ? [
-        {
-          title: (<>
-            <Checkbox
-              checked={allRowsSelectedDONE}
-              onChange={(e) => handleSelectAllIstickDONE(e.target.checked)}
-            >
-              Xác nhận Giao thành công
-            </Checkbox>
-            <Button type="primary" onClick={handleSaveIstickDONE}>
-            Lưu 
-          </Button></>
-          ),
-          key: "istickDONE",
-          width: 50,
-          dataIndex: "istickDONE",
-          render: (_, record) => (
-            <Checkbox
-              checked={record.istickDONE || false}
-              onChange={(e) => handleIstickChangeDONE(record.id, e.target.checked)}
-            />
-          ),
-        },
-        ]
-      : []),
+    // ...((currentUser.position === "salexuly" ||currentUser.position === "salefull")
+    //   ? [
+    //     {
+    //       title: (<>
+    //         <Checkbox
+    //           checked={allRowsSelectedDONE}
+    //           onChange={(e) => handleSelectAllIstickDONE(e.target.checked)}
+    //         >
+    //           Xác nhận Giao thành công
+    //         </Checkbox>
+    //         <Button type="primary" onClick={handleSaveIstickDONE}>
+    //         Lưu 
+    //       </Button></>
+    //       ),
+    //       key: "istickDONE",
+    //       width: 50,
+    //       dataIndex: "istickDONE",
+    //       render: (_, record) => (
+    //         <Checkbox
+    //           checked={record.istickDONE || false}
+    //           onChange={(e) => handleIstickChangeDONE(record.id, e.target.checked)}
+    //         />
+    //       ),
+    //     },
+    //     ]
+    //   : []),
     {
       title: (
         <Checkbox

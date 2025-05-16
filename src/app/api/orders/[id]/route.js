@@ -11,6 +11,10 @@ export async function PUT(request, { params }) {
     delete data._id;
     delete data.id;
     delete data.createdAt;
+    delete data.istick;
+    delete data.istick4;
+    delete data.istickDONE;
+    delete data.isShipping;
 
     const { db } = await connectToDatabase();
     // Giả sử id được tạo bằng Date.now().toString(), so sánh trực tiếp
