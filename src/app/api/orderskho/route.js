@@ -10,9 +10,10 @@ export async function GET(req) {
     let query = {};
 
     if (filter === "failed") {
+      // Đơn đã được sale xử lý, nhưng chưa thanh toán hoặc chưa giao
       query = {
         $and: [
-          { saleReport: "DONE" }, // điều kiện bắt buộc
+          { saleReport: "DONE" },
           {
             $or: [
               { paymentStatus: { $ne: "ĐÃ THANH TOÁN" } },
@@ -22,18 +23,17 @@ export async function GET(req) {
         ]
       };
     } else if (filter === "success") {
+      // Đơn đã giao thành công và được sale xử lý
       query = {
         deliveryStatus: "GIAO THÀNH CÔNG",
-        saleReport: "DONE" 
-        
+        saleReport: "DONE"
       };
-      
     } else if (filter === "all") {
+      // Tất cả đơn đã được sale xử lý
       query = {
-        
-        saleReport: "DONE" 
-        
-      };// filter === "all" thì query = {} mặc định
+        saleReport: "DONE"
+      };
+    }
 
     const orders = await db.collection('orders').find(query).toArray();
 
