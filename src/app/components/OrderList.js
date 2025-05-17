@@ -81,6 +81,11 @@ const OrderList = () => {
   const [specificDate, setSpecificDate] = useState(null); // Ngày cụ thể
   const [sttSearch, setSttSearch] = useState("");
   const [exportDisabled, setExportDisabled] = useState(true);
+  const [filterType, setFilterType] = useState('failed'); // default: chưa thành công
+
+const handleFilterChange = (e) => {
+  setFilterType(e.target.value);
+};
   const fetchEmployees = async () => {
       
       try {
@@ -163,7 +168,9 @@ const OrderList = () => {
       // }
   
       if (currentUser.position_team === "kho" ) {
-          const response = await axios.get('/api/orderskho');
+        const response = await axios.get('/api/orderskho', {
+          params: { filter: filterType }  // `khoFilter` là biến state lưu loại lọc đang chọn
+        });
           const data = response.data.data || [];
   
           setOrders(data);
@@ -204,6 +211,12 @@ const OrderList = () => {
       fetchOrders();
     }
   }, [dateRange, dateRange2]);
+  useEffect(() => {
+    if (currentUser.position_team !== "kho" ) {
+      return
+    }
+    fetchOrders();
+  }, [filterType]);
   
   const handleSearch = (value) => {
     setSearchText(value); // Chỉ cập nhật khi nhấn Search
@@ -2088,7 +2101,7 @@ onChange={(e) => handleColumnSelect("istick", e.target.checked)}
   
     try {
       if (currentEditId) {
-        const response = await axios.put(`/api/orders/${currentEditId}`, newOrder,{ headers: { 'x-current-user': encodeURIComponent(currentUser.name) } });
+        const response = await axios.put(`/api/orders/${currentEditId}`, newOrder,{ headers: { 'x-current-user': encodeURIComponent(currentUser.position_team) } });
         message.success(response.data.message || "Cập nhật thành công");
         // setOrders((prevOrders) =>
         //   prevOrders.map((order) => order.id === currentEditId ? newOrder : order)
@@ -2508,6 +2521,11 @@ onChange={(e) => handleColumnSelect("istick", e.target.checked)}
             ]}
             onChange={(values) => setSelectedFilters(values)}
           />  
+          <select value={filterType} onChange={handleFilterChange}>
+  <option value="failed">Đơn hàng chưa thành công</option>
+  <option value="success">Giao thành công</option>
+  <option value="all">Tất cả đơn hàng</option>
+</select>
           
         </Col>) :(<Col span={5}> <Select
             mode="multiple"

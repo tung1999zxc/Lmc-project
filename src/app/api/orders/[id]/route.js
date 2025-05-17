@@ -15,6 +15,22 @@ export async function PUT(request, { params }) {
     delete data.istick4;
     delete data.istickDONE;
     delete data.isShipping;
+    const currentUser_kho = decodeURIComponent(request.headers.get('x-current-user')) || data.updatedBy || 'Unknown';
+    const allowedForKhoOnly = ["shippingDate1", "shippingDate2", "trackingCode", "noteKHO", "deliveryStatus"];
+
+if (currentUser_kho === "kho") {
+  // Chỉ giữ lại các trường được phép
+  Object.keys(data).forEach((key) => {
+    if (!allowedForKhoOnly.includes(key)) {
+      delete data[key];
+    }
+  });
+} else {
+  // Người khác thì không được cập nhật các trường của kho
+  for (const field of allowedForKhoOnly) {
+    delete data[field];
+  }
+}
 
     const { db } = await connectToDatabase();
     // Giả sử id được tạo bằng Date.now().toString(), so sánh trực tiếp
@@ -23,7 +39,8 @@ export async function PUT(request, { params }) {
 
 
     // Lấy tên người chỉnh sửa từ header (currentUser.name) hoặc data.updatedBy nếu có
-    const currentUserName = decodeURIComponent(request.headers.get('x-current-user')) || data.updatedBy || 'Unknown';
+    // const currentUserName = decodeURIComponent(request.headers.get('x-current-user')) || data.updatedBy || 'Unknown';
+   
     // const exemptUsers = ['TK KHO', 'Nguyễn Diệp Anh', 'Trần Mỹ Hạnh'];
 
     // if (!exemptUsers.includes(currentUserName)   ){
