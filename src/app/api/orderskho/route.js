@@ -11,18 +11,29 @@ export async function GET(req) {
 
     if (filter === "failed") {
       query = {
-        $or: [
-          { paymentStatus: { $ne: "ĐÃ THANH TOÁN" } },
-          { deliveryStatus: { $ne: "GIAO THÀNH CÔNG" } }
+        $and: [
+          { saleReport: "DONE" }, // điều kiện bắt buộc
+          {
+            $or: [
+              { paymentStatus: { $ne: "ĐÃ THANH TOÁN" } },
+              { deliveryStatus: { $ne: "GIAO THÀNH CÔNG" } }
+            ]
+          }
         ]
       };
     } else if (filter === "success") {
       query = {
-        deliveryStatus: "GIAO THÀNH CÔNG"
+        deliveryStatus: "GIAO THÀNH CÔNG",
+        saleReport: "DONE" 
         
       };
       
-    } // filter === "all" thì query = {} mặc định
+    } else if (filter === "all") {
+      query = {
+        
+        saleReport: "DONE" 
+        
+      };// filter === "all" thì query = {} mặc định
 
     const orders = await db.collection('orders').find(query).toArray();
 
