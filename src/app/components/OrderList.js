@@ -853,7 +853,7 @@ case "odd_stt":
       });
       return copy;
     });
-  }, 3000);
+  }, 0);
 
   const handleIstickChange2 = useCallback((orderId, value) => {
     debouncedChangeShipping(orderId, value);
@@ -885,7 +885,7 @@ case "odd_stt":
       });
       return copy;
     });
-  }, 3000);
+  }, 0);
 
   const allRowsSelectedDONE = filteredOrders.length > 0 && filteredOrders.every(order => order.istickDONE);
   
