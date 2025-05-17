@@ -189,12 +189,12 @@ const productOptions = products.map((p) => p.name);
               </Col>
               <Col span={8}>
                 <Form.Item label="NGÀY GỬI" name="shippingDate1">
-                  <DatePicker allowClear style={{ width: "100%" }} format="YYYY-MM-DD HH:mm:ss" />
+                  <DatePicker allowClear style={{ width: "100%" }} format="YYYY-MM-DD" />
                 </Form.Item>
               </Col>
               <Col span={8}>
                 <Form.Item allowClear label="NGÀY NHẬN" name="shippingDate2">
-                  <DatePicker style={{ width: "100%" }} format="YYYY-MM-DD HH:mm:ss" />
+                  <DatePicker style={{ width: "100%" }} format="YYYY-MM-DD" />
                 </Form.Item>
               </Col>
               <Col span={8}>
@@ -650,13 +650,13 @@ const productOptions = products.map((p) => p.name);
               <Input />
             </Form.Item>
             <Form.Item label="NGÀY GỬI" name="shippingDate1"  hidden={currentUser.position_team === "sale"}>
-              <DatePicker style={{ width: "100%" }} format="YYYY-MM-DD HH:mm:ss"/>
+              <DatePicker style={{ width: "100%" }} format="YYYY-MM-DD"/>
             </Form.Item>
             <Form.Item label="odate4" name="orderDate4" hidden={true}>
               <Input type="number" />
             </Form.Item>
             <Form.Item label="NGÀY NHẬN" name="shippingDate2" hidden={currentUser.position_team === "sale"}>
-              <DatePicker style={{ width: "100%" }} format="YYYY-MM-DD HH:mm:ss" />
+              <DatePicker style={{ width: "100%" }} format="YYYY-MM-DD" />
             </Form.Item>
             <Form.Item label="GHI CHÚ KHO" name="noteKHO" hidden={currentUser.position_team === "sale"}>
               <Input.TextArea rows={3} />
