@@ -2155,7 +2155,8 @@ onChange={(e) => handleColumnSelect("istick", e.target.checked)}
     order.saleReport === "DONE" &&
     order.istick === true &&
     order.deliveryStatus === "ĐÃ GỬI HÀNG" &&
-    order.trackingCode === ""&& order.istick4 === false 
+    order.trackingCode === ""&&
+    (order.istick4 ?? false) === false 
   )
   .map(order => ({
     STT: order.stt,
