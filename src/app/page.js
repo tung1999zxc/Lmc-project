@@ -819,7 +819,7 @@ const employeeChartDataNewTEAM = teamEmployees.map(emp => {
 
   const teamChartDataNew = teams2.map(team => {
     const teamEmps = employees.filter(emp => emp.position_team === "mkt" && emp.team_id === team.value);
-    const teamEmps2 = employees.filter(emp => emp.position_team === "mkt" && emp.team_id === team.value && emp.position !=="lead" );
+    const teamEmps2 = employees.filter(emp => emp.position_team === "mkt" && emp.team_id === team.value && (emp.position !=="lead" && emp.position !=="managerMKT"));
     const sales = teamEmps.reduce((acc, emp) => {
       const empSales = filteredOrders
         .filter(order => order.mkt.trim().toLowerCase() === emp.name.trim().toLowerCase())
