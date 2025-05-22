@@ -16,32 +16,24 @@ export async function GET(req) {
 
     if (startDate && endDate) {
       andConditions.push({
-        // $or: [
-        //   {
+        $or: [
+          {
             orderDate: {
               $exists: true,
               $ne: null,
               $gte: startDate,
               $lte: endDate
             }
-        //   },
-        //   {
-        //     shippingDate1: {
-        //       $exists: true,
-        //       $ne: null,
-        //       $gte: startDate,
-        //       $lte: endDate
-        //     }
-        //   },
-        //   {
-        //     shippingDate2: {
-        //       $exists: true,
-        //       $ne: null,
-        //       $gte: startDate,
-        //       $lte: endDate
-        //     }
-        //   }
-        // ]
+          },
+          {
+            shippingDate2: {
+              $exists: true,
+              $ne: null,
+              $gte: startDate,
+              $lte: endDate
+            }
+          }
+        ]
       });
     }
 

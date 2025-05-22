@@ -83,9 +83,10 @@ const OrderList = () => {
   const [exportDisabled, setExportDisabled] = useState(true);
   const [filterType, setFilterType] = useState('failed'); // default: chưa thành công
 
-const handleFilterChange = (e) => {
-  setFilterType(e.target.value);
-};
+  const handleFilterChange = (value) => {
+    setFilterType(value);
+    // Gọi lại API hoặc filter lại danh sách nếu cần
+  };
   const fetchEmployees = async () => {
       
       try {
@@ -154,48 +155,55 @@ const handleFilterChange = (e) => {
 
   const fetchOrders = async () => {
     setLoading(true);
+  
     try {
-      const startDateObj = (Array.isArray(dateRange2) && dateRange2.length === 2) ? dateRange2[0] : (Array.isArray(dateRange) && dateRange.length === 2 ? dateRange[0] : null);
-      const endDateObj = (Array.isArray(dateRange2) && dateRange2.length === 2) ? dateRange2[1] : (Array.isArray(dateRange) && dateRange.length === 2 ? dateRange[1] : null);
-      
+      // Xử lý ngày bắt đầu và kết thúc
+      const [startDateObj, endDateObj] = (() => {
+        if (Array.isArray(dateRange2) && dateRange2.length === 2) {
+          return dateRange2;
+        } else if (Array.isArray(dateRange) && dateRange.length === 2) {
+          return dateRange;
+        }
+        return [null, null];
+      })();
+  
+      // Khởi tạo params chung
       const params = {};
       if (startDateObj && endDateObj) {
         params.startDate = dayjs(startDateObj).format('YYYY-MM-DD');
         params.endDate = dayjs(endDateObj).format('YYYY-MM-DD');
       }
-      // if (searchText) {
-      //   params.search = searchText.trim();
-      // }
   
-      if (currentUser.position_team === "kho" ) {
-        const response = await axios.get('/api/orderskho', {
-          params: { filter: filterType }  // `khoFilter` là biến state lưu loại lọc đang chọn
-        });
-          const data = response.data.data || [];
+      // Thiết lập URL và params tùy theo vị trí người dùng
+      let url = '/api/orders';
+      let requestParams = { ...params, filter: filterType };
   
-          setOrders(data);
-          setInitialOrders(data);
-          setInitialOrders2(data);
-          setInitialOrders3(data);
-          setInitialOrders4(data);
-        } else{
-          const response = await axios.get('/api/orders', { params });
-          const data = response.data.data || [];
+      if (currentUser.position_team === "kho") {
+        url = '/api/orderskho';
+        requestParams = { filter: filterType }; // không truyền ngày
+      } else if (currentUser.position === "salexuly") {
+        url = '/api/ordersvandon';
+      }
   
+      // Gọi API
+      const response = await axios.get(url, { params: requestParams });
+      const data = response.data.data || [];
+  
+      // Cập nhật state
       setOrders(data);
       setInitialOrders(data);
       setInitialOrders2(data);
       setInitialOrders3(data);
       setInitialOrders4(data);
-        }
-     
+  
     } catch (error) {
-      console.error(error);
+      console.error("Lỗi khi gọi API:", error);
       message.error("Lỗi khi lấy đơn hàng");
     } finally {
       setLoading(false);
     }
   };
+  
   useEffect(() => {
     const range = getDateRangeByPreset(dateRange2);
     if (range) {
@@ -212,9 +220,7 @@ const handleFilterChange = (e) => {
     }
   }, [dateRange, dateRange2]);
   useEffect(() => {
-    if (currentUser.position_team !== "kho" ) {
-      return
-    }
+   
     fetchOrders();
   }, [filterType]);
   
@@ -2389,7 +2395,7 @@ onChange={(e) => handleColumnSelect("istick", e.target.checked)}
       </Row>
       
       <Row gutter={[16, 16]} style={{ marginBottom: 24 }}>
-        <Col span={4}>
+        <Col span={5}>
         <RangePicker
   style={{ width: "100%" }}
   placeholder={["Từ ngày", "Đến ngày"]}
@@ -2425,6 +2431,16 @@ onChange={(e) => handleColumnSelect("istick", e.target.checked)}
   <Option value="all">Tất cả (hạn chế dùng)</Option>
 )}
         </Select>
+        <Select
+  value={filterType}
+  onChange={handleFilterChange}
+  style={{ width: '100%'}}
+  placeholder="Chọn trạng thái đơn hàng"
+>
+  <Option value="failed">Đơn hàng chưa hoàn thành</Option>
+  <Option value="success">Đã thanh toán + GTC</Option>
+  <Option value="all">Tất cả đơn hàng</Option>
+</Select>
         </Col>
         <Col span={6}>
         <Input
@@ -2522,11 +2538,7 @@ onChange={(e) => handleColumnSelect("istick", e.target.checked)}
             ]}
             onChange={(values) => setSelectedFilters(values)}
           />  
-          <select value={filterType} onChange={handleFilterChange}>
-  <option value="failed">Đơn hàng chưa thành công</option>
-  <option value="success">Giao thành công</option>
-  <option value="all">Tất cả đơn hàng</option>
-</select>
+         
           
         </Col>) :(<Col span={5}> <Select
             mode="multiple"
@@ -2582,7 +2594,8 @@ onChange={(e) => handleColumnSelect("istick", e.target.checked)}
     <Option value="onlinetoi">Ca Online Tối</Option>
     <Option value="onlinesang">Ca Online Sáng</Option>
   </Select></Col> ) }
-          
+  
+ 
         
         {currentUser.position_team!=="kho" &&(<>
         <Col span={4}>
