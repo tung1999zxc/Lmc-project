@@ -476,7 +476,9 @@ const [loading, setLoading] = useState(false);
             }, 0);
     
           // return ordersDone - deliveredQty;
-          return ordersDone ;
+         
+      
+          return ordersDone;
         };
     
         return getQty(a) - getQty(b);
@@ -507,7 +509,9 @@ const [loading, setLoading] = useState(false);
             }
             return acc;
           }, 0);
-    
+          if (record.name === 'KEM NỀN THỎI') {
+            return ordersDone - 2;
+          }
         // return ordersDone - deliveredQty;
         return ordersDone;
       },
@@ -750,6 +754,7 @@ const [loading, setLoading] = useState(false);
           }, 0);
         
         const slAm = totalImported - ordersDone - deliveredQty;
+     
         let bgColor = "";
         if (slAm <= 0) {
           bgColor = "#F999A8";
@@ -768,7 +773,7 @@ const [loading, setLoading] = useState(false);
               fontWeight: "bold"
             }}
           >
-            {slAm}
+           {record.name === 'KEM NỀN THỎI' ? slAm + 2 : slAm}
           </div>
         );
       },
