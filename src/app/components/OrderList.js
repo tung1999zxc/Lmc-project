@@ -10,7 +10,7 @@ import {
   Input,
   Select,
   Row,
-
+  Modal,
   Col,
   Tag,Spin,
   Checkbox
@@ -82,7 +82,19 @@ const OrderList = () => {
   const [sttSearch, setSttSearch] = useState("");
   const [exportDisabled, setExportDisabled] = useState(true);
   const [filterType, setFilterType] = useState('failed'); // default: chưa thành công
-
+  const [modalCustomerOrders, setModalCustomerOrders] = useState([]);
+  const [modalVisible, setModalVisible] = useState(false);
+  
+  const handleSearchCustomerModal = async (name) => {
+    try {
+      const res = await axios.get(`/api/orders/search-by-customer?name=${encodeURIComponent(name)}`);
+      setModalCustomerOrders(res.data.data || []);
+      setModalVisible(true);
+    } catch (err) {
+      console.error(err);
+      message.error('Không thể tìm đơn khách hàng');
+    }
+  };
   const handleFilterChange = (value) => {
     setFilterType(value);
     // Gọi lại API hoặc filter lại danh sách nếu cần
@@ -136,11 +148,18 @@ const OrderList = () => {
   const saleOptions = employees
     .filter((emp) => emp.position_team === "sale")
     .map((emp) => emp.name);
+
     const salexulyOptions = useMemo(() => {
       return employees
         .filter(emp => emp.position === "salexuly")
         .map(emp => emp.name);
     }, [employees]);
+    const salexulyOptions2 = useMemo(() => {
+      return employees
+        .filter(emp => emp.position === "salexuly" && emp.status === true)
+        .map(emp => emp.name);
+    }, [employees]);
+
 
   // Lấy đơn hàng từ localStorage khi component mount
   // useEffect(() => {
@@ -203,7 +222,7 @@ const OrderList = () => {
       setLoading(false);
     }
   };
-  
+
   useEffect(() => {
     const range = getDateRangeByPreset(dateRange2);
     if (range) {
@@ -257,7 +276,7 @@ const resetPagename =()=>{
     );
   
     // Tính số đơn hàng của từng nhân viên trong salexulyOptions
-    const employeeOrderCounts = salexulyOptions.map((employee) => ({
+    const employeeOrderCounts = salexulyOptions2.map((employee) => ({
       name: employee,
       count: filteredOrders.filter((order) => order.salexuly === employee).length,
     }));
@@ -278,10 +297,10 @@ const resetPagename =()=>{
       const index = roundRobinIndex.current % candidates.length;
       const selectedEmployee = candidates[index];
       // Tăng chỉ số roundRobin cho lần gọi sau
-      roundRobinIndex.current += 1;
+      roundRobinIndex.current += 1;     
       setnamesalexuly(selectedEmployee.name);
     }
-  }, [orders, salexulyOptions, currentUser]);
+  }, [orders, salexulyOptions2, currentUser]);
 
 
   function getDateRangeByPreset(preset) {
@@ -659,6 +678,22 @@ case "odd_stt":
     // Điều kiện: đơn hàng đã tồn tại ban đầu, ban đầu chưa tích nhưng hiện tại đã tích
     return originalOrder && !originalOrder.istick && order.istick;
   });
+
+// const ordersDone = filteredOrders
+//   .filter(order =>
+// order.saleReport === "DONE" &&
+// order.deliveryStatus === "" &&
+// order.products?.some(item => item.product === "MẶT NẠ BONG BÓNG") // lọc đúng đơn có sp
+// ) 
+//   .reduce((acc, order) => {
+//     if (order.products && order.products.length > 0) {
+//       const orderQty = order.products
+//         .filter(item => item.product === record.name)
+//         .reduce((sum, item) => sum + Number(item.quantity), 0);
+//       return acc + orderQty;
+//     }
+//     return acc;
+//   }, 0);
 
   const handleCalculateTotals = () => {
     const totals = calculateTotalQuantities(filteredOrders);
@@ -1286,7 +1321,21 @@ onChange={(e) => handleColumnSelect("istick", e.target.checked)}
       dataIndex: "category",
       key: "category",
     },
-   
+    {
+      title: (
+        <Checkbox
+          checked={selectedColumns.includes("deliveryStatus")}
+          onChange={(e) => handleColumnSelect("deliveryStatus", e.target.checked)}
+        >
+          TÌNH TRẠNG GH
+        </Checkbox>
+      ),
+      dataIndex: "deliveryStatus",
+      key: "deliveryStatus",
+      render: (text) => (
+        <Tag color={text === "GIAO THÀNH CÔNG" ? "blue" : "orange"}>{text}</Tag>
+      ),
+    },
     {
       title: (
         <Checkbox
@@ -1446,21 +1495,7 @@ onChange={(e) => handleColumnSelect("istick", e.target.checked)}
       key: "fb",
       render: (text) => <div style={{ width: 200,  }}>{text} </div>,
     },
-    {
-      title: (
-        <Checkbox
-          checked={selectedColumns.includes("deliveryStatus")}
-          onChange={(e) => handleColumnSelect("deliveryStatus", e.target.checked)}
-        >
-          TÌNH TRẠNG GH
-        </Checkbox>
-      ),
-      dataIndex: "deliveryStatus",
-      key: "deliveryStatus",
-      render: (text) => (
-        <Tag color={text === "GIAO THÀNH CÔNG" ? "blue" : "orange"}>{text}</Tag>
-      ),
-    },
+    
     {
       title: (
         <Checkbox
@@ -2138,9 +2173,11 @@ onChange={(e) => handleColumnSelect("istick", e.target.checked)}
       if (dateRange2 !== "all") {
         // Lọc lại danh sách theo khoảng ngày đã chọn
         fetchOrders();
+        fetchEmployees();
       } else {
         // Thêm đơn hàng mới vào đầu danh sách cũ
         setOrders((prevOrders) => [createdOrder, ...prevOrders]);
+        fetchEmployees();
       }
       }
       // fetchOrders();
@@ -2323,7 +2360,7 @@ onChange={(e) => handleColumnSelect("istick", e.target.checked)}
         <span style={{  }}> |SL ĐƠN : {filteredOrders.length} </span>
       </div> </Col>
       
-      
+      {/* {ordersDone} */}
        
      
       {(currentUser.position_team==="kho"||currentUser.position_team==="mkt" ||currentUser.position ==="leadSALE"||currentUser.position ==="admin"||currentUser.position ==="managerSALE"||  currentUser.name ==="Hoàng Lan Phương"  )&& <Col span={8}>
@@ -2441,6 +2478,7 @@ onChange={(e) => handleColumnSelect("istick", e.target.checked)}
   <Option value="success">Đã thanh toán + GTC</Option>
   <Option value="all">Tất cả đơn hàng</Option>
 </Select>
+
         </Col>
         <Col span={6}>
         <Input
@@ -2593,7 +2631,15 @@ onChange={(e) => handleColumnSelect("istick", e.target.checked)}
     <Option value="hanhchinh">Ca Hành Chính</Option>
     <Option value="onlinetoi">Ca Online Tối</Option>
     <Option value="onlinesang">Ca Online Sáng</Option>
-  </Select></Col> ) }
+  </Select>
+  <Input.Search
+  placeholder="CHECK KHÁCH"
+  enterButton="CHECK"
+  allowClear
+  style={{ width: 300, marginBottom: 10 }}
+  onSearch={handleSearchCustomerModal}
+/>
+  </Col> ) }
   
  
         
@@ -2725,10 +2771,61 @@ onChange={(e) => handleColumnSelect("istick", e.target.checked)}
         initialValues={orders.find((order) => order.id === currentEditId)}
         employees={employees}
         dataPagename={dataPagename}
+        
         namesalexuly={namesalexuly}
         resetPagename={resetPagename}
         loading={loading}
       />
+      <Modal
+  title="Các đơn hàng của khách"
+  visible={modalVisible}
+  onCancel={() => setModalVisible(false)}
+  footer={null}
+  width={800}
+>
+  <Table
+    dataSource={modalCustomerOrders}
+    columns={[
+      // { title: 'Sản phẩm', key: 'products', render: (_, record) => (
+      //   record.products?.map(p => `${p.product} - SL: ${p.quantity}`).join(', ')
+      // )},
+      { title: 'Ngày đặt', dataIndex: 'orderDate', key: 'orderDate',render: (text) => dayjs(text).format("DD/MM"), },
+      { title: 'STT', dataIndex: 'stt', key: 'stt' },
+      {title: 'GHI CHÚ SALE',
+      dataIndex: "note",
+      key: "note",
+      width: 200,
+      render: (text) => <div style={{ width: 200,  }}><h3>{text} </h3></div>,
+    },{
+      title:
+          "TT XỬ LÍ",
+       
+      dataIndex: "processStatus",
+      key: "processStatus",
+    }, {
+      title:
+          'TÌNH TRẠNG GH',
+      
+      dataIndex: "deliveryStatus",
+      width: 90,
+      key: "deliveryStatus",
+      render: (text) => (
+        <Tag color={text === "GIAO THÀNH CÔNG" ? "blue" : "orange"}>{text}</Tag>
+      ),
+    }, {
+      title: "THANH TOÁN",
+      dataIndex: "paymentStatus",
+      key: "paymentStatus",
+      width: 100,
+      render: (text) => (
+        <Tag color={text === "ĐÃ THANH TOÁN" ? "green" : "red"}>{text}</Tag>
+      )
+    },
+    ]}
+    rowKey="id"
+/>
+</Modal>
+
     </div>
   );
 };

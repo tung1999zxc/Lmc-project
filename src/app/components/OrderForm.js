@@ -9,7 +9,7 @@ import {
   DatePicker,
   Select,
   Button,
-  Row,Popover,
+  Row,Popover,Table ,Tag,
   Col,
   Modal,
   Space,
@@ -32,6 +32,20 @@ const OrderForm = ({ visible, onCancel,loading, onSubmit, resetPagename,initialV
   // Danh sách options
   const [products, setProducts] = useState([]);
   const [employeeNamepage, setEmployeeNamepage] = useState("");
+  const [modalCustomerOrders, setModalCustomerOrders] = useState([]);
+const [modalVisible, setModalVisible] = useState(false);
+
+
+const handleSearchCustomerModal = async (name) => {
+  try {
+    const res = await axios.get(`/api/orders/search-by-customer?name=${encodeURIComponent(name)}`);
+    setModalCustomerOrders(res.data.data || []);
+    setModalVisible(true);
+  } catch (err) {
+    console.error(err);
+    message.error('Không thể tìm đơn khách hàng');
+  }
+};
 
    const fetchProducts = async () => {
     setLoading2(true);
@@ -155,7 +169,56 @@ const productOptions = products.map((p) => p.name);
     form.resetFields();
   };
 
-  return (
+  return (<>
+    <Modal
+  title="Các đơn hàng của khách"
+  visible={modalVisible}
+  onCancel={() => setModalVisible(false)}
+  footer={null}
+  width={800}
+>
+  <Table
+    dataSource={modalCustomerOrders}
+    columns={[
+      // { title: 'Sản phẩm', key: 'products', render: (_, record) => (
+      //   record.products?.map(p => `${p.product} - SL: ${p.quantity}`).join(', ')
+      // )},
+      { title: 'Ngày đặt', dataIndex: 'orderDate', key: 'orderDate',render: (text) => dayjs(text).format("DD/MM"), },
+      { title: 'STT', dataIndex: 'stt', key: 'stt' },
+      {title: 'GHI CHÚ SALE',
+      dataIndex: "note",
+      key: "note",
+      width: 200,
+      render: (text) => <div style={{ width: 200,  }}><h3>{text} </h3></div>,
+    },{
+      title:
+          "TT XỬ LÍ",
+       
+      dataIndex: "processStatus",
+      key: "processStatus",
+    }, {
+      title:
+          'TÌNH TRẠNG GH',
+      
+      dataIndex: "deliveryStatus",
+      width: 90,
+      key: "deliveryStatus",
+      render: (text) => (
+        <Tag color={text === "GIAO THÀNH CÔNG" ? "blue" : "orange"}>{text}</Tag>
+      ),
+    }, {
+      title: "THANH TOÁN",
+      dataIndex: "paymentStatus",
+      key: "paymentStatus",
+      width: 100,
+      render: (text) => (
+        <Tag color={text === "ĐÃ THANH TOÁN" ? "green" : "red"}>{text}</Tag>
+      )
+    },
+    ]}
+    rowKey="id"
+/>
+</Modal>
     <Modal
       title={initialValues ? "Chỉnh sửa đơn hàng" : "Thêm đơn hàng mới"}
       open={visible}
@@ -393,11 +456,18 @@ const productOptions = products.map((p) => p.name);
                     ))}
                   </Select>
                 </Form.Item> */}
-                <Form.Item label="TÊN KHÁCH" name="customerName"
-                rules={[{ required: true, message: 'Vui lòng nhập TÊN KHÁCH' }]}
-                >
-                  <Input />
-                </Form.Item>
+               <Form.Item
+  label="TÊN KHÁCH"
+  name="customerName"
+  rules={[{ required: true, message: 'Vui lòng nhập TÊN KHÁCH' }]}
+>
+  <Input
+    onBlur={(e) => {
+      const value = e.target.value.trim();
+      if (value) handleSearchCustomerModal(value);
+    }}
+  />
+</Form.Item>
 
                 <div style={{ display: "flex", gap: 8 }}>
                 <Form.Item label="TÊN PAGE" name="pageName"
@@ -675,6 +745,7 @@ const productOptions = products.map((p) => p.name);
         </>
       )}
     </Modal>
+    </>
   );
 };
 

@@ -1,6 +1,6 @@
 'use client'
 import { useState, useEffect } from "react";
-import { Table, Select } from "antd";
+import { Table, Select,Switch, message } from "antd";
 import dayjs from "dayjs";
 import { useSelector } from "react-redux";
 import axios from "axios"; 
@@ -12,6 +12,7 @@ dayjs.extend(isSameOrAfter);
 const Dashboard = () => {
   const [filterRange, setFilterRange] = useState("week");
   const [orders, setOrders] = useState([]);
+  const [employeeStatusMap, setEmployeeStatusMap] = useState({});
   const router = useRouter(); 
   
   const currentUser = useSelector((state) => state.user.currentUser);
@@ -32,9 +33,25 @@ const Dashboard = () => {
   };
   useEffect(() => {
     fetchOrders();
+    fetchEmployeesStatus();
   }, [filterRange]);
-  
-  
+
+
+
+  const fetchEmployeesStatus = async () => {
+    try {
+      const res = await axios.get('/api/employees');
+      const map = {};
+      res.data.data.forEach(emp => {
+        if (emp.name) {
+          map[emp.name] = emp.status || false;
+        }
+      });
+      setEmployeeStatusMap(map);
+    } catch (error) {
+      console.error("Lỗi tải trạng thái:", error);
+    }
+  }; 
 
 
   // Lọc orders theo bộ lọc thời gian được chọn
@@ -204,7 +221,26 @@ const Dashboard = () => {
     
     return (
      <>
-      <h3>{user ? `NV:${user}` : ""} </h3> <br /> <div
+     <h3 style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+  NV: {user}
+  <Switch
+    checked={employeeStatusMap[user]}
+    onChange={async (checked) => {
+      try {
+        await axios.post('/api/employees/update-status', {
+          name: user,
+          status: checked
+        });
+        message.success(`Đã ${checked ? 'bật' : 'tắt'} trạng thái cho ${user}`);
+        setEmployeeStatusMap(prev => ({ ...prev, [user]: checked }));
+      } catch (err) {
+        message.error("Lỗi khi cập nhật trạng thái");
+      }
+    }}
+    checkedChildren="Bật"
+    unCheckedChildren="Tắt"
+  />
+</h3> <br /> <div
         style={{
           backgroundColor: bgColor,
           padding: "4px 8px",
