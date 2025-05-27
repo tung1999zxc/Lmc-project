@@ -2781,7 +2781,7 @@ onChange={(e) => handleColumnSelect("istick", e.target.checked)}
   visible={modalVisible}
   onCancel={() => setModalVisible(false)}
   footer={null}
-  width={800}
+  width={1200}
 >
   <Table
     dataSource={modalCustomerOrders}

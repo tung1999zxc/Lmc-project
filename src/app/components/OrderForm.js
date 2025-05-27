@@ -175,7 +175,7 @@ const productOptions = products.map((p) => p.name);
   visible={modalVisible}
   onCancel={() => setModalVisible(false)}
   footer={null}
-  width={800}
+  width={1200}
 >
   <Table
     dataSource={modalCustomerOrders}
