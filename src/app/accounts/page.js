@@ -188,7 +188,7 @@
       try {
         const response = await axios.post('/api/employees', formData);
         console.log(response.data.message);
-        message.success('Tạo tài khoản thành công');
+        alert('Tạo tài khoản thành công');
         createForm.resetFields();
         setLoading(false);
         fetchEmployees();
@@ -212,7 +212,8 @@
         position: employee.position,
         team_id: employee.team_id,
         position_team: employee.position_team,
-        position_team2: employee.position_team2
+        position_team2: employee.position_team2,
+        status : employee.status
       });
     };
 
@@ -311,6 +312,14 @@
           >
             <Input disabled={currentUser.name !== "Tung99"}  />
           </Form.Item>
+          <Form.Item
+  label="status"
+  name="status"
+  initialValue={true}
+  hidden
+>
+  
+</Form.Item>
 
           <Form.Item
             label="Chức vụ"
@@ -414,6 +423,14 @@
                 >
                   <Select options={position_team2.map(p => ({ label: p.label, value: p.value }))} />
                 </Form.Item>
+                <Form.Item
+  label="status"
+  name="status"
+  initialValue={true}
+  hidden
+>
+  
+</Form.Item>
 
                 <Form.Item>
                   <Button  disabled ={
