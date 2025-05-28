@@ -2290,29 +2290,36 @@ onChange={(e) => handleColumnSelect("istick", e.target.checked)}
   };
 
   
+  const sanitizeValue = (value) => {
+    if (value === null || value === undefined) return '';
+    if (typeof value === 'object') return '';
+    return String(value)
+      .replace(/\n/g, ' ')
+      .replace(/\r/g, ' ')
+      .replace(/\t/g, ' ')
+      .replace(/"/g, '""');
+  };
+  
   const handleCopy = () => {
-    // Lấy tiêu đề (dùng col.key hoặc col.title nếu có)
     const headers = selectedTableColumns.map(col => {
       if (typeof col.title === 'string') return col.title;
       if (typeof col.title?.props?.children === 'string') return col.title.props.children;
+      if (Array.isArray(col.title?.props?.children)) {
+        return col.title.props.children.map(child => typeof child === 'string' ? child : '').join(' ');
+      }
       return col.key || '';
     }).join('\t');
   
     const rows = sortedOrders.map(order => {
       return selectedTableColumns.map(col => {
         const key = col.dataIndex || col.key;
-  
-        // Cột sản phẩm
         if (key === "products" && Array.isArray(order.products)) {
-          return order.products
+          return sanitizeValue(order.products
             .map(p => `${p.product || ''} (SL: ${p.quantity || ''})`)
-            .join(", ");
+            .join(", "));
         }
-  
-        // Nếu là object hoặc không rõ ràng, bỏ qua
         const value = order[key];
-        if (typeof value === 'object' && value !== null) return '';
-        return value ?? '';
+        return sanitizeValue(value);
       }).join('\t');
     });
   
