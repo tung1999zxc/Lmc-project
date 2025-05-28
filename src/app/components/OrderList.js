@@ -2789,6 +2789,8 @@ onChange={(e) => handleColumnSelect("istick", e.target.checked)}
       { title: 'Sản phẩm', key: 'products', render: (_, record) => (
         record.products?.map(p => `${p.product} - SL: ${p.quantity}`).join(', ')
       )},
+      { title: 'Tên Khách', dataIndex: "customerName",
+        key: "customerName"},
       { title: 'Ngày đặt', dataIndex: 'orderDate', key: 'orderDate',render: (text) => dayjs(text).format("DD/MM"), },
       { title: 'STT', dataIndex: 'stt', key: 'stt' },
       {title: 'GHI CHÚ SALE',
