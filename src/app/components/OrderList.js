@@ -582,7 +582,7 @@ case "odd_stt":
               case "deliveredkomavandon":
                 return order.deliveryStatus === "ĐÃ GỬI HÀNG" && order.trackingCode ==="";
               case "deliveredchuatick":
-                return order.deliveryStatus === "ĐÃ GỬI HÀNG" && order.istick4 === false;
+                return order.deliveryStatus === "ĐÃ GỬI HÀNG" && !order.istick4;
                 
               default:
                 return true;
