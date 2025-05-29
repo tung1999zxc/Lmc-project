@@ -56,6 +56,7 @@
       
     ];
     const teams = [
+      { label: 'TEAM PHI', value: 'PHI' },
       { label: 'TEAM DIỆU', value: 'DIEU' }, 
       { label: 'TEAM SƠN', value: 'SON' }, 
       { label: 'TEAM QUÂN', value: 'QUAN' }, 
@@ -326,7 +327,7 @@
             name="position"
             rules={[{ required: true, message: 'Vui lòng chọn chức vụ' }]}
           >
-            <Select disabled={edit} options={positions.map(p => ({ label: p.label, value: p.value }))} />
+            <Select disabled={currentUser.position !== "admin"} options={positions.map(p => ({ label: p.label, value: p.value }))} />
           </Form.Item>
 
           <Form.Item

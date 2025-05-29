@@ -687,6 +687,7 @@ function getLast30Days() {
 
   // Dữ liệu teams
   const teams = [
+    { label: 'TEAM PHI', value: 'PHI' },
     { label: 'TEAM DIỆU', value: 'DIEU' }, 
     { label: 'TEAM SƠN', value: 'SON' },
     { label: 'TEAM QUÂN', value: 'QUAN' },
@@ -697,6 +698,7 @@ function getLast30Days() {
     { label: 'TEAM LẺ', value: 'LE' }, 
   ];
   const teams2 = [
+    { label: 'TEAM PHI', value: 'PHI' },
     { label: 'TEAM DIỆU', value: 'DIEU' }, 
     { label: 'TEAM SƠN', value: 'SON' },
     { label: 'TEAM QUÂN', value: 'QUAN' },
@@ -745,7 +747,7 @@ let filteredAdsOriginal = filteredAds;
     return { name: emp.name, profit: sales*17000*0.95, adsCost };
   });
  
- const teamEmployees = mktEmployees.filter(emp => emp.team_id === currentUser.team_id || (currentUser.team_id === 'SON' && (emp.name.trim() === "Nguyễn Thị Xuân Diệu" || emp.name.trim() === "Nguyễn Bá Quân")) );
+ const teamEmployees = mktEmployees.filter(emp => emp.team_id === currentUser.team_id || (currentUser.team_id === 'SON' && (emp.name.trim() === "Nguyễn Thị Xuân Diệu" || emp.name.trim() === "Nguyễn Bá Quân"))|| (currentUser.team_id === 'PHONG' && (emp.name.trim() === "Bùi Văn Phi")) );
 
 const employeeChartDataNewTEAM = teamEmployees.map(emp => {
   const sales = filteredOrders
@@ -887,6 +889,10 @@ if (isTeamLead|| currentUser.position==="mkt" || ( currentUser.position==="admin
     (
       currentUser.team_id === "SON" &&
       ["Nguyễn Thị Xuân Diệu", "Nguyễn Bá Quân"].includes((emp.name || "").trim())
+    )||
+    (
+      currentUser.team_id === "PHONG" &&
+      ["Bùi Văn Phi"].includes((emp.name || "").trim())
     )
   )
   .map(emp => (emp.name || "").trim().toLowerCase());
@@ -1111,7 +1117,7 @@ if (sortedEmployees.length <= 5) {
 
 
 // Lọc ra các thành viên mkt thuộc team của currentUser
-const teamMktEmployees = mktEmployees.filter(emp => emp.team_id === currentUser.team_id || (currentUser.team_id === 'SON' && (emp.name.trim() === "Nguyễn Thị Xuân Diệu" || emp.name.trim() === "Nguyễn Bá Quân")) );
+const teamMktEmployees = mktEmployees.filter(emp => emp.team_id === currentUser.team_id || (currentUser.team_id === 'SON' && (emp.name.trim() === "Nguyễn Thị Xuân Diệu" || emp.name.trim() === "Nguyễn Bá Quân"))|| (currentUser.team_id === 'PHONG' && (emp.name.trim() === "Bùi Văn Phi" )) );
 
 const marketingReportDataTEAM = teamMktEmployees.map((emp, index) => {
   const paid = filteredOrders
@@ -1555,6 +1561,10 @@ const percentAds3 = tongKW3 > 0 ? Number(((totalAdsKW3 / (tongKW3*exchangeRate))
         (emp.name || "").trim() === "Nguyễn Thị Xuân Diệu" ||
         (emp.name || "").trim() === "Nguyễn Bá Quân"
       ))
+       ||
+      (currentUser.team_id === 'PHONG' && (
+        (emp.name || "").trim() === "Bùi Văn Phi" 
+      ))
     )
     .map(emp => (emp.name || "").trim().toLowerCase());
     
@@ -1887,23 +1897,27 @@ const percentAds3 = tongKW3 > 0 ? Number(((totalAdsKW3 / (tongKW3*exchangeRate))
            <div style={{ display: 'flex', alignItems: 'center' }}>
                         <span style={{ marginRight: 8 }}>Chọn team: </span>
                         <Select
-                        disabled={currentUser.employee_code !== 6518}
-                        allowClear
-                          value={selectedTeam}
-                          style={{ width: '100%', maxWidth: "200px" }}
-                          onChange={(value) => setSelectedTeam(value)}
-                        >
-                            <Option key={1234} value={"SON"}>
-                              TEAM SƠN
-                            </Option>
-                            <Option key={1235657} value={"QUAN"}>
-                              TEAM QUÂN
-                            </Option>
-                            <Option key={123565788} value={"DIEU"}>
-                              TEAM DIỆU
-                            </Option>
-                          
-                        </Select>
+  disabled={![6518, 4365].includes(currentUser.employee_code)}
+  allowClear
+  value={selectedTeam}
+  style={{ width: '100%', maxWidth: '200px' }}
+  onChange={(value) => setSelectedTeam(value)}
+>
+  {currentUser.employee_code === 6518 && (
+    <>
+      <Option key={1234} value="SON">TEAM SƠN</Option>
+      <Option key={1235657} value="QUAN">TEAM QUÂN</Option>
+      <Option key={123565788} value="DIEU">TEAM DIỆU</Option>
+    </>
+  )}
+
+  {currentUser.employee_code === 4365 && (
+    <>
+      <Option key={1234435} value="PHONG">TEAM PHONG</Option>
+      <Option key={1235657434} value="PHI">TEAM PHI</Option>
+    </>
+  )}
+</Select>
                       </div>
                     </Col>)}
        </Row>

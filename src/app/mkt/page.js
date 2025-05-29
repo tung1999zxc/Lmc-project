@@ -149,6 +149,13 @@ const Dashboard = () => {
         .filter(employee => employee.team_id === 'DIEU')
         .map(employee => employee.employee_code)
     },
+    {
+      id: 8,
+      name: `TEAM PHI`,
+      members: safeEmployees
+        .filter(employee => employee.team_id === 'PHI')
+        .map(employee => employee.employee_code)
+    },
   ];
   
   const filterSampleOrdersByPeriod = (order) => {
