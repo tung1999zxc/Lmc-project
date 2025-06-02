@@ -409,10 +409,17 @@ const resetPagename =()=>{
       roleFilteredOrders = roleFilteredOrders.filter(
         (order) => order.saleReport === "DONE"
       );
-    } else if (currentUser.position === "lead") {
-      roleFilteredOrders = roleFilteredOrders.filter((order) =>
-        leadTeamMembers.includes(order.mkt.trim().toLowerCase())
-      );
+    }else if (currentUser.position === "lead") {
+      if (currentUser.name === "Phan Thế Phong") {
+        roleFilteredOrders = roleFilteredOrders.filter((order) =>
+          leadTeamMembers.includes(order.mkt.trim().toLowerCase()) ||
+          order.mkt.trim().toLowerCase() === "bùi văn phi".toLowerCase()
+        );
+      } else {
+        roleFilteredOrders = roleFilteredOrders.filter((order) =>
+          leadTeamMembers.includes(order.mkt.trim().toLowerCase())
+        );
+      }
     }
 
     return roleFilteredOrders
