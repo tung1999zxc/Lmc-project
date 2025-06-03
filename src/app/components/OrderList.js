@@ -409,7 +409,7 @@ const resetPagename =()=>{
       roleFilteredOrders = roleFilteredOrders.filter(
         (order) => order.saleReport === "DONE"
       );
-    }else if (currentUser.position === "lead") {
+    } else if (currentUser.position === "lead") {
       if (currentUser.name === "Phan Thế Phong") {
         roleFilteredOrders = roleFilteredOrders.filter((order) =>
           leadTeamMembers.includes(order.mkt.trim().toLowerCase()) ||
@@ -421,6 +421,21 @@ const resetPagename =()=>{
         );
       }
     }
+
+    // else if (currentUser.position === "lead") {
+    //   roleFilteredOrders = roleFilteredOrders.filter((order) => {
+    //     const mktName = order.mkt.trim().toLowerCase();
+    
+    //     const isInTeam = leadTeamMembers.includes(mktName);
+    //     const isPhanThePhongExtra =
+    //       currentUser.name === "Phan Thế Phong" && mktName === "bùi văn phi";
+    //     const isNguyenVietSonExtra =
+    //       currentUser.name === "Nguyễn Viết Sơn" &&
+    //       ["nguyễn thị xuân diệu", "nguyễn bá quân"].includes(mktName);
+    
+    //     return isInTeam || isPhanThePhongExtra || isNguyenVietSonExtra;
+    //   });
+    // }
 
     return roleFilteredOrders
     .filter((order) => {
@@ -541,6 +556,8 @@ const resetPagename =()=>{
                 return order.saleReport === "OK";
               case "booktb":
                 return order.saleReport === "BOOK TB";
+              case "chuyendon":
+                return order.saleReport === "CHUYỂN ĐƠN";
               case "istick":
                 return order.istick === true;
                 case "notick": {
@@ -2611,6 +2628,7 @@ onChange={(e) => handleColumnSelect("istick", e.target.checked)}
               { value: "even_stt", label: "Đơn STT CHẴN" },
               { value: "odd_stt", label: "Đơn STT LẺ" },
 
+              { value: "chuyendon", label: "Đơn CHUYỂN ĐƠN" },
               { value: "booktb", label: "BOOK TB" },
               { value: "waiting_approval", label: "Đợi xác nhận" },
               { value: "done", label: "Đơn đã Done" },

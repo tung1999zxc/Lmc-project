@@ -223,7 +223,7 @@ const Dashboard = () => {
      <>
      <h3 style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
   NV: {user}
-  <Switch
+  <Switch disabled={currentUser.position!=='leadSALE'}
     checked={employeeStatusMap[user]}
     onChange={async (checked) => {
       try {
