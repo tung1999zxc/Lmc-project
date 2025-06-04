@@ -223,25 +223,32 @@ const OrderList = () => {
     }
   };
 
+  
+  // useEffect(() => {
+  //   if (currentUser.position_team === "kho" ) {
+  //     return
+  //   }
+  //   const isValidRange = (dateRange && dateRange.length === 2) || (dateRange2 && dateRange2.length === 2);
+  //   if (isValidRange) {
+  //     fetchOrders();
+  //   }
+  // }, [dateRange, dateRange2]);
+  // useEffect(() => {
+   
+  //   fetchOrders();
+  // }, [filterType]);
   useEffect(() => {
-    const range = getDateRangeByPreset(dateRange2);
-    if (range) {
-      setDateRange(range);
-    }
-  }, [dateRange2]);
-  useEffect(() => {
-    if (currentUser.position_team === "kho" ) {
-      return
-    }
-    const isValidRange = (dateRange && dateRange.length === 2) || (dateRange2 && dateRange2.length === 2);
-    if (isValidRange) {
+    const shouldFetch =
+      currentUser.position_team === "kho" ||
+      (filterType && (
+        (dateRange && dateRange.length === 2) ||
+        (dateRange2 && dateRange2.length === 2)
+      ));
+  
+    if (shouldFetch) {
       fetchOrders();
     }
-  }, [dateRange, dateRange2]);
-  useEffect(() => {
-   
-    fetchOrders();
-  }, [filterType]);
+  }, [currentUser.position_team, filterType, dateRange, dateRange2]);
   
   const handleSearch = (value) => {
     setSearchText(value); // Chỉ cập nhật khi nhấn Search
