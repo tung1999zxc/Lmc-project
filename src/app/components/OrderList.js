@@ -2836,7 +2836,19 @@ onChange={(e) => handleColumnSelect("istick", e.target.checked)}
        
       dataIndex: "processStatus",
       key: "processStatus",
-    }, {
+    }, 
+    {
+      title: 
+          'ĐƠN'
+        
+      ,
+      dataIndex: "saleReport",
+      key: "saleReport",
+      render: (text) => (
+        <Tag color={text === "DONE" ? "green" : "red"}>{text}</Tag>
+      ),
+    },
+    {
       title:
           'TÌNH TRẠNG GH',
       
