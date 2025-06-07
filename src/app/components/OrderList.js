@@ -2830,6 +2830,14 @@ onChange={(e) => handleColumnSelect("istick", e.target.checked)}
       )},
       { title: 'Tên Khách', dataIndex: "customerName",
         key: "customerName"},
+        {
+          title: 
+              'TÊN PAGE'
+           ,
+          dataIndex: "pageName",
+          key: "pageName",
+          render: (text) => text ? text.split("||")[0].trim() : "",
+        },
       { title: 'Ngày đặt', dataIndex: 'orderDate', key: 'orderDate',render: (text) => dayjs(text).format("DD/MM"), },
       { title: 'STT', dataIndex: 'stt', key: 'stt' },
       {title: 'GHI CHÚ SALE',
