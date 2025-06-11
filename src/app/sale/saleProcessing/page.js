@@ -6,8 +6,12 @@ import { useSelector } from "react-redux";
 import axios from "axios"; 
 import { useRouter } from 'next/navigation';
 
+
 import isSameOrAfter from "dayjs/plugin/isSameOrAfter";
+import isSameOrBefore from "dayjs/plugin/isSameOrBefore";
+
 dayjs.extend(isSameOrAfter);
+dayjs.extend(isSameOrBefore);
 
 const Dashboard = () => {
   const [filterRange, setFilterRange] = useState("week");
@@ -60,30 +64,40 @@ const Dashboard = () => {
     return orders.filter(order => {
       // Sử dụng order.orderDate thay vì order.date
       const orderDate = dayjs(order.orderDate);
-      switch(filterRange) {
-        case "all":
-          return true;
-        case "today":
-          return orderDate.isSame(today, "day");
-        case "week":
-          return orderDate.isAfter(today.subtract(7, "day"));
-        case "currentMonth":
-          return orderDate.isSameOrAfter(today.startOf("month"));
-        case "lastMonth": {
-          const prevMonth = today.subtract(1, "month");
-          return orderDate.isAfter(prevMonth.startOf("month")) && orderDate.isBefore(prevMonth.endOf("month"));
-        }
-        case "twoMonthsAgo": {
-          const twoMonthsAgo = today.subtract(2, "month");
-          return orderDate.isAfter(twoMonthsAgo.startOf("month")) && orderDate.isBefore(twoMonthsAgo.endOf("month"));
-        }
-        case "threeMonthsAgo": {
-          const threeMonthsAgo = today.subtract(3, "month");
-          return orderDate.isAfter(threeMonthsAgo.startOf("month")) && orderDate.isBefore(threeMonthsAgo.endOf("month"));
-        }
-        default:
-          return true;
-      }
+      switch (filterRange) {
+  case "all":
+    return true;
+  case "today":
+    return orderDate.isSame(today, "day");
+  case "week":
+    return orderDate.isAfter(today.subtract(7, "day"));
+  case "currentMonth":
+    return orderDate.isSameOrAfter(today.startOf("month"));
+  case "lastMonth": {
+    const prevMonth = today.subtract(1, "month");
+    return (
+      orderDate.isSameOrAfter(prevMonth.startOf("month")) &&
+      orderDate.isSameOrBefore(prevMonth.endOf("month"))
+    );
+  }
+  case "twoMonthsAgo": {
+    const twoMonthsAgo = today.subtract(2, "month");
+    return (
+      orderDate.isSameOrAfter(twoMonthsAgo.startOf("month")) &&
+      orderDate.isSameOrBefore(twoMonthsAgo.endOf("month"))
+    );
+  }
+  case "threeMonthsAgo": {
+    const threeMonthsAgo = today.subtract(3, "month");
+    return (
+      orderDate.isSameOrAfter(threeMonthsAgo.startOf("month")) &&
+      orderDate.isSameOrBefore(threeMonthsAgo.endOf("month"))
+    );
+  }
+  default:
+    return true;
+}
+
     });
   };
 
