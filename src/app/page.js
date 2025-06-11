@@ -1340,6 +1340,13 @@ marketingReportDataTEAM.sort((a, b) => b.tienVND - a.tienVND);
     }
   }
   ];
+  const saleColumnsOLND = [
+    { title: "Tên", dataIndex: "name", key: "name" },
+  
+    { title: "Tổng", dataIndex: "total", key: "total", render: (value) => value.toLocaleString() },
+    { title: "Tiền VNĐ", dataIndex: "tienVND", key: "tienVND", render: (value) => value.toLocaleString() },
+    
+  ];
 
   // Báo cáo doanh số ngày cho SALE
   let saleDailyDates = [];
@@ -2188,9 +2195,9 @@ pagination={7}
 <h2 style={{ marginTop: "2rem" }}>Báo cáo Doanh Số Nhân Viên Sale XỬ LÝ</h2>
 <Table columns={saleColumns} dataSource={saleReportDataXL} pagination={false} />
 <h2 style={{ marginTop: "2rem" }}>Báo cáo Doanh Số Nhân Viên Sale ONLINE</h2>
-<Table columns={saleColumns} dataSource={saleReportDataOL} pagination={false} />
+<Table columns={saleColumnsOLND} dataSource={saleReportDataOL} pagination={false} />
 <h2 style={{ marginTop: "2rem" }}>Báo cáo Doanh Số Nhân Viên Sale NHẬP ĐƠN</h2>
-<Table columns={saleColumns} dataSource={saleReportDataND} pagination={false} />
+<Table columns={saleColumnsOLND} dataSource={saleReportDataND} pagination={false} />
 
    
 
@@ -2237,9 +2244,9 @@ pagination={7}
   <h2 style={{ marginTop: "2rem" }}>Báo cáo Doanh Số Nhân Viên Sale Vận Đơn</h2>
 <Table columns={saleColumns} dataSource={saleReportDataXL} pagination={false} />
 <h2 style={{ marginTop: "2rem" }}>Báo cáo Doanh Số Nhân Viên Sale ONLINE</h2>
-<Table columns={saleColumns} dataSource={saleReportDataOL} pagination={false} />
+<Table columns={saleColumnsOLND} dataSource={saleReportDataOL} pagination={false} />
 <h2 style={{ marginTop: "2rem" }}>Báo cáo Doanh Số Nhân Viên Sale NHẬP ĐƠN</h2>
-<Table columns={saleColumns} dataSource={saleReportDataND} pagination={false} />
+<Table columns={saleColumnsOLND} dataSource={saleReportDataND} pagination={false} />
   </Col>
 </Row>
 <h3>Doanh số Nhân viên SALE</h3>
