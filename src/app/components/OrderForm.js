@@ -616,7 +616,15 @@ const productOptions = products.map((p) => p.name);
                 <Form.Item label="SALE CHAT" name="sale" initialValue={currentUser.name}>
                
                   <Select
-                    disabled={currentUser.position === "salexuly" || currentUser.position === "salexacnhan"}
+                    disabled={
+      (currentUser.position === "salexuly" ||
+      currentUser.position === "salenhapdon" ||
+        currentUser.position === "salexacnhan" ||
+        currentUser.position === "salefull")
+      //    &&
+      // currentUser.name !== "Lê Linh Chi" &&
+      // currentUser.name !== "Trần Thị Hồng Nhung"
+    }
                     showSearch
                   >
                     {saleOptions.map((employee) => (
@@ -629,13 +637,15 @@ const productOptions = products.map((p) => p.name);
                 
                
                 <Form.Item label="VẬN ĐƠN" name="salexuly" initialValue={namesalexuly}>
-  <Select
+  <Select showSearch
     disabled={
       (currentUser.position === "salexuly" ||
+      currentUser.position === "salenhapdon" ||
         currentUser.position === "salexacnhan" ||
-        currentUser.position === "salefull") &&
-      currentUser.name !== "Lê Linh Chi" &&
-      currentUser.name !== "Trần Thị Hồng Nhung"
+        currentUser.position === "salefull")
+      //    &&
+      // currentUser.name !== "Lê Linh Chi" &&
+      // currentUser.name !== "Trần Thị Hồng Nhung"
     }
   >
     {salexulyOptions.map((employee) => (
