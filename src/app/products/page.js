@@ -46,8 +46,9 @@ const InventoryPage = () => {
   useEffect(() => {
     if (!currentUser.name) {
       router.push("/login");
-    }if (currentUser.position==="kho1"||currentUser.position_team ==="mkt") {
-      router.push("/orders");}
+    }
+    // if (currentUser.position==="kho1"||currentUser.position_team ==="mkt") {
+    //   router.push("/orders");}
   }, []);
 
   const [orders2, setOrders] = useState([]);
@@ -73,6 +74,11 @@ const [loading, setLoading] = useState(false);
     const now = new Date();
     let start, end;
     switch (preset) {  
+      case "all":
+  // Không giới hạn thời gian → từ ngày rất xa đến ngày rất xa trong tương lai
+  start = new Date("2000-01-01T00:00:00.000Z"); // Hoặc new Date(0)
+  end = new Date("2100-12-31T23:59:59.999Z");
+  break;
       case "today":
         // Bắt đầu từ 00:00:00 đến 23:59:59 của hôm nay
         start = new Date(now.getFullYear(), now.getMonth(), now.getDate());
@@ -461,21 +467,7 @@ const [loading, setLoading] = useState(false);
               return acc;
             }, 0);
     
-          const deliveredQty = orders
-            .filter(order =>
-              ['ĐÃ GỬI HÀNG', 'GIAO THÀNH CÔNG'].includes(order.deliveryStatus)
-            )
-            .reduce((acc, order) => {
-              if (order.products?.length) {
-                const qty = order.products
-                  .filter(item => item.product === record.name)
-                  .reduce((sum, item) => sum + Number(item.quantity), 0);
-                return acc + qty;
-              }
-              return acc;
-            }, 0);
-    
-          // return ordersDone - deliveredQty;
+         
          
       
           return ordersDone;
@@ -485,7 +477,9 @@ const [loading, setLoading] = useState(false);
       },
       render: (_, record) => {
         const ordersDone = orders
-        .filter(order => order.saleReport === 'DONE' && order.deliveryStatus === "")
+        .filter(order =>
+          order.saleReport === "DONE" && order.deliveryStatus === "" // lọc đúng đơn có sp
+    ) 
         .reduce((acc, order) => {
           if (order.products && order.products.length > 0) {
             const orderQty = order.products
@@ -496,22 +490,8 @@ const [loading, setLoading] = useState(false);
           return acc;
         }, 0);
     
-        const deliveredQty = orders
-          .filter(order =>
-            ['ĐÃ GỬI HÀNG', 'GIAO THÀNH CÔNG'].includes(order.deliveryStatus)
-          )
-          .reduce((acc, order) => {
-            if (order.products?.length) {
-              const orderQty = order.products
-                .filter(item => item.product === record.name)
-                .reduce((sum, item) => sum + Number(item.quantity), 0);
-              return acc + orderQty;
-            }
-            return acc;
-          }, 0);
-          if (record.name === 'KEM NỀN THỎI') {
-            return ordersDone - 2;
-          }
+       
+          
         // return ordersDone - deliveredQty;
         return ordersDone;
       },
@@ -524,10 +504,10 @@ const [loading, setLoading] = useState(false);
       render: (_, record) => {
         const deliveredQty = orders
           .filter(
-            (order) =>
-              order.deliveryStatus === 'ĐÃ GỬI HÀNG' ||
-              order.deliveryStatus === 'GIAO THÀNH CÔNG'||
-              order.deliveryStatus === 'BỊ BẮT CHỜ GỬI LẠI'
+            (order) =>  order.saleReport === "DONE" &&
+             ( order.deliveryStatus === 'ĐÃ GỬI HÀNG' ||
+              order.deliveryStatus === 'GIAO THÀNH CÔNG')
+             
           )
           .reduce((acc, order) => {
             if (order.products && order.products.length > 0) {
@@ -599,8 +579,7 @@ const [loading, setLoading] = useState(false);
           .filter(
             (order) =>
               order.deliveryStatus === 'ĐÃ GỬI HÀNG' ||
-              order.deliveryStatus === 'GIAO THÀNH CÔNG'||
-              order.deliveryStatus === 'BỊ BẮT CHỜ GỬI LẠI'
+              order.deliveryStatus === 'GIAO THÀNH CÔNG'
           )
           .reduce((acc, order) => {
             if (order.products && order.products.length > 0) {
@@ -685,8 +664,7 @@ const [loading, setLoading] = useState(false);
           .filter(
             order =>
               (order.deliveryStatus === 'ĐÃ GỬI HÀNG' ||
-               order.deliveryStatus === 'GIAO THÀNH CÔNG' ||
-               order.deliveryStatus === 'BỊ BẮT CHỜ GỬI LẠI') &&
+               order.deliveryStatus === 'GIAO THÀNH CÔNG' ) &&
               order.products &&
               order.products.length > 0 &&
               order.products.some(item => item.product === a.name)
@@ -703,8 +681,7 @@ const [loading, setLoading] = useState(false);
           .filter(
             order =>
               (order.deliveryStatus === 'ĐÃ GỬI HÀNG' ||
-               order.deliveryStatus === 'GIAO THÀNH CÔNG' ||
-               order.deliveryStatus === 'BỊ BẮT CHỜ GỬI LẠI') &&
+               order.deliveryStatus === 'GIAO THÀNH CÔNG') &&
               order.products &&
               order.products.length > 0 &&
               order.products.some(item => item.product === b.name)
@@ -740,8 +717,7 @@ const [loading, setLoading] = useState(false);
           .filter(
             order =>
               order.deliveryStatus === 'ĐÃ GỬI HÀNG' ||
-              order.deliveryStatus === 'GIAO THÀNH CÔNG' ||
-              order.deliveryStatus === 'BỊ BẮT CHỜ GỬI LẠI'
+              order.deliveryStatus === 'GIAO THÀNH CÔNG' 
           )
           .reduce((acc, order) => {
             if (order.products && order.products.length > 0) {
@@ -961,7 +937,7 @@ const [loading, setLoading] = useState(false);
             
           />}
 />
-
+{orders.length}
 <Select
           value={selectedPreset}
           onChange={(value) => setSelectedPreset(value)}
