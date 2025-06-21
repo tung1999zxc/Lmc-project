@@ -2173,7 +2173,8 @@ onChange={(e) => handleColumnSelect("istick", e.target.checked)}
   
     try {
       if (currentEditId) {
-        const response = await axios.put(`/api/orders/${currentEditId}`, newOrder,{ headers: { 'x-current-user': encodeURIComponent(currentUser.position_team) } });
+        const response = await axios.put(`/api/orders/${currentEditId}`, newOrder,{ headers: { 'x-current-user': encodeURIComponent(currentUser.position_team),
+      'x-current-username': encodeURIComponent(currentUser.name) } });
         message.success(response.data.message || "Cập nhật thành công");
         // setOrders((prevOrders) =>
         //   prevOrders.map((order) => order.id === currentEditId ? newOrder : order)
@@ -2361,6 +2362,19 @@ onChange={(e) => handleColumnSelect("istick", e.target.checked)}
       .catch(() => message.error("❌ Lỗi sao chép."));
   };
   
+//   const handleSplitOrders = async () => {
+//   try {
+//     const res = await axios.post("/api/orders/batchSplitLinhChiJune");
+//     const data = res.data;
+
+//     message.success(data.message || "Đã chia đơn thành công");
+//     fetchOrders(); // Cập nhật lại danh sách đơn
+//   } catch (err) {
+//     console.error(err);
+//     message.error("Lỗi khi chia đơn");
+//   }
+// };
+
   return (
     <div  style={{
       transform: "scale(1)", padding: 24,
@@ -2399,8 +2413,15 @@ onChange={(e) => handleColumnSelect("istick", e.target.checked)}
       </div> </Col>
       
       {/* {ordersDone} */}
-       
-     
+       {/* <Button
+  type="primary"
+  danger
+  onClick={handleSplitOrders}
+  style={{ marginLeft: 10 }}
+>
+  Chia đều đơn Lê Linh Chi tháng 6
+</Button>
+      */}
       {(currentUser.position_team==="kho"||currentUser.position_team==="mkt" ||currentUser.position ==="leadSALE"||currentUser.position ==="admin"||currentUser.position ==="managerSALE"||  currentUser.name ==="Hoàng Lan Phương"  )&& <Col span={8}>
      {/* Tổng số lượng sản phẩm (đơn vừa tích): {countNewTickedProductQuantity()} */}
      

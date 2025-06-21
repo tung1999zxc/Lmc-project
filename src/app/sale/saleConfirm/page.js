@@ -1,5 +1,5 @@
 "use client";
-import { Table, message, Select } from "antd";
+import { Table, message,Spin, Select } from "antd";
 import { useEffect, useState } from "react";
 import dayjs from "dayjs";
 import isSameOrBefore from "dayjs/plugin/isSameOrBefore"; // Import plugin
@@ -13,6 +13,8 @@ const OrdersTable = () => {
   const [sampleOrders, setSampleOrders] = useState([]);
   const [safeEmployees, setSafeEmployees] = useState([]);
   const [filterType, setFilterType] = useState("week");
+    const [loading, setLoading] = useState(false);
+  
   const currentUser = useSelector((state) => state.user.currentUser);
   const router = useRouter();
 
@@ -28,12 +30,15 @@ const OrdersTable = () => {
   }, []);
 
   const fetchOrders = async () => {
+    setLoading(true);
     try {
       const response = await axios.get(`/api/orders2?selectedPreset=${filterType}`);
       setSampleOrders(response.data.data);
     } catch (error) {
       console.error(error);
       message.error("Lỗi khi lấy đơn hàng");
+    }finally {
+      setLoading(false);
     }
   };
   useEffect(() => {
@@ -215,7 +220,10 @@ const OrdersTable = () => {
     },
   ];
 
-  return (
+ return loading ? (
+     <Spin size="large" />
+   ) : (
+     <>
     <div>
       {/* Bộ lọc khoảng thời gian */}
       <div style={{ marginBottom: "16px" }}>
@@ -281,6 +289,7 @@ const OrdersTable = () => {
         </div>
       )}
     </div>
+  </>
   );
 };
 

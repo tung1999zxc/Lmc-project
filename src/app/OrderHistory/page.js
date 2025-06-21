@@ -1,47 +1,24 @@
-// src/components/OrderHistory.js
 "use client";
 import React, { useEffect, useState } from "react";
-import { Table, Spin, Input } from "antd";
+import { Table, Spin, Input, Tag } from "antd";
 import axios from "axios";
-import { useDispatch, useSelector } from "react-redux";
-
-// Mapping chuyển tên field trong DB thành label dễ đọc
-const fieldLabelMapping = {
-  orderDate: "NGÀY ĐẶT",
-  customerName: "TÊN KHÁCH",
-  pageName: "TÊN PAGE",
-  phone: "SỐ ĐIỆN THOẠI",
-  address: "ĐỊA CHỈ",
-  mkt: "MKT",
-  sale: "SALE CHAT",
-  salexuly: "VẬN ĐƠN",
-  salexacnhan: "SALE XÁC NHẬN",
-  revenue: "DOANH SỐ",
-  profit: "DOANH THU",
-  category: "QUÀ",
-  products: "SẢN PHẨM",
-  note: "GHI CHÚ SALE",
-  fb: "Link FB",
-  processStatus: "TT SALE XỬ LÍ ĐƠN",
-  saleReport: "ĐƠN",
-  paymentStatus: "THANH TOÁN",
-  deliveryStatus: "TÌNH TRẠNG GIAO HÀNG",
-  trackingCode: "MÃ VẬN ĐƠN",
-  istick: "in đơn",
-  istick4: "ĐÃ in đơn",
-  isShipping: "cty đóng hàng",
-  istickDONE: "xác nhận giao thành công",
-  shippingDate1: "NGÀY GỬI",
-  orderDate4: "odate4",
-  shippingDate2: "NGÀY NHẬN",
-  noteKHO: "GHI CHÚ KHO",
-};
+import { useSelector } from "react-redux";
+import dayjs from "dayjs";
 
 const OrderHistory = () => {
   const [history, setHistory] = useState([]);
   const [loading, setLoading] = useState(false);
   const [searchText, setSearchText] = useState("");
- const currentUser = useSelector((state) => state.user.currentUser);
+  const currentUser = useSelector((state) => state.user.currentUser);
+
+  // ❌ Không cho hiển thị với MKT & KHO
+  if (
+    currentUser.position_team === "mkt" ||
+    currentUser.position_team === "kho"
+  ) {
+    return null;
+  }
+
   useEffect(() => {
     fetchHistory();
   }, []);
@@ -49,100 +26,138 @@ const OrderHistory = () => {
   const fetchHistory = async () => {
     setLoading(true);
     try {
-      const response = await axios.get(`/api/orders/history`);
-      setHistory(response.data.data);
+      const res = await axios.get(`/api/orders/history`);
+      setHistory(res.data.data || []);
     } catch (error) {
-      console.error("Lỗi khi lấy danh sách history", error);
+      console.error("Lỗi khi lấy lịch sử đơn hàng:", error);
     } finally {
       setLoading(false);
     }
   };
 
-  // Mỗi record history được lưu dưới dạng đối tượng toàn bộ, dùng để render trong bảng
-  const dataSource = history.map((record, index) => ({
-    key: index,
-    record, // lưu toàn bộ record
-  }));
-
-  // Lọc theo STT nếu có nhập search
-  const filteredDataSource = dataSource.filter(({ record }) =>
-    record.stt !== undefined &&
-    record.stt.toString().toLowerCase().includes(searchText.toLowerCase())
+  const filteredHistory = history.filter((record) =>
+    record.stt?.toString().includes(searchText.trim())
   );
 
   const columns = [
-  
+      { title: "Người sửa", dataIndex: "backupBy", key: "backupBy" },
+  {
+    title: "Thời gian",
+    dataIndex: "timestamp",
+    key: "timestamp",
+    render: (text) => dayjs(text).format("DD/MM/YYYY HH:mm"),
+  },
     {
       title: "STT",
-      dataIndex: "record",
+      dataIndex: "stt",
       key: "stt",
-      render: (record) => record.stt,
+      width: 80,
     },
     {
-      title: "Người sửa",
-      dataIndex: "record",
-      key: "editedBy",
-      render: (record) => record.editedBy,
+      title: "NGÀY ĐẶT",
+      dataIndex: "orderDate4",
+      key: "orderDate",
+      render: (text, record) =>
+        dayjs(text || record.orderDate).isValid()
+          ? dayjs(text || record.orderDate).format("DD/MM")
+          : "N/A",
+      width: 80,
     },
     {
-      title: "Thời gian",
-      dataIndex: "record",
-      key: "timestamp",
-      render: (record) => new Date(record.timestamp).toLocaleString(),
+      title: "TÊN KHÁCH",
+      dataIndex: "customerName",
+      key: "customerName",
     },
     {
-        title: "Thay đổi",
-        dataIndex: "record",
-        key: "changes",
-        render: (record) => {
-          console.log("Record changes:", record.changes);
-          const { changes } = record;
-          if (Array.isArray(changes) && changes.length > 0) {
-            return (
-              <div>
-                {changes.map((change, idx) => {
-                  const label = fieldLabelMapping[change.field] || change.field;
-                  // Kiểm tra nếu oldValue hoặc newValue là object hoặc array
-                  let oldVal = change.oldValue;
-                  let newVal = change.newValue;
-                  if (typeof oldVal === "object") {
-                    oldVal = JSON.stringify(oldVal);
-                  }
-                  if (typeof newVal === "object") {
-                    newVal = JSON.stringify(newVal);
-                  }
-                  return (
-                    <div key={idx}>
-                      <strong>{label}</strong>: {oldVal} → {newVal}
-                    </div>
-                  );
-                })}
-              </div>
-            );
-          }
-          return <span>Không có thay đổi</span>;
-        },
-      },
+      title: "PAGE",
+      dataIndex: "pageName",
+      key: "pageName",
+      render: (text) => (text ? text.split("||")[0].trim() : ""),
+    },
+    {
+      title: "SẢN PHẨM",
+      key: "products",
+      render: (_, record) =>
+        record.products?.map((item, i) => (
+          <div key={i}>
+            <strong>{item.product}</strong> - SL:{" "}
+            <strong>{item.quantity}</strong>
+          </div>
+        )),
+    },
+    { title: "QUÀ", dataIndex: "category", key: "category" },
+    {
+      title: "T/G GH",
+      dataIndex: "deliveryStatus",
+      key: "deliveryStatus",
+      render: (text) => (
+        <Tag color={text === "GIAO THÀNH CÔNG" ? "blue" : "orange"}>
+          {text}
+        </Tag>
+      ),
+    },
+    { title: "DS", dataIndex: "revenue", key: "revenue" },
+    { title: "DT", dataIndex: "profit", key: "profit" },
+    { title: "SALE", dataIndex: "sale", key: "sale" },
+    { title: "VĐ", dataIndex: "salexuly", key: "salexuly" },
+    { title: "XN", dataIndex: "salexacnhan", key: "salexacnhan" },
+    ...(currentUser.position !== "salenhapdon"
+      ? [{ title: "MKT", dataIndex: "mkt", key: "mkt" }]
+      : []),
+    {
+      title: "ĐƠN",
+      dataIndex: "saleReport",
+      key: "saleReport",
+      render: (text) => (
+        <Tag color={text === "DONE" ? "green" : "red"}>{text}</Tag>
+      ),
+    },
+    { title: "SĐT", dataIndex: "phone", key: "phone" },
+    { title: "ĐỊA CHỈ", dataIndex: "address", key: "address" },
+    {
+      title: "TT",
+      dataIndex: "paymentStatus",
+      key: "paymentStatus",
+      render: (text) => (
+        <Tag color={text === "ĐÃ THANH TOÁN" ? "green" : "red"}>{text}</Tag>
+      ),
+    },
+    { title: "GHI CHÚ", dataIndex: "note", key: "note" },
+    { title: "FB", dataIndex: "fb", key: "fb" },
+    { title: "MÃ VĐ", dataIndex: "trackingCode", key: "trackingCode" },
+    {
+      title: "GỬI",
+      dataIndex: "shippingDate1",
+      key: "shippingDate1",
+      render: (text) => text && dayjs(text).format("DD/MM/YYYY"),
+    },
+    {
+      title: "NHẬN",
+      dataIndex: "shippingDate2",
+      key: "shippingDate2",
+      render: (text) => text && dayjs(text).format("DD/MM/YYYY"),
+    },
+    { title: "GHI CHÚ KHO", dataIndex: "noteKHO", key: "noteKHO" },
+    { title: "TTXL", dataIndex: "processStatus", key: "processStatus" },
+    { title: "CTY ĐÓNG NAME", dataIndex: "isShippingname", key: "isShippingname" },
   ];
 
-  if (currentUser.position_team === "mkt" || currentUser.position_team === "kho") {
-    return null;
-  }
-  
   return loading ? (
     <Spin size="large" />
   ) : (
     <>
       <Input.Search
-        placeholder="Tìm kiếm theo STT"
+        placeholder="Tìm theo STT"
         allowClear
         onChange={(e) => setSearchText(e.target.value)}
         style={{ marginBottom: 16, maxWidth: 300 }}
       />
       <Table
-        dataSource={filteredDataSource}
+        dataSource={filteredHistory}
         columns={columns}
+       rowKey="id"
         pagination={{ pageSize: 10 }}
+        scroll={{ x: 1200 }}
       />
     </>
   );

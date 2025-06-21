@@ -1,6 +1,6 @@
 'use client'
 import { useState, useEffect } from "react";
-import { Table, Select,Switch, message } from "antd";
+import { Table, Select,Switch,Spin, message } from "antd";
 import dayjs from "dayjs";
 import { useSelector } from "react-redux";
 import axios from "axios"; 
@@ -16,6 +16,8 @@ dayjs.extend(isSameOrBefore);
 const Dashboard = () => {
   const [filterRange, setFilterRange] = useState("week");
   const [orders, setOrders] = useState([]);
+    const [loading, setLoading] = useState(false);
+  
   const [employeeStatusMap, setEmployeeStatusMap] = useState({});
   const router = useRouter(); 
   
@@ -27,12 +29,15 @@ const Dashboard = () => {
   }, []);
   // Dữ liệu orders mẫu; bạn có thể thay thế bằng dữ liệu thật từ API hay nguồn khác.
   const fetchOrders = async () => {
+    setLoading(true);
     try {
       const response = await axios.get(`/api/orders2?selectedPreset=${filterRange}`);
       setOrders(response.data.data);
     } catch (error) {
       console.error(error);
       message.error("Lỗi khi lấy đơn hàng");
+    }finally {
+      setLoading(false);
     }
   };
   useEffect(() => {
@@ -267,7 +272,10 @@ const Dashboard = () => {
     );
   };
 
-  return (
+ return loading ? (
+      <Spin size="large" />
+    ) : (
+      <>
     <div>
       {/* Bộ lọc theo khoảng thời gian */}
       <div style={{ marginBottom: 16 }}>
@@ -311,6 +319,7 @@ const Dashboard = () => {
         </>
       )}
     </div>
+  </>
   );
 };
 

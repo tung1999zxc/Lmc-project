@@ -5,7 +5,7 @@ export async function GET(request) {
   try {
     const { db } = await connectToDatabase();
     // Lấy tất cả các bản ghi lịch sử chỉnh sửa, sắp xếp theo thời gian mới nhất
-    const history = await db.collection('orderHistory').find({}).sort({ timestamp: -1 }).toArray();
+    const history = await db.collection('orderHistory').find({}).toArray();
     return new Response(
       JSON.stringify({ message: 'Lấy danh sách history thành công', data: history }),
       { status: 200 }

@@ -17,6 +17,7 @@ export async function PUT(request, { params }) {
     delete data.isShipping;
     const currentUser_kho = decodeURIComponent(request.headers.get('x-current-user')) || data.updatedBy || 'Unknown';
     const allowedForKhoOnly = ["shippingDate1", "shippingDate2", "trackingCode", "noteKHO", "deliveryStatus"];
+const userName = request.headers.get('x-current-username');
 
 if (currentUser_kho === "kho") {
   // Chỉ giữ lại các trường được phép
@@ -86,10 +87,17 @@ if (currentUser_kho === "kho") {
         { status: 404 }
       );
     }
+  await db.collection('orderHistory').insertOne({
+  ...data,
+  id, // đảm bảo có ID để backup theo đơn
+  backupBy: userName || 'Unknown',
+  backupAt: new Date()
+});
     return new Response(
       JSON.stringify({ message: 'Cập nhật đơn hàng thành công' }),
       { status: 200 }
     );
+    
   } catch (error) {
     console.error("Lỗi PUT /api/orders/[id]:", error);
     return new Response(

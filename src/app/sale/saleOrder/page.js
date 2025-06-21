@@ -4,7 +4,7 @@ import {
   Form,
   InputNumber,
   DatePicker,
-  Button,
+  Button,Spin,
   Table,
   Popconfirm,
   Select,
@@ -30,6 +30,8 @@ const Dashboard = () => {
   const [sampleOrders, setSampleOrders] = useState([]);
   const [form] = Form.useForm();
   const [records, setRecords] = useState([]);
+    const [loading, setLoading] = useState(false);
+  
   // period có thể là: "week", "month", "lastMonth", "twoMonthsAgo"
   const [period, setPeriod] = useState("month");
   // editingKey dùng để xác định record nào đang được chỉnh sửa
@@ -38,7 +40,7 @@ const Dashboard = () => {
 const [safeEmployees, setSafeEmployees] = useState([]);
 
 const fetchEmployees = async () => {
-      
+   setLoading(true);   
   try {
     const response = await axios.get('/api/employees');
     // response.data.data chứa danh sách nhân viên theo API đã viết
@@ -47,8 +49,8 @@ const fetchEmployees = async () => {
     console.error('Lỗi khi lấy danh sách nhân viên:', error);
     message.error('Lỗi khi lấy danh sách nhân viên');
   } finally {
-   
-  }
+      setLoading(false);
+    }
 };
 const fetchOrders = async () => {
   try {
@@ -410,7 +412,10 @@ const computeAverageClosingRate = (employeeName) => {
     }, {});
   };
 
-  return (
+   return loading ? (
+     <Spin size="large" />
+   ) : (
+     <>
     <div style={{ padding: 24 }}>
       <h1>Nhập dữ liệu</h1>
       <Form
@@ -518,6 +523,7 @@ currentUser.position === "leadSALE" ? (
 )}
 
     </div>
+ </>
   );
 };
 
