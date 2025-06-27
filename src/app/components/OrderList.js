@@ -614,6 +614,9 @@ case "odd_stt":
                 return order.deliveryStatus === "ĐÃ GỬI HÀNG" && order.trackingCode ==="";
               case "deliveredchuatick":
                 return order.deliveryStatus === "ĐÃ GỬI HÀNG" && !order.istick4;
+              case "slam":
+  return Array.isArray(order.products) &&
+         order.products.some(p => parseInt(p.quantity) < 0);
                 
               default:
                 return true;
@@ -2655,6 +2658,7 @@ onChange={(e) => handleColumnSelect("istick", e.target.checked)}
               
               { value: "even_stt", label: "Đơn STT CHẴN" },
               { value: "odd_stt", label: "Đơn STT LẺ" },
+              { value: "slam", label: "Điền sl âm" },
 
               { value: "chuyendon", label: "Đơn CHUYỂN ĐƠN" },
               { value: "booktb", label: "BOOK TB" },
@@ -2841,7 +2845,7 @@ onChange={(e) => handleColumnSelect("istick", e.target.checked)}
   visible={modalVisible}
   onCancel={() => setModalVisible(false)}
   footer={null}
-  width={1200}
+  width={1300}
 >
   <Table
     dataSource={modalCustomerOrders}
@@ -2859,6 +2863,7 @@ onChange={(e) => handleColumnSelect("istick", e.target.checked)}
           key: "pageName",
           render: (text) => text ? text.split("||")[0].trim() : "",
         },
+        { title: 'SĐT', dataIndex: 'phone', key: 'phone' },
       { title: 'Ngày đặt', dataIndex: 'orderDate', key: 'orderDate',render: (text) => dayjs(text).format("DD/MM"), },
       { title: 'STT', dataIndex: 'stt', key: 'stt' },
       {title: 'GHI CHÚ SALE',

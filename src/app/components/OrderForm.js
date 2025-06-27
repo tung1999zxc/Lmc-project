@@ -175,7 +175,7 @@ const productOptions = products.map((p) => p.name);
   visible={modalVisible}
   onCancel={() => setModalVisible(false)}
   footer={null}
-  width={1200}
+  width={1300}
 >
   <Table
     dataSource={modalCustomerOrders}
@@ -185,6 +185,15 @@ const productOptions = products.map((p) => p.name);
       )},
       { title: 'Tên Khách', dataIndex: "customerName",
         key: "customerName"},
+        {
+          title: 
+              'TÊN PAGE'
+           ,
+          dataIndex: "pageName",
+          key: "pageName",
+          render: (text) => text ? text.split("||")[0].trim() : "",
+        },
+        { title: 'SĐT', dataIndex: 'phone', key: 'phone' },
       { title: 'Ngày đặt', dataIndex: 'orderDate', key: 'orderDate',render: (text) => dayjs(text).format("DD/MM"), },
       { title: 'STT', dataIndex: 'stt', key: 'stt' },
       {title: 'GHI CHÚ SALE',
@@ -367,7 +376,7 @@ const productOptions = products.map((p) => p.name);
                             fieldKey={[field.fieldKey, "quantity"]}
                             rules={[{ required: true, message: "Nhập số lượng" }]}
                           >
-                            <Input type="number" placeholder="Số lượng" style={{ width: 100 }} />
+                            <Input type="number" min={1} placeholder="Số lượng" style={{ width: 100 }} />
                           </Form.Item>
                           
                         </Space>
@@ -592,7 +601,7 @@ const productOptions = products.map((p) => p.name);
                             fieldKey={[field.fieldKey, "quantity"]}
                             rules={[{ required: true, message: "Nhập số lượng" }]}
                           >
-                            <Input type="number" placeholder="SL" style={{ width: 60 }} />
+                            <Input type="number" min={1} placeholder="SL" style={{ width: 60 }} />
                           </Form.Item>
                           <MinusCircleOutlined onClick={() => remove(field.name)} />
                         </Space>
