@@ -66,13 +66,13 @@ const EmployeePageTable = () => {
           .filter(employee => employee.team_id === 'QUAN')
           .map(employee => employee.employee_code)
       },
-      {
-        id: 3,
-        name: `TEAM CHI `,
-        members: employees
-          .filter(employee => employee.team_id === 'CHI')
-          .map(employee => employee.employee_code)
-      },
+      // {
+      //   id: 3,
+      //   name: `TEAM CHI `,
+      //   members: employees
+      //     .filter(employee => employee.team_id === 'CHI')
+      //     .map(employee => employee.employee_code)
+      // },
       {
         id: 4,
         name: `TEAM PHONG `,
@@ -367,7 +367,7 @@ const EmployeePageTable = () => {
 >
   <Option value="SON">TEAM SƠN</Option>
   <Option value="QUAN">TEAM QUÂN</Option>
-  <Option value="CHI">TEAM CHI</Option>
+  {/* <Option value="CHI">TEAM CHI</Option> */}
   <Option value="PHONG">TEAM PHONG</Option>
   <Option value="TUANANH">TEAM TUẤN ANH</Option>
   <Option value="DIEN">TEAM DIỆN</Option>
