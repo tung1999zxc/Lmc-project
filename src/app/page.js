@@ -2022,7 +2022,7 @@ const percentAds3 = tongKW3 > 0 ? Number(((totalAdsKW3 / (tongKW3*exchangeRate))
   </Col></Row></>)}
 <br></br>
       
-{(currentUser.position === "admin" && !selectedTeam) ||(currentUser.position === "managerMKT" && !selectedTeam ) ||(currentUser.position === "managerSALE" && !selectedTeam ) ? (
+{(currentUser.position === "admin" && !selectedTeam) ||(currentUser.position === "managerMKT" && !selectedTeam )  ? (
   <Tabs defaultActiveKey="MKT">
   <Tabs.TabPane tab="MKT" key="MKT">
  
