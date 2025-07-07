@@ -28,6 +28,7 @@
     const [employees, setEmployees] = useState([]);
     const [createForm] = Form.useForm();
     const [editForm] = Form.useForm();
+const [searchText, setSearchText] = useState('');
 
     const positions = [
       { label: 'ADMIN', value: 'admin' },
@@ -271,9 +272,17 @@
         message.error('Xóa nhân viên thất bại');
       }
     };
-    const filteredEmployees = employees.filter(
-      (emp) => emp.username.toLowerCase() !== "admin"
+ const filteredEmployees = employees
+  .filter(emp => emp.username?.toLowerCase() !== "admin")
+  .filter(emp => {
+    const keyword = searchText.toLowerCase();
+    return (
+      emp.name?.toLowerCase().includes(keyword) ||
+      emp.username?.toLowerCase().includes(keyword) ||
+      emp.employee_code?.toString().toLowerCase().includes(keyword)
     );
+  });
+
     const EditModal = () => (
       <Modal
         title="Chỉnh sửa nhân viên"
@@ -447,14 +456,24 @@
           </Col>
 
           <Col span={16}>
-            <Card title="Danh sách nhân viên">
-              <Table 
-                columns={columns}
-                dataSource={filteredEmployees}
-                rowKey="employee_id"
-                pagination={{ pageSize: 10 }}
-              />
-            </Card>
+           <Card
+  title="Danh sách nhân viên"
+  extra={
+    <Input.Search
+      placeholder="Tìm theo tên, tài khoản hoặc mã NV"
+      allowClear
+      onChange={e => setSearchText(e.target.value)}
+      style={{ width: 300 }}
+    />
+  }
+>
+  <Table 
+    columns={columns}
+    dataSource={filteredEmployees}
+    rowKey="employee_id"
+    pagination={{ pageSize: 10 }}
+  />
+</Card>
           </Col>
         </Row>
         {editModalVisible && <EditModal />}
