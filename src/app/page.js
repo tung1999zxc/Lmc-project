@@ -1938,7 +1938,7 @@ const percentAds3 = tongKW3 > 0 ? Number(((totalAdsKW3 / (tongKW3*exchangeRate))
      
      
     </Row>)}
-      {((currentUser.position === "admin" && !selectedTeam) ||(currentUser.position === "managerMKT" && !selectedTeam )||currentUser.position === "managerSALE" ||currentUser.position === "leadSALE"   ) && (<>
+      {((currentUser.position === "admin" && !selectedTeam) ||(currentUser.position === "managerMKT" && !selectedTeam )||currentUser.position === "managerSALE"  ||currentUser.position === "leadSALE"   ) && (<>
       <Row gutter={[16, 16]}  >
   <Col xs={24} md={16}>
   <Row>
@@ -2022,7 +2022,7 @@ const percentAds3 = tongKW3 > 0 ? Number(((totalAdsKW3 / (tongKW3*exchangeRate))
   </Col></Row></>)}
 <br></br>
       
-{(currentUser.position === "admin" && !selectedTeam) ||(currentUser.position === "managerMKT" && !selectedTeam ) ? (
+{(currentUser.position === "admin" && !selectedTeam) ||(currentUser.position === "managerMKT" && !selectedTeam ) ||(currentUser.position === "managerSALE" && !selectedTeam ) ? (
   <Tabs defaultActiveKey="MKT">
   <Tabs.TabPane tab="MKT" key="MKT">
  
