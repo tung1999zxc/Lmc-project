@@ -358,7 +358,7 @@ const [searchText, setSearchText] = useState('');
             name="position_team2"
           
           >
-            <Select disabled={edit} options={position_team2.map(p => ({ label: p.label, value: p.value }))} />
+            <Select disabled ={currentUser.position !== 'admin'} options={position_team2.map(p => ({ label: p.label, value: p.value }))} />
           </Form.Item>
 
           <Form.Item>
