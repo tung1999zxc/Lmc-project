@@ -30,6 +30,9 @@ const EmployeePageTable = () => {
   const [searchText, setSearchText] = useState("");
   const [appliedSearchText, setAppliedSearchText] = useState("");
   const [selectedTeam, setSelectedTeam] = useState(null);
+  const [pageListInput, setPageListInput] = useState("");
+const [filteredPages, setFilteredPages] = useState([]);
+
  
   // Danh sách options
   useEffect(() => {
@@ -314,7 +317,11 @@ const EmployeePageTable = () => {
     },
   ];
   
-  
+  const normalizeText = (text) =>
+  text
+    .toLowerCase()
+    .trim()
+    .replace(/\s+/g, " "); // Giữ lại khoảng trắng giữa từ, nhưng loại bỏ thừa
   return (
     <div style={{ padding: 20 }}>
       <Space style={{ marginBottom: 20 }}>
@@ -374,7 +381,64 @@ const EmployeePageTable = () => {
   <Option value="LE">TEAM LẺ</Option>
   <Option value="DIEU">TEAM DIỆU</Option>
 </Select>
+<br></br>
+{currentUser.name==='Trần Mỹ Hạnh' && (
+<Space style={{ marginTop: 20, flexDirection: 'column' }}>
+  <h3>Trần Mỹ Hạnh search đi cho nhanh !</h3>
+  <Input.TextArea
+    rows={3}
+    placeholder="Dán danh sách tên page, mỗi dòng 1 tên"
+    style={{ width: 400 }}
+    value={pageListInput}
+    onChange={(e) => setPageListInput(e.target.value)}
+  />
+  <Button
+    type="primary"
+    style={{ marginTop: 10, width: 200 }}
+    onClick={() => {
+      const searchPages = pageListInput
+        .split(/\r?\n/)                         // tách từng dòng
+        .map(name => normalizeText(name))       // chuẩn hóa từng dòng
+        .filter(name => name);                  // loại bỏ dòng trống
 
+      const matchedPages = data.filter(record =>
+        searchPages.includes(normalizeText(record.pageName))
+      );
+
+      setFilteredPages(matchedPages);
+
+      // Gợi ý log các tên không tìm thấy (gỡ lỗi)
+      const notFound = searchPages.filter(p =>
+        !data.find(d => normalizeText(d.pageName) === p)
+      );
+      if (notFound.length > 0) {
+        console.log("❌ Không tìm thấy các page sau:", notFound);
+      }
+    }}
+  >
+    Tìm kiếm danh sách page
+  </Button>
+</Space>)}
+{filteredPages.length > 0 && (
+  <div style={{ marginTop: 40 }}>
+    <h3>Kết quả tìm kiếm:</h3>
+    <Table
+      dataSource={filteredPages.map((item, index) => ({
+        key: index,
+        pageName: item.pageName,
+        employee: item.employee
+      }))}
+      columns={[
+        { title: "Tên Page", dataIndex: "pageName", key: "pageName" },
+        { title: "Tên Nhân Viên", dataIndex: "employee", key: "employee" }
+      ]}
+      pagination={false}
+    />
+  </div>
+)}
+
+
+<h2>List Page</h2>
       <Table
         columns={columns}
         dataSource={filteredData .sort((a, b) => (a.employee?.localeCompare(b.employee) || 0))}
