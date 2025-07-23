@@ -1108,9 +1108,41 @@ if (sortedEmployees.length <= 5) {
   top5CriticismEmployees = sortedEmployees.filter(emp => emp.total2 <= cutoffValue);
 }
 
-  const top5Employees = [...marketingReportData1]
-  .filter(emp => (emp.total1 !== 0 && emp.totalAds1 !== 0))
-  .sort((a, b) => b.total1 - a.total1)
+// Tạo marketingReportData1 mới đúng điều kiện
+const marketingReportData3 = mktEmployees.map((emp, index) => {
+  const nameLC = emp.name.trim().toLowerCase();
+
+  // 1. Doanh số hôm nay
+  const totalToday = orders
+    .filter(order => {
+      const orderDate = new Date(order.createdAt);
+      return order.mkt.trim().toLowerCase() === nameLC &&
+             orderDate >= startOfToday &&
+             orderDate < endOfToday;
+    })
+    .reduce((sum, order) => sum + order.profit, 0);
+
+  // 2. Ads trong tháng hiện tại
+  const now = new Date();
+  const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+  const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999);
+
+  const adsThisMonth = adsMoneyData
+    .filter(ad => {
+      const adDate = new Date(ad.createdAt);
+      return ad.name.trim().toLowerCase() === nameLC &&
+             adDate >= startOfMonth &&
+             adDate <= endOfMonth;
+    })
+    .reduce((sum, ad) => sum + (ad.request1 + ad.request2), 0);
+
+  return { key: index, name: emp.name, totalToday, adsThisMonth };
+});
+
+// Lọc chỉ những người có ads tháng này > 0
+const top5Employees = marketingReportData3
+  .filter(emp => emp.adsThisMonth > 0)
+  .sort((a, b) => b.totalToday - a.totalToday)
   .slice(0, 3);
 
   
