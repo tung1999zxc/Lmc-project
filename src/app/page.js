@@ -1815,9 +1815,9 @@ const percentAds3 = tongKW3 > 0 ? Number(((totalAdsKW3 / (tongKW3*exchangeRate))
   }}
 />
             <span className="employee-name">{emp.name}  </span><br></br>
-            {emp.total1 * 17000 * 0.95 > 15000000 && (
+            {emp.totalToday * 17000 * 0.95 > 15000000 && (
   <span className="employee-name2">
-    {(emp.total1 * 17000 * 0.95).toLocaleString()} VNĐ
+    {(emp.totalToday * 17000 * 0.95).toLocaleString()} VNĐ
   </span>
 )}
             
