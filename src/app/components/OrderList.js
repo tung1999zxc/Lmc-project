@@ -685,6 +685,79 @@ case "odd_stt":
     searchCustomerName2,
     shiftFilter 
   ]);
+  const customerNameCountMap = useMemo(() => {
+    if (currentUser.name !== 'Tung99') return [];
+  const map = new Map();
+  filteredOrders.forEach(order => {
+    const name = order.customerName?.trim() || "Không rõ";
+    map.set(name, (map.get(name) || 0) + 1);
+  });
+  return map;
+}, [filteredOrders,currentUser.name]);
+const pageProductStats = useMemo(() => {
+   if (currentUser.name !== 'Tung99') return [];
+  const stats = {};
+
+  filteredOrders.forEach(order => {
+    const page = (order.pageName || "Không rõ").split("||")[0].trim();
+    const mkt = order.mkt || "Không rõ";
+    const customerName = order.customerName?.trim() || "Không rõ";
+
+    if (!stats[page]) {
+      stats[page] = {
+        page,
+        mkt,
+        totalQuantity: 0,
+        productDetail: {},
+        customerNames: new Set(),
+      };
+    }
+
+    // Cộng sản phẩm
+    order.products?.forEach(product => {
+      const name = product.product;
+      const qty = Number(product.quantity);
+      if (!stats[page].productDetail[name]) stats[page].productDetail[name] = 0;
+      stats[page].productDetail[name] += qty;
+      stats[page].totalQuantity += qty;
+    });
+
+    // Thêm tên khách (dùng Set để loại trùng)
+    stats[page].customerNames.add(customerName);
+  });
+
+  const rows = Object.values(stats).map(item => ({
+    page: item.page,
+    mkt: item.mkt,
+    totalQuantity: item.totalQuantity,
+    productStr: Object.entries(item.productDetail)
+      .map(([name, qty]) => `${name} (SL: ${qty})`)
+      .join(", "),
+    customers: Array.from(item.customerNames).join(", "),
+  }));
+
+  return rows.sort((a, b) => b.totalQuantity - a.totalQuantity);
+}, [filteredOrders,currentUser.name]);
+
+const colorPalette = [
+  "#f28b82", "#fbbc04", "#fff475", "#ccff90", "#a7ffeb",
+  "#cbf0f8", "#aecbfa", "#d7aefb", "#fdcfe8", "#e6c9a8",
+  "#e8eaed", "#c6dafc", "#ffd6a5", "#fdffb6", "#caffbf",
+  "#9bf6ff", "#a0c4ff", "#bdb2ff", "#ffc6ff", "#fffffc",
+  "#ffe066", "#fab1a0", "#e17055", "#fd79a8", "#a29bfe",
+  "#74b9ff", "#55efc4", "#81ecec", "#ffeaa7", "#dfe6e9",
+  "#636e72", "#00cec9", "#6c5ce7", "#e84393", "#2ecc71",
+  "#f1c40f", "#d35400", "#7f8c8d", "#e67e22", "#1abc9c",
+  "#2980b9", "#3498db", "#9b59b6", "#8e44ad", "#c0392b",
+  "#34495e", "#16a085", "#27ae60", "#f39c12", "#bdc3c7"
+];
+const getCustomerColor = (name) => {
+  let hash = 0;
+  for (let i = 0; i < name.length; i++) {
+    hash = name.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  return colorPalette[Math.abs(hash) % colorPalette.length];
+};
 
   // const handleCalculateTotals = () => {
   //   // Lọc ra các đơn hàng có istick === true
@@ -2811,7 +2884,76 @@ onChange={(e) => handleColumnSelect("istick", e.target.checked)}
 )}
         </Col>
         <Col flex="auto">
-       
+
+    {(  currentUser.name ==='Tung99'
+ ) && (    
+       <Table
+  dataSource={pageProductStats}
+  rowKey="page"
+  title={() => "📊 Tổng kết sản phẩm theo Page"}
+  columns={[
+    {
+      title: "Tên Page",
+      dataIndex: "page",
+      key: "page",
+      width: 150,
+    },
+    {
+      title: "MKT",
+      dataIndex: "mkt",
+      key: "mkt",
+      width: 120,
+    },
+    {
+      title: "Tổng SL",
+      dataIndex: "totalQuantity",
+      key: "totalQuantity",
+      sorter: (a, b) => a.totalQuantity - b.totalQuantity,
+      defaultSortOrder: "descend",
+      width: 100,
+    },
+    {
+      title: "Sản phẩm",
+      dataIndex: "productStr",
+      key: "productStr",
+    },
+    {
+  title: "Tên khách",
+  dataIndex: "customers",
+  key: "customers",
+  render: (text) => {
+    const names = text.split(",").map(name => name.trim());
+    return (
+      <div style={{ display: "flex", flexWrap: "wrap", gap: "5px" }}>
+        {names.map((name, idx) => {
+          const isDuplicate = customerNameCountMap.get(name) > 1;
+          const bgColor = isDuplicate ? getCustomerColor(name) : "transparent";
+
+          return (
+            <div
+              key={idx}
+              style={{
+                backgroundColor: bgColor,
+                padding: "2px 6px",
+                borderRadius: "4px",
+                color: isDuplicate ? "#000" : "#333",
+                fontSize: "12px",
+                border: isDuplicate ? "1px solid #ccc" : "none",
+                whiteSpace: "nowrap"
+              }}
+            >
+              {name}
+            </div>
+          );
+        })}
+      </div>
+    );
+  },
+},
+  ]}
+/>
+)}
+
         <Table 
   scroll={{ x: 3000}}
   columns={
