@@ -57,6 +57,7 @@ const OrderList = () => {
   const [sttInput, setSttInput] = useState("");
   const [codeInput, setCodeInput] = useState("");
   const [sttDoneInput, setSttDoneInput] = useState("");
+  const [showProductColumn, setShowProductColumn] = useState(false);
   
   
   const [namesalexuly, setnamesalexuly] = useState("");
@@ -2886,7 +2887,10 @@ onChange={(e) => handleColumnSelect("istick", e.target.checked)}
         <Col flex="auto">
 
     {(  currentUser.name ==='Tung99'
- ) && (    
+ ) && (    <>
+  <Button onClick={() => setShowProductColumn(prev => !prev)} style={{ marginBottom: 8 }}>
+  {showProductColumn ? "Ẩn cột sản phẩm" : "Hiện cột sản phẩm"}
+</Button>
        <Table
   dataSource={pageProductStats}
   rowKey="page"
@@ -2917,7 +2921,9 @@ onChange={(e) => handleColumnSelect("istick", e.target.checked)}
       dataIndex: "productStr",
       key: "productStr",
     },
-    {
+    ...(showProductColumn
+      ? [
+          {
   title: "Tên khách",
   dataIndex: "customers",
   key: "customers",
@@ -2950,9 +2956,12 @@ onChange={(e) => handleColumnSelect("istick", e.target.checked)}
     );
   },
 },
+        ]
+      : []),
+    
   ]}
 />
-)}
+</>)}
 
         <Table 
   scroll={{ x: 3000}}
