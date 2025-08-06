@@ -1855,7 +1855,7 @@ const percentAds3 = tongKW3 > 0 ? Number(((totalAdsKW3 / (tongKW3*exchangeRate))
     .criticism-container h2 {
       font-size: 2rem;
       font-weight: 700;
-      margin-bottom: 20px;
+      margin-bottom: 40px;
       color: #2c3e50;
       text-align: center;
     }
@@ -1878,7 +1878,7 @@ const percentAds3 = tongKW3 > 0 ? Number(((totalAdsKW3 / (tongKW3*exchangeRate))
 
     .employee-item {
       flex-shrink: 0;
-      width: 160px;
+      width: 210px;
       margin-right: 100px;
       text-align: center;
       padding: 10px;
@@ -1888,8 +1888,8 @@ const percentAds3 = tongKW3 > 0 ? Number(((totalAdsKW3 / (tongKW3*exchangeRate))
     }
 
     .employee-image {
-      width: 100px;
-      height: 100px;
+      width: 150px;
+      height: 150px;
       object-fit: cover;
       border-radius: 50%;
       border: 3px solid #6ab04c;
