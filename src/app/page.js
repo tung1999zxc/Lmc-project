@@ -1800,78 +1800,178 @@ const percentAds3 = tongKW3 > 0 ? Number(((totalAdsKW3 / (tongKW3*exchangeRate))
     }}
     >
      
-    <div className="criticism-container">
-      <h2>TOP 3 NHÂN VIÊN DOANH SỐ CAO NHẤT</h2>
-      <div className="marquee">
-        { currentUser.name!=="" && top5Employees.map((emp, index) => (
-          <div key={index} className="employee-item">
-            <img
-  src={`/${emp.name.trim()}.jpg`}
-  alt={emp.name.trim()}
-  className="employee-image"
-  onError={(e) => {
-    e.currentTarget.onerror = null; // Ngăn lặp lại nếu ảnh mặc định không tồn tại
-    e.currentTarget.src = "/ngockem.jpg";
-  }}
-/>
-            <span className="employee-name">{emp.name}  </span><br></br>
-            {emp.totalToday * 17000 * 0.95 > 15000000 && (
-  <span className="employee-name2">
-    {(emp.totalToday * 17000 * 0.95).toLocaleString()} VNĐ
-  </span>
-)}
-            
-          </div>
-        ))}
+   <div className="criticism-container">
+  <h2>🎉 Vinh danh hôm nay 🎉</h2>
+  <div className="marquee">
+    {top5Employees.map((emp, index) => (
+      <div
+        key={index}
+        className={`employee-item ${
+          index % top5Employees.length === 0
+            ? 'top1'
+            : index % top5Employees.length === 1
+            ? 'top2'
+            : index % top5Employees.length === 2
+            ? 'top3'
+            : ''
+        }`}
+      >
+        <img
+          src={`/${emp.name.trim()}.jpg`}
+          alt={emp.name.trim()}
+          className="employee-image"
+          onError={(e) => {
+            e.currentTarget.onerror = null;
+            e.currentTarget.src = "/ngockem.jpg";
+          }}
+        />
+        <span className="employee-name">{emp.name}</span><br />
+        {index % top5Employees.length === 0 && (
+          <span className="top-badge">🏆 TOP 1 SERVER</span>
+        )}
+        <br />
+        {emp.totalToday * 17000 * 0.95 > 15000000 && (
+          <span className="employee-name2">
+            {(emp.totalToday * 17000 * 0.95).toLocaleString()} VNĐ
+          </span>
+        )}
       </div>
-      <style jsx>{`
-        .criticism-container {
-          padding: 20px;
-          background: #9fe09d;
-          text-align: center;
-          border: 2px solid #e2e612;
-          border-radius: 10px;
-          margin: 20px;
-          overflow: hidden; /* Giới hạn marquee chỉ chạy trong khung */
-          position: relative;
-        }
-        .marquee {
-          display: inline-block;
-          white-space: nowrap;
-          animation: marquee 30s linear infinite;
-        }
-        .employee-item {
-          display: inline-block;
-          margin-right: 50px;
-          text-align: center;
-        }
-        .employee-image {
-          width: 120px;
-          height: 120px;
-          object-fit: cover;
-          border-radius: 20%;
-          margin-bottom: 10px;
-        }
-        .employee-name {
-          font-size: 1.5em;
-          font-weight: bold;
-          color: #c2185b ;
-        }
-        .employee-name2 {
-          font-size: 1.5em;
-          font-weight: bold;
-          color:rgb(26, 47, 235) ;
-        }
-        @keyframes marquee {
-          0% {
-            transform: translateX(100%);
-          }
-          100% {
-            transform: translateX(-100%);
-          }
-        }
-      `}</style>
-    </div>
+    ))}
+  </div>
+  <style jsx>{`
+    .criticism-container {
+      padding: 25px 15px;
+      background: linear-gradient(135deg, #f5f7fa, #c3ecb2);
+      border: 2px solid #f1c40f;
+      border-radius: 15px;
+      margin: 20px auto;
+      max-width: 100%;
+      overflow: hidden;
+      position: relative;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+      text-align: center;
+    }
+
+    .criticism-container h2 {
+      font-size: 2rem;
+      font-weight: 700;
+      margin-bottom: 20px;
+      color: #2c3e50;
+      text-align: center;
+    }
+
+    .marquee {
+      display: flex;
+      flex-wrap: nowrap;
+      width: max-content;
+      animation: marquee 30s linear infinite;
+    }
+
+    @keyframes marquee {
+      0% {
+        transform: translateX(100%);
+      }
+      100% {
+        transform: translateX(-100%);
+      }
+    }
+
+    .employee-item {
+      flex-shrink: 0;
+      width: 160px;
+      margin-right: 100px;
+      text-align: center;
+      padding: 10px;
+      border-radius: 10px;
+      background: #ffffff80;
+      transition: transform 0.3s ease;
+    }
+
+    .employee-image {
+      width: 100px;
+      height: 100px;
+      object-fit: cover;
+      border-radius: 50%;
+      border: 3px solid #6ab04c;
+      box-shadow: 0 0 8px rgba(0,0,0,0.15);
+      margin-bottom: 10px;
+    }
+
+    
+      
+      .employee-name {
+      font-size: 1.2em;
+      font-weight: bold;
+      color: #2c3e50;
+  display: block;
+  white-space: normal; /* Cho phép xuống dòng */
+  word-break: break-word; /* Nếu cần tách từ */
+  text-align: center;
+}
+ 
+
+    .employee-name2 {
+      font-size: 1.1em;
+      font-weight: bold;
+      color: #2980b9;
+    }
+
+    .top-badge {
+      background-color: #e74c3c;
+      color: white;
+      padding: 4px 8px;
+      border-radius: 20px;
+      font-size: 0.9em;
+      font-weight: bold;
+      animation: pulse 1.5s infinite;
+      display: inline-block;
+      margin-top: 4px;
+    }
+
+    /* TOP 1 – Viền vàng, hiệu ứng nổi bật */
+    .employee-item.top1 {
+      border: 3px solid #f1c40f;
+      box-shadow: 0 0 20px 5px rgba(241, 196, 15, 0.6);
+      transform: scale(1.1);
+    }
+
+    /* TOP 2 – Viền bạc */
+    .employee-item.top2 {
+      border: 3px solid #42a6e8ff;
+      box-shadow: 0 0 10px 2px rgba(189, 195, 199, 0.4);
+    }
+
+    /* TOP 3 – Viền đồng */
+    .employee-item.top3 {
+      border: 3px solid #d2a06eff;
+      box-shadow: 0 0 5px 1px rgba(205, 127, 50, 0.3);
+    }
+
+    @keyframes pulse {
+      0% {
+        box-shadow: 0 0 0 0 rgba(231, 76, 60, 0.7);
+      }
+      70% {
+        box-shadow: 0 0 0 10px rgba(231, 76, 60, 0);
+      }
+      100% {
+        box-shadow: 0 0 0 0 rgba(231, 76, 60, 0);
+      }
+    }
+
+    @media (max-width: 768px) {
+      .employee-item {
+        width: 140px;
+        margin-right: 40px;
+      }
+      .employee-image {
+        width: 80px;
+        height: 80px;
+      }
+    }
+  `}</style>
+</div>
+
       {/* Bộ lọc */}
       {( currentUser.position === "lead" || (currentUser.position === "admin" && selectedTeam) ||(currentUser.position === "managerMKT" && selectedTeam ))  && (
       <Row gutter={[16, 16]}  >
