@@ -1790,6 +1790,32 @@ const percentAds3 = tongKW3 > 0 ? Number(((totalAdsKW3 / (tongKW3*exchangeRate))
     { name: "Hành chính", profit: 0 },
     { name: "Tối", profit: 0 }
   ];
+
+// Tạo ngày hôm nay
+const todayDate = new Date().toISOString().split('T')[0];
+
+// Lọc các nhân viên có position là salenhapdon
+const salenhapdonEmployees = employees.filter(emp => emp.position === "salenhapdon");
+
+// Tính tổng số đơn hôm nay của từng salenhapdon
+const salenhapdonOrderCounts = salenhapdonEmployees.map(emp => {
+  const count = orders.filter(order =>
+    order.sale?.trim().toLowerCase() === emp.name.trim().toLowerCase() &&
+    order.orderDate === todayDate
+  ).length;
+  return {
+    name: emp.name,
+    orderCount: count
+  };
+});
+
+// Sắp xếp giảm dần và lấy top 3
+const top3SalenhapdonToday = salenhapdonOrderCounts
+  .sort((a, b) => b.orderCount - a.orderCount)
+  .slice(0, 3);
+
+  
+
   return (
     
     <div  
@@ -1800,6 +1826,8 @@ const percentAds3 = tongKW3 > 0 ? Number(((totalAdsKW3 / (tongKW3*exchangeRate))
     }}
     >
      
+   
+
    <div className="criticism-container">
   <h2>🎉 Vinh danh hôm nay 🎉</h2>
   <div className="marquee">
@@ -1838,6 +1866,40 @@ const percentAds3 = tongKW3 > 0 ? Number(((totalAdsKW3 / (tongKW3*exchangeRate))
       </div>
     ))}
   </div>
+  {/* Vinh danh TOP 3 SALE NHẬP ĐƠN */}
+<br></br>
+
+  <div className="marquee">
+    {top3SalenhapdonToday.map((emp, index) => (
+      <div
+        key={index}
+        className={`employee-item ${
+          index === 0 ? 'top1' : index === 1 ? 'top2' : index === 2 ? 'top3' : ''
+        }`}
+      >
+        <img
+          src={`/${emp.name.trim()}.jpg`}
+          alt={emp.name.trim()}
+          className="employee-image"
+          onError={(e) => {
+            e.currentTarget.onerror = null;
+            e.currentTarget.src = "/ngockem.jpg";
+          }}
+        />
+        <span className="employee-name">{emp.name}</span><br />
+        {index === 0 && (
+          <span className="top-badge">🏆 Best Seller</span>
+        )}
+        <br />
+        {emp.orderCount > 0 && (
+          <span className="employee-name2">
+            {emp.orderCount} đơn hàng
+          </span>
+        )}
+      </div>
+    ))}
+  </div>
+
   <style jsx>{`
     .criticism-container {
       padding: 25px 15px;
@@ -1881,6 +1943,7 @@ const percentAds3 = tongKW3 > 0 ? Number(((totalAdsKW3 / (tongKW3*exchangeRate))
       width: 210px;
       margin-right: 100px;
       text-align: center;
+      margin-bottom: 40px;
       padding: 10px;
       border-radius: 10px;
       background: #ffffff80;
@@ -1971,6 +2034,7 @@ const percentAds3 = tongKW3 > 0 ? Number(((totalAdsKW3 / (tongKW3*exchangeRate))
     }
   `}</style>
 </div>
+
 
       {/* Bộ lọc */}
       {( currentUser.position === "lead" || (currentUser.position === "admin" && selectedTeam) ||(currentUser.position === "managerMKT" && selectedTeam ))  && (
