@@ -1830,6 +1830,7 @@ const top3SalenhapdonToday = salenhapdonOrderCounts
 
    <div className="criticism-container">
   <h2>🎉 Vinh danh hôm nay 🎉</h2>
+  
   <div className="marquee">
     {top5Employees.map((emp, index) => (
       <div
@@ -1926,7 +1927,7 @@ const top3SalenhapdonToday = salenhapdonOrderCounts
       display: flex;
       flex-wrap: nowrap;
       width: max-content;
-      animation: marquee 30s linear infinite;
+      animation: marquee 35s linear infinite;
     }
 
     @keyframes marquee {
@@ -1934,13 +1935,13 @@ const top3SalenhapdonToday = salenhapdonOrderCounts
         transform: translateX(100%);
       }
       100% {
-        transform: translateX(-100%);
+        transform: translateX(-60%);
       }
     }
 
     .employee-item {
       flex-shrink: 0;
-      width: 210px;
+      width: 300px;
       margin-right: 100px;
       text-align: center;
       margin-bottom: 40px;
@@ -1951,8 +1952,8 @@ const top3SalenhapdonToday = salenhapdonOrderCounts
     }
 
     .employee-image {
-      width: 150px;
-      height: 150px;
+      width: 220px;
+      height: 200px;
       object-fit: cover;
       border-radius: 50%;
       border: 3px solid #6ab04c;
@@ -2000,8 +2001,8 @@ const top3SalenhapdonToday = salenhapdonOrderCounts
 
     /* TOP 2 – Viền bạc */
     .employee-item.top2 {
-      border: 3px solid #42a6e8ff;
-      box-shadow: 0 0 10px 2px rgba(189, 195, 199, 0.4);
+      border: 3px solid #1a6191ff;
+      box-shadow: 0 0 10px 2px rgba(71, 147, 198, 0.4);
     }
 
     /* TOP 3 – Viền đồng */
