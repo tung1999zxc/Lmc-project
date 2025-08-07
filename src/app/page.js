@@ -1868,7 +1868,7 @@ const top3SalenhapdonToday = salenhapdonOrderCounts
   </div>
   {/* Vinh danh TOP 3 SALE NHẬP ĐƠN */}
 <br></br>
-{(currentUser.name !== "Trần Ngọc Lâm"   ) && (
+{(currentUser.name !== "Trần Ngọc Lâm" && currentUser.name !== "Diệp Anh"  ) && (
   <div className="marquee">
     {top3SalenhapdonToday.map((emp, index) => (
       <div
