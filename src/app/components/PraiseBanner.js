@@ -136,7 +136,7 @@ const PraiseBanner = ({ top5Employees }) => {
       .marquee-text {
         display: inline-block;
         white-space: nowrap;
-        animation: slide-left 30s linear infinite;
+        animation: slide-left 28s linear infinite;
         font-weight: 700;
         font-size: 32px;
         color: #f60112ff;
