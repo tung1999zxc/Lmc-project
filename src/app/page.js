@@ -95,7 +95,7 @@ const fetchEmployees = async () => {
       // Thiết lập interval để gọi lại sau mỗi 1 giờ (3600000 ms)
       const intervalId = setInterval(() => {
         fetchData();
-      }, 1800000);
+      }, 300000);
     
       // Hủy interval khi unmount component
       return () => {
