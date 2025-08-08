@@ -10,6 +10,29 @@ const PraiseBanner = ({ top5Employees }) => {
   const phrasesTop1 = [
       "{{name}} Hãy để doanh số hôm nay trở thành kỷ niệm đáng nhớ của bạn!",
       "Hãy tiếp tục giữ vững phong độ như {{name}} nhé cả nhà!",
+      "{{name}} đang viết nên câu chuyện thành công mới cho team!",
+      "{{name}}, bạn đã chứng minh đẳng cấp của mình!",
+      "Chúng tôi tự hào khi có {{name}} trong đội!",
+      "{{name}} đang chứng minh: tốc độ + kiên trì = thành công!",
+      "Một ngày đầy năng lượng và doanh số cho {{name}}!",
+      "Sáng nay {{name}} đứng giữa bảng xếp hạng, giờ thì top 1 rồi!",
+      "Ai có thể ngăn nổi tốc độ của {{name}} hôm nay?",
+      "Bước nhảy doanh số của {{name}} khiến BXH nóng rực!",
+      "Hãy lấy tinh thần của {{name}} làm động lực để bứt phá!",
+      "Ai muốn vào top hôm nay, hãy học cách {{name}} bứt phá!",
+      "Team đang nóng lên nhờ cú bứt của {{name}}!",
+      "{{name}} đã chứng minh rằng chăm chỉ là vũ khí mạnh nhất!",
+      "Một ngày đẹp trời cho {{name}} và toàn bộ team MKT!",
+      "Liệu {{name}} có giữ được vị trí đến cuối ngày?",
+      "💰 {{name}} hút tiền về công ty như nam châm hút sắt!  ",
+      "⚡ {{name}} chốt đơn nhanh hơn cả tia chớp!",
+      "🎯 {{name}} bắn phát nào trúng đơn phát đó!",
+      "🐉 {{name}} quẩy doanh số như rồng cuộn mây bay!",
+      "🍀 {{name}} may mắn và tài năng kết hợp hoàn hảo!",
+      "🕹 {{name}} điều khiển doanh số như chơi game!",
+      "🍩 {{name}} thêm “đường” vào doanh số cho ngọt!",
+      "🥶 {{name}} làm lạnh túi tiền khách nhưng làm nóng doanh số!",
+    
       "Bản lĩnh MKT là đây – và {{name}} chính là hình mẫu!",
       "Từ một người ít nói, {{name}} đã vươn mình mạnh mẽ qua từng ngày!",
       "{{name}} không chỉ đang tăng doanh số – bạn đang tạo dấu ấn cá nhân.",
@@ -26,7 +49,22 @@ const PraiseBanner = ({ top5Employees }) => {
       "Tập thể chúng ta đang lớn mạnh nhờ những ngôi sao như {{name}}!",
       "{{name}} không chỉ bán tốt, còn truyền cảm hứng cho cả team!",
       "Tinh thần và kết quả của {{name}} là động lực cho cả bộ phận MKT!",
-      "Không ai ngờ {{name}} lại lật ngược tình thế nhanh đến vậy!"
+      "Không ai ngờ {{name}} lại lật ngược tình thế nhanh đến vậy!",
+      "🎤 {{name}} hát bản hit “Doanh số là đam mê”!",
+      "🧨 {{name}} bùng nổ doanh số bất ngờ!",
+      "🎢 {{name}} lái tàu lượn doanh số lên đỉnh!",
+      "🥤 {{name}} uống “nước doanh số” không ngừng!",
+      "🥊 {{name}} hạ knock-out mọi đối thủ doanh số!",
+      "🧗 {{name}} leo đỉnh doanh số nhanh nhất hôm nay!",
+      "🧨 {{name}} kích nổ doanh số bất ngờ!",
+      "🏹 {{name}} nhắm đâu trúng đó, toàn đơn ngon!",
+      "🌠 {{name}} là ngôi sao băng doanh số hôm nay!",
+      "🧲 {{name}} hút khách về như nam châm!",
+      "🪵 {{name}} góp từng “củi” vào lửa doanh số!",
+      "🥗 {{name}} trộn đều bí quyết thành công và doanh số!",
+      "🦦 {{name}} ôm trọn mọi đơn ngon!",
+     
+
     ];
 
     const phrases15tr = [
@@ -38,32 +76,67 @@ const PraiseBanner = ({ top5Employees }) => {
       "Cột mốc 15 triệu đã được {{name}} chinh phục!",
       "Với {{sales}}, {{name}} đang làm bùng nổ bảng xếp hạng!",
       "{{name}} đã cán mốc {{sales}}, tiếp tục giữ vững phong độ nhé!",
-      "Tăng trưởng liên tục! {{name}} đang trở thành hình mẫu lý tưởng!"
+      "Tăng trưởng liên tục! {{name}} đang trở thành hình mẫu lý tưởng!",
+      "Chúc mừng {{name}} đã chinh phục mốc {{sales}}!",
+      "{{name}} đã chính thức bước vào “Câu lạc bộ 15 triệu” hôm nay!",
+      "Hôm nay, {{name}} đã khẳng định vị thế bằng doanh số vượt trội!",
+      "Vượt mốc lớn giữa ngày – {{name}} đang chơi ở một đẳng cấp khác!",
+      "🔥 {{name}} làm doanh số nóng rực cả bảng xếp hạng!",
+      "📈 {{name}} kéo biểu đồ doanh số lên như leo núi!",
+      "🐼 {{name}} dễ thương nhưng doanh số thì cực gắt!",
+      "🎬 {{name}} đóng vai chính trong bộ phim “Doanh số triệu view”!",
+      "🦖 {{name}} cắn nát mọi mục tiêu doanh số!",
+      "🥶 {{name}} làm lạnh túi tiền khách nhưng làm nóng doanh số!",
+      "🚜 {{name}} cày doanh số như cày ruộng!",
+      "🚧 {{name}} phá mọi rào cản doanh số!",
+      "🌱 {{name}} gieo hạt doanh số hôm nay, gặt vàng ngày mai!",
+      "🌌 {{name}} chiếu sáng cả bầu trời doanh số!",
+      "🧯 {{name}} dập tắt mọi lo âu, thổi bùng doanh số!",
+    
+      "⚡ {{name}} chốt đơn nhanh hơn cả tia chớp!",
+      "🏆 {{name}} giữ cúp “Thánh chốt đơn” hôm nay!",
+      "🍯 {{name}} ngọt ngào như mật ong, khách mê tít!",
+      "🦅 {{name}} săn đơn từ xa, không trượt phát nào!",
+      "🛠 {{name}} sửa mọi lý do khách từ chối thành chốt đơn!",
+      "🛸 {{name}} chốt đơn bay cao hơn UFO!",
+      "🐋 {{name}} nuốt trọn đơn to!",
+      "🥷 {{name}} chốt đơn âm thầm nhưng cực chất!",
+      "🏹 {{name}} bắn mũi tên doanh số xuyên tim khách!",
+      "🪄 {{name}} biến phép thuật thành đơn hàng!",
+      "🧊 {{name}} làm tan băng mọi khách khó tính!",
+      "🥇 {{name}} xứng đáng huy chương vàng chốt đơn!",
+      "🐕 {{name}} săn đơn như chó săn thỏ!",
+      "🐍 {{name}} luồn lách chốt đơn cực mượt!",
+      "🐙 {{name}} ôm trọn mọi cơ hội chốt đơn!",
+      "🔑 {{name}} mở khóa mọi khách hàng khó tính!",
+      "🛎 {{name}} rung chuông doanh số liên tục!",
+      "🥡 {{name}} gói ghém doanh số gọn gàng đem về!",
+      "🧃 {{name}} ép nước từ mọi cơ hội doanh số!",
+      "🎩 {{name}} ảo thuật gia biến khách lạ thành khách quen!",
+ 
     ];
 
     const phrases20tr = [
       "Chỉ trong hôm nay, {{name}} đã bán hơn 20tr – không thể tin nổi!",
       "20 triệu doanh số? Đúng là {{name}} không có giới hạn!",
-      "{{name}} là minh chứng cho việc: nỗ lực không bao giờ phản bội!"
+      "{{name}} là minh chứng cho việc: nỗ lực không bao giờ phản bội!",
+      "{{name}} đã làm được điều mà ít ai dám nghĩ tới hôm nay!",
+      "Chúc mừng {{name}} đã chinh phục mốc {{sales}}!",
+      "{{sales}} doanh số – {{name}} đang tiến gần kỷ lục của tháng!",
+      "Chỉ trong 1 ngày, {{name}} đã đạt gấp đôi mục tiêu!"
     ];
 
     const phrasesTop2 = [
       "Đừng dừng lại nhé {{name}}, bạn đang đi đúng hướng!",
-      "Khi người khác nghỉ ngơi, {{name}} vẫn không ngừng tiến lên!",
-      "Chính nỗ lực thầm lặng của {{name}} đang tạo nên sự khác biệt lớn!",
+      "🦄 {{name}} cưỡi kỳ lân bay vào bảng vàng doanh số!", 
       "Mỗi phút trôi qua, {{name}} lại tiến gần hơn đến vị trí số 1!",
-      "Còn thời gian – đừng bỏ lỡ cơ hội ghi danh hôm nay!",
       "{{name}} đang bám rất sát Top 1 Server , cuộc đua doanh số cực kỳ gay cấn!",
-      "{{name}} không chỉ đang tăng doanh số – bạn đang tạo dấu ấn cá nhân.",
-      "Mỗi người một bước – cả đội cùng lên như {{name}} đang làm!"
+   
     ];
 
     const phrasesTop3 = [
       "Đừng dừng lại nhé {{name}}, bạn đang đi đúng hướng!",
-      "Khi người khác nghỉ ngơi, {{name}} vẫn không ngừng tiến lên!",
-      "Chính nỗ lực thầm lặng của {{name}} đang tạo nên sự khác biệt lớn!",
-      "{{name}} không chỉ đang tăng doanh số – bạn đang tạo dấu ấn cá nhân.",
-      "Mỗi người một bước – cả đội cùng lên như {{name}} đang làm!"
+      "🦄 {{name}} cưỡi kỳ lân bay vào bảng vàng doanh số!",
     ];
 
     function getPraiseText(rank, name, sales) {
@@ -136,7 +209,7 @@ const PraiseBanner = ({ top5Employees }) => {
       .marquee-text {
         display: inline-block;
         white-space: nowrap;
-        animation: slide-left 28s linear infinite;
+        animation: slide-left 29s linear infinite;
         font-weight: 700;
         font-size: 32px;
         color: #f60112ff;
