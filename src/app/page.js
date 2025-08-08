@@ -4,6 +4,7 @@ import dynamic from 'next/dynamic';
 import { Select, Row, Col, Table, Button, Input, Tabs ,message} from 'antd';
 import { useDispatch, useSelector } from 'react-redux';
 import axios from "axios"; 
+import PraiseBanner from './components/PraiseBanner'
 const { Option } = Select;
 import { useRouter } from 'next/navigation';
 const Dashboard = () => {
@@ -1826,6 +1827,7 @@ const top3SalenhapdonToday = salenhapdonOrderCounts
     }}
     >
      
+   <PraiseBanner top5Employees={top5Employees} />
    
 
    <div className="criticism-container">
@@ -1923,19 +1925,21 @@ const top3SalenhapdonToday = salenhapdonOrderCounts
       text-align: center;
     }
 
-    .marquee {
-      display: flex;
-      flex-wrap: nowrap;
-      width: max-content;
-      animation: marquee 35s linear infinite;
-    }
+   .marquee {
+  display: flex;
+  flex-wrap: nowrap;
+  justify-content: center; /* Căn giữa 3 khối */
+  gap: 40px; /* Khoảng cách giữa các khối */
+  width: 100%;
+}
+      
 
     @keyframes marquee {
       0% {
         transform: translateX(100%);
       }
       100% {
-        transform: translateX(-60%);
+        transform: translateX(100%);
       }
     }
 
