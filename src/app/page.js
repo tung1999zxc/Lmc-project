@@ -1894,7 +1894,7 @@ const top3SalenhapdonToday = salenhapdonOrderCounts
           <span className="top-badge">🏆 Best Seller</span>
         )}
         <br />
-        {emp.orderCount > 0 && (
+        {emp.orderCount > 20 && (
           <span className="employee-name2">
             {emp.orderCount} đơn hàng
           </span>
