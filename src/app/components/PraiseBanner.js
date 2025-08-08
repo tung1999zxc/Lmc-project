@@ -149,10 +149,10 @@ const PraiseBanner = ({ top5Employees }) => {
         } else {
           return replace(getRandomItem(phrasesTop1), name, salesDisplay);
         }
-      } else if (rank === 0) {
-        return replace(getRandomItem(phrasesTop1), name, salesDisplay);
-      } else if (rank === 0) {
-        return replace(getRandomItem(phrasesTop1), name, salesDisplay);
+      } else if (rank === 1) {
+        return replace(getRandomItem(phrasesTop2), name, salesDisplay);
+      } else if (rank === 2) {
+        return replace(getRandomItem(phrasesTop3), name, salesDisplay);
       }
       return "";
     }
