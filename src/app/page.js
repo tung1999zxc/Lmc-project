@@ -1831,7 +1831,7 @@ const top3SalenhapdonToday = salenhapdonOrderCounts
    
 
    <div className="criticism-container">
-  <h2>🎉 Vinh danh hôm nay 🎉</h2>
+
   
   <div className="marquee">
     {top5Employees.map((emp, index) => (
