@@ -1145,6 +1145,10 @@ const top5Employees = marketingReportData3
   .filter(emp => emp.adsThisMonth > 0)
   .sort((a, b) => b.totalToday - a.totalToday)
   .slice(0, 3);
+const top1Employees = marketingReportData3
+  .filter(emp => emp.adsThisMonth > 0)
+  .sort((a, b) => b.totalToday - a.totalToday)
+  .slice(0, 1);
 
   
 
@@ -1827,7 +1831,7 @@ const top3SalenhapdonToday = salenhapdonOrderCounts
     }}
     >
      
-   <PraiseBanner top5Employees={top5Employees} />
+   <PraiseBanner top5Employees={top1Employees} />
    
 
    <div className="criticism-container">
