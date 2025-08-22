@@ -1,7 +1,7 @@
 // src/app/api/employees/route.js
 
-import { connectToDatabase } from '../../../app/lib/mongodb.js';
-import bcrypt from 'bcryptjs';
+import { connectToDatabase } from "../../../app/lib/mongodb.js";
+import bcrypt from "bcryptjs";
 
 /**
  * Tạo nhân viên mới
@@ -10,12 +10,21 @@ import bcrypt from 'bcryptjs';
 export async function POST(req) {
   try {
     const body = await req.json();
-    const { username, password, name, position, team_id, position_team, position_team2 } = body;
+    const {
+      username,
+      password,
+      name,
+      position,
+      team_id,
+      position_team,
+      position_team2,
+      status,
+    } = body;
 
     // Kiểm tra các trường bắt buộc
     if (!username || !password || !name || !position) {
       return new Response(
-        JSON.stringify({ error: 'Thiếu thông tin bắt buộc' }),
+        JSON.stringify({ error: "Thiếu thông tin bắt buộc" }),
         { status: 400 }
       );
     }
@@ -23,12 +32,13 @@ export async function POST(req) {
     const { db } = await connectToDatabase();
 
     // Kiểm tra xem username đã tồn tại chưa
-    const existingEmployee = await db.collection('employees').findOne({ username });
+    const existingEmployee = await db
+      .collection("employees")
+      .findOne({ username });
     if (existingEmployee) {
-      return new Response(
-        JSON.stringify({ error: 'Tài khoản đã tồn tại' }),
-        { status: 400 }
-      );
+      return new Response(JSON.stringify({ error: "Tài khoản đã tồn tại" }), {
+        status: 400,
+      });
     }
 
     // Mã hóa mật khẩu
@@ -42,27 +52,27 @@ export async function POST(req) {
       password: hashedPassword,
       name,
       position,
+      status,
       team_id: team_id || null,
       position_team: position_team || null,
       position_team2: position_team2 || null,
-      createdAt: new Date()
+      createdAt: new Date(),
     };
 
-    await db.collection('employees').insertOne(newEmployee);
+    await db.collection("employees").insertOne(newEmployee);
 
     return new Response(
       JSON.stringify({
-        message: 'Đăng ký thành công',
-        data: newEmployee
+        message: "Đăng ký thành công",
+        data: newEmployee,
       }),
       { status: 201 }
     );
   } catch (error) {
-    console.error('Lỗi trong POST /api/employees:', error);
-    return new Response(
-      JSON.stringify({ error: 'Lỗi server nội bộ' }),
-      { status: 500 }
-    );
+    console.error("Lỗi trong POST /api/employees:", error);
+    return new Response(JSON.stringify({ error: "Lỗi server nội bộ" }), {
+      status: 500,
+    });
   }
 }
 
@@ -75,20 +85,19 @@ export async function GET(req) {
     const { db } = await connectToDatabase();
 
     // Lấy danh sách nhân viên từ collection "employees"
-    const employees = await db.collection('employees').find({}).toArray();
+    const employees = await db.collection("employees").find({}).toArray();
 
     return new Response(
       JSON.stringify({
-        message: 'Danh sách nhân viên',
-        data: employees
+        message: "Danh sách nhân viên",
+        data: employees,
       }),
       { status: 200 }
     );
   } catch (error) {
-    console.error('Lỗi trong GET /api/employees:', error);
-    return new Response(
-      JSON.stringify({ error: 'Lỗi server nội bộ' }),
-      { status: 500 }
-    );
+    console.error("Lỗi trong GET /api/employees:", error);
+    return new Response(JSON.stringify({ error: "Lỗi server nội bộ" }), {
+      status: 500,
+    });
   }
 }
