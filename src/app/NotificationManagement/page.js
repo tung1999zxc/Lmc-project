@@ -51,16 +51,27 @@ const NotificationManagement = () => {
     }
   };
 
-  // Tùy chọn cho bộ phận thông báo: chỉ 2 lựa chọn
+  // Các lựa chọn bộ phận (bao gồm từng team)
   const departmentOptions = [
-    // { value: "all", label: "TẤT CẢ" },
+    { value: "all", label: "TẤT CẢ" },
     { value: "mkt", label: "MKT" },
     { value: "sale", label: "SALE" },
+    { value: "salechat", label: "SALE CHAT" },
+    { value: "vandon", label: "VẬN ĐƠN" },
+    { value: "PHI", label: "TEAM PHI" },
+    { value: "DIEU", label: "TEAM DIỆU" },
+    { value: "SON", label: "TEAM SƠN" },
+    { value: "QUAN", label: "TEAM QUÂN" },
+    { value: "PHONG", label: "TEAM PHONG" },
+    { value: "TUANANH", label: "TEAM TUẤN ANH" },
+    { value: "DIEN", label: "TEAM DIỆN" },
   ];
+
   const filteredEmployees = employees.filter(
     (emp) => emp.username.toLowerCase() !== "admin"
   );
-  // Tùy chọn cho đối tượng thông báo: hiển thị toàn bộ nhân viên
+
+  // Đối tượng thông báo: toàn bộ nhân viên
   const recipientOptions = filteredEmployees.map((emp) => ({
     value: emp.name,
     label: emp.name,
@@ -79,13 +90,45 @@ const NotificationManagement = () => {
     }
     let recipients = [];
     if (values.department) {
-      const deptRecipients = employees
-        .filter(
-          (emp) =>
-            emp.position_team &&
-            emp.position_team.toLowerCase() === values.department.toLowerCase()
-        )
-        .map((emp) => emp.name);
+      let deptRecipients = [];
+
+      switch (values.department) {
+        case "all":
+          deptRecipients = employees.map((emp) => emp.name);
+          break;
+        case "salechat":
+          deptRecipients = employees
+            .filter((emp) => emp.position === "salenhapdon")
+            .map((emp) => emp.name);
+          break;
+        case "vandon":
+          deptRecipients = employees
+            .filter((emp) => emp.position === "salexuly")
+            .map((emp) => emp.name);
+          break;
+        case "PHI":
+        case "DIEU":
+        case "SON":
+        case "QUAN":
+        case "PHONG":
+        case "TUANANH":
+        case "DIEN":
+          deptRecipients = employees
+            .filter((emp) => emp.team_id === values.department)
+            .map((emp) => emp.name);
+          break;
+        default:
+          deptRecipients = employees
+            .filter(
+              (emp) =>
+                emp.position_team &&
+                emp.position_team.toLowerCase() ===
+                  values.department.toLowerCase()
+            )
+            .map((emp) => emp.name);
+          break;
+      }
+
       recipients = recipients.concat(deptRecipients);
     }
     if (values.recipients) {
@@ -120,9 +163,12 @@ const NotificationManagement = () => {
 
   const handleConfirmNotification = async () => {
     try {
-      await axios.patch(`/api/notifications/${selectedNotification._id}/confirm`, {
-        user: currentUser.name,
-      });
+      await axios.patch(
+        `/api/notifications/${selectedNotification._id}/confirm`,
+        {
+          user: currentUser.name,
+        }
+      );
       message.success("Bạn đã xác nhận thông báo");
       setConfirmModalVisible(false);
       setSelectedNotification(null);
@@ -135,20 +181,30 @@ const NotificationManagement = () => {
 
   // Lọc danh sách thông báo
   const allowedPositions = ["leadSALE", "admin", "managerSALE"];
-  const filteredNotifications =
-    allowedPositions.includes(currentUser.position)
-      ? notifications
-      : notifications.filter(
-          (notif) =>
-            notif.author === currentUser.name ||
-            (notif.recipients && notif.recipients.includes(currentUser.name))
-        );
+  const filteredNotifications = allowedPositions.includes(currentUser.position)
+    ? notifications
+    : notifications.filter(
+        (notif) =>
+          notif.author === currentUser.name ||
+          (notif.recipients && notif.recipients.includes(currentUser.name))
+      );
 
   // Định nghĩa các cột cho bảng thông báo
   const columns = [
     {
+      title: "Thời gian",
+      dataIndex: "createdAt",
+      width: "10%",
+      key: "createdAt",
+      render: (value) => {
+        const date = new Date(value);
+        return date.toLocaleDateString("vi-VN");
+      },
+    },
+    {
       title: "Thông điệp",
       dataIndex: "message",
+      width: "10%",
       key: "message",
       render: (text) => (
         <Tooltip title={text}>
@@ -169,18 +225,20 @@ const NotificationManagement = () => {
       title: "Người viết",
       dataIndex: "author",
       key: "author",
+      width: "10%",
     },
     {
       title: "Bộ phận",
       dataIndex: "department",
       key: "department",
+      width: "10%",
       render: (dep) => (dep ? dep.toUpperCase() : "N/A"),
     },
     {
       title: "Đối tượng",
       dataIndex: "recipients",
       key: "recipients",
-      width: 250,
+      width: "25%",
       render: (recipients) =>
         `SL: ${recipients.length} - (${recipients.join(", ")})`,
     },
@@ -188,7 +246,7 @@ const NotificationManagement = () => {
       title: "Đã xác nhận",
       dataIndex: "confirmed",
       key: "confirmed",
-      width: 250,
+      width: "25%",
       render: (confirmed, record) => {
         const notConfirmed = record.recipients.filter(
           (name) => !confirmed.includes(name)
@@ -206,23 +264,6 @@ const NotificationManagement = () => {
         );
       },
     },
-    // {
-    //   title: "Hành động",
-    //   key: "action",
-    //   render: (_, record) => {
-    //     if (
-    //       record.recipients.includes(currentUser.name) &&
-    //       !record.confirmed.includes(currentUser.name)
-    //     ) {
-    //       return (
-    //         <Button type="primary" onClick={() => handleConfirmClick(record)}>
-    //           Xác nhận
-    //         </Button>
-    //       );
-    //     }
-    //     return null;
-    //   },
-    // },
   ];
 
   return (
@@ -247,11 +288,11 @@ const NotificationManagement = () => {
             </Form.Item>
           </Col>
           <Col span={8}>
-            <Form.Item
-              label="Bộ phận thông báo (Tùy chọn)"
-              name="department"
-            >
-              <Select allowClear placeholder="Chọn bộ phận thông báo (nếu muốn)">
+            <Form.Item label="Bộ phận thông báo (Tùy chọn)" name="department">
+              <Select
+                allowClear
+                placeholder="Chọn bộ phận thông báo (nếu muốn)"
+              >
                 {departmentOptions.map((dep) => (
                   <Option key={dep.value} value={dep.value}>
                     {dep.label}
@@ -261,11 +302,9 @@ const NotificationManagement = () => {
             </Form.Item>
           </Col>
           <Col span={8}>
-            <Form.Item
-              label="Đối tượng thông báo (Tùy chọn)"
-              name="recipients"
-            >
-              <Select allowClear
+            <Form.Item label="Đối tượng thông báo (Tùy chọn)" name="recipients">
+              <Select
+                allowClear
                 mode="multiple"
                 placeholder="Chọn đối tượng thông báo (nếu muốn)"
                 options={recipientOptions}
@@ -281,11 +320,16 @@ const NotificationManagement = () => {
       </Form>
 
       <h3>Danh sách thông báo</h3>
-      <Table dataSource={filteredNotifications} columns={columns} rowKey="_id" />
+      <Table
+        dataSource={filteredNotifications}
+        columns={columns}
+        rowKey="_id"
+        tableLayout="fixed"
+      />
 
       <Modal
         title="Xác nhận thông báo"
-        visible={confirmModalVisible}
+        open={confirmModalVisible}
         onOk={handleConfirmNotification}
         onCancel={() => setConfirmModalVisible(false)}
       >
