@@ -5,7 +5,7 @@ import { Select, Row, Col, Table, Button, Input, Tabs, message } from "antd";
 import { useDispatch, useSelector } from "react-redux";
 import axios from "axios";
 import PraiseBanner from "./components/PraiseBanner";
-import PraiseBanner2 from "./components/PraiseBanner2";
+// import PraiseBanner2 from "./components/PraiseBanner2";
 const { Option } = Select;
 import { useRouter } from "next/navigation";
 const Dashboard = () => {
