@@ -1361,24 +1361,38 @@ const Dashboard = () => {
     .slice(0, 1);
 
   // Lọc ra các thành viên mkt thuộc team của currentUser
+  // Lọc nhân viên MKT thuộc team
   const teamMktEmployees = mktEmployees.filter(
     (emp) =>
       emp.team_id === currentUser.team_id ||
       (currentUser.team_id === "SON" &&
-        (emp.name.trim() === "Nguyễn Thị Xuân Diệu" ||
-          emp.name.trim() === "Nguyễn Bá Quân")) ||
+        ["Nguyễn Thị Xuân Diệu", "Nguyễn Bá Quân"].includes(emp.name.trim())) ||
       (currentUser.team_id === "PHONG" && emp.name.trim() === "Bùi Văn Phi")
   );
 
+  // Lọc riêng dữ liệu đơn hàng và ads của team (KHÔNG ghi đè biến gốc)
+  const teamEmployeeNames = teamMktEmployees.map((e) =>
+    e.name.trim().toLowerCase()
+  );
+
+  const teamFilteredOrders = filteredOrders.filter((order) =>
+    teamEmployeeNames.includes(order.mkt.trim().toLowerCase())
+  );
+
+  const teamFilteredAds = filteredAds.filter((ad) =>
+    teamEmployeeNames.includes(ad.name.trim().toLowerCase())
+  );
+
   const marketingReportDataTEAM = teamMktEmployees.map((emp, index) => {
-    const paid = filteredOrders
+    const paid = teamFilteredOrders
       .filter(
         (order) =>
           order.mkt.trim().toLowerCase() === emp.name.trim().toLowerCase() &&
           order.paymentStatus === "ĐÃ THANH TOÁN"
       )
       .reduce((sum, order) => sum + order.profit, 0);
-    const unpaid = filteredOrders
+
+    const unpaid = teamFilteredOrders
       .filter(
         (order) =>
           order.mkt.trim().toLowerCase() === emp.name.trim().toLowerCase() &&
@@ -1386,16 +1400,20 @@ const Dashboard = () => {
             order.paymentStatus === "")
       )
       .reduce((sum, order) => sum + order.profit, 0);
+
     const total = paid + unpaid;
     const tienVND = total * 0.95 * exchangeRate;
-    const totalAds = filteredAds
+
+    const totalAds = teamFilteredAds
       .filter(
         (ad) => ad.name.trim().toLowerCase() === emp.name.trim().toLowerCase()
       )
       .reduce((sum, ad) => sum + (ad.request1 + ad.request2), 0);
+
     const adsPercent = tienVND
       ? ((totalAds / tienVND) * 100).toFixed(2)
       : "0.00";
+
     return {
       key: index,
       name: emp.name,
@@ -1407,6 +1425,8 @@ const Dashboard = () => {
       adsPercent,
     };
   });
+
+  // Sắp xếp theo tiền VNĐ giảm dần
 
   // Sắp xếp theo cột "Tiền VNĐ" giảm dần
   marketingReportDataTEAM.sort((a, b) => b.tienVND - a.tienVND);
@@ -2765,7 +2785,7 @@ const Dashboard = () => {
           <Col xs={24} md={8}>
             <Table
               columns={totalColumns3}
-              dataSource={totalData2}
+              dataSource={totalData3}
               pagination={false}
             />
           </Col>
