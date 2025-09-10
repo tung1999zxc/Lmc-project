@@ -264,9 +264,6 @@ const InventoryPage = () => {
           importDate: moment().format("YYYY-MM-DD"),
         },
       ],
-      sltqHistory: sltq
-        ? [{ qty: sltq, date: new Date().toISOString().split("T")[0] }]
-        : [],
     };
 
     // Gọi API để lưu vào MongoDB nếu cần (API backend cần được xây dựng riêng)

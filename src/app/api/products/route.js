@@ -1,33 +1,39 @@
 // src/app/api/products/route.js
-import { connectToDatabase } from '../../../app/lib/mongodb.js';
+import { connectToDatabase } from "../../../app/lib/mongodb.js";
 
 export async function GET(req) {
   try {
     const { db } = await connectToDatabase();
     // Lấy toàn bộ sản phẩm nhưng loại bỏ trường image
-    const products = await db.collection('products').find({}, { projection: { image: 0 } }).toArray();
-    
+    const products = await db
+      .collection("products")
+      .find({}, { projection: { image: 0 } })
+      .toArray();
+
     return new Response(
-      JSON.stringify({ message: 'Lấy danh sách sản phẩm thành công', data: products }),
+      JSON.stringify({
+        message: "Lấy danh sách sản phẩm thành công",
+        data: products,
+      }),
       { status: 200 }
     );
   } catch (error) {
-    console.error('Lỗi GET /api/products:', error);
-    return new Response(
-      JSON.stringify({ error: 'Lỗi server nội bộ' }),
-      { status: 500 }
-    );
+    console.error("Lỗi GET /api/products:", error);
+    return new Response(JSON.stringify({ error: "Lỗi server nội bộ" }), {
+      status: 500,
+    });
   }
 }
 
 export async function POST(req) {
   try {
-    const { name, image, description ,importedQty, slvn,sltq} = await req.json();
+    const { name, image, description, importedQty, slvn, sltq } =
+      await req.json();
 
     // Kiểm tra các trường bắt buộc (bạn có thể bổ sung thêm nếu cần)
-    if (!name   === undefined) {
+    if (!name === undefined) {
       return new Response(
-        JSON.stringify({ error: 'Thiếu thông tin bắt buộc' }),
+        JSON.stringify({ error: "Thiếu thông tin bắt buộc" }),
         { status: 400 }
       );
     }
@@ -39,27 +45,27 @@ export async function POST(req) {
       sltq,
       image, // mảng base64 strings
       description,
+
       imports: [
         {
           importedQty,
-          importDate: new Date().toISOString().split('T')[0], // định dạng "YYYY-MM-DD"
+          importDate: new Date().toISOString().split("T")[0], // định dạng "YYYY-MM-DD"
         },
       ],
       createdAt: new Date(),
     };
 
     const { db } = await connectToDatabase();
-    await db.collection('products').insertOne(newProduct);
+    await db.collection("products").insertOne(newProduct);
 
     return new Response(
-      JSON.stringify({ message: 'Thêm sản phẩm thành công', data: newProduct }),
+      JSON.stringify({ message: "Thêm sản phẩm thành công", data: newProduct }),
       { status: 201 }
     );
   } catch (error) {
-    console.error('Lỗi POST /api/products:', error);
-    return new Response(
-      JSON.stringify({ error: 'Lỗi server nội bộ' }),
-      { status: 500 }
-    );
+    console.error("Lỗi POST /api/products:", error);
+    return new Response(JSON.stringify({ error: "Lỗi server nội bộ" }), {
+      status: 500,
+    });
   }
 }
