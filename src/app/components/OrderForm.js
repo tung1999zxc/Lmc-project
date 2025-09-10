@@ -697,7 +697,7 @@ const productOptions = products.map((p) => p.name);
                 <Input />
                 </Form.Item>
                 <Form.Item label="TT SALE XỬ LÍ ĐƠN" name="processStatus">
-                  <Select>
+                  <Select showSearch>
                     {handleTTXLOptions.map((status) => (
                       <Option key={status} value={status}>
                         {status}
