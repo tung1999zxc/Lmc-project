@@ -1,7 +1,17 @@
 "use client";
 import React, { useState, useEffect, useMemo } from "react";
 import dynamic from "next/dynamic";
-import { Select, Row, Col, Table, Button, Input, Tabs, message } from "antd";
+import {
+  Select,
+  Row,
+  Col,
+  Table,
+  Card,
+  Button,
+  Input,
+  Tabs,
+  message,
+} from "antd";
 import { useDispatch, useSelector } from "react-redux";
 import axios from "axios";
 import PraiseBanner from "./components/PraiseBanner";
@@ -2440,6 +2450,108 @@ const Dashboard = () => {
     .sort((a, b) => b.orderCount - a.orderCount)
     .slice(0, 3);
 
+  const now = new Date();
+  const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const todayEnd = new Date(
+    now.getFullYear(),
+    now.getMonth(),
+    now.getDate() + 1
+  );
+
+  const yesterdayStart = new Date(
+    now.getFullYear(),
+    now.getMonth(),
+    now.getDate() - 1
+  );
+  const yesterdayEnd = new Date(
+    now.getFullYear(),
+    now.getMonth(),
+    now.getDate()
+  );
+
+  // Tính tổng doanh số hôm nay
+  const totalTodayProfit = orders
+    .filter((order) => {
+      const orderDate = new Date(order.createdAt);
+      return orderDate >= todayStart && orderDate < todayEnd;
+    })
+    .reduce((sum, order) => sum + order.profit, 0);
+
+  // Tính tổng doanh số hôm qua
+  const totalYesterdayProfit = orders
+    .filter((order) => {
+      const orderDate = new Date(order.createdAt);
+      return orderDate >= yesterdayStart && orderDate < yesterdayEnd;
+    })
+    .reduce((sum, order) => sum + order.profit, 0);
+
+  // Tính % hôm nay so với hôm qua
+  const percentTodayVsYesterday =
+    totalYesterdayProfit > 0
+      ? ((totalTodayProfit / totalYesterdayProfit) * 100).toFixed(2)
+      : 0;
+  const summaryData = [
+    {
+      key: "1",
+      today: (totalTodayProfit * 17000).toLocaleString("vi-VN") + " VNĐ",
+      yesterday:
+        (totalYesterdayProfit * 17000).toLocaleString("vi-VN") + " VNĐ",
+      percent: percentTodayVsYesterday + " %",
+    },
+  ];
+
+  const summaryColumns = [
+    {
+      title: "Doanh số hôm nay",
+      dataIndex: "today",
+      key: "today",
+      align: "center",
+      render: (text) => (
+        <span style={{ fontWeight: "bold", color: "#1890ff" }}>{text}</span>
+      ),
+    },
+    {
+      title: "Doanh số hôm qua",
+      dataIndex: "yesterday",
+      key: "yesterday",
+      align: "center",
+      render: (text) => (
+        <span style={{ fontWeight: "bold", color: "#52c41a" }}>{text}</span>
+      ),
+    },
+    {
+      title: "Hôm nay đạt (%)",
+      dataIndex: "percent",
+      key: "percent",
+      align: "center",
+      render: (text) => {
+        const value = parseFloat(text); // ép chuỗi "85.23 %" thành số
+        let bgColor;
+        if (value > 95) {
+          bgColor = "#54DA1F"; // xanh lá
+        } else if (value >= 70 && value <= 95) {
+          bgColor = "#FF9501"; // vàng
+        } else {
+          bgColor = "#F999A8"; // đỏ
+        }
+        return (
+          <div
+            style={{
+              backgroundColor: bgColor,
+              padding: "4px 8px",
+              borderRadius: "4px",
+              fontSize: "20px",
+              textAlign: "center",
+              fontWeight: "bold",
+              color: "#000000ff",
+            }}
+          >
+            {text}
+          </div>
+        );
+      },
+    },
+  ];
   return (
     <div
       style={{
@@ -2867,6 +2979,24 @@ const Dashboard = () => {
           </Row>
           <Row>
             <Col xs={24} md={12}>
+              <Card
+                bordered={true}
+                // style={{
+                //   width: "50%", // nửa màn hình
+                //   margin: "20px auto",
+                //   borderRadius: "12px",
+                //   boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
+                // }}
+              >
+                <Table
+                  columns={summaryColumns}
+                  dataSource={summaryData}
+                  pagination={false}
+                  bordered
+                  size="middle"
+                  style={{ borderRadius: "8px" }}
+                />
+              </Card>
               <h2 style={{ marginTop: "2rem" }}>Tổng khách thanh toán</h2>
               <Table
                 columns={totalColumns}
