@@ -2450,55 +2450,54 @@ const Dashboard = () => {
     .sort((a, b) => b.orderCount - a.orderCount)
     .slice(0, 3);
 
-  const now = new Date();
-  const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-  const todayEnd = new Date(
-    now.getFullYear(),
-    now.getMonth(),
-    now.getDate() + 1
-  );
+ const now = new Date();
 
-  const yesterdayStart = new Date(
-    now.getFullYear(),
-    now.getMonth(),
-    now.getDate() - 1
-  );
-  const yesterdayEnd = new Date(
-    now.getFullYear(),
-    now.getMonth(),
-    now.getDate()
-  );
+// Hôm nay: từ 00:00 đến thời điểm hiện tại
+const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+const todayNow = now;
+const totalTodayProfit = orders
+  .filter((order) => {
+    const orderDate = new Date(order.createdAt);
+    return orderDate >= todayStart && orderDate <= todayNow;
+  })
+  .reduce((sum, order) => sum + order.revenue, 0);
 
-  // Tính tổng doanh số hôm nay
-  const totalTodayProfit = orders
-    .filter((order) => {
-      const orderDate = new Date(order.createdAt);
-      return orderDate >= todayStart && orderDate < todayEnd;
-    })
-    .reduce((sum, order) => sum + order.profit, 0);
+// Hôm qua: từ 00:00 đến cùng giờ như hiện tại hôm nay
+const yesterdayStart = new Date(
+  now.getFullYear(),
+  now.getMonth(),
+  now.getDate() - 1
+);
+const yesterdaySameTime = new Date(
+  now.getFullYear(),
+  now.getMonth(),
+  now.getDate() - 1,
+  now.getHours(),
+  now.getMinutes(),
+  now.getSeconds()
+);
+const totalYesterdayProfit = orders
+  .filter((order) => {
+    const orderDate = new Date(order.createdAt);
+    return orderDate >= yesterdayStart && orderDate <= yesterdaySameTime;
+  })
+  .reduce((sum, order) => sum + order.revenue, 0);
 
-  // Tính tổng doanh số hôm qua
-  const totalYesterdayProfit = orders
-    .filter((order) => {
-      const orderDate = new Date(order.createdAt);
-      return orderDate >= yesterdayStart && orderDate < yesterdayEnd;
-    })
-    .reduce((sum, order) => sum + order.profit, 0);
+// % hôm nay vs hôm qua
+const percentTodayVsYesterday =
+  totalYesterdayProfit > 0
+    ? ((totalTodayProfit / totalYesterdayProfit) * 100).toFixed(2)
+    : 0;
 
-  // Tính % hôm nay so với hôm qua
-  const percentTodayVsYesterday =
-    totalYesterdayProfit > 0
-      ? ((totalTodayProfit / totalYesterdayProfit) * 100).toFixed(2)
-      : 0;
-  const summaryData = [
-    {
-      key: "1",
-      today: (totalTodayProfit * 17000).toLocaleString("vi-VN") + " VNĐ",
-      yesterday:
-        (totalYesterdayProfit * 17000).toLocaleString("vi-VN") + " VNĐ",
-      percent: percentTodayVsYesterday + " %",
-    },
-  ];
+// ===== Data cho bảng =====
+const summaryData = [
+  {
+    key: "1",
+    today: (totalTodayProfit * 17000).toLocaleString("vi-VN") + " VNĐ",
+    yesterday: (totalYesterdayProfit * 17000).toLocaleString("vi-VN") + " VNĐ",
+    percent: percentTodayVsYesterday + "%",
+  },
+];
 
   const summaryColumns = [
     {
