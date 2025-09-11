@@ -2519,37 +2519,45 @@ const summaryData = [
       ),
     },
     {
-      title: "Hôm nay đạt (%)",
-      dataIndex: "percent",
-      key: "percent",
-      align: "center",
-      render: (text) => {
-        const value = parseFloat(text); // ép chuỗi "85.23 %" thành số
-        let bgColor;
-        if (value > 95) {
-          bgColor = "#54DA1F"; // xanh lá
-        } else if (value >= 70 && value <= 95) {
-          bgColor = "#FF9501"; // vàng
-        } else {
-          bgColor = "#F999A8"; // đỏ
-        }
-        return (
-          <div
-            style={{
-              backgroundColor: bgColor,
-              padding: "4px 8px",
-              borderRadius: "4px",
-              fontSize: "20px",
-              textAlign: "center",
-              fontWeight: "bold",
-              color: "#000000ff",
-            }}
-          >
-            {text}
-          </div>
-        );
-      },
-    },
+  title: "Hôm nay đạt (%)",
+  dataIndex: "percent",
+  key: "percent",
+  align: "center",
+  render: (value) => {
+    const percent = parseFloat(value);
+
+    // Tính chênh lệch so với 100%
+    const diff = percent - 100;
+    const sign = diff >= 0 ? "+" : ""; // hiển thị dấu + nếu >=0
+    const displayText = `${sign}${diff.toFixed(2)}%`;
+
+    let bgColor;
+    if (percent > 100) {
+      bgColor = "#54DA1F"; // xanh lá khi vượt hôm qua
+    } else if (percent >= 80 && percent <= 100) {
+      bgColor = "#FF9501"; // vàng khi gần bằng hôm qua
+    } else {
+      bgColor = "#F999A8"; // đỏ khi thấp hơn nhiều
+    }
+
+    return (
+      <div
+        style={{
+          backgroundColor: bgColor,
+          padding: "10px 14px",
+          borderRadius: "6px",
+          textAlign: "center",
+          fontWeight: "bold",
+          fontSize: "20px",
+          color: "#0e0c0cff",
+          minWidth: "120px",
+        }}
+      >
+        {displayText}
+      </div>
+    );
+  },
+}
   ];
   return (
     <div
