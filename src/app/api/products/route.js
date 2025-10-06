@@ -4,7 +4,7 @@ import { connectToDatabase } from "../../../app/lib/mongodb.js";
 export async function GET(req) {
   try {
     const { db } = await connectToDatabase();
-    // Lấy toàn bộ sản phẩm nhưng loại bỏ trường image
+    // Lấy toàn bộ sản phẩm, loại bỏ trường image cho nhẹ
     const products = await db
       .collection("products")
       .find({}, { projection: { image: 0 } })
@@ -27,29 +27,38 @@ export async function GET(req) {
 
 export async function POST(req) {
   try {
-    const { name, image, description, importedQty, slvn, sltq } =
-      await req.json();
+    const {
+      name,
+      image,
+      description,
+      importedQty = 0,
+      importVN = 0,
+      importKR = 0,
+      slvn = 0,
+      sltq = 0,
+    } = await req.json();
 
-    // Kiểm tra các trường bắt buộc (bạn có thể bổ sung thêm nếu cần)
-    if (!name === undefined) {
+    // Kiểm tra tên sản phẩm
+    if (!name) {
       return new Response(
-        JSON.stringify({ error: "Thiếu thông tin bắt buộc" }),
+        JSON.stringify({ error: "Thiếu tên sản phẩm" }),
         { status: 400 }
       );
     }
 
     const newProduct = {
-      key: Date.now(), // Sử dụng timestamp làm định danh duy nhất (kiểu số)
+      key: Date.now(), // Dùng timestamp làm ID tạm
       name,
+      image,
+      description,
       slvn,
       sltq,
-      image, // mảng base64 strings
-      description,
-
       imports: [
         {
-          importedQty,
-          importDate: new Date().toISOString().split("T")[0], // định dạng "YYYY-MM-DD"
+          importedQty: Number(importedQty) || 0,
+          importVN: Number(importVN) || 0,
+          importKR: Number(importKR) || 0,
+          importDate: new Date().toISOString().split("T")[0],
         },
       ],
       createdAt: new Date(),
@@ -59,7 +68,10 @@ export async function POST(req) {
     await db.collection("products").insertOne(newProduct);
 
     return new Response(
-      JSON.stringify({ message: "Thêm sản phẩm thành công", data: newProduct }),
+      JSON.stringify({
+        message: "Thêm sản phẩm thành công",
+        data: newProduct,
+      }),
       { status: 201 }
     );
   } catch (error) {

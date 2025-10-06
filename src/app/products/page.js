@@ -214,17 +214,23 @@ const InventoryPage = () => {
     fetchProducts();
   }, []);
 
-  const getTotalImportedQty = (product) => {
-    if (product.imports && product.imports.length > 0) {
-      // return (product.imports.reduce((acc, cur) => acc + cur.importedQty, 0)+(product.slvn||0)+(product.sltq||0));
-      return (
-        product.imports.reduce((acc, cur) => acc + cur.importedQty, 0) +
-        (product.slvn || 0) +
-        (product.sltq || 0)
-      );
-    }
-    return 0;
-  };
+ const getTotalImportedQty = (product) => {
+  if (product.imports && product.imports.length > 0) {
+    // Tính tổng tất cả số lượng trong imports (bao gồm importedQty, importVN, importKR)
+    const totalImports = product.imports.reduce((acc, cur) => {
+      const importedQty = Number(cur.importedQty) || 0;
+      const importVN = Number(cur.importVN) || 0;
+      const importKR = Number(cur.importKR) || 0;
+      return acc + importedQty + importVN + importKR;
+    }, 0);
+
+    // Cộng thêm 2 trường tồn kho VN và TQ hiện có (nếu có)
+    return totalImports + (Number(product.slvn) || 0) + (Number(product.sltq) || 0);
+  }
+  // Nếu chưa có lịch sử nhập
+  return (Number(product.slvn) || 0) + (Number(product.sltq) || 0);
+};
+
   const getTotalImportedQty22 = (product) => {
     if (product.imports && product.imports.length > 0) {
       // return (product.imports.reduce((acc, cur) => acc + cur.importedQty, 0)+(product.slvn||0)+(product.sltq||0));
@@ -351,10 +357,12 @@ const InventoryPage = () => {
     setAddImportModalVisible(true);
   };
   const handleAddImportFinish = async (values) => {
-    const newImport = {
-      importedQty: values.importedQty,
-      importDate: values.importDate.format("YYYY-MM-DD"),
-    };
+   const newImport = {
+  importedQty: values.importedQty,
+  importVN: values.importVN || 0,
+  importKR: values.importKR || 0,
+  importDate: values.importDate.format("YYYY-MM-DD"),
+};
 
     try {
       // Tìm sản phẩm cần cập nhật
@@ -468,18 +476,27 @@ const InventoryPage = () => {
       ),
     },
     {
-      title: "SL nhập hàng",
+      title: "SL nhập hàng Tổng",
       key: "importedQty",
       render: (_, record) => {
-        const totalImported = getTotalImportedQty22(record);
+        const totalImported =
+  (record.imports || []).reduce(
+    (acc, cur) =>
+      acc +
+      (Number(cur.importedQty) || 0) +
+      (Number(cur.importVN) || 0) +
+      (Number(cur.importKR) || 0),
+    0
+  );
         const historyContent =
           record.imports && record.imports.length > 0 ? (
             <ul style={{ padding: 0, margin: 0, listStyle: "none" }}>
               {record.imports.map((imp, index) => (
                 <li key={index}>
-                  <strong>Ngày:</strong> {imp.importDate} - <strong>SL:</strong>{" "}
-                  {imp.importedQty}
-                </li>
+  <strong>Ngày:</strong> {imp.importDate} - <strong>SL tổng:</strong>{" "}
+  {Number(imp.importedQty || 0) + Number(imp.importVN || 0) + Number(imp.importKR || 0)}{" "}
+  VN: {imp.importVN || 0} | Hàn: {imp.importKR || 0}
+</li>
               ))}
             </ul>
           ) : (
@@ -530,6 +547,81 @@ const InventoryPage = () => {
     //     return ordersNotDone;
     //   },
     // },
+    {
+      title: "SL nhập hàng VIỆT",
+      key: "importedQtyVN",
+      render: (_, record) => {
+        const totalImported =
+  (record.imports || []).reduce(
+    (acc, cur) =>
+      acc +
+    
+      (Number(cur.importVN) || 0) 
+      ,
+    0
+  );
+        const historyContent =
+          record.imports && record.imports.length > 0 ? (
+            <ul style={{ padding: 0, margin: 0, listStyle: "none" }}>
+              {record.imports.map((imp, index) => (
+                <li key={index}>
+  <strong>Ngày:</strong> {imp.importDate} - 
+  VN: {imp.importVN || 0} 
+</li>
+              ))}
+            </ul>
+          ) : (
+            "Chưa có lịch sử nhập"
+          );
+        return (
+          <Popover
+            content={historyContent}
+            title="Lịch sử nhập hàng"
+            trigger="hover"
+          >
+            <span>{totalImported}</span>
+          </Popover>
+        );
+      },
+    },
+
+    {
+      title: "SL nhập hàng HÀN",
+      key: "importedQtyKR",
+      render: (_, record) => {
+        const totalImported =
+  (record.imports || []).reduce(
+    (acc, cur) =>
+      acc +
+    
+      (Number(cur.importKR) || 0),
+    0
+  );
+        const historyContent =
+          record.imports && record.imports.length > 0 ? (
+            <ul style={{ padding: 0, margin: 0, listStyle: "none" }}>
+              {record.imports.map((imp, index) => (
+                <li key={index}>
+  <strong>Ngày:</strong> {imp.importDate} - 
+   Hàn: {imp.importKR || 0}
+</li>
+              ))}
+            </ul>
+          ) : (
+            "Chưa có lịch sử nhập"
+          );
+        return (
+          <Popover
+            content={historyContent}
+            title="Lịch sử nhập hàng"
+            trigger="hover"
+          >
+            <span>{totalImported}</span>
+          </Popover>
+        );
+      },
+    },
+    
     {
       title: "SL sản phẩm đơn Done /nhưng chưa gửi",
       key: "ordersDone",
@@ -888,7 +980,7 @@ const InventoryPage = () => {
       width: 80,
     },
     {
-      title: "Nhập TQ",
+      title: "Nhập HQ",
       key: "sltq",
       render: (_, record) => {
         const historyContent =
@@ -1068,7 +1160,7 @@ const InventoryPage = () => {
             e?.fileList && e.fileList.length > 0 ? [e.fileList[0]] : []
           } // Chỉ giữ 1 file
         >
-          <Upload
+          <Upload 
             listType="picture"
             maxCount={1}
             fileList={editFileList}
@@ -1077,8 +1169,9 @@ const InventoryPage = () => {
               editForm.setFieldsValue({ image: fileList });
             }}
             beforeUpload={() => false}
+            
           >
-            <Button icon={<UploadOutlined />}>Chọn ảnh hoặc dán ảnh</Button>
+            {/* <Button icon={<UploadOutlined />}>Chọn ảnh hoặc dán ảnh</Button> */}
           </Upload>
         </Form.Item>
         <Form.Item>
@@ -1195,7 +1288,7 @@ const InventoryPage = () => {
           <Form.Item label="Nhập VN" name="slvn">
             <InputNumber placeholder="nhập sl" />
           </Form.Item>
-          <Form.Item label="Nhập TQ" name="sltq">
+          <Form.Item label="Nhập HQ" name="sltq">
             <InputNumber placeholder="nhập sl" />
           </Form.Item>
 
@@ -1220,13 +1313,26 @@ const InventoryPage = () => {
           onFinish={handleAddImportFinish}
           layout="vertical"
         >
-          <Form.Item
+          {/* <Form.Item
             name="importedQty"
             label="Số lượng nhập"
-            rules={[{ required: true, message: "Vui lòng nhập số lượng nhập" }]}
+            // rules={[{ required: true, message: "Vui lòng nhập số lượng nhập" }]}
           >
             <InputNumber style={{ width: "100%" }} />
-          </Form.Item>
+          </Form.Item> */}
+          <Form.Item
+  name="importVN"
+  label="Nhập về Việt Nam"
+>
+  <InputNumber style={{ width: "100%" }} />
+</Form.Item>
+
+<Form.Item
+  name="importKR"
+  label="Nhập về Hàn Quốc"
+>
+  <InputNumber style={{ width: "100%" }} />
+</Form.Item>
           <Form.Item
             name="importDate"
             label="Ngày nhập"
