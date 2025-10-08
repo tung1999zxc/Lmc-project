@@ -1313,13 +1313,13 @@ const InventoryPage = () => {
           onFinish={handleAddImportFinish}
           layout="vertical"
         >
-          {/* <Form.Item
+          <Form.Item
             name="importedQty"
             label="Số lượng nhập"
             // rules={[{ required: true, message: "Vui lòng nhập số lượng nhập" }]}
           >
             <InputNumber style={{ width: "100%" }} />
-          </Form.Item> */}
+          </Form.Item>
           <Form.Item
   name="importVN"
   label="Nhập về Việt Nam"
