@@ -696,7 +696,13 @@ const InventoryPage = () => {
           return ordersDone - 2;
         }
         if (record.name === "MẶT NẠ BONG BÓNG") {
-          return ordersDone - 30;
+          return ordersDone - 28;
+        }
+        if (record.name === "TAI NGHE AI - TRẮNG") {
+          return ordersDone - 2;
+        }
+        if (record.name === "TAI NGHE AI - TÍM") {
+          return ordersDone - 2;
         }
         // return ordersDone - deliveredQty;
         return ordersDone;
@@ -966,8 +972,10 @@ const InventoryPage = () => {
           >
             {record.name === "KEM NỀN THỎI"
   ? slAm + 2
-  : record.name === "MẶT NẠ BONG BÓNG"
-  ? slAm + 28
+  : record.name === "TAI NGHE AI - TRẮNG"
+  ? slAm + 2
+  : record.name === "TAI NGHE AI - TÍM"
+  ? slAm + 2
   : slAm}
           </div>
         );
