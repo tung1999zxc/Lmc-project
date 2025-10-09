@@ -14,10 +14,18 @@ export async function GET(req) {
       );
     }
 
-    const orders = await db
-      .collection('orders')
-      .find({ customerName: { $regex: new RegExp(customerName, 'i') } }) // không phân biệt hoa thường
-      .toArray();
+const searchTerm = customerName.trim();
+
+const query = isNaN(searchTerm)
+  ? { customerName: { $regex: new RegExp(searchTerm, 'i') } } // nếu nhập chữ, tìm trong tên
+  : {
+      $or: [
+        { customerName: { $regex: new RegExp(searchTerm, 'i') } },
+        { stt: Number(searchTerm) } // nếu nhập số, tìm chính xác trong stt
+      ]
+    };
+
+const orders = await db.collection('orders').find(query).toArray();
 
     return new Response(
       JSON.stringify({ message: 'Tìm đơn theo tên khách thành công', data: orders }),
