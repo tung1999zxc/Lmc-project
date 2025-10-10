@@ -98,7 +98,7 @@ const NotificationManagement = () => {
           break;
         case "salechat":
           deptRecipients = employees
-            .filter((emp) => emp.position === "salenhapdon")
+            .filter((emp) => emp.position === "salenhapdon"||emp.position === "salefull")
             .map((emp) => emp.name);
           break;
         case "vandon":
