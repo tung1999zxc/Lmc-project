@@ -191,7 +191,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
             chatango.setAttribute("data-cfasync", "false");
             chatango.style.width = "307px";
             chatango.style.height = "765px";
-            chatango.innerHTML = '{"handle":"lmcroom","arch":"js","styles":{"a":"33cc00","b":100,"c":"FFFFFF","d":"FFFFFF","k":"33cc00","l":"33cc00","m":"33cc00","n":"FFFFFF","p":"11","q":"33cc00","r":100,"usricon":0,"surl":0,"cnrs":"0.74","fwtickm":1}}';
+            chatango.innerHTML = '{"handle":"lmcroom","arch":"js","styles":{"a":"33cc00","b":100,"c":"FFFFFF","d":"FFFFFF","k":"33cc00","l":"33cc00","m":"33cc00","n":"FFFFFF","p":"11","q":"33cc00","r":100,"usricon":0,"surl":0,"cnrs":"0.74","fwtickm":1,"v":"0"}}';
 
             wrapper.appendChild(chatango);
             document.body.appendChild(wrapper);
