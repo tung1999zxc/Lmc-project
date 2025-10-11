@@ -9,7 +9,7 @@ import { store } from "./store/store";
 import { setCurrentUser } from "./store/userSlice";
 import { usePathname } from "next/navigation";
 import SidebarMenu from "./components/SidebarMenu";
-import PraiseBanner2 from './components/PraiseBanner2'
+// import PraiseBanner2 from './components/PraiseBanner2'
 import Script from "next/script";
 import CurrentUserSelector from "./components/CurrentUserSelector";
 import { motion, useAnimation } from "framer-motion";
