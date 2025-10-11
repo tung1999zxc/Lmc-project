@@ -182,7 +182,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
             wrapper.style.background = "white";
             wrapper.style.width = "307px";
             wrapper.style.height = "765px";
-            wrapper.style.display = "block";
+            wrapper.style.display = "none";
 
             var chatango = document.createElement("script");
             chatango.id = "cid0020000361180134082";
