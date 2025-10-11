@@ -11,7 +11,7 @@ import { usePathname } from "next/navigation";
 import SidebarMenu from "./components/SidebarMenu";
 // import PraiseBanner2 from './components/PraiseBanner2'
 import Script from "next/script";
-import CurrentUserSelector from "./components/CurrentUserSelector";
+// import CurrentUserSelector from "./components/CurrentUserSelector";
 import { motion, useAnimation } from "framer-motion";
 import GlobalNotification from "./components/GlobalNotification";
 
@@ -126,9 +126,9 @@ function InnerDashboardLayout({ children }: { children: ReactNode }) {
             >
               {currentUser.name}
             </div>
-          {/* <CurrentUserSelector />
+            {/* <CurrentUserSelector />
           <PraiseBanner2 /> */}
-          <Button
+            <Button
               type="primary"
               icon={<LogoutOutlined />}
               danger
@@ -164,11 +164,11 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
       <body>
         <Provider store={store}>
           <InnerDashboardLayout>{children}</InnerDashboardLayout>
-           <Script
-          id="chatango-script"
-          strategy="afterInteractive"
-          dangerouslySetInnerHTML={{
-            __html: `
+          <Script
+            id="chatango-script"
+            strategy="afterInteractive"
+            dangerouslySetInnerHTML={{
+              __html: `
           (function() {
             var wrapper = document.createElement("div");
             wrapper.id = "chatango-wrapper";
@@ -180,8 +180,8 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
             wrapper.style.overflow = "hidden";
             wrapper.style.boxShadow = "0 4px 20px rgba(0,0,0,0.2)";
             wrapper.style.background = "white";
-            wrapper.style.width = "507px";
-            wrapper.style.height = "465px";
+            wrapper.style.width = "307px";
+            wrapper.style.height = "765px";
             wrapper.style.display = "block";
 
             var chatango = document.createElement("script");
@@ -189,9 +189,9 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
             chatango.src = "//st.chatango.com/js/gz/emb.js";
             chatango.async = true;
             chatango.setAttribute("data-cfasync", "false");
-            chatango.style.width = "507px";
-            chatango.style.height = "465px";
-            chatango.innerHTML = '{"handle":"lmcroom","arch":"js","styles":{"a":"33cc00","b":100,"c":"FFFFFF","d":"FFFFFF","k":"33cc00","l":"33cc00","m":"33cc00","n":"FFFFFF","p":"10.5","q":"33cc00","r":100,"usricon":0,"surl":0,"cnrs":"0.74","fwtickm":1}}';
+            chatango.style.width = "307px";
+            chatango.style.height = "765px";
+            chatango.innerHTML = '{"handle":"lmcroom","arch":"js","styles":{"a":"33cc00","b":100,"c":"FFFFFF","d":"FFFFFF","k":"33cc00","l":"33cc00","m":"33cc00","n":"FFFFFF","p":"11","q":"33cc00","r":100,"usricon":0,"surl":0,"cnrs":"0.74","fwtickm":1}}';
 
             wrapper.appendChild(chatango);
             document.body.appendChild(wrapper);
@@ -247,11 +247,11 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
             document.head.appendChild(style);
           })();
         `,
-          }}
-        />
+            }}
+          />
         </Provider>
         {/* 👇 Thêm đoạn này ngay trước </body> */}
-       
+
 
 
 
