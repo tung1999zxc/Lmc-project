@@ -3022,6 +3022,14 @@ onChange={(e) => handleColumnSelect("istick", e.target.checked)}
         { title: 'SĐT', dataIndex: 'phone', key: 'phone' },
       { title: 'Ngày đặt', dataIndex: 'orderDate', key: 'orderDate',render: (text) => dayjs(text).format("DD/MM"), },
       { title: 'STT', dataIndex: 'stt', key: 'stt' },
+       ...((currentUser.position === "leadSALE" || currentUser.position === "managerSALE" )
+      ? [
+        { title: 'SALE', dataIndex: 'sale', key: 'sale' },
+      { title: 'MKT', dataIndex: 'mkt', key: 'mkt' },
+        ]
+      : []),
+      { title: 'SALE', dataIndex: 'sale', key: 'sale' },
+      { title: 'MKT', dataIndex: 'mkt', key: 'mkt' },
       {title: 'GHI CHÚ SALE',
       dataIndex: "note",
       key: "note",
