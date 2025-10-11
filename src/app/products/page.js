@@ -698,6 +698,9 @@ const InventoryPage = () => {
         if (record.name === "MẶT NẠ BONG BÓNG") {
           return ordersDone - 28;
         }
+        if (record.name === "KÍNH NỮ") {
+          return ordersDone - 1;
+        }
         if (record.name === "TAI NGHE AI - TRẮNG") {
           return ordersDone - 2;
         }
@@ -976,6 +979,8 @@ const InventoryPage = () => {
   ? slAm + 2
   : record.name === "TAI NGHE AI - TÍM"
   ? slAm + 2
+  : record.name === "KÍNH NỮ"
+  ? slAm + 1
   : slAm}
           </div>
         );
