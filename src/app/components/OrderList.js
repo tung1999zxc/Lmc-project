@@ -3001,7 +3001,7 @@ onChange={(e) => handleColumnSelect("istick", e.target.checked)}
   visible={modalVisible}
   onCancel={() => setModalVisible(false)}
   footer={null}
-  width={1300}
+  width={1500}
 >
   <Table
     dataSource={modalCustomerOrders}
@@ -3028,8 +3028,7 @@ onChange={(e) => handleColumnSelect("istick", e.target.checked)}
       { title: 'MKT', dataIndex: 'mkt', key: 'mkt' },
         ]
       : []),
-      { title: 'SALE', dataIndex: 'sale', key: 'sale' },
-      { title: 'MKT', dataIndex: 'mkt', key: 'mkt' },
+     
       {title: 'GHI CHÚ SALE',
       dataIndex: "note",
       key: "note",
