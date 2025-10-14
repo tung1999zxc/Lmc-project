@@ -50,7 +50,7 @@ const InventoryPage = () => {
     if (!currentUser.name) {
       router.push("/login");
     }
-    if (currentUser.position === "mkt") {
+    if (currentUser.position_team === "mkt") {
       router.push("/orders");
     }
   }, []);
@@ -995,6 +995,7 @@ const InventoryPage = () => {
     {
       title: "Nhập HQ",
       key: "sltq",
+      width: 80,
       render: (_, record) => {
         const historyContent =
           record.sltqHistory && record.sltqHistory.length > 0 ? (
@@ -1053,7 +1054,9 @@ const InventoryPage = () => {
         } else return <span>Chỉ xem</span>;
       },
     },
-    {
+     ...((currentUser.name !== "nhii"  )
+      ? [
+        {
       title: "Tổng doanh số",
       key: "totalProfit",
       render: (_, record) => {
@@ -1117,6 +1120,9 @@ const InventoryPage = () => {
         // return totalProfitB - totalProfitA;
       },
     },
+        ]
+      : []),
+    
     ...(currentUser.position === "managerSALE" ||
     currentUser.position === "leadSALE" ||
     currentUser.name === "Tung99" ||
