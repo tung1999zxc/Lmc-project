@@ -557,7 +557,7 @@ const InventoryPage = () => {
                 (Number(cur.importVN) || 0) +
                 (Number(cur.importKR) || 0)
               );
-            }, 0) + (Number(record.slvn) || 0) + (Number(record.sltq) || 0);
+            }, 0) ;
 
           const historyContent =
             record.imports && record.imports.length > 0 ? (
