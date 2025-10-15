@@ -425,7 +425,8 @@ const resetPagename =()=>{
       if (currentUser.name === "Phan Thế Phong") {
         roleFilteredOrders = roleFilteredOrders.filter((order) =>
           leadTeamMembers.includes(order.mkt.trim().toLowerCase()) ||
-          order.mkt.trim().toLowerCase() === "bùi văn phi".toLowerCase()
+          order.mkt.trim().toLowerCase() === "bùi văn phi".toLowerCase()||
+          order.mkt.trim().toLowerCase() === "đỗ ngọc ánh".toLowerCase()
         );
       } else {
         roleFilteredOrders = roleFilteredOrders.filter((order) =>
