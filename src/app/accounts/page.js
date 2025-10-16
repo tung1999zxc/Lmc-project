@@ -14,6 +14,7 @@ import {
   message,
 } from "antd";
 import { EditOutlined, DeleteOutlined } from "@ant-design/icons";
+import { ExclamationCircleOutlined } from "@ant-design/icons";
 import { useSelector, useDispatch } from "react-redux";
 
 import axios from "axios";
@@ -279,15 +280,23 @@ export default function EmployeeManagement() {
     }
   };
   const filteredEmployees = employees
-    .filter((emp) => emp.username?.toLowerCase() !== "admin")
-    .filter((emp) => {
-      const keyword = searchText.toLowerCase();
-      return (
-        emp.name?.toLowerCase().includes(keyword) ||
-        emp.username?.toLowerCase().includes(keyword) ||
-        emp.employee_code?.toString().toLowerCase().includes(keyword)
+  .filter((emp) => emp.username?.toLowerCase() !== "admin")
+  .filter((emp) => {
+    const keyword = searchText.toLowerCase();
+    return (
+      emp.name?.toLowerCase().includes(keyword) ||
+      emp.username?.toLowerCase().includes(keyword) ||
+      emp.employee_code?.toString().toLowerCase().includes(keyword)
+    );
+  });
+
+// 👉 Thêm điều kiện chỉ hiển thị nhân viên hiện tại nếu không phải admin
+const visibleEmployees =
+  currentUser.position === "admin" || currentUser.position === "managerMKT"
+    ? filteredEmployees
+    : filteredEmployees.filter(
+        (emp) => emp.employee_code === currentUser.employee_code
       );
-    });
 
   const EditModal = () => (
     <Modal
@@ -385,8 +394,13 @@ export default function EmployeeManagement() {
     </Modal>
   );
 
+
+// ... trong component EmployeeManagement, thêm hàm:
+
+
   return (
     <div style={{ padding: 24 }}>
+    
       <Row gutter={[16, 16]}>
         <Col span={8}>
           <Card title="Tạo tài khoản nhân viên">
@@ -491,12 +505,12 @@ export default function EmployeeManagement() {
               />
             }
           >
-            <Table
-              columns={columns}
-              dataSource={filteredEmployees}
-              rowKey="employee_id"
-              pagination={{ pageSize: 10 }}
-            />
+          <Table
+  columns={columns}
+  dataSource={visibleEmployees}
+  rowKey="employee_id"
+  pagination={{ pageSize: 10 }}
+/>
           </Card>
         </Col>
       </Row>
