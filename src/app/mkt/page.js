@@ -260,7 +260,7 @@ const Dashboard = () => {
     return grouped;
   };
   const fetchRecords = async () => {
-  setLoading(true);
+  
   try {
     const dates = getDateRange();
     const start = dates[0];
@@ -271,7 +271,7 @@ const Dashboard = () => {
     console.error(error);
     message.error("Lỗi khi lấy danh sách");
   } finally {
-    setLoading(false);
+   
   }
 };
   /*** Xử lý submit form (Thêm mới hoặc cập nhật) ***/
