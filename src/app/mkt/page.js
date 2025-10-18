@@ -75,12 +75,10 @@ const Dashboard = () => {
   };
 
   useEffect(() => {
-  const dates = getDateRange();
-  const start = dates[0];
-  const end = dates[dates.length - 1];
-  fetchRecords(start, end);
-  fetchOrders(start, end);
-}, [period]);
+    fetchRecords();
+    fetchEmployees();
+    fetchOrders();
+  }, [period]);
 
   // if (currentUser.position === 'admin'){
   //   // Nếu admin thì trả về gì đó (theo code ban đầu của bạn)
@@ -401,41 +399,41 @@ const Dashboard = () => {
     );
   };
   //Hàm lấy danh sách ngày dựa theo bộ lọc:
-  const getDateRange = (customPeriod = period) => {
-  let start, end;
-  const now = moment();
+  const getDateRange = () => {
+    let start, end;
+    const now = moment();
 
-  if (customPeriod === "day") {
-    start = now.clone().startOf("day");
-    end = now.clone().endOf("day");
-  } else if (customPeriod === "yesterday") {
-    start = now.clone().subtract(1, "days").startOf("day");
-    end = now.clone().subtract(1, "days").endOf("day");
-  } else if (customPeriod === "week") {
-    start = now.clone().subtract(6, "days").startOf("day");
-    end = now.clone().endOf("day");
-  } else if (customPeriod === "month") {
-    start = now.clone().startOf("month");
-    end = now.clone().endOf("day");
-  } else if (customPeriod === "lastMonth") {
-    start = now.clone().subtract(1, "months").startOf("month");
-    end = now.clone().subtract(1, "months").endOf("month");
-  } else if (customPeriod === "twoMonthsAgo") {
-    start = now.clone().subtract(2, "months").startOf("month");
-    end = now.clone().subtract(2, "months").endOf("month");
-  } else {
-    start = now.clone().startOf("month");
-    end = now.clone().endOf("day");
-  }
+    if (period === "day") {
+      start = now.clone().startOf("day");
+      end = now.clone().endOf("day");
+    } else if (period === "yesterday") {
+      start = now.clone().subtract(1, "days").startOf("day");
+      end = now.clone().subtract(1, "days").endOf("day");
+    } else if (period === "week") {
+      start = now.clone().subtract(6, "days").startOf("day");
+      end = now.clone().endOf("day");
+    } else if (period === "month") {
+      start = now.clone().startOf("month");
+      end = now.clone().endOf("day");
+    } else if (period === "lastMonth") {
+      start = now.clone().subtract(1, "months").startOf("month");
+      end = now.clone().subtract(1, "months").endOf("month");
+    } else if (period === "twoMonthsAgo") {
+      start = now.clone().subtract(2, "months").startOf("month");
+      end = now.clone().subtract(2, "months").endOf("month");
+    } else {
+      start = now.clone().startOf("month");
+      end = now.clone().endOf("day");
+    }
 
-  const dates = [];
-  let current = start.clone();
-  while (current.isSameOrBefore(end, "day")) {
-    dates.push(current.format("YYYY-MM-DD"));
-    current.add(1, "days");
-  }
-  return dates;
-};
+    const dates = [];
+    let current = start.clone();
+    while (current.isSameOrBefore(end, "day")) {
+      dates.push(current.format("YYYY-MM-DD"));
+      current.add(1, "days");
+    }
+    return dates;
+  };
 
   //Tạo dữ liệu tổng hợp cho từng ngày và tính các chỉ số tổng:
   const summaryDates = getDateRange();
@@ -1104,16 +1102,7 @@ const Dashboard = () => {
             <br />
             <Select
               value={period}
-              onChange={async (value) => {
-  setPeriod(value);
-  const dates = getDateRange(value); // truyền period mới vào
-  const start = dates[0];
-  const end = dates[dates.length - 1];
-  await Promise.all([
-    fetchRecords(start, end),
-    fetchOrders(start, end),
-  ]);
-}}
+              onChange={(value) => setPeriod(value)}
               style={{ width: 250 }}
             >
               <Option value="day">Hôm Nay</Option>
