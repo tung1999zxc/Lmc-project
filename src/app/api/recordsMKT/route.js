@@ -1,19 +1,32 @@
 // src/app/api/recordsMKT/route.js
 import { connectToDatabase } from '../../../app/lib/mongodb.js';
-
+import moment from "moment";
 export async function GET(req) {
   try {
+    const { searchParams } = new URL(req.url);
+    const start = searchParams.get("start");
+    const end = searchParams.get("end");
+
     const { db } = await connectToDatabase();
-    // Lấy toàn bộ bản ghi từ collection "records"
-    const records = await db.collection('recordsMKT').find({}).toArray();
+
+    let query = {};
+    if (start && end) {
+      query.date = {
+        $gte: moment(start).format("YYYY-MM-DD"),
+        $lte: moment(end).format("YYYY-MM-DD"),
+      };
+    }
+
+    const records = await db.collection("recordsMKT").find(query).toArray();
+
     return new Response(
-      JSON.stringify({ message: 'Lấy danh sách thành công', data: records }),
+      JSON.stringify({ message: "Lấy danh sách thành công", data: records }),
       { status: 200 }
     );
   } catch (error) {
-    console.error("Lỗi GET /api/recordsMKT:", error);
+    console.error("❌ Lỗi GET /api/recordsMKT:", error);
     return new Response(
-      JSON.stringify({ error: 'Lỗi server nội bộ' }),
+      JSON.stringify({ error: "Lỗi server nội bộ" }),
       { status: 500 }
     );
   }

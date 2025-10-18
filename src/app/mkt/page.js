@@ -42,6 +42,7 @@ const Dashboard = () => {
   const [records, setRecords] = useState([]);
   const [safeEmployees, setSafeEmployees] = useState([]);
   const [editingRecord, setEditingRecord] = useState(null);
+  
   // Bộ lọc theo khoảng thời gian (mặc định 7 ngày)
   // const [filterOption, setFilterOption] = useState("7"); // Đã loại bỏ
   // Nếu là manager, có thêm bộ lọc để chọn team (default "all" hiển thị tất cả các team)
@@ -62,7 +63,10 @@ const Dashboard = () => {
 
   const fetchOrders = async () => {
     try {
-      const response = await axios.get("/api/orders3");
+      const dates = getDateRange();
+    const start = dates[0];
+    const end = dates[dates.length - 1];
+    const response = await axios.get(`/api/ordersMKT?start=${start}&end=${end}`);
       setSafeOrders(response.data.data);
     } catch (error) {
       console.error(error);
@@ -71,10 +75,12 @@ const Dashboard = () => {
   };
 
   useEffect(() => {
-    fetchRecords();
-    fetchEmployees();
-    fetchOrders();
-  }, []);
+  const dates = getDateRange();
+  const start = dates[0];
+  const end = dates[dates.length - 1];
+  fetchRecords(start, end);
+  fetchOrders(start, end);
+}, [period]);
 
   // if (currentUser.position === 'admin'){
   //   // Nếu admin thì trả về gì đó (theo code ban đầu của bạn)
@@ -256,22 +262,20 @@ const Dashboard = () => {
     return grouped;
   };
   const fetchRecords = async () => {
-    if (
-      currentUser.position !== "admin" &&
-      currentUser.position !== "managerMKT"
-    ) {
-      setLoading(true);
-    }
-    try {
-      const response = await axios.get("/api/recordsMKT");
-      setRecords(response.data.data);
-    } catch (error) {
-      console.error(error);
-      message.error("Lỗi khi lấy danh sách");
-    } finally {
-      setLoading(false); // Tắt loading
-    }
-  };
+  setLoading(true);
+  try {
+    const dates = getDateRange();
+    const start = dates[0];
+    const end = dates[dates.length - 1];
+    const response = await axios.get(`/api/recordsMKT?start=${start}&end=${end}`);
+    setRecords(response.data.data);
+  } catch (error) {
+    console.error(error);
+    message.error("Lỗi khi lấy danh sách");
+  } finally {
+    setLoading(false);
+  }
+};
   /*** Xử lý submit form (Thêm mới hoặc cập nhật) ***/
   const onFinish = async (values) => {
     const {
@@ -397,41 +401,41 @@ const Dashboard = () => {
     );
   };
   //Hàm lấy danh sách ngày dựa theo bộ lọc:
-  const getDateRange = () => {
-    let start, end;
-    const now = moment();
+  const getDateRange = (customPeriod = period) => {
+  let start, end;
+  const now = moment();
 
-    if (period === "day") {
-      start = now.clone().startOf("day");
-      end = now.clone().endOf("day");
-    } else if (period === "yesterday") {
-      start = now.clone().subtract(1, "days").startOf("day");
-      end = now.clone().subtract(1, "days").endOf("day");
-    } else if (period === "week") {
-      start = now.clone().subtract(6, "days").startOf("day");
-      end = now.clone().endOf("day");
-    } else if (period === "month") {
-      start = now.clone().startOf("month");
-      end = now.clone().endOf("day");
-    } else if (period === "lastMonth") {
-      start = now.clone().subtract(1, "months").startOf("month");
-      end = now.clone().subtract(1, "months").endOf("month");
-    } else if (period === "twoMonthsAgo") {
-      start = now.clone().subtract(2, "months").startOf("month");
-      end = now.clone().subtract(2, "months").endOf("month");
-    } else {
-      start = now.clone().startOf("month");
-      end = now.clone().endOf("day");
-    }
+  if (customPeriod === "day") {
+    start = now.clone().startOf("day");
+    end = now.clone().endOf("day");
+  } else if (customPeriod === "yesterday") {
+    start = now.clone().subtract(1, "days").startOf("day");
+    end = now.clone().subtract(1, "days").endOf("day");
+  } else if (customPeriod === "week") {
+    start = now.clone().subtract(6, "days").startOf("day");
+    end = now.clone().endOf("day");
+  } else if (customPeriod === "month") {
+    start = now.clone().startOf("month");
+    end = now.clone().endOf("day");
+  } else if (customPeriod === "lastMonth") {
+    start = now.clone().subtract(1, "months").startOf("month");
+    end = now.clone().subtract(1, "months").endOf("month");
+  } else if (customPeriod === "twoMonthsAgo") {
+    start = now.clone().subtract(2, "months").startOf("month");
+    end = now.clone().subtract(2, "months").endOf("month");
+  } else {
+    start = now.clone().startOf("month");
+    end = now.clone().endOf("day");
+  }
 
-    const dates = [];
-    let current = start.clone();
-    while (current.isSameOrBefore(end, "day")) {
-      dates.push(current.format("YYYY-MM-DD"));
-      current.add(1, "days");
-    }
-    return dates;
-  };
+  const dates = [];
+  let current = start.clone();
+  while (current.isSameOrBefore(end, "day")) {
+    dates.push(current.format("YYYY-MM-DD"));
+    current.add(1, "days");
+  }
+  return dates;
+};
 
   //Tạo dữ liệu tổng hợp cho từng ngày và tính các chỉ số tổng:
   const summaryDates = getDateRange();
@@ -1100,7 +1104,16 @@ const Dashboard = () => {
             <br />
             <Select
               value={period}
-              onChange={(value) => setPeriod(value)}
+              onChange={async (value) => {
+  setPeriod(value);
+  const dates = getDateRange(value); // truyền period mới vào
+  const start = dates[0];
+  const end = dates[dates.length - 1];
+  await Promise.all([
+    fetchRecords(start, end),
+    fetchOrders(start, end),
+  ]);
+}}
               style={{ width: 250 }}
             >
               <Option value="day">Hôm Nay</Option>
