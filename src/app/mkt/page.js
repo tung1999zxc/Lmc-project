@@ -697,6 +697,11 @@ const Dashboard = () => {
     } else if (currentUser.position_team === "kho") {
       filtered = [];
     }
+     if (currentUser?.name !== "Tung99") {
+    filtered = filtered.filter(
+      (record) => record.name.trim().toLowerCase() !== "tung99"
+    );
+  }
     return filtered;
   };
 
