@@ -292,7 +292,7 @@ export default function EmployeeManagement() {
 
 // 👉 Thêm điều kiện chỉ hiển thị nhân viên hiện tại nếu không phải admin
 const visibleEmployees =
-  currentUser.position === "admin" || currentUser.position === "managerMKT"
+  currentUser.position === "admin" || currentUser.position === "managerMKT" ||currentUser.position === "managerSALE"
     ? filteredEmployees
     : filteredEmployees.filter(
         (emp) => emp.employee_code === currentUser.employee_code
@@ -377,7 +377,7 @@ const visibleEmployees =
         </Form.Item>
         <Form.Item label="Ca làm việc" name="position_team2">
           <Select
-            disabled={currentUser.position !== "admin"}
+            disabled={currentUser.position !== "admin" && currentUser.position !== "managerSALE"}
             options={position_team2.map((p) => ({
               label: p.label,
               value: p.value,
