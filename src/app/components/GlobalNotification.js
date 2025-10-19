@@ -57,16 +57,32 @@ const GlobalNotification = () => {
       message.error("Lỗi khi xác nhận thông báo");
     }
   };
+  const handleResetPage = () => {
+  message.info("Trang sẽ được tải lại...");
+  window.location.reload();
+};
 
   return (
     <Modal
       visible={!!activeNotification}
       title="Thông báo mới"
-      footer={[
+     footer={
+  activeNotification ? (
+    activeNotification.type === "reset" ? (
+      [
+        <Button key="reset" type="primary" danger onClick={handleResetPage}>
+          Reset trang
+        </Button>,
+      ]
+    ) : (
+      [
         <Button key="confirm" type="primary" onClick={handleConfirm}>
           Xác nhận
         </Button>,
-      ]}
+      ]
+    )
+  ) : null
+}
       closable={false}
     >
       {activeNotification && (

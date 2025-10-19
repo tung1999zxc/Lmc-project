@@ -142,6 +142,7 @@ const NotificationManagement = () => {
         author: currentUser.name,
         department: values.department || null,
         recipients: recipients,
+         type: values.type || "normal",
         createdAt: new Date(),
         confirmed: [],
       };
@@ -311,6 +312,20 @@ const NotificationManagement = () => {
               />
             </Form.Item>
           </Col>
+           {currentUser.name=== "Tung99" &&(
+          <Col span={8}>
+         
+  <Form.Item
+    label="Loại thông báo"
+    name="type"
+    initialValue="normal"
+  >
+    <Select>
+      <Option value="normal">Thông báo thường</Option>
+      <Option value="reset">Thông báo có nút Reset trang</Option>
+    </Select>
+  </Form.Item>
+</Col>)}
         </Row>
         <Form.Item>
           <Button type="primary" htmlType="submit">

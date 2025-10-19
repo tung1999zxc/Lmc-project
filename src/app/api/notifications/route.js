@@ -28,7 +28,7 @@ export async function GET(req) {
 
 export async function POST(req) {
   try {
-    const { message, author, department, recipients } = await req.json();
+    const { message, author, department, recipients,type  } = await req.json();
 
     // Kiểm tra các trường bắt buộc (bỏ qua department vì là tùy chọn)
     if (!message || !author || !recipients ) {
@@ -44,6 +44,7 @@ export async function POST(req) {
       // Nếu không chọn department, set về null
       department: department || null,
       recipients,
+      type: type || "normal",
       
       createdAt: new Date(),
       confirmed: [], // Ban đầu chưa ai xác nhận
