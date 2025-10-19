@@ -318,7 +318,7 @@ const NotificationManagement = () => {
   <Form.Item
     label="Loại thông báo"
     name="type"
-    initialValue="normal"
+    
   >
     <Select>
       <Option value="normal">Thông báo thường</Option>
