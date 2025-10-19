@@ -3007,6 +3007,43 @@ onChange={(e) => handleColumnSelect("istick", e.target.checked)}
   <Table
     dataSource={modalCustomerOrders}
     columns={[
+       {
+      title: (
+        <Checkbox
+          checked={selectedColumns.includes("action")}
+          onChange={(e) => handleColumnSelect("action", e.target.checked)}
+        >
+          THAO TÁC
+        </Checkbox>
+      ),
+      key: "action",
+      render: (_, record) => {        
+      //   const disableEdit =
+      // currentUser.position === "salenhapdon" && record.saleReport === "DONE";
+      return (
+        <Space>
+          <Button disabled={
+                
+                currentUser.name === "Hoàng Công Phi"
+                
+              }  icon={<EditOutlined />} onClick={() => handleEdit(record)} />
+          <Popconfirm title="Xóa đơn hàng?" onConfirm={() => handleDeleteOrder(record.id)}>
+            <Button
+              danger
+              disabled={
+                currentUser.position === "salenhapdon" ||
+                currentUser.position === "salexacnhan" ||
+                currentUser.position === "salexuly"||
+                currentUser.name === "Hoàng Công Phi"||
+                currentUser.position === "salefull"
+              }
+              icon={<DeleteOutlined />}
+            />
+          </Popconfirm>
+        </Space>)
+      },
+      width: 50,
+    },
       { title: 'Sản phẩm', key: 'products', render: (_, record) => (
         record.products?.map(p => `${p.product} - SL: ${p.quantity}`).join(', ')
       )},
