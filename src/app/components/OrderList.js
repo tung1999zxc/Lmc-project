@@ -2179,6 +2179,7 @@ onChange={(e) => handleColumnSelect("istick", e.target.checked)}
     
     setCurrentEditId(null);
     setFormVisible(true);
+    setEditingOrder(null);
   };
 
   const handleEdit = (order) => {
@@ -3055,7 +3056,9 @@ onChange={(e) => handleColumnSelect("istick", e.target.checked)}
       )},
       { title: 'Tên Khách', dataIndex: "customerName",
         key: "customerName"},
-        {
+         ...((currentUser.position === "leadSALE" || currentUser.position === "managerSALE" )
+      ? [
+       {
           title: 
               'TÊN PAGE'
            ,
@@ -3063,6 +3066,9 @@ onChange={(e) => handleColumnSelect("istick", e.target.checked)}
           key: "pageName",
           render: (text) => text ? text.split("||")[0].trim() : "",
         },
+        ]
+      : []),
+        
         { title: 'SĐT', dataIndex: 'phone', key: 'phone' },
       { title: 'Ngày đặt', dataIndex: 'orderDate', key: 'orderDate',render: (text) => dayjs(text).format("DD/MM"), },
       { title: 'STT', dataIndex: 'stt', key: 'stt' },
@@ -3073,12 +3079,24 @@ onChange={(e) => handleColumnSelect("istick", e.target.checked)}
         ]
       : []),
      
-      {title: 'GHI CHÚ SALE',
-      dataIndex: "note",
-      key: "note",
-      width: 200,
-      render: (text) => <div style={{ width: 200,  }}><h3>{text} </h3></div>,
-    },{
+    {
+          title: (
+            <Checkbox
+              checked={selectedColumns.includes("note")}
+              onChange={(e) => handleColumnSelect("note", e.target.checked)}
+            >
+              GHI CHÚ SALE
+            </Checkbox>
+          ),
+          dataIndex: "note",
+          key: "note",
+          width: 200,
+          render: (text) => {
+            if (!text) return ""; // Tránh lỗi nếu note rỗng hoặc null
+            const parts = text.split(":");
+            return <div style={{ width: 200 }}><h3>{parts.length > 1 ? parts.slice(1).join(":").trim() : text}</h3></div>;
+          },
+        },{
       title:
           "TT XỬ LÍ",
        
