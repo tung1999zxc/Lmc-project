@@ -1,5 +1,6 @@
 "use client";
 import { useState, useEffect, useMemo } from "react";
+import { CopyOutlined } from "@ant-design/icons"; // ⚡ thêm dòng này ở đầu file
 import {
   Table,
   Input,
@@ -29,7 +30,7 @@ const EmployeePageTable = () => {
       router.push("/orders");
     }
   }, []);
-
+ const [messageApi, contextHolder] = message.useMessage();
   const [pageName, setPageName] = useState("");
   const [selectedEmployee, setSelectedEmployee] = useState(null);
   const [data, setData] = useState([]);
@@ -267,8 +268,41 @@ const EmployeePageTable = () => {
     }
   };
 
+  const handleCopy = (text) => {
+  navigator.clipboard.writeText(text);
+  messageApi.success(`  Đã copy: ${text}`);
+};
+
   const columns = [
-    { title: "Tên Page", dataIndex: "pageName", key: "pageName" },
+      {
+    title: "Tên Page",
+    dataIndex: "pageName",
+    key: "pageName",
+    render: (text) => (
+      <Space>
+        <span style={{ fontWeight: 500 }}>{text}</span>
+        <Button
+          type="primary"
+          size="middle"
+          icon={<CopyOutlined style={{ fontSize: 18 }} />}
+          onClick={() => handleCopy(text)}
+          style={{
+            borderRadius: 8,
+            fontSize: 16,
+            padding: "4px 12px",
+            background: "#1677ff",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          Copy
+        </Button>
+      </Space>
+    ),
+  },
+
+  
     { title: "Tên Nhân Viên", dataIndex: "employee", key: "employee" },
     {
       title: "Thời gian",
@@ -341,6 +375,7 @@ const EmployeePageTable = () => {
     text.toLowerCase().trim().replace(/\s+/g, " "); // Giữ lại khoảng trắng giữa từ, nhưng loại bỏ thừa
   return (
     <div style={{ padding: 20 }}>
+       {contextHolder}
       <Space style={{ marginBottom: 20 }}>
         <Input
           style={{ width: 300 }}
