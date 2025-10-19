@@ -1763,8 +1763,8 @@ const selectedTableColumns = columns.filter((col) =>
     { title: "DOANH THU", dataIndex: "profit", key: "profit" ,width: 20,},
     { title: "TÊN PAGE", dataIndex: "pageName", key: "pageName",width: 100, },
     { title: "TÊN KHÁCH", width: 100,dataIndex: "customerName", key: "customerName" },
-    ...(currentUser.position === "mkt"
-      ? [
+    // ...(currentUser.position === "mkt"
+    //   ? [
         {
           title: (
             <Checkbox
@@ -1783,26 +1783,26 @@ const selectedTableColumns = columns.filter((col) =>
             return <div style={{ width: 200 }}><h3>{parts.length > 1 ? parts.slice(1).join(":").trim() : text}</h3></div>;
           },
         },
-        ]
-      : []),
-    ...((currentUser.position === "lead" || currentUser.position === "managerMKT" )
-      ? [
-        {
-          title: (
-            <Checkbox
-              checked={selectedColumns.includes("note")}
-              onChange={(e) => handleColumnSelect("note", e.target.checked)}
-            >
-              GHI CHÚ SALE
-            </Checkbox>
-          ),
-          dataIndex: "note",
-          key: "note",
-          width: 200,
-          render: (text) => <div style={{ width: 200,  }}><h3>{text} </h3></div>,
-        },
-        ]
-      : []),
+      //   ]
+      // : []),
+    // ...((currentUser.position === "lead" || currentUser.position === "managerMKT" )
+    //   ? [
+    //     {
+    //       title: (
+    //         <Checkbox
+    //           checked={selectedColumns.includes("note")}
+    //           onChange={(e) => handleColumnSelect("note", e.target.checked)}
+    //         >
+    //           GHI CHÚ SALE
+    //         </Checkbox>
+    //       ),
+    //       dataIndex: "note",
+    //       key: "note",
+    //       width: 200,
+    //       render: (text) => <div style={{ width: 200,  }}><h3>{text} </h3></div>,
+    //     },
+    //     ]
+    //   : []),
     
     {
       title: "THANH TOÁN",
@@ -1816,11 +1816,11 @@ const selectedTableColumns = columns.filter((col) =>
    
     
     
-    ...((currentUser.position === "lead" || currentUser.position === "managerMKT" )
-      ? [
-        { title: "Sale", dataIndex: "sale", key: "sale",width: 100, },
-        ]
-      : []),
+    // ...((currentUser.position === "lead" || currentUser.position === "managerMKT" )
+    //   ? [
+    //     { title: "Sale", dataIndex: "sale", key: "sale",width: 100, },
+    //     ]
+    //   : []),
     { title: "MKT", dataIndex: "mkt", key: "mkt" },
     
     
