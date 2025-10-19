@@ -42,6 +42,8 @@ const OrderList = () => {
   // const lastFetchTime = useRef(0);
   // const THIRTY_MINUTES = 60 * 60 * 1000;  
   // Các state quản lý đơn hàng, form, filter, …
+  const [messageApi, contextHolder] = message.useMessage();
+  const [editingOrder, setEditingOrder] = useState(null);
   const [orders, setOrders] = useState([]);
   const [currentEditId, setCurrentEditId] = useState(null);
   const [formVisible, setFormVisible] = useState(false);
@@ -93,7 +95,7 @@ const OrderList = () => {
       setModalVisible(true);
     } catch (err) {
       console.error(err);
-      message.error('Không thể tìm đơn khách hàng');
+      messageApi.error('Không thể tìm đơn khách hàng');
     }
   };
   const handleFilterChange = (value) => {
@@ -108,7 +110,7 @@ const OrderList = () => {
         setEmployees(response.data.data);
       } catch (error) {
         console.error('Lỗi khi lấy danh sách nhân viên:', error);
-        message.error('Lỗi khi lấy danh sách nhân viên');
+        messageApi.error('Lỗi khi lấy danh sách nhân viên');
       } finally {
        
       }
@@ -218,7 +220,7 @@ const OrderList = () => {
   
     } catch (error) {
       console.error("Lỗi khi gọi API:", error);
-      message.error("Lỗi khi lấy đơn hàng");
+      messageApi.error("Lỗi khi lấy đơn hàng");
     } finally {
       setLoading(false);
     }
@@ -938,12 +940,12 @@ const getCustomerColor = (name) => {
   //     const response = await axios.patch(`/api/orders/${orderId}/shipping`, {
   //       isShipping: checked,
   //     });
-  //     message.success(response.data.message);
+  //     messageApi.success(response.data.message);
   //     // Sau khi cập nhật thành công, bạn có thể làm mới danh sách đơn hàng từ API
   //     fetchOrders();
   //   } catch (error) {
   //     console.error(error.response?.data?.error || error.message);
-  //     message.error("Lỗi khi cập nhật trạng thái đóng hàng");
+  //     messageApi.error("Lỗi khi cập nhật trạng thái đóng hàng");
   //   }
   // };
   const handleColumnSelect = (columnKey, checked) => {
@@ -1052,7 +1054,7 @@ const getCustomerColor = (name) => {
     });
   
     if (ordersToUpdate.length === 0) {
-      message.info("Không có đơn hàng nào thay đổi");
+      messageApi.info("Không có đơn hàng nào thay đổi");
       return;
     }
   
@@ -1061,14 +1063,14 @@ const getCustomerColor = (name) => {
       const response = await axios.post("/api/orders/updateIstickDONE", {
         orders: ordersToUpdate.map(({ id, istickDONE }) => ({ id, istickDONE })),
       });
-      message.success(response.data.message || "Đã lưu cập nhật các đơn");
+      messageApi.success(response.data.message || "Đã lưu cập nhật các đơn");
       alert("Thao tác thành công!");
       // Cập nhật lại initialOrders sau khi lưu để làm mốc mới
       setInitialOrders3(orders);
       fetchOrders();
     } catch (error) {
       console.error(error);
-      message.error("Lỗi khi lưu các đơn");
+      messageApi.error("Lỗi khi lưu các đơn");
     }
   };
   
@@ -1103,7 +1105,7 @@ const getCustomerColor = (name) => {
     });
   
     if (ordersToUpdate.length === 0) {
-      message.info("Không có đơn hàng nào thay đổi");
+      messageApi.info("Không có đơn hàng nào thay đổi");
       alert("Không có thay đổi nào!");
       return;
     }
@@ -1113,14 +1115,14 @@ const getCustomerColor = (name) => {
       const response = await axios.post("/api/orders/updateIstick", {
         orders: ordersToUpdate.map(({ id, istick }) => ({ id, istick })),
       });
-      message.success(response.data.message || "Đã lưu cập nhật các đơn");
+      messageApi.success(response.data.message || "Đã lưu cập nhật các đơn");
       alert("Thao tác thành công!");
       // Cập nhật lại initialOrders sau khi lưu để làm mốc mới
       setInitialOrders(orders);
       fetchOrders();
     } catch (error) {
       console.error(error);
-      message.error("Lỗi khi lưu các đơn");
+      messageApi.error("Lỗi khi lưu các đơn");
     }finally {
       // Sau khi gọi API (dù thành công hay lỗi), disable nút ExportExcelButton trong 3 giây
       setExportDisabled(false);
@@ -1141,7 +1143,7 @@ const getCustomerColor = (name) => {
     });
   
     if (ordersToUpdate.length === 0) {
-      message.info("Không có đơn hàng nào thay đổi");
+      messageApi.info("Không có đơn hàng nào thay đổi");
       return;
     }
   
@@ -1154,14 +1156,14 @@ const getCustomerColor = (name) => {
         headers: { "x-current-user": encodeURIComponent(currentUser.name) },
       });
   
-      message.success(response.data.message || "Đã lưu cập nhật các đơn");
+      messageApi.success(response.data.message || "Đã lưu cập nhật các đơn");
       alert("Thao tác thành công!");
       // Cập nhật lại initialOrders sau khi lưu để làm mốc mới
       setInitialOrders2(orders);
       fetchOrders();
     } catch (error) {
       console.error(error);
-      message.error("Lỗi khi lưu các đơn");
+      messageApi.error("Lỗi khi lưu các đơn");
     }
  
   
@@ -1866,7 +1868,7 @@ const selectedTableColumns = columns.filter((col) =>
     });
   
     if (ordersToUpdate.length === 0) {
-      message.info("Không có đơn hàng nào thay đổi");
+      messageApi.info("Không có đơn hàng nào thay đổi");
       return;
     }
   
@@ -1875,14 +1877,14 @@ const selectedTableColumns = columns.filter((col) =>
       const response = await axios.post("/api/orders/updateIstick4", {
         orders: ordersToUpdate.map(({ id, istick4 }) => ({ id, istick4 })),
       });
-      message.success(response.data.message || "Đã lưu cập nhật các đơn");
+      messageApi.success(response.data.message || "Đã lưu cập nhật các đơn");
       alert("Thao tác thành công!");
       // Cập nhật lại initialOrders sau khi lưu để làm mốc mới
       setInitialOrders4(orders);
       fetchOrders();
     } catch (error) {
       console.error(error);
-      message.error("Lỗi khi lưu các đơn");
+      messageApi.error("Lỗi khi lưu các đơn");
     }
   };
   
@@ -2181,17 +2183,18 @@ onChange={(e) => handleColumnSelect("istick", e.target.checked)}
 
   const handleEdit = (order) => {
     setCurrentEditId(order.id);
+    setEditingOrder(order);
     setFormVisible(true);
   };
 
   const handleDeleteOrder = async (id) => {
     try {
       const response = await axios.delete(`/api/orders/${id}`);
-      message.success(response.data.message || "Xóa đơn hàng thành công");
+      messageApi.success(response.data.message || "Xóa đơn hàng thành công");
       fetchOrders();
     } catch (error) {
       console.error(error);
-      message.error("Lỗi khi xóa đơn hàng");
+      messageApi.error("Lỗi khi xóa đơn hàng");
     }
   };
   
@@ -2212,7 +2215,7 @@ onChange={(e) => handleColumnSelect("istick", e.target.checked)}
         console.log(stt);
       } catch (error) {
         console.error("Lỗi khi lấy số thứ tự mới:", error);
-        message.error("Lỗi khi lấy số thứ tự mới");
+        messageApi.error("Lỗi khi lấy số thứ tự mới");
         return;
       }
     }
@@ -2257,7 +2260,7 @@ onChange={(e) => handleColumnSelect("istick", e.target.checked)}
       if (currentEditId) {
         const response = await axios.put(`/api/orders/${currentEditId}`, newOrder,{ headers: { 'x-current-user': encodeURIComponent(currentUser.position_team),
       'x-current-username': encodeURIComponent(currentUser.name) } });
-        message.success(response.data.message || "Cập nhật thành công");
+        messageApi.success(response.data.message || "Cập nhật thành công");
         // setOrders((prevOrders) =>
         //   prevOrders.map((order) => order.id === currentEditId ? newOrder : order)
         // );
@@ -2280,7 +2283,7 @@ onChange={(e) => handleColumnSelect("istick", e.target.checked)}
 
       } else {
         const response = await axios.post("/api/orders", newOrder);
-        message.success(response.data.message || "Thêm mới thành công");
+        messageApi.success(response.data.message || "Thêm mới thành công");
         const createdOrder = response.data.data;
       // Thêm đơn hàng mới vào state orders (ví dụ thêm vào đầu mảng)
       // setOrders((prevOrders) => [createdOrder, ...prevOrders]);
@@ -2302,7 +2305,7 @@ onChange={(e) => handleColumnSelect("istick", e.target.checked)}
     //   lastFetchTime.current = now;}
     } catch (error) {
       console.error(error);
-      message.error("Lỗi khi lưu đơn hàng");
+      messageApi.error("Lỗi khi lưu đơn hàng");
     }
   };
 
@@ -2441,7 +2444,7 @@ onChange={(e) => handleColumnSelect("istick", e.target.checked)}
   
     navigator.clipboard.writeText(finalText)
       .then(() => alert("✅ Đã sao chép toàn bộ dữ liệu!"))
-      .catch(() => message.error("❌ Lỗi sao chép."));
+      .catch(() => messageApi.error("❌ Lỗi sao chép."));
   };
   
 //   const handleSplitOrders = async () => {
@@ -2449,11 +2452,11 @@ onChange={(e) => handleColumnSelect("istick", e.target.checked)}
 //     const res = await axios.post("/api/orders/batchSplitLinhChiJune");
 //     const data = res.data;
 
-//     message.success(data.message || "Đã chia đơn thành công");
+//     messageApi.success(data.message || "Đã chia đơn thành công");
 //     fetchOrders(); // Cập nhật lại danh sách đơn
 //   } catch (err) {
 //     console.error(err);
-//     message.error("Lỗi khi chia đơn");
+//     messageApi.error("Lỗi khi chia đơn");
 //   }
 // };
 
@@ -2463,6 +2466,7 @@ onChange={(e) => handleColumnSelect("istick", e.target.checked)}
      fontSize: "5px"
      
     }}>
+      {contextHolder}
       <FullScreenLoading loading={loading} tip="Đang tải dữ liệu..." />
       {/* <Button
   type="primary"
@@ -2470,7 +2474,7 @@ onChange={(e) => handleColumnSelect("istick", e.target.checked)}
   onClick={async () => {
     const res = await fetch('/api/orders/batchUpdateSalexuly', { method: 'POST' });
     const data = await res.json();
-    message.success(data.message || "Cập nhật xong!");
+    messageApi.success(data.message || "Cập nhật xong!");
     fetchOrders(); // Gọi lại để load đơn mới
   }}
 >
@@ -2989,7 +2993,7 @@ onChange={(e) => handleColumnSelect("istick", e.target.checked)}
         visible={formVisible}
         onCancel={() => setFormVisible(false)}
         onSubmit={handleSubmit}
-        initialValues={orders.find((order) => order.id === currentEditId)}
+        initialValues={editingOrder || orders.find((order) => order.id === currentEditId)}
         employees={employees}
         dataPagename={dataPagename}
         
@@ -3024,7 +3028,8 @@ onChange={(e) => handleColumnSelect("istick", e.target.checked)}
         <Space>
           <Button disabled={
                 
-                currentUser.name === "Hoàng Công Phi"
+                currentUser.name === "Hoàng Công Phi"||
+                 currentUser.position_team === "mkt"
                 
               }  icon={<EditOutlined />} onClick={() => handleEdit(record)} />
           <Popconfirm title="Xóa đơn hàng?" onConfirm={() => handleDeleteOrder(record.id)}>
@@ -3035,6 +3040,7 @@ onChange={(e) => handleColumnSelect("istick", e.target.checked)}
                 currentUser.position === "salexacnhan" ||
                 currentUser.position === "salexuly"||
                 currentUser.name === "Hoàng Công Phi"||
+                currentUser.position_team === "mkt"||
                 currentUser.position === "salefull"
               }
               icon={<DeleteOutlined />}
