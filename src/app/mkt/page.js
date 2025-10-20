@@ -42,7 +42,7 @@ const Dashboard = () => {
   const [records, setRecords] = useState([]);
   const [safeEmployees, setSafeEmployees] = useState([]);
   const [editingRecord, setEditingRecord] = useState(null);
-  
+  const [messageApi, contextHolder] = message.useMessage();
   // Bộ lọc theo khoảng thời gian (mặc định 7 ngày)
   // const [filterOption, setFilterOption] = useState("7"); // Đã loại bỏ
   // Nếu là manager, có thêm bộ lọc để chọn team (default "all" hiển thị tất cả các team)
@@ -50,6 +50,7 @@ const Dashboard = () => {
   const [selectedTeam, setSelectedTeam] = useState("all");
 
   const fetchEmployees = async () => {
+    
     try {
       const response = await axios.get("/api/employees");
       // response.data.data chứa danh sách nhân viên theo API đã viết
@@ -58,6 +59,7 @@ const Dashboard = () => {
       console.error("Lỗi khi lấy danh sách nhân viên:", error);
       message.error("Lỗi khi lấy danh sách nhân viên");
     } finally {
+       
     }
   };
 
@@ -309,12 +311,12 @@ const Dashboard = () => {
           `/api/recordsMKT/${editingRecord.id}`,
           newRecord
         );
-        message.success(response.data.message || "Cập nhật thành công");
+        messageApi.success(response.data.message || "Cập nhật thành công");
 
         fetchRecords();
       } else {
         const response = await axios.post("/api/recordsMKT", newRecord);
-        message.success(response.data.message || "Thêm mới thành công");
+        messageApi.success(response.data.message || "Thêm mới thành công");
       }
       fetchRecords();
       setEditingRecord(null);
@@ -373,7 +375,7 @@ const Dashboard = () => {
         record.isLocked = true;
       } else record.isLocked = false;
       const response = await axios.put(`/api/recordsMKT/${record.id}`, record);
-      message.success(response.data.message || "Lưu thành công");
+      messageApi.success(response.data.message || "Lưu thành công");
       alert("Thao tác thành công!");
       fetchRecords();
     } catch (error) {
@@ -1035,6 +1037,7 @@ const Dashboard = () => {
 
   return (
     <div style={{ padding: 24 }}>
+      {contextHolder}
       {/* Tiêu đề "Nhập thông tin" */}
       <Row gutter={[16, 16]}>
         <FullScreenLoading loading={loading} tip="Đang tải dữ liệu..." />
