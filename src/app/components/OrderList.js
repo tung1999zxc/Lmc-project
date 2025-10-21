@@ -2460,6 +2460,17 @@ onChange={(e) => handleColumnSelect("istick", e.target.checked)}
 //     messageApi.error("Lỗi khi chia đơn");
 //   }
 // };
+const handleResetAllSTT = async () => {
+  if (!window.confirm("Bạn có chắc chắn muốn đặt toàn bộ STT từ 1–20000 về 0 không?")) return;
+  try {
+    const res = await axios.put("/api/orders");
+    alert(res.data.message || "Đặt lại STT thành công!");
+    fetchOrders(); // Gọi lại API để cập nhật danh sách đơn hàng
+  } catch (error) {
+    console.error(error);
+    alert("Lỗi khi đặt lại STT!");
+  }
+};
 
   return (
     <div  style={{
@@ -2481,7 +2492,9 @@ onChange={(e) => handleColumnSelect("istick", e.target.checked)}
 >
   Cập nhật Salexuly cho Đỗ Uyển Nhi
 </Button> */}
-
+{/* <Button type="primary" danger onClick={handleResetAllSTT}>
+  Đặt STT về 0
+</Button> */}
       <Row>
       <Col span={6}><div style={{ marginBottom: 16 }}>
         <Button

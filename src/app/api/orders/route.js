@@ -184,3 +184,28 @@ export async function POST(req) {
     );
   }
 }
+
+// export async function PUT(req) {
+//   try {
+//     const { db } = await connectToDatabase();
+
+//     // Cập nhật tất cả đơn có stt từ 1 đến 20000
+//     const result = await db.collection('orders').updateMany(
+//       { stt: { $gte: 1, $lte: 20000 } },
+//       { $set: { stt: 0 } }
+//     );
+
+//     return new Response(
+//       JSON.stringify({
+//         message: `Đã cập nhật ${result.modifiedCount} đơn hàng: đặt STT = 0`,
+//       }),
+//       { status: 200 }
+//     );
+//   } catch (error) {
+//     console.error("Lỗi PUT /api/orders/reset-stt:", error);
+//     return new Response(
+//       JSON.stringify({ error: 'Lỗi server khi đặt lại STT' }),
+//       { status: 500 }
+//     );
+//   }
+// }
