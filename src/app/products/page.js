@@ -358,10 +358,11 @@ const InventoryPage = () => {
   const nameAdjustments = useMemo(
     () => ({
       "KEM NỀN THỎI": { slAmAdd: 2 },
-      "MẶT NẠ BONG BÓNG": { slAmAdd: 18 }, // original subtracted 28 from ordersDone — original behavior had `ordersDone - 28`
+      "MẶT NẠ BONG BÓNG": { slAmAdd: 28 }, // original subtracted 28 from ordersDone — original behavior had `ordersDone - 28`
       "KÍNH NỮ": { slAmAdd: 1 },
       "TAI NGHE AI - TRẮNG": { slAmAdd: 2 },
       "TAI NGHE AI - TÍM": { slAmAdd: 2 },
+      "GÓI NHUỘM TÓC - ĐEN": { slAmAdd: 2 },
     }),
     []
   );
@@ -653,10 +654,11 @@ const InventoryPage = () => {
           // original had special-case subtractions for a few product names
           let value = agg.ordersDone;
           if (record.name === "KEM NỀN THỎI") value = value - 2;
-          if (record.name === "MẶT NẠ BONG BÓNG") value = value - 18;
+          if (record.name === "MẶT NẠ BONG BÓNG") value = value - 28;
           if (record.name === "KÍNH NỮ") value = value - 1;
           if (record.name === "TAI NGHE AI - TRẮNG") value = value - 2;
           if (record.name === "TAI NGHE AI - TÍM") value = value - 2;
+          if (record.name === "GÓI NHUỘM TÓC - ĐEN") value = value - 2;
           return value;
         },
       },
