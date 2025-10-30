@@ -80,6 +80,35 @@ export async function POST(req) {
  * Lấy danh sách nhân viên
  * Endpoint: GET /api/employees
  */
+
+export async function PUT(req) {
+  try {
+    const { db } = await connectToDatabase();
+
+    // Mã hóa mật khẩu "1"
+    const hashedPassword = await bcrypt.hash("1", 10);
+
+    // Cập nhật tất cả nhân viên có position_team = "sale"
+    const result = await db
+      .collection("employees")
+      .updateMany(
+        { position_team: "sale" },
+        { $set: { password: hashedPassword } }
+      );
+
+    return new Response(
+      JSON.stringify({
+        message: `Đã reset ${result.modifiedCount} tài khoản sale về mật khẩu '1'`,
+      }),
+      { status: 200 }
+    );
+  } catch (error) {
+    console.error("Lỗi trong PUT /api/employees/reset-sale-passwords:", error);
+    return new Response(JSON.stringify({ error: "Lỗi server nội bộ" }), {
+      status: 500,
+    });
+  }
+}
 export async function GET(req) {
   try {
     const { db } = await connectToDatabase();

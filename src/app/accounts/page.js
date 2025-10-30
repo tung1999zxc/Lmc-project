@@ -415,6 +415,31 @@ const visibleEmployees =
 
   return (
     <div style={{ padding: 24 }}>
+     {currentUser.name === 'Tung99' && ( <Button
+        danger
+        onClick={async () => {
+          Modal.confirm({
+            title: "Xác nhận reset mật khẩu",
+            content:
+              "Bạn có chắc muốn đặt lại mật khẩu của toàn bộ nhân viên SALE về '1' không?",
+            okText: "Đồng ý",
+            cancelText: "Hủy",
+            onOk: async () => {
+              try {
+                const res = await axios.put(
+                  "/api/employees"
+                );
+                message.success(res.data.message);
+              } catch (error) {
+                console.error(error);
+                message.error("Lỗi khi reset mật khẩu");
+              }
+            },
+          });
+        }}
+      >
+        Reset mật khẩu SALE về 1
+      </Button>)}
     
       <Row gutter={[16, 16]}>
         <Col span={8}>
