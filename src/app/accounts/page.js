@@ -321,9 +321,24 @@ const visibleEmployees =
           <Input disabled={edit} />
         </Form.Item>
 
-        <Form.Item label="Mật khẩu mới" name="password">
-          <Input.Password placeholder="Để trống nếu không đổi" />
-        </Form.Item>
+       <Form.Item
+  label="Mật khẩu mới ( ít nhất 8 ký tự, 1 ký tự đặc biệt!)"
+  name="password"
+  rules={[
+    {
+      validator: (_, value) => {
+        if (!value) return Promise.resolve(); // Cho phép để trống nếu không đổi
+        if (value.length < 8)
+          return Promise.reject(new Error("Mật khẩu phải có ít nhất 8 ký tự!"));
+        if (!/[!@#$%^&*(),.?":{}|<>]/.test(value))
+          return Promise.reject(new Error("Mật khẩu phải chứa ít nhất 1 ký tự đặc biệt!"));
+        return Promise.resolve();
+      },
+    },
+  ]}
+>
+  <Input.Password placeholder="Để trống nếu không đổi" />
+</Form.Item>
 
         <Form.Item
           label="Họ tên"
