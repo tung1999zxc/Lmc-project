@@ -2387,9 +2387,9 @@ onChange={(e) => handleColumnSelect("istick", e.target.checked)}
  
     
   const sortedOrders = useMemo(() => {
-    return [...filteredOrders].sort((a, b) => b.stt - a.stt);
-  }, [filteredOrders]);
-   
+  return [...filteredOrders].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+}, [filteredOrders]);
+
   const handleUpdateDeliveredStatus = async () => {
     const sttList = sttDoneInput.trim().split(/\s+/).map(Number);
     if (!sttList.length) {
