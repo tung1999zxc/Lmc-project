@@ -1364,7 +1364,11 @@ const Dashboard = () => {
   const top5Employees = marketingReportData3
     .filter((emp) => emp.adsThisMonth > 0)
     .sort((a, b) => b.totalToday - a.totalToday)
-    .slice(0, 3);
+    .slice(0, 2);
+  const top5Employees2 = marketingReportData3
+    .filter((emp) => emp.adsThisMonth > 0)
+    .sort((a, b) => a.totalToday - b.totalToday)
+    .slice(0, 1);
   const top1Employees = marketingReportData3
     .filter((emp) => emp.adsThisMonth > 0)
     .sort((a, b) => b.totalToday - a.totalToday)
@@ -2607,10 +2611,49 @@ const summaryData = [
               )}
             </div>
           ))}
-        </div>
+        
         {/* Vinh danh TOP 3 SALE NHẬP ĐƠN */}
-        <br></br>
-        {currentUser.name === "1"  && (
+      
+        {currentUser.name !== "Trần" &&
+          (
+            <div className="marquee">
+              {top5Employees2.map((emp, index) => (
+                <div
+                  key={index}
+                  className={`employee-item ${
+                    index === 0
+                      ? "top1bet"
+                      : index === 1
+                      ? "top2"
+                      : index === 2
+                      ? "top3"
+                      : ""
+                  }`}
+                >
+                  <img
+                    src={`/${emp.name.trim()}.jpg`}
+                    alt={emp.name.trim()}
+                    className="employee-image"
+                    onError={(e) => {
+                      e.currentTarget.onerror = null;
+                      e.currentTarget.src = "/ngockem.jpg";
+                    }}
+                  />
+                  <span className="employee-name">{emp.name}</span>
+                  <br />
+                  {index === 0 && (
+                    <span className="top-badge">Cảnh báo doanh số thấp</span>
+                  )}
+                  <br />
+                 
+                </div>
+              ))}
+            </div>
+          )}
+          </div>
+        {/* {currentUser.name !== "Trần Ngọc Lâm" &&
+          currentUser.name !== "Diệp Anh" &&
+          currentUser.name !== "Hoàng Thị Trà My" && (
             <div className="marquee">
               {top3SalenhapdonToday.map((emp, index) => (
                 <div
@@ -2648,13 +2691,13 @@ const summaryData = [
                 </div>
               ))}
             </div>
-          )}
+          )} */}
 
         <style jsx>{`
           .criticism-container {
-            padding: 25px 15px;
+            padding: 25px 225px;
             background: linear-gradient(135deg, #f5f7fa, #c3ecb2);
-            border: 2px solid #f1c40f;
+            border: 5px solid #f1c40f;
             border-radius: 15px;
             margin: 20px auto;
             max-width: 100%;
@@ -2742,14 +2785,20 @@ const summaryData = [
           /* TOP 1 – Viền vàng, hiệu ứng nổi bật */
           .employee-item.top1 {
             border: 3px solid #f1c40f;
-            box-shadow: 0 0 20px 5px rgba(241, 196, 15, 0.6);
+            box-shadow: 0 0 20px 5px rgba(26, 241, 15, 0.6);
             transform: scale(1.1);
+          }
+          .employee-item.top1bet {
+            border: 3px solid #f12d0fff;
+            box-shadow: 0 0 20px 5px rgba(241, 15, 15, 0.6);
+            
           }
 
           /* TOP 2 – Viền bạc */
           .employee-item.top2 {
             border: 3px solid #1a6191ff;
-            box-shadow: 0 0 10px 2px rgba(71, 147, 198, 0.4);
+            box-shadow: 0 0 30px 5px rgba(185, 221, 26, 0.4);
+            transform: scale(1.1);
           }
 
           /* TOP 3 – Viền đồng */
