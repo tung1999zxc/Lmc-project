@@ -1365,10 +1365,15 @@ const Dashboard = () => {
     .filter((emp) => emp.adsThisMonth > 0)
     .sort((a, b) => b.totalToday - a.totalToday)
     .slice(0, 2);
-  const top5Employees2 = marketingReportData3
+  const top5Employees2List = marketingReportData3
     .filter((emp) => emp.adsThisMonth > 0)
     .sort((a, b) => a.totalToday - b.totalToday)
-    .slice(0, 1);
+    .slice(0, 8);
+ 
+const top5Employees2 =
+  top5Employees2List.length > 0
+    ? [top5Employees2List[Math.floor(Math.random() * top5Employees2List.length)]]
+    : [];
   const top1Employees = marketingReportData3
     .filter((emp) => emp.adsThisMonth > 0)
     .sort((a, b) => b.totalToday - a.totalToday)
@@ -2695,7 +2700,7 @@ const summaryData = [
 
         <style jsx>{`
           .criticism-container {
-            padding: 25px 225px;
+            padding: 45px 225px;
             background: linear-gradient(135deg, #f5f7fa, #c3ecb2);
             border: 5px solid #f1c40f;
             border-radius: 15px;
@@ -2791,7 +2796,7 @@ const summaryData = [
           .employee-item.top1bet {
             border: 3px solid #f12d0fff;
             box-shadow: 0 0 20px 5px rgba(241, 15, 15, 0.6);
-            
+            transform: scale(1.15);
           }
 
           /* TOP 2 – Viền bạc */
