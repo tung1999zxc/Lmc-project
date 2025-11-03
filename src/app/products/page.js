@@ -741,36 +741,79 @@ const InventoryPage = () => {
         },
       },
       {
-        title: "Nhập VN",
-        dataIndex: "slvn",
-        key: "slvn",
-        width: 80,
-      },
-      {
-        title: "Nhập HQ",
-        key: "sltq",
-        width: 80,
-        render: (_, record) => {
-          const historyContent =
-            record.sltqHistory && record.sltqHistory.length > 0 ? (
-              <ul style={{ padding: 0, margin: 0, listStyle: "none" }}>
-                {record.sltqHistory.map((item, index) => (
-                  <li key={index}>
-                    <strong>Ngày:</strong> {item.date} - <strong>SL:</strong> {item.qty}
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              "Chưa có lịch sử nhập TQ"
-            );
+  title: "Nhập VN",
+  dataIndex: "slvn",
+  key: "slvn",
+  width: 80,
+  render: (_, record) => {
+    const historyContent =
+      record.slvnHistory && record.slvnHistory.length > 0 ? (
+        <ul style={{ padding: 0, margin: 0, listStyle: "none" }}>
+          {record.slvnHistory.map((item, index) => (
+            <li key={index}>
+              <strong>Ngày:</strong> {item.date} - <strong>SL:</strong> {item.qty}
+            </li>
+          ))}
+        </ul>
+      ) : (
+        "Chưa có lịch sử nhập VN"
+      );
 
-          return (
-            <Popover content={historyContent} title="Lịch sử nhập TQ" trigger="hover">
-              <span>{record.sltq}</span>
-            </Popover>
-          );
-        },
-      },
+    const value =
+      record.slvn !== undefined && record.slvn !== null ? Number(record.slvn) : 0;
+
+    // ✅ Nếu có giá trị khác 0 thì bôi đậm
+     const style = {
+      fontWeight: value !== 0 ? "bold" : "normal",
+      color: value !== 0 ? "#000" : "#999",
+      backgroundColor: value !== 0 ? "#e6f7ff" : "transparent",
+      padding: "2px 6px",
+      borderRadius: "4px",
+    };
+
+    return (
+      <Popover content={historyContent} title="Lịch sử nhập VN" trigger="hover">
+        <span style={style}>{value}</span>
+      </Popover>
+    );
+  },
+},
+   {
+  title: "Nhập HQ",
+  key: "sltq",
+  width: 80,
+  render: (_, record) => {
+    const historyContent =
+      record.sltqHistory && record.sltqHistory.length > 0 ? (
+        <ul style={{ padding: 0, margin: 0, listStyle: "none" }}>
+          {record.sltqHistory.map((item, index) => (
+            <li key={index}>
+              <strong>Ngày:</strong> {item.date} - <strong>SL:</strong> {item.qty}
+            </li>
+          ))}
+        </ul>
+      ) : (
+        "Chưa có lịch sử nhập HQ"
+      );
+
+    const value =
+      record.sltq !== undefined && record.sltq !== null ? Number(record.sltq) : 0;
+
+    const style = {
+      fontWeight: value !== 0 ? "bold" : "normal",
+      color: value !== 0 ? "#000" : "#999",
+      backgroundColor: value !== 0 ? "#e6f7ff" : "transparent",
+      padding: "2px 6px",
+      borderRadius: "4px",
+    };
+
+    return (
+      <Popover content={historyContent} title="Lịch sử nhập HQ" trigger="hover">
+        <span style={style}>{value}</span>
+      </Popover>
+    );
+  },
+},
       {
         title: "Hành động",
         key: "actions",

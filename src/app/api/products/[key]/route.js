@@ -3,27 +3,53 @@ import { connectToDatabase } from "../../../../app/lib/mongodb.js";
 
 export async function PUT(request, { params }) {
   try {
-    // Chờ params được giải quyết
     const { key } = await params;
     let data = await request.json();
 
     const updateFields = { ...data };
-    // Loại bỏ các trường không được phép cập nhật
-    delete data._id;
-    delete data.key;
-    delete data.createdAt;
+    delete updateFields._id;
+    delete updateFields.key;
+    delete updateFields.createdAt;
 
     const { db } = await connectToDatabase();
-    // Vì key được tạo bằng Date.now() (kiểu số), chuyển từ chuỗi sang số
     const filter = { key: parseInt(key, 10) };
+
+    // 🔹 Lấy sản phẩm cũ ra để so sánh
+    const oldProduct = await db.collection("products").findOne(filter);
+    if (!oldProduct) {
+      return new Response(
+        JSON.stringify({ error: "Không tìm thấy sản phẩm" }),
+        { status: 404 }
+      );
+    }
+
     let updateDoc = { $set: updateFields };
-    if (data.sltq !== undefined) {
-      updateDoc.$push = {
-        sltqHistory: {
-          qty: data.sltq,
-          date: new Date().toISOString().split("T")[0],
-        },
+    const pushOps = {};
+
+    // 🔹 So sánh sltq
+    if (
+      data.sltq !== undefined &&
+      data.sltq !== oldProduct.sltq
+    ) {
+      pushOps.sltqHistory = {
+        qty: data.sltq,
+        date: new Date().toISOString().split("T")[0],
       };
+    }
+
+    // 🔹 So sánh slvn
+    if (
+      data.slvn !== undefined &&
+      data.slvn !== oldProduct.slvn
+    ) {
+      pushOps.slvnHistory = {
+        qty: data.slvn,
+        date: new Date().toISOString().split("T")[0],
+      };
+    }
+
+    if (Object.keys(pushOps).length > 0) {
+      updateDoc.$push = pushOps;
     }
 
     const result = await db.collection("products").updateOne(filter, updateDoc);
