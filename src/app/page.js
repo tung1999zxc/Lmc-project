@@ -1318,47 +1318,77 @@ const Dashboard = () => {
   }
 
   // Tạo marketingReportData1 mới đúng điều kiện
-  const marketingReportData3 = mktEmployees.map((emp, index) => {
-    const nameLC = emp.name.trim().toLowerCase();
+ const marketingReportData3 = mktEmployees.map((emp, index) => {
+  const nameLC = emp.name.trim().toLowerCase();
 
-    // 1. Doanh số hôm nay
-    const totalToday = orders
-      .filter((order) => {
-        const orderDate = new Date(order.createdAt);
-        return (
-          order.mkt.trim().toLowerCase() === nameLC &&
-          orderDate >= startOfToday &&
-          orderDate < endOfToday
-        );
-      })
-      .reduce((sum, order) => sum + order.profit, 0);
+  // 1️⃣ Doanh số hôm nay
+  const totalToday = orders
+    .filter((order) => {
+      const orderDate = new Date(order.createdAt);
+      return (
+        order.mkt.trim().toLowerCase() === nameLC &&
+        orderDate >= startOfToday &&
+        orderDate < endOfToday
+      );
+    })
+    .reduce((sum, order) => sum + order.profit, 0);
 
-    // 2. Ads trong tháng hiện tại
-    const now = new Date();
-    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-    const endOfMonth = new Date(
-      now.getFullYear(),
-      now.getMonth() + 1,
-      0,
-      23,
-      59,
-      59,
-      999
-    );
+  // 2️⃣ Doanh số từ đầu tháng đến nay
+  const now = new Date();
+  const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+  const endOfMonth = new Date(
+    now.getFullYear(),
+    now.getMonth() + 1,
+    0,
+    23,
+    59,
+    59,
+    999
+  );
 
-    const adsThisMonth = adsMoneyData
-      .filter((ad) => {
-        const adDate = new Date(ad.createdAt);
-        return (
-          ad.name.trim().toLowerCase() === nameLC &&
-          adDate >= startOfMonth &&
-          adDate <= endOfMonth
-        );
-      })
-      .reduce((sum, ad) => sum + (ad.request1 + ad.request2), 0);
+  const totalMonth = orders
+    .filter((order) => {
+      const orderDate = new Date(order.createdAt);
+      return (
+        order.mkt.trim().toLowerCase() === nameLC &&
+        orderDate >= startOfMonth &&
+        orderDate <= endOfMonth
+      );
+    })
+    .reduce((sum, order) => sum + order.profit, 0);
 
-    return { key: index, name: emp.name, totalToday, adsThisMonth };
-  });
+  // 3️⃣ Chi phí ads trong tháng hiện tại (giữ nguyên)
+  const adsThisMonth = adsMoneyData
+    .filter((ad) => {
+      const adDate = new Date(ad.createdAt);
+      return (
+        ad.name.trim().toLowerCase() === nameLC &&
+        adDate >= startOfMonth &&
+        adDate <= endOfMonth
+      );
+    })
+    .reduce((sum, ad) => sum + (ad.request1 + ad.request2), 0);
+
+  return { key: index, name: emp.name, totalToday, totalMonth, adsThisMonth };
+});
+
+// 🧩 Chọn người có doanh số thấp nhất từ đầu tháng
+const warningEmployeesList = marketingReportData3.filter(
+  (emp) => emp.adsThisMonth > 0
+);
+
+const minMonthSales = Math.min(...warningEmployeesList.map(e => e.totalMonth));
+const lowestMonthEmployees = warningEmployeesList.filter(
+  e => e.totalMonth === minMonthSales
+);
+
+// Nếu nhiều người cùng doanh số thấp nhất → chọn ngẫu nhiên 1 người
+const randomEmployee =
+  lowestMonthEmployees.length > 0
+    ? lowestMonthEmployees[Math.floor(Math.random() * lowestMonthEmployees.length)]
+    : null;
+
+const top5Employees2 = randomEmployee ? [randomEmployee] : [];
 
   // Lọc chỉ những người có ads tháng này > 0
   const top5Employees = marketingReportData3
@@ -1366,38 +1396,11 @@ const Dashboard = () => {
     .sort((a, b) => b.totalToday - a.totalToday)
     .slice(0, 2);
   // Lọc ra nhân viên có chi phí ads tháng này > 0
-const warningEmployeesList = marketingReportData3.filter(
-  (emp) => emp.adsThisMonth > 0
-);
 
-// 1️⃣ Tìm doanh số hôm nay thấp nhất
-const minToday = Math.min(...warningEmployeesList.map((e) => e.totalToday));
-
-// 2️⃣ Lọc ra những người có doanh số hôm nay thấp nhất
-const lowestTodayEmployees = warningEmployeesList.filter(
-  (e) => e.totalToday === minToday
-);
-
-// 3️⃣ Trong nhóm đó, tìm doanh số tháng thấp nhất
-const minMonth = Math.min(...lowestTodayEmployees.map((e) => e.adsThisMonth));
-
-// 4️⃣ Lấy tất cả nhân viên có doanh số tháng thấp nhất
-const lowestMonthEmployees = lowestTodayEmployees.filter(
-  (e) => e.adsThisMonth === minMonth
-);
-
-// 5️⃣ Nếu nhiều người cùng thỏa, chọn ngẫu nhiên 1 người
-const randomEmployee =
-  lowestMonthEmployees.length > 0
-    ? lowestMonthEmployees[Math.floor(Math.random() * lowestMonthEmployees.length)]
-    : null;
-
-// 6️⃣ Trả về dạng mảng (để tương thích với code hiển thị cũ)
-const top5Employees2 = randomEmployee ? [randomEmployee] : [];
 
   const top1Employees = marketingReportData3
     .filter((emp) => emp.adsThisMonth > 0)
-    .sort((a, b) => b.totalToday - a.totalToday)
+    .sort((a, b) => a.totalToday - b.totalToday)
     .slice(0, 1);
 
   // Lọc ra các thành viên mkt thuộc team của currentUser
