@@ -1365,15 +1365,36 @@ const Dashboard = () => {
     .filter((emp) => emp.adsThisMonth > 0)
     .sort((a, b) => b.totalToday - a.totalToday)
     .slice(0, 2);
-  const top5Employees2List = marketingReportData3
-    .filter((emp) => emp.adsThisMonth > 0)
-    .sort((a, b) => a.totalToday - b.totalToday)
-    .slice(0, 8);
- 
-const top5Employees2 =
-  top5Employees2List.length > 0
-    ? [top5Employees2List[Math.floor(Math.random() * top5Employees2List.length)]]
-    : [];
+  // Lọc ra nhân viên có chi phí ads tháng này > 0
+const warningEmployeesList = marketingReportData3.filter(
+  (emp) => emp.adsThisMonth > 0
+);
+
+// 1️⃣ Tìm doanh số hôm nay thấp nhất
+const minToday = Math.min(...warningEmployeesList.map((e) => e.totalToday));
+
+// 2️⃣ Lọc ra những người có doanh số hôm nay thấp nhất
+const lowestTodayEmployees = warningEmployeesList.filter(
+  (e) => e.totalToday === minToday
+);
+
+// 3️⃣ Trong nhóm đó, tìm doanh số tháng thấp nhất
+const minMonth = Math.min(...lowestTodayEmployees.map((e) => e.adsThisMonth));
+
+// 4️⃣ Lấy tất cả nhân viên có doanh số tháng thấp nhất
+const lowestMonthEmployees = lowestTodayEmployees.filter(
+  (e) => e.adsThisMonth === minMonth
+);
+
+// 5️⃣ Nếu nhiều người cùng thỏa, chọn ngẫu nhiên 1 người
+const randomEmployee =
+  lowestMonthEmployees.length > 0
+    ? lowestMonthEmployees[Math.floor(Math.random() * lowestMonthEmployees.length)]
+    : null;
+
+// 6️⃣ Trả về dạng mảng (để tương thích với code hiển thị cũ)
+const top5Employees2 = randomEmployee ? [randomEmployee] : [];
+
   const top1Employees = marketingReportData3
     .filter((emp) => emp.adsThisMonth > 0)
     .sort((a, b) => b.totalToday - a.totalToday)
@@ -2793,11 +2814,40 @@ const summaryData = [
             box-shadow: 0 0 20px 5px rgba(26, 241, 15, 0.6);
             transform: scale(1.1);
           }
+
           .employee-item.top1bet {
-            border: 3px solid #f12d0fff;
-            box-shadow: 0 0 20px 5px rgba(241, 15, 15, 0.6);
-            transform: scale(1.15);
-          }
+  position: relative;
+  border: 3px solid #f12d0f;
+  box-shadow: 0 0 20px 5px rgba(241, 15, 15, 0.6);
+  transform: scale(1.15);
+  overflow: hidden; /* để không bị tràn đường chéo */
+}
+
+/* thêm gạch chéo đỏ */
+.employee-item.top1bet::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: -10%;
+  width: 120%;
+  height: 6px;
+  background: #f12d0f;
+  transform: rotate(-25deg);
+  transform-origin: center;
+  box-shadow: 0 0 5px rgba(241, 15, 15, 0.8);
+}
+  .employee-item.top1bet::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: -10%;
+  width: 120%;
+  height: 6px;
+  background: #f12d0f;
+  transform: rotate(25deg);
+  transform-origin: center;
+  box-shadow: 0 0 5px rgba(241, 15, 15, 0.8);
+}
 
           /* TOP 2 – Viền bạc */
           .employee-item.top2 {
