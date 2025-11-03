@@ -1400,7 +1400,7 @@ const top5Employees2 = randomEmployee ? [randomEmployee] : [];
 
   const top1Employees = marketingReportData3
     .filter((emp) => emp.adsThisMonth > 0)
-    .sort((a, b) => a.totalToday - b.totalToday)
+    .sort((a, b) => b.totalToday - a.totalToday)
     .slice(0, 1);
 
   // Lọc ra các thành viên mkt thuộc team của currentUser
