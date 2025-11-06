@@ -830,11 +830,11 @@ const InventoryPage = () => {
           if (
             currentUser?.position === "admin" ||
             currentUser?.position === "managerSALE" ||
-            currentUser?.name === "Đỗ Uyển Nhi"
+            currentUser?.name === "Đỗ Uyển Nhi" || currentUser?.name === "Diệp Anh"
           ) {
             return (
               <Space>
-                <Button icon={<PlusOutlined />} onClick={() => handleAddImport(record)} />
+                <Button disabled={currentUser?.name === "Diệp Anh"} icon={<PlusOutlined />} onClick={() => handleAddImport(record)} />
                 <Button icon={<EditOutlined />} onClick={() => handleEditProduct(record)} />
                 <Popconfirm title="Xóa bản ghi?" onConfirm={() => handleDeleteProduct(record)}>
                   <Button danger icon={<DeleteOutlined />} />
