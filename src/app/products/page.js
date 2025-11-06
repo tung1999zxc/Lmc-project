@@ -363,6 +363,10 @@ const InventoryPage = () => {
       "TAI NGHE AI - TRẮNG": { slAmAdd: 2 },
       "TAI NGHE AI - TÍM": { slAmAdd: 2 },
       "GÓI NHUỘM TÓC - ĐEN": { slAmAdd: 2 },
+      "ĐỒNG HỒ CẢM ỨNG MẶT VUÔNG - ĐEN": { slAmAdd: 2 },
+      "ĐỒNG HỒ CẢM ỨNG MẶT VUÔNG - CAM": { slAmAdd: 1 },
+      "ĐỒNG HỒ CẢM ỨNG MẶT VUÔNG - VÀNG": { slAmAdd: 1 },
+      "GÓI NHUỘM TÓC - ĐEN": { slAmAdd: 2 },
     }),
     []
   );
@@ -655,6 +659,9 @@ const InventoryPage = () => {
           let value = agg.ordersDone;
           if (record.name === "KEM NỀN THỎI") value = value - 2;
           if (record.name === "MẶT NẠ BONG BÓNG") value = value - 28;
+          if (record.name === "ĐỒNG HỒ CẢM ỨNG MẶT VUÔNG - ĐEN") value = value - 2;
+          if (record.name === "ĐỒNG HỒ CẢM ỨNG MẶT VUÔNG - CAM") value = value - 1;
+          if (record.name === "ĐỒNG HỒ CẢM ỨNG MẶT VUÔNG - VÀNG") value = value - 1;
           if (record.name === "KÍNH NỮ") value = value - 1;
           if (record.name === "TAI NGHE AI - TRẮNG") value = value - 2;
           if (record.name === "TAI NGHE AI - TÍM") value = value - 2;
