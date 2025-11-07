@@ -39,11 +39,11 @@ export default function EmployeeManagement() {
   const [searchText, setSearchText] = useState("");
 
   const positions = [
-    { label: "ADMIN", value: "admin" },
-    { label: "Trưởng phòng MKT", value: "managerMKT" },
-    { label: "Trưởng phòng Sale", value: "managerSALE" },
+    // { label: "ADMIN", value: "admin" },
+    // { label: "Trưởng phòng MKT", value: "managerMKT" },
+    // { label: "Trưởng phòng Sale", value: "managerSALE" },
     { label: "Lead Maketing", value: "lead" },
-    { label: "Lead Sale", value: "leadSALE" },
+    // { label: "Lead Sale", value: "leadSALE" },
     { label: "Nhân viên MKT", value: "mkt" },
     { label: "Nhân viên Sale nhập đơn", value: "salenhapdon" },
     { label: "Nhân viên Sale xác nhận đơn", value: "salexacnhan" },
