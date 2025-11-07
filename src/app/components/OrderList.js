@@ -3083,7 +3083,27 @@ const handleResetAllSTT = async () => {
       : []),
         
         { title: 'SĐT', dataIndex: 'phone', key: 'phone' },
-      { title: 'Ngày đặt', dataIndex: 'orderDate', key: 'orderDate',render: (text) => dayjs(text).format("DD/MM"), },
+      { title: 'Ngày đặt', dataIndex: 'orderDate4', key: 'orderDate',render: (text, record) => {
+        // Kiểm tra nếu orderDate4 không hợp lệ thì lấy orderDate
+        const dateValue = text || record.orderDate;
+    
+        if (!dateValue) return "N/A"; // Nếu không có cả hai giá trị, hiển thị "N/A"
+    
+        const formattedDate = dayjs(dateValue).isValid()
+          ? dayjs(dateValue).format("DD/MM")
+          : "N/A";
+        const formattedTime = dayjs(dateValue).isValid()
+          ? dayjs(dateValue).format("HH:mm:ss")
+          : "N/A";
+    
+        return (
+          <div>
+            {formattedDate}
+            <br />
+            {formattedTime}
+          </div>
+        );
+      }, },
       { title: 'STT', dataIndex: 'stt', key: 'stt' },
        ...((currentUser.position === "leadSALE" || currentUser.position === "managerSALE" )
       ? [
