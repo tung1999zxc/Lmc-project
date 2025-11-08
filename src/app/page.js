@@ -2671,7 +2671,7 @@ const summaryData = [
                   <span className="employee-name">{emp.name}</span>
                   <br />
                   {index === 0 && (
-                    <span className="top-badge">Cảnh báo doanh số thấp</span>
+                    <span className="top-badge">NHẤT NHẦN NHÂN</span>
                   )}
                   <br />
                  
@@ -2826,31 +2826,7 @@ const summaryData = [
   overflow: hidden; /* để không bị tràn đường chéo */
 }
 
-/* thêm gạch chéo đỏ */
-.employee-item.top1bet::before {
-  content: "";
-  position: absolute;
-  top: 50%;
-  left: -10%;
-  width: 120%;
-  height: 6px;
-  background: #f12d0f;
-  transform: rotate(-25deg);
-  transform-origin: center;
-  box-shadow: 0 0 5px rgba(241, 15, 15, 0.8);
-}
-  .employee-item.top1bet::after {
-  content: "";
-  position: absolute;
-  top: 50%;
-  left: -10%;
-  width: 120%;
-  height: 6px;
-  background: #f12d0f;
-  transform: rotate(25deg);
-  transform-origin: center;
-  box-shadow: 0 0 5px rgba(241, 15, 15, 0.8);
-}
+
 
           /* TOP 2 – Viền bạc */
           .employee-item.top2 {
