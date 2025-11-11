@@ -424,7 +424,7 @@ const resetPagename =()=>{
         (order) => order.saleReport === "DONE"
       );
     } else if (currentUser.position === "lead") {
-      if (currentUser.name === "Phan Thế Phong") {
+      if (currentUser.name === "Phan Phong") {
         roleFilteredOrders = roleFilteredOrders.filter((order) =>
           leadTeamMembers.includes(order.mkt.trim().toLowerCase()) ||
           order.mkt.trim().toLowerCase() === "bùi văn phi".toLowerCase()||
