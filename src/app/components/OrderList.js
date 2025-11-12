@@ -1475,6 +1475,8 @@ onChange={(e) => handleColumnSelect("istick", e.target.checked)}
       dataIndex: "profit",
       key: "profit",
     },
+     ...( currentUser.position !== "salexuly"
+      ? [
     {
       title: (
         <Checkbox
@@ -1486,7 +1488,11 @@ onChange={(e) => handleColumnSelect("istick", e.target.checked)}
       ),
       dataIndex: "sale",
       key: "sale",
-    },
+    }
+     ]
+      : []),
+      ...( currentUser.position !== "salenhapdon" &&currentUser.position !== "salefull"
+      ? [
     {
       title: (
         <Checkbox
@@ -1499,20 +1505,22 @@ onChange={(e) => handleColumnSelect("istick", e.target.checked)}
       dataIndex: "salexuly",
       key: "salexuly",
     },
-    {
-      title: (
-        <Checkbox
-          checked={selectedColumns.includes("salexacnhan")}
-          onChange={(e) => handleColumnSelect("salexacnhan", e.target.checked)}
-        >
-          SALE XÁC NHẬN
-        </Checkbox>
-      ),
-      dataIndex: "salexacnhan",
-      key: "salexacnhan",
-    },
+     ]
+      : []),
+    // {
+    //   title: (
+    //     <Checkbox
+    //       checked={selectedColumns.includes("salexacnhan")}
+    //       onChange={(e) => handleColumnSelect("salexacnhan", e.target.checked)}
+    //     >
+    //       SALE XÁC NHẬN
+    //     </Checkbox>
+    //   ),
+    //   dataIndex: "salexacnhan",
+    //   key: "salexacnhan",
+    // },
     
-    ...(currentUser.position !== "salenhapdon"
+    ...(currentUser.position !== "salenhapdon" && currentUser.position !== "salexuly" &&currentUser.position !== "salefull"
       ? [
         {
           title: (
@@ -1584,6 +1592,30 @@ onChange={(e) => handleColumnSelect("istick", e.target.checked)}
         <Tag color={text === "ĐÃ THANH TOÁN" ? "green" : "red"}>{text}</Tag>
       ),
     },
+    ...(currentUser.position === "salenhapdon" || currentUser.position === "salexuly" ||currentUser.position === "salefull"
+      ? [
+    {
+          title: (
+            <Checkbox
+              checked={selectedColumns.includes("note")}
+              onChange={(e) => handleColumnSelect("note", e.target.checked)}
+            >
+              GHI CHÚ SALE
+            </Checkbox>
+          ),
+          dataIndex: "note",
+          key: "note",
+          width: 200,
+          render: (text) => {
+            if (!text) return ""; // Tránh lỗi nếu note rỗng hoặc null
+            const parts = text.split(":");
+            return <div style={{ width: 200 }}><h3>{parts.length > 1 ? parts.slice(1).join(":").trim() : text}</h3></div>;
+          },
+        },
+          ]
+      : []),
+        ...(currentUser.position !== "salenhapdon" && currentUser.position !== "salexuly" &&currentUser.position !== "salefull"
+      ? [
     {
       title: (
         <Checkbox
@@ -1597,6 +1629,8 @@ onChange={(e) => handleColumnSelect("istick", e.target.checked)}
       key: "note",
       render: (text) => <div style={{ width: 200,  }}><h3>{text} </h3></div>,
     },
+      ]
+      : []),
     {
       title: (
         <Checkbox
