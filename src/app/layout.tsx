@@ -11,7 +11,7 @@ import { usePathname } from "next/navigation";
 import SidebarMenu from "./components/SidebarMenu";
 // import PraiseBanner2 from './components/PraiseBanner2'
 import Script from "next/script";
-// import CurrentUserSelector from "./components/CurrentUserSelector";
+import CurrentUserSelector from "./components/CurrentUserSelector";
 import { motion, useAnimation } from "framer-motion";
 import GlobalNotification from "./components/GlobalNotification";
 
@@ -126,8 +126,8 @@ function InnerDashboardLayout({ children }: { children: ReactNode }) {
             >
               {currentUser.name}
             </div>
-            {/* <CurrentUserSelector />
-          <PraiseBanner2 /> */}
+            {/* <CurrentUserSelector /> */}
+            {/* <PraiseBanner2 /> */}
             <Button
               type="primary"
               icon={<LogoutOutlined />}
@@ -164,91 +164,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
       <body>
         <Provider store={store}>
           <InnerDashboardLayout>{children}</InnerDashboardLayout>
-          <Script
-            id="chatango-script"
-            strategy="afterInteractive"
-            dangerouslySetInnerHTML={{
-              __html: `
-          (function() {
-            var wrapper = document.createElement("div");
-            wrapper.id = "chatango-wrapper";
-            wrapper.style.position = "fixed";
-            wrapper.style.bottom = "80px";
-            wrapper.style.right = "20px";
-            wrapper.style.zIndex = "99999";
-            wrapper.style.borderRadius = "10px";
-            wrapper.style.overflow = "hidden";
-            wrapper.style.boxShadow = "0 4px 20px rgba(0,0,0,0.2)";
-            wrapper.style.background = "white";
-            wrapper.style.width = "307px";
-            wrapper.style.height = "765px";
-            wrapper.style.display = "none";
 
-            var chatango = document.createElement("script");
-            chatango.id = "cid0020000361180134082";
-            chatango.src = "//st.chatango.com/js/gz/emb.js";
-            chatango.async = true;
-            chatango.setAttribute("data-cfasync", "false");
-            chatango.style.width = "307px";
-            chatango.style.height = "765px";
-            chatango.innerHTML = '{"handle":"lmcroom","arch":"js","styles":{"a":"33cc00","b":100,"c":"FFFFFF","d":"FFFFFF","k":"33cc00","l":"33cc00","m":"33cc00","n":"FFFFFF","p":"11","q":"33cc00","r":100,"usricon":0,"surl":0,"cnrs":"0.74","fwtickm":1,"v":"0"}}';
-
-            wrapper.appendChild(chatango);
-            document.body.appendChild(wrapper);
-
-            var toggleButton = document.createElement("button");
-            toggleButton.id = "chatango-toggle";
-            toggleButton.innerHTML = "💬";
-            toggleButton.style.position = "fixed";
-            toggleButton.style.bottom = "20px";
-            toggleButton.style.right = "20px";
-            toggleButton.style.width = "60px";
-            toggleButton.style.height = "60px";
-            toggleButton.style.borderRadius = "50%";
-            toggleButton.style.border = "none";
-            toggleButton.style.background = "#0078FF";
-            toggleButton.style.color = "white";
-            toggleButton.style.fontSize = "28px";
-            toggleButton.style.cursor = "pointer";
-            toggleButton.style.boxShadow = "0 4px 10px rgba(0,0,0,0.3)";
-            toggleButton.style.zIndex = "100000";
-
-            toggleButton.onmouseenter = () => toggleButton.style.background = "#005FCC";
-            toggleButton.onmouseleave = () => toggleButton.style.background = "#0078FF";
-
-            toggleButton.onclick = function() {
-              var chatBox = document.getElementById("chatango-wrapper");
-              if (!chatBox) return;
-              if (chatBox.style.display === "none") {
-                chatBox.style.display = "block";
-              } else {
-                chatBox.style.display = "none";
-              }
-            };
-
-            document.body.appendChild(toggleButton);
-
-            // ✅ CSS ẩn tiêu đề mặc định của Chatango
-            var style = document.createElement('style');
-            style.innerHTML = \`
-              #chatango-wrapper iframe {
-                border: none !important;
-              }
-              #chatango-wrapper .cg-head,
-              #chatango-wrapper .cg-titlebar,
-              #chatango-wrapper .chtitle,
-              #chatango-wrapper .header,
-              #chatango-wrapper [id*="title"] {
-                display: none !important;
-                height: 0 !important;
-                overflow: hidden !important;
-              }
-            \`;
-            document.head.appendChild(style);
-          })();
-        `,
-            }}
-          />
         </Provider>
         {/* 👇 Thêm đoạn này ngay trước </body> */}
 
