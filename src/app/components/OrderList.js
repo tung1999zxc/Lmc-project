@@ -1493,7 +1493,23 @@ onChange={(e) => handleColumnSelect("istick", e.target.checked)}
       dataIndex: "profit",
       key: "profit",
     },
-     ...( currentUser.position !== "salexuly"
+     ...( currentUser.position !== "salexuly" && currentUser.position !== "salenhapdon"
+      ? [
+    {
+      title: (
+        <Checkbox
+          checked={selectedColumns.includes("sale")}
+          onChange={(e) => handleColumnSelect("sale", e.target.checked)}
+        >
+          SALE
+        </Checkbox>
+      ),
+      dataIndex: "sale",
+      key: "sale",
+    }
+     ]
+      : []),
+     ...( currentUser.name === "Nguyễn Thị Xuân Ánh" 
       ? [
     {
       title: (
