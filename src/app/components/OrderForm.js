@@ -622,7 +622,7 @@ const productOptions = products.map((p) => p.name);
                 >
                   <Input type="number" />
                 </Form.Item>
-                <Form.Item label="SALE CHAT" name="sale" initialValue={currentUser.name}>
+                <Form.Item label="SALE CHAT" name="sale" initialValue={currentUser.name}  hidden={currentUser.position==='salenhapdon'||currentUser.position==='salexuly'}>
                
                   <Select
                     disabled={
@@ -645,8 +645,8 @@ const productOptions = products.map((p) => p.name);
                 </Form.Item>
                 
                
-                <Form.Item label="VẬN ĐƠN" name="salexuly" initialValue={namesalexuly}>
-  <Select showSearch
+                <Form.Item label="VẬN ĐƠN" name="salexuly" initialValue={namesalexuly} hidden={currentUser.position==='salenhapdon'||currentUser.position==='salexuly'}>
+  <Select showSearch 
     disabled={
       (currentUser.position === "salexuly" ||
       currentUser.position === "salenhapdon" ||
