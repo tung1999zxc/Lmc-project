@@ -55,6 +55,7 @@ const OrderList = () => {
   const [initialOrders4, setInitialOrders4] = useState([]); 
   const [loading, setLoading] = useState(false);
   const [shiftFilter, setShiftFilter] = useState(null);
+  const [shiftFilter2, setShiftFilter2] = useState(null);
   const [totalRevenue, setTotalRevenue] = useState(0);
   const [sttInput, setSttInput] = useState("");
   const [codeInput, setCodeInput] = useState("");
@@ -388,6 +389,15 @@ const resetPagename =()=>{
       )
       .map((employee) => employee.name)
   : employees.map((employee) => employee.name);  
+  const filteredEmpIds2 = shiftFilter2
+  ? employees
+      .filter(
+        (employee) =>
+          employee.team_id &&
+          employee.team_id.toLowerCase() === shiftFilter2.toLowerCase()
+      )
+      .map((employee) => employee.name)
+  : employees.map((employee) => employee.name);  
   // Lọc đơn hàng dựa trên vai trò và các filter được chọn
 
 
@@ -494,6 +504,13 @@ const resetPagename =()=>{
       !filteredEmpIds
         .map((name) => name.trim().toLowerCase())
         .includes(order.sale.trim().toLowerCase())
+    ) {
+      return false;
+    }
+    if (
+      !filteredEmpIds2
+        .map((name) => name.trim().toLowerCase())
+        .includes(order.mkt.trim().toLowerCase())
     ) {
       return false;
     }
@@ -691,7 +708,8 @@ case "odd_stt":
     leadTeamMembers,
     searchCustomerName,
     searchCustomerName2,
-    shiftFilter 
+    shiftFilter,
+    shiftFilter2 
   ]);
   const customerNameCountMap = useMemo(() => {
     if (currentUser.name !== 'Tung99') return [];
@@ -2828,6 +2846,21 @@ const handleResetAllSTT = async () => {
     <Option value="onlinetoi">Ca Online Tối</Option>
     <Option value="onlinesang">Ca Online Sáng</Option>
   </Select>
+          <Select
+    value={shiftFilter2}
+    onChange={(value) => setShiftFilter2(value)}
+    style={{ width: 250, marginRight: 16 }}
+    placeholder="Chọn Team"
+    allowClear
+  >
+    <Option value="SON">TEAM SƠN</Option>
+        <Option value="QUAN">TEAM QUÂN</Option>
+        <Option value="PHONG">TEAM PHONG</Option>
+        <Option value="TUANANH">TEAM TUẤN ANH</Option>
+        <Option value="DIEN">TEAM DIỆN</Option>
+        <Option value="DIEU">TEAM DIỆU</Option>
+        <Option value="PHI">TEAM PHI</Option>
+  </Select>
   <Input.Search
   placeholder="CHECK KHÁCH"
   enterButton="CHECK"
@@ -3116,6 +3149,7 @@ const handleResetAllSTT = async () => {
         ]
       : []),
         
+        { title: 'Doanh số', dataIndex: 'revenue', key: 'revenue' },
         { title: 'SĐT', dataIndex: 'phone', key: 'phone' },
       { title: 'Ngày đặt', dataIndex: 'orderDate4', key: 'orderDate',render: (text, record) => {
         // Kiểm tra nếu orderDate4 không hợp lệ thì lấy orderDate
