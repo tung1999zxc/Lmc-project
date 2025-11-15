@@ -507,13 +507,14 @@ const resetPagename =()=>{
     ) {
       return false;
     }
-    if (
-      !filteredEmpIds2
-        .map((name) => name.trim().toLowerCase())
-        .includes(order.mkt.trim().toLowerCase())
-    ) {
-      return false;
-    }
+ if (
+  order.mkt.trim() !== "" &&
+  !filteredEmpIds2
+    .map((name) => name.trim().toLowerCase())
+    .includes(order.mkt.trim().toLowerCase())
+) {
+  return false;
+}
 
         // Điều kiện lọc theo từ khóa tìm kiếm
         const searchMatch = (() => {
