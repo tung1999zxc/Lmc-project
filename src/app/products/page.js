@@ -367,6 +367,8 @@ const InventoryPage = () => {
       "ĐỒNG HỒ CẢM ỨNG MẶT VUÔNG - CAM": { slAmAdd: 1 },
       "ĐỒNG HỒ CẢM ỨNG MẶT VUÔNG - VÀNG": { slAmAdd: 1 },
       "GÓI NHUỘM TÓC - ĐEN": { slAmAdd: 2 },
+      "THỎI NÉN NHUỘM TÓC - NÂU": { slAmAdd: 10 },
+      "XỊT MŨI XIMONTH": { slAmAdd: 5 },
     }),
     []
   );
@@ -666,6 +668,9 @@ const InventoryPage = () => {
           if (record.name === "TAI NGHE AI - TRẮNG") value = value - 2;
           if (record.name === "TAI NGHE AI - TÍM") value = value - 2;
           if (record.name === "GÓI NHUỘM TÓC - ĐEN") value = value - 2;
+          if (record.name === "GÓI NHUỘM TÓC - ĐEN") value = value - 2;
+          if (record.name === "XỊT MŨI XIMONTH") value = value - 5;
+          if (record.name === "THỎI NÉN NHUỘM TÓC - NÂU") value = value - 10;
           return value;
         },
       },
