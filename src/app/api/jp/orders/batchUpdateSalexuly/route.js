@@ -1,5 +1,5 @@
 // src/app/api/orders/batchUpdateSalexuly/route.js
-import { connectToDatabase } from '../../../../app/lib/mongodb.js';
+import { connectToDatabase } from '../../../../../app/lib/mongodb2.js';
 
 export async function POST(req) {
   try {

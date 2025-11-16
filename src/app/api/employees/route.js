@@ -19,6 +19,8 @@ export async function POST(req) {
       position_team,
       position_team2,
       status,
+      quocgia,
+      khuvuc,
     } = body;
 
     // Kiểm tra các trường bắt buộc
@@ -53,6 +55,8 @@ export async function POST(req) {
       name,
       position,
       status,
+      quocgia,
+      khuvuc,
       team_id: team_id || null,
       position_team: position_team || null,
       position_team2: position_team2 || null,
@@ -125,6 +129,32 @@ export async function GET(req) {
     );
   } catch (error) {
     console.error("Lỗi trong GET /api/employees:", error);
+    return new Response(JSON.stringify({ error: "Lỗi server nội bộ" }), {
+      status: 500,
+    });
+  }
+}
+
+export async function PATCH(req) {
+  try {
+    const { db } = await connectToDatabase();
+    
+    // Cập nhật trường khuvuc = 'pvd' cho TẤT CẢ document trong collection "employees"
+    const result = await db
+      .collection("employees")
+      .updateMany(
+        {}, // Bộ lọc rỗng áp dụng cho tất cả
+        { $set: { khuvuc: "pvd" } } // Đặt khuvuc = 'pvd'
+      );
+
+    return new Response(
+      JSON.stringify({
+        message: `Đã cập nhật ${result.modifiedCount} nhân viên về khu vực 'Phạm Văn Đồng'`,
+      }),
+      { status: 200 }
+    );
+  } catch (error) {
+    console.error("Lỗi trong PATCH /api/employees:", error);
     return new Response(JSON.stringify({ error: "Lỗi server nội bộ" }), {
       status: 500,
     });

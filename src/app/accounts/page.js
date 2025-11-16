@@ -58,6 +58,18 @@ export default function EmployeeManagement() {
     { label: "MKT", value: "mkt" },
     { label: "Kho", value: "kho" },
   ];
+  const quocgia = [
+    { label: "Hàn", value: "kr" },
+    { label: "Nhật Bản", value: "jp" },
+    { label: "Đài Loan", value: "tw" },
+    
+  ];
+  const khuvuc = [
+    { label: "Phạm Văn Đồng", value: "pvd" },
+    { label: "Đông Anh", value: "da" },
+
+    
+  ];
   const position_team2 = [
     { label: "Online Sáng", value: "onlinesang" },
     { label: "Online Tối", value: "onlinetoi" },
@@ -114,7 +126,26 @@ export default function EmployeeManagement() {
     const pt = position_team2.find((pt) => pt.value === ptValue);
     return pt ? pt.label : ptValue;
   };
-
+  const getPositionTeamLabel3 = (ptValue) => {
+    const pt = quocgia.find((pt) => pt.value === ptValue);
+    return pt ? pt.label : ptValue;
+  };
+  const getPositionTeamLabel4 = (ptValue) => {
+    const pt = khuvuc.find((pt) => pt.value === ptValue);
+    return pt ? pt.label : ptValue;
+  };
+const handleMassUpdateKhuvuc = async () => {
+   
+        try {
+          const res = await axios.patch("/api/employees"); // Gọi API PATCH mới
+          message.success(res.data.message);
+          await fetchEmployees(); // Làm mới danh sách sau khi cập nhật
+        } catch (error) {
+          console.error(error);
+          message.error("Lỗi khi cập nhật khu vực hàng loạt");
+        }
+   
+  };
   const columns = [
     { title: "Mã NV", dataIndex: "employee_code" },
     { title: "Tài khoản", dataIndex: "username" },
@@ -138,6 +169,16 @@ export default function EmployeeManagement() {
       title: "Ca làm việc",
       dataIndex: "position_team2",
       render: (value) => getPositionTeamLabel2(value),
+    },
+    {
+      title: "Quốc gia",
+      dataIndex: "quocgia",
+      render: (value) => getPositionTeamLabel3(value),
+    },
+    {
+      title: "Khu Vực",
+      dataIndex: "khuvuc",
+      render: (value) => getPositionTeamLabel4(value),
     },
     {
       title: "Thao tác",
@@ -215,6 +256,8 @@ export default function EmployeeManagement() {
       position_team: employee.position_team,
       position_team2: employee.position_team2,
       status: employee.status,
+      quocgia: employee.quocgia,
+      khuvuc: employee.khuvuc,
     });
   };
 
@@ -231,6 +274,9 @@ export default function EmployeeManagement() {
       team_id: values.team_id,
       position_team: values.position_team,
       position_team2: values.position_team2,
+      quocgia: values.quocgia,
+      khuvuc: values.khuvuc,
+      status: values.status,
     };
 
     try {
@@ -399,6 +445,30 @@ const visibleEmployees =
             }))}
           />
         </Form.Item>
+         <Form.Item
+                label="Quốc Gia"
+                name="quocgia"
+              >
+                <Select
+                 disabled={currentUser.position !== "admin" && currentUser.position !== "managerSALE"}
+                  options={quocgia.map((p) => ({
+                    label: p.label,
+                    value: p.value,
+                  }))}
+                />
+              </Form.Item>
+              <Form.Item
+                label="Khu vực"
+                name="khuvuc"
+              >
+                <Select
+                 disabled={currentUser.position !== "admin" && currentUser.position !== "managerSALE"}
+                  options={khuvuc.map((p) => ({
+                    label: p.label,
+                    value: p.value,
+                  }))}
+                />
+              </Form.Item>
 
         <Form.Item>
           <Button type="primary" htmlType="submit" loading={loading}>
@@ -509,6 +579,28 @@ const visibleEmployees =
                 />
               </Form.Item>
               <Form.Item
+                label="Quốc Gia"
+                name="quocgia"
+              >
+                <Select
+                  options={quocgia.map((p) => ({
+                    label: p.label,
+                    value: p.value,
+                  }))}
+                />
+              </Form.Item>
+              <Form.Item
+                label="Khu vực"
+                name="khuvuc"
+              >
+                <Select
+                  options={khuvuc.map((p) => ({
+                    label: p.label,
+                    value: p.value,
+                  }))}
+                />
+              </Form.Item>
+              <Form.Item
                 label="status"
                 name="status"
                 initialValue={true}
@@ -532,7 +624,10 @@ const visibleEmployees =
             </Form>
           </Card>
         </Col>
-
+{/* <Button type="primary" onClick={handleMassUpdateKhuvuc}>
+            Cập nhật Khu vực về PVD (Tất cả)
+          </Button> */}
+          
         <Col span={16}>
           <Card
             title="Danh sách nhân viên"

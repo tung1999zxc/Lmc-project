@@ -68,7 +68,7 @@ const Dashboard = () => {
       const dates = getDateRange();
     const start = dates[0];
     const end = dates[dates.length - 1];
-    const response = await axios.get(`/api/ordersMKT?start=${start}&end=${end}`);
+    const response = await axios.get(`/api/tw/ordersMKT?start=${start}&end=${end}`);
       setSafeOrders(response.data.data);
     } catch (error) {
       console.error(error);
@@ -220,7 +220,7 @@ const Dashboard = () => {
             p.mkt.trim().toLowerCase() === employeeName.trim().toLowerCase() &&
             filterSampleOrdersByPeriod(p)
         )
-        .reduce((sum, p) => sum + p.profit, 0) * 17000;
+        .reduce((sum, p) => sum + p.profit, 0) * 800;
     return totalProfit * 0.95;
   };
   const computeTotalADS = (employeeName) => {
@@ -267,7 +267,7 @@ const Dashboard = () => {
     const dates = getDateRange();
     const start = dates[0];
     const end = dates[dates.length - 1];
-    const response = await axios.get(`/api/recordsMKT?start=${start}&end=${end}`);
+    const response = await axios.get(`/api/tw/recordsMKT?start=${start}&end=${end}`);
     setRecords(response.data.data);
   } catch (error) {
     console.error(error);
@@ -308,14 +308,14 @@ const Dashboard = () => {
     try {
       if (editingRecord) {
         const response = await axios.put(
-          `/api/recordsMKT/${editingRecord.id}`,
+          `/api/tw/recordsMKT/${editingRecord.id}`,
           newRecord
         );
         messageApi.success(response.data.message || "Cập nhật thành công");
 
         fetchRecords();
       } else {
-        const response = await axios.post("/api/recordsMKT", newRecord);
+        const response = await axios.post("/api/tw/recordsMKT", newRecord);
         messageApi.success(response.data.message || "Thêm mới thành công");
       }
       fetchRecords();
@@ -374,7 +374,7 @@ const Dashboard = () => {
       if (record.totalReceived !== 0) {
         record.isLocked = true;
       } else record.isLocked = false;
-      const response = await axios.put(`/api/recordsMKT/${record.id}`, record);
+      const response = await axios.put(`/api/tw/recordsMKT/${record.id}`, record);
       messageApi.success(response.data.message || "Lưu thành công");
       alert("Thao tác thành công!");
       fetchRecords();
@@ -459,7 +459,7 @@ const Dashboard = () => {
           );
           return matchedEmployee && isMatchTeam(matchedEmployee.employee_code);
         })
-        .reduce((sum, order) => sum + order.profit, 0) * 17000;
+        .reduce((sum, order) => sum + order.profit, 0) * 800;
 
     const adsSang = records
       .filter((r) => r.date === date && isMatchTeam(r.userId))
@@ -657,7 +657,7 @@ const Dashboard = () => {
 
   const onDelete = async (record) => {
     try {
-      const response = await axios.delete(`/api/recordsMKT/${record.id}`);
+      const response = await axios.delete(`/api/tw/recordsMKT/${record.id}`);
 
       let key = "loading";
       message.loading({ content: "Đang xử lý...", key, duration: 2 });
@@ -701,7 +701,7 @@ const Dashboard = () => {
     } else if (currentUser.position_team === "kho") {
       filtered = [];
     }
-     if (currentUser?.name !== "Tung99" ) {
+     if (currentUser?.name !== "Tung99") {
     filtered = filtered.filter(
       (record) => record.name.trim().toLowerCase() !== "tung99"
     );
@@ -840,7 +840,7 @@ const Dashboard = () => {
           record.date,
           record.name
         );
-        return (totalSalesForSelectedDate * 0.95 * 17000).toLocaleString(
+        return (totalSalesForSelectedDate * 0.95 * 800).toLocaleString(
           "vi-VN"
         );
       },
@@ -853,7 +853,7 @@ const Dashboard = () => {
           record.date,
           record.name
         );
-        const total = totalSalesForSelectedDate * 17000 * 0.95;
+        const total = totalSalesForSelectedDate * 800 * 0.95;
         if (totalSalesForSelectedDate === 0) return 0;
         const percent = Number(
           ((record.request1 + record.request2) / total) * 100
