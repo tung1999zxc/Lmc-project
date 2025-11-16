@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useMemo } from "react";
 import dynamic from "next/dynamic";
 import {
-  Select,
+  Select,Radio ,
   Row,
   Col,
   Table,
@@ -29,6 +29,7 @@ const Dashboard = () => {
   const today = new Date().toISOString().split("T")[0];
   const [selectedDate, setSelectedDate] = useState(today);
   const [selectedPreset, setSelectedPreset] = useState("currentMonth");
+  const [selectedArea, setSelectedArea] = useState("all");
   // Ngày hiện tại định dạng YYYY-MM-DD
 
   // State cho bộ lọc: selectedDate mặc định là ngày hiện tại, và preset
@@ -118,6 +119,22 @@ const Dashboard = () => {
   const filteredEmployees = isTeamLead
     ? employees.filter((emp) => emp.team_id === currentUser.team_id)
     : employees;
+
+  const filteredEmployeesByArea = useMemo(() => {
+  if (selectedArea === "da") {
+    return employees.filter((emp) => emp.khuvuc === "da");
+  } else if (selectedArea === "pvd") {
+    // Phạm Văn Đồng: gồm cả nhân viên không có trường khuvuc
+    return employees.filter(
+      (emp) => emp.khuvuc === "pvd" && emp.position_team ==='mkt'
+    );
+  } else {
+    // all: giữ nguyên
+    return employees;
+  }
+}, [employees, selectedArea]);
+
+
 
   const BarChartComponent = dynamic(
     () =>
@@ -756,28 +773,60 @@ const Dashboard = () => {
   }
 
   // Dữ liệu teams
-  const teams = [
+  const teamsByArea = {
+  da: [
     { label: "TEAM PHI", value: "PHI" },
+    { label: "TEAM TUẤN ANH", value: "TUANANH" },
+  ],
+  pvd: [
     { label: "TEAM DIỆU", value: "DIEU" },
     { label: "TEAM SƠN", value: "SON" },
     { label: "TEAM QUÂN", value: "QUAN" },
-    // { label: 'TEAM CHI', value: 'CHI' },
     { label: "TEAM PHONG", value: "PHONG" },
-    { label: "TEAM TUẤN ANH", value: "TUANANH" },
-
     { label: "TEAM DIỆN ONLINE", value: "DIENON" },
     { label: "TEAM DIỆN", value: "DIEN" },
-  ];
-  const teams2 = [
+  ],
+  all: [
     { label: "TEAM PHI", value: "PHI" },
     { label: "TEAM DIỆU", value: "DIEU" },
     { label: "TEAM SƠN", value: "SON" },
     { label: "TEAM QUÂN", value: "QUAN" },
-    // { label: 'TEAM CHI', value: 'CHI' },
     { label: "TEAM PHONG", value: "PHONG" },
     { label: "TEAM TUẤN ANH", value: "TUANANH" },
+    { label: "TEAM DIỆN ONLINE", value: "DIENON" },
     { label: "TEAM DIỆN", value: "DIEN" },
-  ];
+  ],
+};
+
+const teams = teamsByArea[selectedArea] || [];
+  const teamsByArea2 = {
+  da: [
+    { label: "TEAM PHI", value: "PHI" },
+    { label: "TEAM TUẤN ANH", value: "TUANANH" },
+  ],
+  pvd: [
+    { label: "TEAM DIỆU", value: "DIEU" },
+    { label: "TEAM SƠN", value: "SON" },
+    { label: "TEAM QUÂN", value: "QUAN" },
+    { label: "TEAM PHONG", value: "PHONG" },
+    { label: "TEAM DIỆN ONLINE", value: "DIENON" },
+    { label: "TEAM DIỆN", value: "DIEN" },
+  ],
+  all: [
+    { label: "TEAM PHI", value: "PHI" },
+    { label: "TEAM DIỆU", value: "DIEU" },
+    { label: "TEAM SƠN", value: "SON" },
+    { label: "TEAM QUÂN", value: "QUAN" },
+    { label: "TEAM PHONG", value: "PHONG" },
+    { label: "TEAM TUẤN ANH", value: "TUANANH" },
+    { label: "TEAM DIỆN ONLINE", value: "DIENON" },
+    { label: "TEAM DIỆN", value: "DIEN" },
+  ],
+};
+
+const teams2 = teamsByArea2[selectedArea] || [];
+
+  
 
   // Dữ liệu nhân viên (mẫu)
 
@@ -788,6 +837,36 @@ const Dashboard = () => {
   } else if (selectedDate) {
     filteredOrders = orders.filter((order) => order.orderDate === selectedDate);
   }
+const areaEmployeeNames = filteredEmployeesByArea.map((e) =>
+  e.name.trim().toLowerCase()
+);
+
+const filteredOrdersByArea =
+  selectedArea === "all"
+    ? filteredOrders
+    : filteredOrders.filter((order) => {
+        const mkt = order.mkt?.trim().toLowerCase();
+      
+        return (
+          // areaEmployeeNames.includes(saleName) ||
+          areaEmployeeNames.includes(mkt) 
+          // areaEmployeeNames.includes(salexulyName)
+        );
+      });
+const filteredOrdersByArea2 =
+  selectedArea === "all"
+    ? filteredOrders
+    : filteredOrders.filter((order) => {
+        const mkt = order.mkt?.trim().toLowerCase();
+      
+        return (
+         
+          areaEmployeeNames.includes(mkt) 
+      
+        );
+      });
+
+
 
   // Lọc chi phí ads theo cùng bộ lọc (dùng field 'date')
   let filteredAds = adsMoneyData;
@@ -801,18 +880,24 @@ const Dashboard = () => {
   } else if (selectedDate) {
     filteredAds = adsMoneyData.filter((ad) => ad.date === selectedDate);
   }
-
+const filteredAdsByArea =
+  selectedArea === "all"
+    ? filteredAds
+    : filteredAds.filter((ad) => {
+        const name = ad.name?.trim().toLowerCase();
+        return areaEmployeeNames.includes(name);
+      });
   // === Biểu đồ doanh số theo nhân viên (Grouped Double Bar Chart) ===
-  const mktEmployees = employees.filter((emp) => emp.position_team === "mkt");
+  const mktEmployees = filteredEmployeesByArea.filter((emp) => emp.position_team === "mkt" && emp.quocgia !== "jp");
 
   const employeeChartDataNew = mktEmployees.map((emp) => {
-    const sales = filteredOrders
-      .filter(
+    const sales = filteredOrdersByArea
+    .filter(
         (order) =>
           order.mkt.trim().toLowerCase() === emp.name.trim().toLowerCase()
       )
       .reduce((sum, order) => sum + order.profit, 0);
-    const adsCost = filteredAds
+    const adsCost = filteredAdsByArea
       .filter(
         (ad) => ad.name.trim().toLowerCase() === emp.name.trim().toLowerCase()
       )
@@ -830,8 +915,8 @@ const Dashboard = () => {
   );
 
   const employeeChartDataNewTEAM = teamEmployees.map((emp) => {
-    const sales = filteredOrders
-      .filter(
+    const sales = filteredOrdersByArea
+    .filter(
         (order) =>
           order.mkt.trim().toLowerCase() === emp.name.trim().toLowerCase()
       )
@@ -844,25 +929,25 @@ const Dashboard = () => {
     return { name: emp.name, profit: sales * 17000 * 0.95, adsCost };
   });
 
-  const saleEmployees = employees.filter((emp) => emp.position_team === "sale");
-  const saleEmployees2 = employees.filter(
+  const saleEmployees = filteredEmployeesByArea.filter((emp) => emp.position_team === "sale" && emp.quocgia !== "jp" );
+  const saleEmployees2 = filteredEmployeesByArea.filter(
     (emp) =>
       emp.position === "salenhapdon" ||
       emp.position === "salexuly" ||
-      emp.position === "salefull"
+      emp.position === "salefull" 
   );
-  const saleEmployeesND = employees.filter(
-    (emp) => emp.position_team === "sale" && emp.position === "salenhapdon"
+  const saleEmployeesND = filteredEmployeesByArea.filter(
+    (emp) => emp.position_team === "sale" && emp.position === "salenhapdon" && emp.quocgia !== "jp"
   );
-  const saleEmployeesOL = employees.filter(
-    (emp) => emp.position_team === "sale" && emp.position === "salefull"
+  const saleEmployeesOL = filteredEmployeesByArea.filter(
+    (emp) => emp.position_team === "sale" && emp.position === "salefull" && emp.quocgia !== "jp"
   );
-  const saleEmployeesXL = employees.filter(
-    (emp) => emp.position_team === "sale" && emp.position === "salexuly"
+  const saleEmployeesXL = filteredEmployeesByArea.filter(
+    (emp) => emp.position_team === "sale" && emp.position === "salexuly" && emp.quocgia !== "jp"
   );
   const employeeChartDataNewsale = saleEmployees2.map((emp) => {
-    const sales = filteredOrders
-      .filter(
+    const sales = filteredOrdersByArea
+    .filter(
         (order) =>
           order.sale.trim().toLowerCase() === emp.name.trim().toLowerCase() ||
           order.salexuly.trim().toLowerCase() === emp.name.trim().toLowerCase()
@@ -883,11 +968,11 @@ const Dashboard = () => {
 
   // // === Biểu đồ doanh số theo team (Grouped Double Bar Chart) ===
   const teamChartDataNew2 = teams.map((team) => {
-    const teamEmps = employees.filter(
+    const teamEmps = filteredEmployeesByArea.filter(
       (emp) => emp.position_team === "mkt" && emp.team_id === team.value
     );
     const sales = teamEmps.reduce((acc, emp) => {
-      const empSales = filteredOrders
+      const empSales = filteredOrdersByArea
         .filter(
           (order) =>
             order.mkt.trim().toLowerCase() === emp.name.trim().toLowerCase()
@@ -906,9 +991,9 @@ const Dashboard = () => {
     return { name: team.label, profit: sales * 17000 * 0.95, adsCost };
   });
   // const teamChartDataNew = teams.map(team => {
-  //   const teamEmps = employees.filter(emp => emp.position_team === "mkt" && emp.team_id === team.value);
+  //   const teamEmps = filteredEmployeesByArea.filter(emp => emp.position_team === "mkt" && emp.team_id === team.value);
   //   const sales = teamEmps.reduce((acc, emp) => {
-  //     const empSales = filteredOrders
+  //     const empSales = filteredOrdersByArea
   //       .filter(order => order.mkt === emp.name)
   //       .reduce((sum, order) => sum + order.profit, 0);
   //     return acc + empSales;
@@ -923,10 +1008,10 @@ const Dashboard = () => {
   // });
 
   const teamChartDataNew = teams2.map((team) => {
-    const teamEmps = employees.filter(
+    const teamEmps = filteredEmployeesByArea.filter(
       (emp) => emp.position_team === "mkt" && emp.team_id === team.value
     );
-    const teamEmps2 = employees.filter(
+    const teamEmps2 = filteredEmployeesByArea.filter(
       (emp) =>
         emp.position_team === "mkt" &&
         emp.team_id === team.value &&
@@ -934,7 +1019,7 @@ const Dashboard = () => {
         emp.position !== "managerMKT"
     );
     const sales = teamEmps.reduce((acc, emp) => {
-      const empSales = filteredOrders
+      const empSales = filteredOrdersByArea
         .filter(
           (order) =>
             order.mkt.trim().toLowerCase() === emp.name.trim().toLowerCase()
@@ -943,7 +1028,7 @@ const Dashboard = () => {
       return acc + empSales;
     }, 0);
     const members = teamEmps2.reduce((acc, emp) => {
-      const empSales = filteredOrders
+      const empSales = filteredOrdersByArea
         .filter(
           (order) =>
             order.mkt.trim().toLowerCase() === emp.name.trim().toLowerCase()
@@ -978,7 +1063,7 @@ const Dashboard = () => {
       currentDate.setDate(currentDate.getDate() + 1);
     }
     dailyChartDataNew = dateArray.map((date) => {
-      const sales = filteredOrders
+      const sales = filteredOrdersByArea
         .filter((order) => order.orderDate === date)
         .reduce((sum, order) => sum + order.profit, 0);
       const adsCost = filteredAds
@@ -1025,7 +1110,7 @@ const Dashboard = () => {
       .map((emp) => (emp.name || "").trim().toLowerCase());
 
     // Lọc đơn hàng và ads chỉ thuộc team đó
-    filteredOrders = filteredOrders.filter((order) =>
+    filteredOrders = filteredOrdersByArea.filter((order) =>
       teamEmployeeNames.includes(order.mkt.trim().toLowerCase())
     );
     filteredAds = filteredAds.filter((ad) =>
@@ -1051,7 +1136,7 @@ const Dashboard = () => {
     }
 
     dailyChartDataNewTEAM = dateArray.map((date) => {
-      const sales = filteredOrders
+      const sales = filteredOrdersByArea
         .filter((order) => order.orderDate === date)
         .reduce((sum, order) => sum + order.profit, 0);
       const adsCost = filteredAds
@@ -1073,7 +1158,7 @@ const Dashboard = () => {
   }
 
   // === Biểu đồ phần trăm doanh số theo team (PieChart) ===
-  const totalCompanyProfit = filteredOrders.reduce(
+  const totalCompanyProfit = filteredOrdersByArea.reduce(
     (sum, order) => sum + order.profit,
     0
   );
@@ -1101,14 +1186,14 @@ const Dashboard = () => {
 
   // === Biểu đồ doanh số trung bình của nhân viên trong từng team (BarChart) ===
   const averageTeamChartData = teams2.map((team) => {
-    const teamEmps = employees.filter(
+    const teamEmps = filteredEmployeesByArea.filter(
       (emp) =>
         emp.position_team === "mkt" &&
         emp.team_id === team.value &&
         emp.position !== "lead"
     );
     const teamProfit = teamEmps.reduce((acc, emp) => {
-      const empSales = filteredOrders
+      const empSales = filteredOrdersByArea
         .filter(
           (order) =>
             order.mkt.trim().toLowerCase() === emp.name.trim().toLowerCase()
@@ -1123,7 +1208,7 @@ const Dashboard = () => {
   // === Biểu đồ so sánh doanh số giữa leader và các nhân viên khác trong team (Grouped Bar Chart) ===
   // Công thức: leaderPercent = (leaderSales / othersSales) * 100
   const leaderComparisonChartData = teams.map((team) => {
-    const teamEmps = employees.filter(
+    const teamEmps = filteredEmployeesByArea.filter(
       (emp) => emp.position_team === "mkt" && emp.team_id === team.value
     );
     const othersEmps = teamEmps.filter(
@@ -1131,7 +1216,7 @@ const Dashboard = () => {
     );
 
     const leaderSales0 = teamEmps.reduce((acc, emp) => {
-      const empSales = filteredOrders
+      const empSales = filteredOrdersByArea
         .filter(
           (order) =>
             order.mkt.trim().toLowerCase() === emp.name.trim().toLowerCase()
@@ -1156,7 +1241,7 @@ const Dashboard = () => {
       return acc + empAds;
     }, 0);
     const othersSales0 = othersEmps.reduce((acc, emp) => {
-      const empSales = filteredOrders
+      const empSales = filteredOrdersByArea
         .filter(
           (order) =>
             order.mkt.trim().toLowerCase() === emp.name.trim().toLowerCase()
@@ -1177,15 +1262,15 @@ const Dashboard = () => {
 
   // === Báo cáo Marketing ===
   const marketingReportData = mktEmployees.map((emp, index) => {
-    const paid = filteredOrders
-      .filter(
+    const paid = filteredOrdersByArea
+    .filter(
         (order) =>
           order.mkt.trim().toLowerCase() === emp.name.trim().toLowerCase() &&
           order.paymentStatus === "ĐÃ THANH TOÁN"
       )
       .reduce((sum, order) => sum + order.profit, 0);
-    const unpaid = filteredOrders
-      .filter(
+    const unpaid = filteredOrdersByArea
+    .filter(
         (order) =>
           order.mkt.trim().toLowerCase() === emp.name.trim().toLowerCase() &&
           (order.paymentStatus === "CHƯA THANH TOÁN" ||
@@ -1418,7 +1503,7 @@ const top5Employees2 = randomEmployee ? [randomEmployee] : [];
     e.name.trim().toLowerCase()
   );
 
-  const teamFilteredOrders = filteredOrders.filter((order) =>
+  const teamFilteredOrders = filteredOrdersByArea.filter((order) =>
     teamEmployeeNames.includes(order.mkt.trim().toLowerCase())
   );
 
@@ -1561,14 +1646,14 @@ const top5Employees2 = randomEmployee ? [randomEmployee] : [];
     let paid = 0,
       unpaid = 0;
     if (emp.position === "salenhapdon" || emp.position === "salefull") {
-      paid = filteredOrders
+      paid = filteredOrdersByArea
         .filter(
           (order) =>
             order.sale.trim().toLowerCase() === emp.name.trim().toLowerCase() &&
             order.paymentStatus === "ĐÃ THANH TOÁN"
         )
         .reduce((sum, order) => sum + order.profit, 0);
-      unpaid = filteredOrders
+      unpaid = filteredOrdersByArea
         .filter(
           (order) =>
             order.sale.trim().toLowerCase() === emp.name.trim().toLowerCase() &&
@@ -1577,7 +1662,7 @@ const top5Employees2 = randomEmployee ? [randomEmployee] : [];
         )
         .reduce((sum, order) => sum + order.profit, 0);
     } else if (emp.position === "salexuly") {
-      paid = filteredOrders
+      paid = filteredOrdersByArea
         .filter(
           (order) =>
             order.salexuly.trim().toLowerCase() ===
@@ -1585,7 +1670,7 @@ const top5Employees2 = randomEmployee ? [randomEmployee] : [];
             order.paymentStatus === "ĐÃ THANH TOÁN"
         )
         .reduce((sum, order) => sum + order.profit, 0);
-      unpaid = filteredOrders
+      unpaid = filteredOrdersByArea
         .filter(
           (order) =>
             order.salexuly.trim().toLowerCase() ===
@@ -1612,14 +1697,14 @@ const top5Employees2 = randomEmployee ? [randomEmployee] : [];
     let paid = 0,
       unpaid = 0;
     if (emp.position === "salenhapdon" || emp.position === "salefull") {
-      paid = filteredOrders
+      paid = filteredOrdersByArea
         .filter(
           (order) =>
             order.sale.trim().toLowerCase() === emp.name.trim().toLowerCase() &&
             order.paymentStatus === "ĐÃ THANH TOÁN"
         )
         .reduce((sum, order) => sum + order.profit, 0);
-      unpaid = filteredOrders
+      unpaid = filteredOrdersByArea
         .filter(
           (order) =>
             order.sale.trim().toLowerCase() === emp.name.trim().toLowerCase() &&
@@ -1628,7 +1713,7 @@ const top5Employees2 = randomEmployee ? [randomEmployee] : [];
         )
         .reduce((sum, order) => sum + order.profit, 0);
     } else if (emp.position === "salexuly") {
-      paid = filteredOrders
+      paid = filteredOrdersByArea
         .filter(
           (order) =>
             order.salexuly.trim().toLowerCase() ===
@@ -1636,7 +1721,7 @@ const top5Employees2 = randomEmployee ? [randomEmployee] : [];
             order.paymentStatus === "ĐÃ THANH TOÁN"
         )
         .reduce((sum, order) => sum + order.profit, 0);
-      unpaid = filteredOrders
+      unpaid = filteredOrdersByArea
         .filter(
           (order) =>
             order.salexuly.trim().toLowerCase() ===
@@ -1663,14 +1748,14 @@ const top5Employees2 = randomEmployee ? [randomEmployee] : [];
     let paid = 0,
       unpaid = 0;
     if (emp.position === "salenhapdon" || emp.position === "salefull") {
-      paid = filteredOrders
+      paid = filteredOrdersByArea
         .filter(
           (order) =>
             order.sale.trim().toLowerCase() === emp.name.trim().toLowerCase() &&
             order.paymentStatus === "ĐÃ THANH TOÁN"
         )
         .reduce((sum, order) => sum + order.profit, 0);
-      unpaid = filteredOrders
+      unpaid = filteredOrdersByArea
         .filter(
           (order) =>
             order.sale.trim().toLowerCase() === emp.name.trim().toLowerCase() &&
@@ -1679,7 +1764,7 @@ const top5Employees2 = randomEmployee ? [randomEmployee] : [];
         )
         .reduce((sum, order) => sum + order.profit, 0);
     } else if (emp.position === "salexuly") {
-      paid = filteredOrders
+      paid = filteredOrdersByArea
         .filter(
           (order) =>
             order.salexuly.trim().toLowerCase() ===
@@ -1687,7 +1772,7 @@ const top5Employees2 = randomEmployee ? [randomEmployee] : [];
             order.paymentStatus === "ĐÃ THANH TOÁN"
         )
         .reduce((sum, order) => sum + order.profit, 0);
-      unpaid = filteredOrders
+      unpaid = filteredOrdersByArea
         .filter(
           (order) =>
             order.salexuly.trim().toLowerCase() ===
@@ -1714,14 +1799,14 @@ const top5Employees2 = randomEmployee ? [randomEmployee] : [];
     let paid = 0,
       unpaid = 0;
     if (emp.position === "salenhapdon" || emp.position === "salefull") {
-      paid = filteredOrders
+      paid = filteredOrdersByArea
         .filter(
           (order) =>
             order.sale.trim().toLowerCase() === emp.name.trim().toLowerCase() &&
             order.paymentStatus === "ĐÃ THANH TOÁN"
         )
         .reduce((sum, order) => sum + order.profit, 0);
-      unpaid = filteredOrders
+      unpaid = filteredOrdersByArea
         .filter(
           (order) =>
             order.sale.trim().toLowerCase() === emp.name.trim().toLowerCase() &&
@@ -1730,7 +1815,7 @@ const top5Employees2 = randomEmployee ? [randomEmployee] : [];
         )
         .reduce((sum, order) => sum + order.profit, 0);
     } else if (emp.position === "salexuly") {
-      paid = filteredOrders
+      paid = filteredOrdersByArea
         .filter(
           (order) =>
             order.salexuly.trim().toLowerCase() ===
@@ -1738,7 +1823,7 @@ const top5Employees2 = randomEmployee ? [randomEmployee] : [];
             order.paymentStatus === "ĐÃ THANH TOÁN"
         )
         .reduce((sum, order) => sum + order.profit, 0);
-      unpaid = filteredOrders
+      unpaid = filteredOrdersByArea
         .filter(
           (order) =>
             order.salexuly.trim().toLowerCase() ===
@@ -2024,7 +2109,7 @@ const top5Employees2 = randomEmployee ? [randomEmployee] : [];
   ];
 
   // Thống kê để dục chuyển khoản
-  const giaoThanhCongKW = filteredOrders
+  const giaoThanhCongKW = filteredOrdersByArea
     .filter(
       (order) =>
         (order.paymentStatus === "CHƯA THANH TOÁN" ||
@@ -2033,7 +2118,7 @@ const top5Employees2 = randomEmployee ? [randomEmployee] : [];
         order.saleReport === "DONE"
     )
     .reduce((sum, order) => sum + order.revenue, 0);
-  const daGuiHangKW = filteredOrders
+  const daGuiHangKW = filteredOrdersByArea
     .filter(
       (order) =>
         (order.paymentStatus === "CHƯA THANH TOÁN" ||
@@ -2042,7 +2127,7 @@ const top5Employees2 = randomEmployee ? [randomEmployee] : [];
         order.saleReport === "DONE"
     )
     .reduce((sum, order) => sum + order.revenue, 0);
-  const chuaGuiHangKW = filteredOrders
+  const chuaGuiHangKW = filteredOrdersByArea
     .filter(
       (order) =>
         (order.paymentStatus === "CHƯA THANH TOÁN" ||
@@ -2052,7 +2137,7 @@ const top5Employees2 = randomEmployee ? [randomEmployee] : [];
         order.saleReport === "DONE"
     )
     .reduce((sum, order) => sum + order.revenue, 0);
-  const SLgiaoThanhCongKW = filteredOrders.filter(
+  const SLgiaoThanhCongKW = filteredOrdersByArea.filter(
     (order) =>
       (order.paymentStatus === "CHƯA THANH TOÁN" ||
         order.paymentStatus === "") &&
@@ -2060,7 +2145,7 @@ const top5Employees2 = randomEmployee ? [randomEmployee] : [];
       order.saleReport === "DONE"
   );
 
-  const SLdaGuiHangKW = filteredOrders.filter(
+  const SLdaGuiHangKW = filteredOrdersByArea.filter(
     (order) =>
       (order.paymentStatus === "CHƯA THANH TOÁN" ||
         order.paymentStatus === "") &&
@@ -2068,7 +2153,7 @@ const top5Employees2 = randomEmployee ? [randomEmployee] : [];
       order.saleReport === "DONE"
   );
 
-  const SLchuaGuiHangKW = filteredOrders.filter(
+  const SLchuaGuiHangKW = filteredOrdersByArea.filter(
     (order) =>
       (order.paymentStatus === "CHƯA THANH TOÁN" ||
         order.paymentStatus === "") &&
@@ -2164,11 +2249,32 @@ const top5Employees2 = randomEmployee ? [randomEmployee] : [];
     tongKW3 > 0
       ? Number(((totalAdsKW3 / (tongKW3 * exchangeRate)) * 100).toFixed(2))
       : 0;
+
+  //bang trong team    
+  const daThanhToanKW4 = filteredOrdersByArea
+    .filter((order) => order.paymentStatus === "ĐÃ THANH TOÁN")
+    .reduce((sum, order) => sum + order.profit, 0);
+  const chuaThanhToanKW4 = filteredOrdersByArea
+    .filter(
+      (order) =>
+        order.paymentStatus === "CHƯA THANH TOÁN" || order.paymentStatus === ""
+    )
+    .reduce((sum, order) => sum + order.profit, 0);
+  const tongKW4 = (daThanhToanKW4 + chuaThanhToanKW4) * 0.95;
+
+  const totalAdsKW4 = filteredAdsByArea.reduce(
+    (sum, ad) => sum + (ad.request1 + ad.request2),
+    0
+  );
+  const percentAds4 =
+    tongKW4 > 0
+      ? Number(((totalAdsKW4 / (tongKW4 * exchangeRate)) * 100).toFixed(2))
+      : 0;
   // Bảng Tổng
-  const daThanhToanKW = filteredOrders
+  const daThanhToanKW = filteredOrdersByArea
     .filter((order) => order.paymentStatus === "ĐÃ THANH TOÁN")
     .reduce((sum, order) => sum + order.revenue, 0);
-  const chuaThanhToanKW = filteredOrders
+  const chuaThanhToanKW = filteredOrdersByArea
     .filter(
       (order) =>
         order.paymentStatus === "CHƯA THANH TOÁN" || order.paymentStatus === ""
@@ -2185,10 +2291,10 @@ const top5Employees2 = randomEmployee ? [randomEmployee] : [];
       ? Number(((totalAdsKW / (tongKW * exchangeRate)) * 100).toFixed(2))
       : 0;
 
-  const daThanhToanKWSALE = filteredOrders
+  const daThanhToanKWSALE = filteredOrdersByArea
     .filter((order) => order.paymentStatus === "ĐÃ THANH TOÁN")
     .reduce((sum, order) => sum + order.profit, 0);
-  const chuaThanhToanKWSALE = filteredOrders
+  const chuaThanhToanKWSALE = filteredOrdersByArea
     .filter(
       (order) =>
         order.paymentStatus === "CHƯA THANH TOÁN" || order.paymentStatus === ""
@@ -2226,7 +2332,7 @@ const top5Employees2 = randomEmployee ? [randomEmployee] : [];
       .map((emp) => (emp.name || "").trim().toLowerCase());
 
     // Lọc các đơn hàng theo tên nhân viên thuộc team
-    filteredOrders = filteredOrders.filter(
+    filteredOrders = filteredOrdersByArea.filter(
       (order) =>
         (order.mkt || "").trim().toLowerCase() &&
         teamEmployeeNames.includes((order.mkt || "").trim().toLowerCase())
@@ -2241,10 +2347,10 @@ const top5Employees2 = randomEmployee ? [randomEmployee] : [];
   }
 
   // Bảng Tổng chỉ của các thành viên trong team
-  const daThanhToanKW2 = filteredOrders
+  const daThanhToanKW2 = filteredOrdersByArea
     .filter((order) => order.paymentStatus === "ĐÃ THANH TOÁN")
     .reduce((sum, order) => sum + order.profit, 0);
-  const chuaThanhToanKW2 = filteredOrders
+  const chuaThanhToanKW2 = filteredOrdersByArea
     .filter(
       (order) =>
         order.paymentStatus === "CHƯA THANH TOÁN" || order.paymentStatus === ""
@@ -2319,6 +2425,16 @@ const top5Employees2 = randomEmployee ? [randomEmployee] : [];
 
       totalAds: totalAdsKW3,
       percentAds: percentAds3,
+    },
+  ];
+  const totalData4 = [
+    {
+      key: "VND",
+
+      tong: tongKW4 * exchangeRate,
+
+      totalAds: totalAdsKW4,
+      percentAds: percentAds4,
     },
   ];
 
@@ -2461,8 +2577,8 @@ const top5Employees2 = randomEmployee ? [randomEmployee] : [];
   const todayDate = new Date().toISOString().split("T")[0];
 
   // Lọc các nhân viên có position là salenhapdon
-  const salenhapdonEmployees = employees.filter(
-    (emp) => emp.position === "salenhapdon"
+  const salenhapdonEmployees = filteredEmployeesByArea.filter(
+    (emp) => emp.position === "salenhapdon" && emp.quocgia !== "jp"
   );
 
   // Tính tổng số đơn hôm nay của từng salenhapdon
@@ -2889,12 +3005,25 @@ const summaryData = [
           }
         `}</style>
       </div>
-
+<Row gutter={8} style={{ marginBottom: 16 }}>
+  <Col>
+    <Radio.Group
+  value={selectedArea}
+  onChange={(e) => setSelectedArea(e.target.value)}
+  style={{ display: "flex", gap: 12 }}
+>
+  <Radio.Button value="all">Tất cả</Radio.Button>
+  <Radio.Button value="da">Đông Anh</Radio.Button>
+  <Radio.Button value="pvd">Phạm Văn Đồng</Radio.Button>
+</Radio.Group>
+  </Col>
+</Row>
       {/* Bộ lọc */}
       {(currentUser.position === "lead" ||
         (currentUser.position === "admin" && selectedTeam) ||
         (currentUser.position === "managerMKT" && selectedTeam)) && (
         <Row gutter={[16, 16]}>
+          
           <Col xs={24} md={16}>
             <Row>
               <Col xs={24} md={7}>
@@ -2960,6 +3089,7 @@ const summaryData = [
                         </Option>
                       ))}
                     </Select>
+                    
                   </div>
                 </Col>
               )}
@@ -3138,7 +3268,7 @@ const summaryData = [
                   <h2 style={{ marginTop: "2rem" }}>Doanh Số (MKT)</h2>
                   <Table
                     columns={totalColumns3}
-                    dataSource={totalData3}
+                    dataSource={totalData4}
                     pagination={false}
                   />
                 </>
