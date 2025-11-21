@@ -14,11 +14,7 @@ import Script from "next/script";
 import CurrentUserSelector from "./components/CurrentUserSelector";
 import { motion, useAnimation } from "framer-motion";
 import GlobalNotification from "./components/GlobalNotification";
-export const metadata = {
-  other: {
-    "facebook-domain-verification": "4flq2d7bue0buct1vgi1wqhpay3sqr",
-  },
-};
+import Head from "next/head";
 
 const { Content, Sider } = Layout;
 const MotionHeader = motion(Layout.Header);
@@ -73,6 +69,12 @@ function InnerDashboardLayout({ children }: { children: ReactNode }) {
 
   return (
     <>
+      <Head>
+        <meta
+          name="facebook-domain-verification"
+          content="4flq2d7bue0buct1vgi1wqhpay3sqr"
+        />
+      </Head>
       <div
         style={{
           position: "fixed",
@@ -131,7 +133,7 @@ function InnerDashboardLayout({ children }: { children: ReactNode }) {
             >
               {currentUser.name}
             </div>
-            {/* <CurrentUserSelector /> */}
+            <CurrentUserSelector />
             {/* <PraiseBanner2 /> */}
             <Button
               type="primary"
@@ -158,7 +160,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
   if (pathname === "/login") {
     return (
       <html lang="en">
-        
+
         <body>
           <Provider store={store}>{children}</Provider>
         </body>
@@ -167,7 +169,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
   }
   return (
     <html lang="en">
-       
+
       <body>
         <Provider store={store}>
           <InnerDashboardLayout>{children}</InnerDashboardLayout>
