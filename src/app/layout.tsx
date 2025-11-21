@@ -14,6 +14,11 @@ import Script from "next/script";
 import CurrentUserSelector from "./components/CurrentUserSelector";
 import { motion, useAnimation } from "framer-motion";
 import GlobalNotification from "./components/GlobalNotification";
+export const metadata = {
+  other: {
+    "facebook-domain-verification": "4flq2d7bue0buct1vgi1wqhpay3sqr",
+  },
+};
 
 const { Content, Sider } = Layout;
 const MotionHeader = motion(Layout.Header);
@@ -153,6 +158,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
   if (pathname === "/login") {
     return (
       <html lang="en">
+        
         <body>
           <Provider store={store}>{children}</Provider>
         </body>
@@ -161,6 +167,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
   }
   return (
     <html lang="en">
+       
       <body>
         <Provider store={store}>
           <InnerDashboardLayout>{children}</InnerDashboardLayout>
