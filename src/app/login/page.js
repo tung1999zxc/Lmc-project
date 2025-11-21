@@ -1,4 +1,5 @@
 "use client";
+
 import React, { useState, useEffect } from "react";
 import { Form, Input, Button, Card, message } from "antd";
 import axios from "axios";
@@ -6,6 +7,12 @@ import { useDispatch } from 'react-redux';
 import { useRouter } from 'next/navigation';
 import { setCurrentUser } from '../store/userSlice';
 import { motion, useAnimation } from 'framer-motion';
+
+// Thông tin doanh nghiệp hiển thị trên trang (dễ chỉnh sửa)
+const COMPANY_LEGAL_NAME = 'CÔNG TY TNHH LMC GROUPS';
+const COMPANY_DISPLAY_NAME = 'LMC GROUPS';
+const COMPANY_LOGO_URL = 'lmc.jpg'; // Thay bằng link logo thực tế của bạn sau
+const COMPANY_WEBSITE = 'https://lmcgroupss.com'; // Thay nếu cần
 
 const LoginPage = () => {
   const router = useRouter();
@@ -32,9 +39,11 @@ const LoginPage = () => {
       if (response.data.data.position === "lead" ||response.data.data.position === "leadSALE"||response.data.data.position === "managerSALE"||response.data.data.position==="admin"||response.data.data.position==="managerMKT"){
         router.push("/");
       }else if(response.data.data.position === "mkt"){
-      router.push("/mkt");}
+        router.push("/mkt");
+      }
       else {
-      router.push("/orders");}
+        router.push("/orders");
+      }
     } catch (error) {
       console.error(error);
       message.error(
@@ -155,6 +164,56 @@ const LoginPage = () => {
       {/* Hiệu ứng rơi chỉ render khi đã mount */}
       <FallingItems />
 
+      {/* HEADER: hiển thị tên pháp lý và logo công ty để Facebook có thể xác minh */}
+      <header
+        style={{
+          position: 'absolute',
+          top: 20,
+          left: 20,
+          zIndex: 2,
+          display: 'flex',
+          alignItems: 'center',
+          gap: 12,
+          background: 'rgba(56, 255, 6, 0.85)',
+          padding: '8px 12px',
+          borderRadius: 8,
+          boxShadow: '0 4px 12px rgba(0,0,0,1)'
+        }}
+        aria-label="Thông tin công ty"
+      >
+        <img
+          src={COMPANY_LOGO_URL}
+          alt={`${COMPANY_DISPLAY_NAME} logo`}
+          width={190}
+          height={60}
+          style={{ objectFit: 'contain', display: 'block' }}
+        />
+        <div style={{ lineHeight: 1 }}>
+          <div style={{ fontWeight: 700, fontSize: 20}}>{COMPANY_DISPLAY_NAME}</div>
+          <div style={{ fontSize: 18, color: '#000000ff' }}>{COMPANY_LEGAL_NAME}</div>
+          <a href={COMPANY_WEBSITE} style={{ fontSize: 16, color: '#096dd9' }}>{COMPANY_WEBSITE}</a>
+        </div>
+      </header>
+
+      {/* Hiển thị thêm một phần footer nhỏ (cùng nội dung) để đảm bảo hiển thị rõ ràng */}
+      <footer
+        style={{
+          position: 'absolute',
+          bottom: 14,
+          left: '50%',
+          transform: 'translateX(-50%)',
+          zIndex: 2,
+          background: 'rgba(255,255,255,0.85)',
+          padding: '6px 10px',
+          borderRadius: 6,
+          fontSize: 18,
+          boxShadow: '0 2px 8px rgba(0,0,0,0.06)'
+        }}
+        aria-hidden={false}
+      >
+        <strong>{COMPANY_LEGAL_NAME}</strong> — Trang web: <a href={COMPANY_WEBSITE}>{COMPANY_WEBSITE}</a>
+      </footer>
+
       <motion.div
         initial={{ opacity: 0, scale: 0.8 }}
         animate={{ opacity: 1, scale: 1 }}
@@ -233,6 +292,7 @@ const LoginPage = () => {
           </Form>
         </Card>
       </motion.div>
+
     </div>
   );
 };
