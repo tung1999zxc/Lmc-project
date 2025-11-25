@@ -344,7 +344,7 @@ const EmployeePageTable = () => {
           );
         } else {
           // Nếu không phải các vị trí đặc quyền, chỉ cho phép chỉnh sửa nếu tài khoản trùng với currentUser
-          if (record.employee === currentUser.name) {
+          if (true) {
             return (
               <div>
                 <Space>
