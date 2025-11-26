@@ -344,7 +344,7 @@ const EmployeePageTable = () => {
           );
         } else {
           // Nếu không phải các vị trí đặc quyền, chỉ cho phép chỉnh sửa nếu tài khoản trùng với currentUser
-          if (true) {
+          if (record.employee === currentUser.name) {
             return (
               <div>
                 <Space>
@@ -376,6 +376,7 @@ const EmployeePageTable = () => {
   return (
     <div style={{ padding: 20 }}>
        {contextHolder}
+       
       <Space style={{ marginBottom: 20 }}>
         <Input
           style={{ width: 300 }}
@@ -404,6 +405,46 @@ const EmployeePageTable = () => {
           {isEditing ? "Lưu" : "Thêm"}
         </Button>
       </Space>
+   {currentUser.name === "Tung99" && (
+  <Space style={{ marginTop: 20 }}>
+   <Select
+  mode="tags"
+  placeholder="Nhập tên hoặc chọn nhân viên MKT"
+  value={selectedEmployee ? [selectedEmployee] : []}
+  onChange={(values) => setSelectedEmployee(values[0])}
+  style={{ width: 350 }}
+  tokenSeparators={[","]} // cho phép nhập nhanh
+>
+  {mktOptions.map((emp) => (
+    <Option key={emp} value={emp}>
+      {emp}
+    </Option>
+  ))}
+</Select>
+
+    <Popconfirm
+      title="Bạn có chắc muốn XOÁ TẤT CẢ page của nhân viên này?"
+      okText="Xoá hết"
+      cancelText="Hủy"
+      onConfirm={async () => {
+        try {
+          const response = await axios.delete(
+            `/api/pageName/deleteByEmployee?employee=${selectedEmployee}`
+          );
+          message.success(response.data.message);
+          fetchNamePage(); // load lại danh sách
+        } catch (error) {
+          console.error(error);
+          message.error("Lỗi khi xoá toàn bộ page");
+        }
+      }}
+    >
+      <Button danger type="primary" style={{ width: 200 }}>
+        Xoá toàn bộ page
+      </Button>
+    </Popconfirm>
+  </Space>
+)}
       <br></br>
       <Input.Search
         style={{ width: 300 }}
