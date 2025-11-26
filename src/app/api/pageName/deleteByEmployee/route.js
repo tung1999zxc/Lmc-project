@@ -1,10 +1,9 @@
-// src/app/api/pageName/deleteByEmployee/route.js
 import { connectToDatabase } from "../../../lib/mongodb";
 
 export async function DELETE(req) {
   try {
-    const url = new URL(req.url);
-    const employee = url.searchParams.get("employee");
+    const { searchParams } = new URL(req.url);
+    const employee = searchParams.get("employee");
 
     if (!employee) {
       return new Response(
@@ -15,14 +14,16 @@ export async function DELETE(req) {
 
     const { db } = await connectToDatabase();
 
-    // Xoá toàn bộ page theo tên nhân viên
+    // Tạo regex xóa không cần chính xác hoàn toàn
+    const regex = new RegExp(employee.replace(/\s+/g, "\\s+"), "i");
+
     const result = await db.collection("pageName").deleteMany({
-      employee: employee,
+      employee: { $regex: regex },
     });
 
     return new Response(
       JSON.stringify({
-        message: `Đã xoá toàn bộ page của nhân viên: ${employee}`,
+        message: `Đã xoá toàn bộ page có employee giống: ${employee}`,
         deletedCount: result.deletedCount,
       }),
       { status: 200 }
