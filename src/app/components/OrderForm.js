@@ -27,7 +27,18 @@ const OrderForm = ({ visible, onCancel,loading, onSubmit, resetPagename,initialV
   
   const [loading2, setLoading2] = useState(false);
   
-   
+  const revenue = Form.useWatch("revenue", form);
+
+  
+  useEffect(() => {
+  const numericProfit = Number(revenue); // chuyển về số
+  if (numericProfit === 0) {
+    form.setFieldsValue({
+      orderDate5: dayjs(), // ngày giờ hiện tại
+     
+    });
+  }
+}, [revenue]);
 
   // Danh sách options
   const [products, setProducts] = useState([]);
@@ -318,7 +329,10 @@ const productOptions = products.map((p) => p.name);
             <Form.Item label="odate4" name="orderDate4" hidden={true}>
               <Input type="number" />
             </Form.Item>
-            <Form.Item label="DOANH SỐ" name="profit" hidden={true}>
+            <Form.Item label="Ngày xóa ds" name="orderDate5" hidden={true}>
+                 <Input type="number" />
+            </Form.Item>
+            <Form.Item label="DOANH SỐ" name="revenue" hidden={true}>
               <Input type="number" />
             </Form.Item>
             <Form.Item label="SỐ ĐIỆN THOẠI" name="phone" hidden={true}>
@@ -542,7 +556,7 @@ const productOptions = products.map((p) => p.name);
                 <Form.Item label="ĐỊA CHỈ" name="address">
                   <Input.TextArea rows={2} />
                 </Form.Item>
-                <Form.Item label="MKT" name="mkt" hidden={currentUser.position === "salenhapdon"} >
+                <Form.Item label="MKT" name="mkt" hidden={currentUser.position==='salenhapdon'||currentUser.position==='salexuly'} >
                   <Input value={employeeNamepage} disable ={currentUser.position !== "salexuly"||currentUser.position !== "managerSALE"||currentUser.position !== "leadSALE"||currentUser.position !== "salefull"}  />
                 </Form.Item> 
               </Col>
@@ -618,10 +632,20 @@ const productOptions = products.map((p) => p.name);
                 <Form.Item label="QUÀ" name="category">
                   <Input />
                 </Form.Item>
-                <Form.Item label="DOANH SỐ" name="revenue"
-                >
-                  <Input type="number" />
-                </Form.Item>
+               
+               <Form.Item label="DOANH SỐ" name="revenue" >
+  <Input
+    type="number"
+    onChange={(e) => {
+      const value = e.target.value ? Number(e.target.value) : 0;
+      form.setFieldsValue({ revenue: value });
+    }}
+  />
+</Form.Item>
+                <Form.Item label="Ngày xóa ds" name="orderDate5"  hidden={true} >
+                 <Input type="number" />
+            </Form.Item>
+
                 <Form.Item label="SALE CHAT" name="sale" initialValue={currentUser.name}  hidden={currentUser.position==='salenhapdon'||currentUser.position==='salexuly'}>
                
                   <Select
