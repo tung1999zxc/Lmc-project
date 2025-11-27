@@ -889,6 +889,7 @@ const filteredAdsByArea =
       });
   // === Biểu đồ doanh số theo nhân viên (Grouped Double Bar Chart) ===
   const mktEmployees = filteredEmployeesByArea.filter((emp) => emp.position_team === "mkt" && emp.quocgia !== "jp");
+  const mktEmployeesPVD = filteredEmployeesByArea.filter((emp) => emp.position_team === "mkt" && emp.quocgia !== "jp"&&emp.khuvuc === "pvd");
 
   const employeeChartDataNew = mktEmployees.map((emp) => {
     const sales = filteredOrdersByArea
@@ -1403,7 +1404,7 @@ const filteredAdsByArea =
   }
 
   // Tạo marketingReportData1 mới đúng điều kiện
- const marketingReportData3 = mktEmployees.map((emp, index) => {
+ const marketingReportData3 = mktEmployeesPVD.map((emp, index) => {
   const nameLC = emp.name.trim().toLowerCase();
 
   // 1️⃣ Doanh số hôm nay
