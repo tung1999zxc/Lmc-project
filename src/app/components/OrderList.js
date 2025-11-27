@@ -1494,40 +1494,40 @@ onChange={(e) => handleColumnSelect("istick", e.target.checked)}
       dataIndex: "profit",
       key: "profit",
     },
-      {
-      title: (
-        <Checkbox
-          checked={selectedColumns.includes("orderDate5")}
-          onChange={(e) => handleColumnSelect("orderDate5", e.target.checked)}
-        >
-          Ngày xóa DS
-        </Checkbox>
-      ),
-      dataIndex: "orderDate5",
-      key: "orderDate5",
-     render: (text, record) => {
-        // Kiểm tra nếu orderDate4 không hợp lệ thì lấy orderDate
-        const dateValue = text || record.orderDate5;
+      // {
+      // title: (
+      //   <Checkbox
+      //     checked={selectedColumns.includes("orderDate5")}
+      //     onChange={(e) => handleColumnSelect("orderDate5", e.target.checked)}
+      //   >
+      //     Ngày xóa DS
+      //   </Checkbox>
+      // ),
+    //   dataIndex: "orderDate5",
+    //   key: "orderDate5",
+    //  render: (text, record) => {
+    //     // Kiểm tra nếu orderDate4 không hợp lệ thì lấy orderDate
+    //     const dateValue = text || record.orderDate5;
     
-        if (!dateValue) return "N/A"; // Nếu không có cả hai giá trị, hiển thị "N/A"
+    //     if (!dateValue) return "N/A"; // Nếu không có cả hai giá trị, hiển thị "N/A"
     
-        const formattedDate = dayjs(dateValue).isValid()
-          ? dayjs(dateValue).format("DD/MM")
-          : "N/A";
-        const formattedTime = dayjs(dateValue).isValid()
-          ? dayjs(dateValue).format("HH:mm:ss")
-          : "N/A";
+    //     const formattedDate = dayjs(dateValue).isValid()
+    //       ? dayjs(dateValue).format("DD/MM")
+    //       : "N/A";
+    //     const formattedTime = dayjs(dateValue).isValid()
+    //       ? dayjs(dateValue).format("HH:mm:ss")
+    //       : "N/A";
     
-        return (
-          <div>
-            {formattedDate}
-            <br />
-            {formattedTime}
-          </div>
-        );
-      },
-      width: 80, // Tăng width nếu cần để hiển thị đủ thông tin
-    },
+    //     return (
+    //       <div>
+    //         {formattedDate}
+    //         <br />
+    //         {formattedTime}
+    //       </div>
+    //     );
+    //   },
+    //   width: 80, // Tăng width nếu cần để hiển thị đủ thông tin
+    // },
      ...( currentUser.position !== "salexuly" && currentUser.position !== "salenhapdon"
       ? [
     {
@@ -1866,40 +1866,40 @@ const selectedTableColumns = columns.filter((col) =>
     { title: "DOANH SỐ",width: 100, dataIndex: "revenue", key: "revenue" },
 
     { title: "DOANH THU", dataIndex: "profit", key: "profit" ,width: 20,},
-      {
-      title: (
-        <Checkbox
-          checked={selectedColumns.includes("orderDate5")}
-          onChange={(e) => handleColumnSelect("orderDate5", e.target.checked)}
-        >
-          Ngày xóa DS
-        </Checkbox>
-      ),
-      dataIndex: "orderDate5",
-      key: "orderDate5",
-      render: (text, record) => {
-        // Kiểm tra nếu orderDate4 không hợp lệ thì lấy orderDate
-        const dateValue = text || record.orderDate5;
+    //   {
+    //   title: (
+    //     <Checkbox
+    //       checked={selectedColumns.includes("orderDate5")}
+    //       onChange={(e) => handleColumnSelect("orderDate5", e.target.checked)}
+    //     >
+    //       Ngày xóa DS
+    //     </Checkbox>
+    //   ),
+    //   dataIndex: "orderDate5",
+    //   key: "orderDate5",
+    //   render: (text, record) => {
+    //     // Kiểm tra nếu orderDate4 không hợp lệ thì lấy orderDate
+    //     const dateValue = text || record.orderDate5;
     
-        if (!dateValue) return "N/A"; // Nếu không có cả hai giá trị, hiển thị "N/A"
+    //     if (!dateValue) return "N/A"; // Nếu không có cả hai giá trị, hiển thị "N/A"
     
-        const formattedDate = dayjs(dateValue).isValid()
-          ? dayjs(dateValue).format("DD/MM")
-          : "N/A";
-        const formattedTime = dayjs(dateValue).isValid()
-          ? dayjs(dateValue).format("HH:mm:ss")
-          : "N/A";
+    //     const formattedDate = dayjs(dateValue).isValid()
+    //       ? dayjs(dateValue).format("DD/MM")
+    //       : "N/A";
+    //     const formattedTime = dayjs(dateValue).isValid()
+    //       ? dayjs(dateValue).format("HH:mm:ss")
+    //       : "N/A";
     
-        return (
-          <div>
-            {formattedDate}
-            <br />
-            {formattedTime}
-          </div>
-        );
-      },
-      width: 80, // Tăng width nếu cần để hiển thị đủ thông tin
-    },
+    //     return (
+    //       <div>
+    //         {formattedDate}
+    //         <br />
+    //         {formattedTime}
+    //       </div>
+    //     );
+    //   },
+    //   width: 80, // Tăng width nếu cần để hiển thị đủ thông tin
+    // },
 
     { title: "TÊN PAGE", dataIndex: "pageName", key: "pageName",width: 100, },
     { title: "TÊN KHÁCH", width: 100,dataIndex: "customerName", key: "customerName" },
@@ -2386,7 +2386,7 @@ onChange={(e) => handleColumnSelect("istick", e.target.checked)}
       trackingCode: values.trackingCode || "",
       orderDate: values.orderDate || moment().format("YYYY-MM-DD"),
       orderDate4: values.orderDate4 || moment().format("YYYY-MM-DD HH:mm:ss"),
-      orderDate5: values.orderDate5.format("YYYY-MM-DD HH:mm:ss") ||null,
+      // orderDate5: values.orderDate5.format("YYYY-MM-DD HH:mm:ss") ||null,
       shippingDate1: values.shippingDate1 || "",
       shippingDate2: values.shippingDate2 || "",
       employee_code_order: currentUser.employee_code,

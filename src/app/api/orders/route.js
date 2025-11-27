@@ -91,7 +91,7 @@ export async function POST(req) {
   try {
     const {
       orderDate4,
-      orderDate5,
+      // orderDate5,
       id,
       stt,
       orderDate,
@@ -166,7 +166,7 @@ export async function POST(req) {
       istick4,
       istickDONE,
       orderDate4,
-      orderDate5,
+      // orderDate5,
       isShipping,
       createdAt: new Date(),
     };
