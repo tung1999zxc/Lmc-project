@@ -45,6 +45,11 @@ const revenue = Form.useWatch("revenue", form);
       orderDate5: dayjs(), // ngày giờ hiện tại
     });
   }
+  if (numericProfit !== 0) {
+    form.setFieldsValue({
+      orderDate5: null, // ngày giờ hiện tại
+    });
+  }
 }, [revenue]);
 
 const handleSearchCustomerModal = async (name) => {
@@ -150,7 +155,7 @@ const handlePageNameChange = (value) => {
   const saleBaoOptions = ["DONE","OK", "HỦY", "ĐỢI XN","CHUYỂN ĐƠN", "BOOK TB","THIẾU TT","50/50", "NGUY CƠ", "BÙNG", "ĐANG UP", "CHECK"];
   const massOptions = ["Nặng", "Nhẹ"];
   const thanhToanOptions = ["ĐÃ THANH TOÁN", "CHƯA THANH TOÁN"];
-  const tinhTrangGHOptions = ["ĐÃ GỬI HÀNG", "GIAO THÀNH CÔNG","BỊ BẮT CHỜ GỬI LẠI","CHECK ĐỊA CHỈ"];
+  const tinhTrangGHOptions = ["ĐÃ GỬI HÀNG", "GIAO THÀNH CÔNG","VẮNG MẶT","HẸN GIAO LẠI","CUỘC ĐIỀU TRA","HOÀN"];
 
   // Khi có initialValues (dữ liệu cũ) thì chuyển các trường ngày về đối tượng dayjs
  
@@ -162,6 +167,7 @@ const productOptions = products.map((p) => p.name);
         orderDate: initialValues.orderDate ? dayjs(initialValues.orderDate) : null,
         shippingDate1: initialValues.shippingDate1 ? dayjs(initialValues.shippingDate1) : null,
         shippingDate2: initialValues.shippingDate2 ? dayjs(initialValues.shippingDate2) : null,
+       
       });
     } else {
       form.resetFields();
@@ -175,6 +181,7 @@ const productOptions = products.map((p) => p.name);
       orderDate: values.orderDate ? values.orderDate.format("YYYY-MM-DD") : null,
       shippingDate1: values.shippingDate1 ? values.shippingDate1.format("YYYY-MM-DD") : null,
       shippingDate2: values.shippingDate2 ? values.shippingDate2.format("YYYY-MM-DD") : null,
+  
     };
     onSubmit(submitValues);
     form.resetFields();
@@ -329,9 +336,18 @@ const productOptions = products.map((p) => p.name);
             <Form.Item label="odate4" name="orderDate4" hidden={true}>
               <Input type="number" />
             </Form.Item>
-            <Form.Item label="DOANH SỐ" name="profit" hidden={true}>
-              <Input type="number" />
+            <Form.Item label="DOANH SỐ" name="revenue" hidden={true}>
+             <Input
+                    type="number"
+                    onChange={(e) => {
+                      const value = e.target.value ? Number(e.target.value) : 0;
+                      form.setFieldsValue({ revenue: value });
+                    }}
+                  />
             </Form.Item>
+             <Form.Item label="Ngày xóa ds" name="orderDate5"  hidden>
+                             <Input type="number" />
+                            </Form.Item>
             <Form.Item label="SỐ ĐIỆN THOẠI" name="phone" hidden={true}>
               <Input type="tel" />
             </Form.Item>
@@ -416,7 +432,13 @@ const productOptions = products.map((p) => p.name);
               </Select>
             </Form.Item>
             <Form.Item label="DOANH SỐ" name="revenue" hidden={true}>
-              <Input type="number" />
+              <Input
+                    type="number"
+                    onChange={(e) => {
+                      const value = e.target.value ? Number(e.target.value) : 0;
+                      form.setFieldsValue({ revenue: value });
+                    }}
+                  />
             </Form.Item>
                <Form.Item label="ngày xóa ds" name="orderDate5" hidden>
        <Input type="number" />
@@ -641,7 +663,7 @@ const productOptions = products.map((p) => p.name);
                     }}
                   />
                 </Form.Item>
-                                <Form.Item label="Ngày xóa ds" name="orderDate5" hidden={true} >
+                                <Form.Item label="Ngày xóa ds" name="orderDate5"  hidden>
                              <Input type="number" />
                             </Form.Item>
 
@@ -687,7 +709,7 @@ const productOptions = products.map((p) => p.name);
     ))}
   </Select>
 </Form.Item>
-                <Form.Item label="SALE XÁC NHẬN" name="salexacnhan" initialValue={currentUser.name}> 
+                <Form.Item label="SALE XÁC NHẬN" name="salexacnhan" initialValue={currentUser.name} hidden> 
                 <Select
                     
                     showSearch

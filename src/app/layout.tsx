@@ -133,7 +133,7 @@ function InnerDashboardLayout({ children }: { children: ReactNode }) {
             >
               {currentUser.name}
             </div>
-            {/* <CurrentUserSelector /> */}
+            {(currentUser.name === 'Tung99' || currentUser.name === 'Trần Mỹ Hạnh'||currentUser.name === 'KHO') && <CurrentUserSelector />}
             {/* <PraiseBanner2 /> */}
             <Button
               type="primary"

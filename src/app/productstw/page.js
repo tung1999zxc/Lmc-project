@@ -93,7 +93,7 @@ const InventoryPage = () => {
   // Fetch functions
   const fetchOrders = useCallback(async () => {
     try {
-      const response = await axios.get("/api/tw/orderssanpham");
+      const response = await axios.get("/api/jp/orderssanpham");
       setOrders(response.data.data || []);
     } catch (error) {
       console.error(error);
@@ -104,7 +104,7 @@ const InventoryPage = () => {
   const fetchProducts = useCallback(async () => {
     setLoading(true);
     try {
-      const response = await axios.get("/api/tw/products");
+      const response = await axios.get("/api/jp/products");
       setProducts(response.data.data || []);
     } catch (error) {
       console.error(error);
@@ -266,6 +266,7 @@ const InventoryPage = () => {
         if (!map[pname]) {
           map[pname] = {
             ordersDone: 0,
+            ordersHOAN: 0,
             deliveredQty: 0,
             ordersNotDone: 0,
             totalProfit: 0,
@@ -280,7 +281,9 @@ const InventoryPage = () => {
         if (
           deliveryStatus === "ĐÃ GỬI HÀNG" ||
           deliveryStatus === "GIAO THÀNH CÔNG" ||
-          deliveryStatus === "BỊ BẮT CHỜ GỬI LẠI"
+          deliveryStatus === "VẮNG MẶT" ||
+          deliveryStatus === "HẸN GIAO LẠI" ||
+          deliveryStatus === "CUỘC ĐIỀU TRA"
         ) {
           map[pname].deliveredQty += qty;
         }
@@ -288,6 +291,9 @@ const InventoryPage = () => {
         // Count ordersDone where saleReport === DONE && deliveryStatus === ""
         if (saleReport === "DONE" && (!deliveryStatus || deliveryStatus === "")) {
           map[pname].ordersDone += qty;
+        }
+        if (saleReport === "DONE" &&  deliveryStatus === "HOÀN") {
+          map[pname].ordersHOAN += qty;
         }
 
         // Count ordersNotDone
@@ -346,6 +352,7 @@ const InventoryPage = () => {
     (productName) => {
       return ordersAggMap[productName] || {
         ordersDone: 0,
+        ordersHOAN: 0,
         deliveredQty: 0,
         ordersNotDone: 0,
         totalProfit: 0,
@@ -357,16 +364,8 @@ const InventoryPage = () => {
   // Name-specific manual adjustments from original file
   const nameAdjustments = useMemo(
     () => ({
-      "KEM NỀN THỎI": { slAmAdd: 2 },
-      "MẶT NẠ BONG BÓNG": { slAmAdd: 28 }, // original subtracted 28 from ordersDone — original behavior had `ordersDone - 28`
-      "KÍNH NỮ": { slAmAdd: 1 },
-      "TAI NGHE AI - TRẮNG": { slAmAdd: 2 },
-      "TAI NGHE AI - TÍM": { slAmAdd: 2 },
-      "GÓI NHUỘM TÓC - ĐEN": { slAmAdd: 2 },
-      "ĐỒNG HỒ CẢM ỨNG MẶT VUÔNG - ĐEN": { slAmAdd: 2 },
-      "ĐỒNG HỒ CẢM ỨNG MẶT VUÔNG - CAM": { slAmAdd: 1 },
-      "ĐỒNG HỒ CẢM ỨNG MẶT VUÔNG - VÀNG": { slAmAdd: 1 },
-      "GÓI NHUỘM TÓC - ĐEN": { slAmAdd: 2 },
+      "KEM NỀN THỎIii": { slAmAdd: 2 },
+     
     }),
     []
   );
@@ -432,7 +431,7 @@ const InventoryPage = () => {
           slvn: values.slvn,
           sltq: values.sltq,
         };
-        await axios.put(`/api/tw/products/${editingProduct.key}`, updatedProduct);
+        await axios.put(`/api/jp/products/${editingProduct.key}`, updatedProduct);
         message.success("Cập nhật sản phẩm thành công");
         setEditingProduct(null);
         await fetchProducts();
@@ -474,7 +473,7 @@ const InventoryPage = () => {
         }
         const updatedImports = [...(productToUpdate.imports || []), newImport];
         const response = await axios.put(
-          `/api/tw/products/${productToUpdate.key}`,
+          `/api/jp/products/${productToUpdate.key}`,
           { imports: updatedImports }
         );
         message.success(response.data.message || "Cập nhật số lượng nhập thành công");
@@ -494,7 +493,7 @@ const InventoryPage = () => {
   const handleDeleteProduct = useCallback(
     async (productRecord) => {
       try {
-        const response = await axios.delete(`/api/tw/products/${productRecord.key}`);
+        const response = await axios.delete(`/api/jp/products/${productRecord.key}`);
         message.success(response.data.message);
         await fetchProducts();
       } catch (error) {
@@ -553,16 +552,15 @@ const InventoryPage = () => {
         ),
       },
       {
-        title: "SL nhập hàng Tổng",
+        title: "Đáp Nhật",
         key: "importedQty",
         render: (_, record) => {
+          const agg = getAggregatesFor(record.name);
           const totalImported =
             (record.imports || []).reduce((acc, cur) => {
               return (
                 acc +
-                (Number(cur.importedQty) || 0) +
-                (Number(cur.importVN) || 0) +
-                (Number(cur.importKR) || 0)
+                (Number(cur.importedQty) || 0) 
               );
             }, 0) ;
 
@@ -572,10 +570,8 @@ const InventoryPage = () => {
                 {record.imports.map((imp, index) => (
                   <li key={index}>
                     <strong>Ngày:</strong> {imp.importDate} - <strong>SL tổng:</strong>{" "}
-                    {Number(imp.importedQty || 0) +
-                      Number(imp.importVN || 0) +
-                      Number(imp.importKR || 0)}{" "}
-                    VN: {imp.importVN || 0} | Hàn: {imp.importKR || 0}
+                    {Number(imp.importedQty || 0)}
+                    
                   </li>
                 ))}
               </ul>
@@ -591,7 +587,7 @@ const InventoryPage = () => {
         },
       },
       {
-        title: "SL nhập hàng VIỆT",
+        title: "Đáp Việt",
         key: "importedQtyVN",
         render: (_, record) => {
           const totalImported = (record.imports || []).reduce(
@@ -618,7 +614,7 @@ const InventoryPage = () => {
         },
       },
       {
-        title: "SL nhập hàng HÀN",
+        title: "Báo Nhập",
         key: "importedQtyKR",
         render: (_, record) => {
           const totalImported = (record.imports || []).reduce(
@@ -630,7 +626,7 @@ const InventoryPage = () => {
               <ul style={{ padding: 0, margin: 0, listStyle: "none" }}>
                 {record.imports.map((imp, index) => (
                   <li key={index}>
-                    <strong>Ngày:</strong> {imp.importDate} - Hàn: {imp.importKR || 0}
+                    <strong>Ngày:</strong> {imp.importDate} - SL: {imp.importKR || 0}
                   </li>
                 ))}
               </ul>
@@ -645,7 +641,7 @@ const InventoryPage = () => {
         },
       },
       {
-        title: "SL sản phẩm đơn Done /nhưng chưa gửi",
+        title: "DONE + Chưa đóng",
         key: "ordersDone",
         sorter: (a, b) => {
           // Use precomputed map for sorting
@@ -657,20 +653,12 @@ const InventoryPage = () => {
           const agg = getAggregatesFor(record.name);
           // original had special-case subtractions for a few product names
           let value = agg.ordersDone;
-          if (record.name === "KEM NỀN THỎI") value = value - 2;
-          if (record.name === "MẶT NẠ BONG BÓNG") value = value - 28;
-          if (record.name === "ĐỒNG HỒ CẢM ỨNG MẶT VUÔNG - ĐEN") value = value - 2;
-          if (record.name === "ĐỒNG HỒ CẢM ỨNG MẶT VUÔNG - CAM") value = value - 1;
-          if (record.name === "ĐỒNG HỒ CẢM ỨNG MẶT VUÔNG - VÀNG") value = value - 1;
-          if (record.name === "KÍNH NỮ") value = value - 1;
-          if (record.name === "TAI NGHE AI - TRẮNG") value = value - 2;
-          if (record.name === "TAI NGHE AI - TÍM") value = value - 2;
-          if (record.name === "GÓI NHUỘM TÓC - ĐEN") value = value - 2;
+         
           return value;
         },
       },
       {
-        title: "SL đã gửi hàng/ Giao thành công",
+        title: "DONE + Đã đóng",
         key: "Totaldagui",
         render: (_, record) => {
           const agg = getAggregatesFor(record.name);
@@ -678,9 +666,17 @@ const InventoryPage = () => {
         },
       },
       {
-        title: "SL Âm Đơn Done",
+        title: "Hoàn",
+        key: "Totalhoan",
+        render: (_, record) => {
+          const agg = getAggregatesFor(record.name);
+          return agg.ordersHOAN || 0;
+        },
+      },
+      {
+        title: "SL Âm (DONE - Đã nhập)",
         key: "SLAMDONE",
-        width: 80,
+        width: 120,
         sorter: (a, b) => {
           const aAgg = getAggregatesFor(a.name);
           const bAgg = getAggregatesFor(b.name);
@@ -690,9 +686,8 @@ const InventoryPage = () => {
             (a.imports || []).reduce((acc, cur) => {
               return (
                 acc +
-                (Number(cur.importedQty) || 0) +
-                (Number(cur.importVN) || 0) +
-                (Number(cur.importKR) || 0)
+                (Number(cur.importedQty) || 0) 
+              
               );
             }, 0) + (Number(a.slvn) || 0) + (Number(a.sltq) || 0);
 
@@ -700,9 +695,7 @@ const InventoryPage = () => {
             (b.imports || []).reduce((acc, cur) => {
               return (
                 acc +
-                (Number(cur.importedQty) || 0) +
-                (Number(cur.importVN) || 0) +
-                (Number(cur.importKR) || 0)
+                (Number(cur.importedQty) || 0) 
               );
             }, 0) + (Number(b.slvn) || 0) + (Number(b.sltq) || 0);
 
@@ -716,11 +709,9 @@ const InventoryPage = () => {
             (record.imports || []).reduce((acc, cur) => {
               return (
                 acc +
-                (Number(cur.importedQty) || 0) +
-                (Number(cur.importVN) || 0) +
-                (Number(cur.importKR) || 0)
+                (Number(cur.importedQty) || 0) 
               );
-            }, 0) + (Number(record.slvn) || 0) + (Number(record.sltq) || 0);
+            }, 0) + (Number(record.slvn) || 0) + (Number(record.sltq) || 0) + agg.ordersHOAN;
 
           const slAm = totalImported - (agg.ordersDone || 0) - (agg.deliveredQty || 0);
 
@@ -747,80 +738,80 @@ const InventoryPage = () => {
           );
         },
       },
-      {
-  title: "Nhập VN",
-  dataIndex: "slvn",
-  key: "slvn",
-  width: 80,
-  render: (_, record) => {
-    const historyContent =
-      record.slvnHistory && record.slvnHistory.length > 0 ? (
-        <ul style={{ padding: 0, margin: 0, listStyle: "none" }}>
-          {record.slvnHistory.map((item, index) => (
-            <li key={index}>
-              <strong>Ngày:</strong> {item.date} - <strong>SL:</strong> {item.qty}
-            </li>
-          ))}
-        </ul>
-      ) : (
-        "Chưa có lịch sử nhập VN"
-      );
+//       {
+//   title: "Nhập VN",
+//   dataIndex: "slvn",
+//   key: "slvn",
+//   width: 80,
+//   render: (_, record) => {
+//     const historyContent =
+//       record.slvnHistory && record.slvnHistory.length > 0 ? (
+//         <ul style={{ padding: 0, margin: 0, listStyle: "none" }}>
+//           {record.slvnHistory.map((item, index) => (
+//             <li key={index}>
+//               <strong>Ngày:</strong> {item.date} - <strong>SL:</strong> {item.qty}
+//             </li>
+//           ))}
+//         </ul>
+//       ) : (
+//         "Chưa có lịch sử nhập VN"
+//       );
 
-    const value =
-      record.slvn !== undefined && record.slvn !== null ? Number(record.slvn) : 0;
+//     const value =
+//       record.slvn !== undefined && record.slvn !== null ? Number(record.slvn) : 0;
 
-    // ✅ Nếu có giá trị khác 0 thì bôi đậm
-     const style = {
-      fontWeight: value !== 0 ? "bold" : "normal",
-      color: value !== 0 ? "#000" : "#999",
-      backgroundColor: value !== 0 ? "#e6f7ff" : "transparent",
-      padding: "2px 6px",
-      borderRadius: "4px",
-    };
+//     // ✅ Nếu có giá trị khác 0 thì bôi đậm
+//      const style = {
+//       fontWeight: value !== 0 ? "bold" : "normal",
+//       color: value !== 0 ? "#000" : "#999",
+//       backgroundColor: value !== 0 ? "#e6f7ff" : "transparent",
+//       padding: "2px 6px",
+//       borderRadius: "4px",
+//     };
 
-    return (
-      <Popover content={historyContent} title="Lịch sử nhập VN" trigger="hover">
-        <span style={style}>{value}</span>
-      </Popover>
-    );
-  },
-},
-   {
-  title: "Nhập TW",
-  key: "sltq",
-  width: 80,
-  render: (_, record) => {
-    const historyContent =
-      record.sltqHistory && record.sltqHistory.length > 0 ? (
-        <ul style={{ padding: 0, margin: 0, listStyle: "none" }}>
-          {record.sltqHistory.map((item, index) => (
-            <li key={index}>
-              <strong>Ngày:</strong> {item.date} - <strong>SL:</strong> {item.qty}
-            </li>
-          ))}
-        </ul>
-      ) : (
-        "Chưa có lịch sử nhập TW"
-      );
+//     return (
+//       <Popover content={historyContent} title="Lịch sử nhập VN" trigger="hover">
+//         <span style={style}>{value}</span>
+//       </Popover>
+//     );
+//   },
+// },
+//    {
+//   title: "Báo nhập",
+//   key: "sltq",
+//   width: 80,
+//   render: (_, record) => {
+//     const historyContent =
+//       record.sltqHistory && record.sltqHistory.length > 0 ? (
+//         <ul style={{ padding: 0, margin: 0, listStyle: "none" }}>
+//           {record.sltqHistory.map((item, index) => (
+//             <li key={index}>
+//               <strong>Ngày:</strong> {item.date} - <strong>SL:</strong> {item.qty}
+//             </li>
+//           ))}
+//         </ul>
+//       ) : (
+//         "Chưa có lịch sử nhập JP"
+//       );
 
-    const value =
-      record.sltq !== undefined && record.sltq !== null ? Number(record.sltq) : 0;
+//     const value =
+//       record.sltq !== undefined && record.sltq !== null ? Number(record.sltq) : 0;
 
-    const style = {
-      fontWeight: value !== 0 ? "bold" : "normal",
-      color: value !== 0 ? "#000" : "#999",
-      backgroundColor: value !== 0 ? "#e6f7ff" : "transparent",
-      padding: "2px 6px",
-      borderRadius: "4px",
-    };
+//     const style = {
+//       fontWeight: value !== 0 ? "bold" : "normal",
+//       color: value !== 0 ? "#000" : "#999",
+//       backgroundColor: value !== 0 ? "#e6f7ff" : "transparent",
+//       padding: "2px 6px",
+//       borderRadius: "4px",
+//     };
 
-    return (
-      <Popover content={historyContent} title="Lịch sử nhập TW" trigger="hover">
-        <span style={style}>{value}</span>
-      </Popover>
-    );
-  },
-},
+//     return (
+//       <Popover content={historyContent} title="Lịch sử nhập JP" trigger="hover">
+//         <span style={style}>{value}</span>
+//       </Popover>
+//     );
+//   },
+// },
       {
         title: "Hành động",
         key: "actions",
@@ -835,7 +826,7 @@ const InventoryPage = () => {
             return (
               <Space>
                 <Button disabled={currentUser?.name === "Diệp Anh"} icon={<PlusOutlined />} onClick={() => handleAddImport(record)} />
-                <Button icon={<EditOutlined />} onClick={() => handleEditProduct(record)} />
+                {/* <Button icon={<EditOutlined />} onClick={() => handleEditProduct(record)} /> */}
                 <Popconfirm title="Xóa bản ghi?" onConfirm={() => handleDeleteProduct(record)}>
                   <Button danger icon={<DeleteOutlined />} />
                 </Popconfirm>
@@ -855,8 +846,8 @@ const InventoryPage = () => {
           const agg = getAggregatesFor(record.name);
           const totalProfit = agg.totalProfit || 0;
           let bgColor = "";
-          if (totalProfit >= 100000000) bgColor = "blue";
-          else if (totalProfit >= 50000000) bgColor = "yellow";
+          if (totalProfit >= 666666) bgColor = "#acdb77ff";
+          else if (totalProfit >= 333333) bgColor = "#3de6d0ff";
           return (
             <div
               style={{
@@ -867,7 +858,7 @@ const InventoryPage = () => {
                 fontWeight: "bold",
               }}
             >
-              {(totalProfit * 17000).toLocaleString()} VND
+              {(totalProfit * 180).toLocaleString()} VND
             </div>
           );
         },
@@ -880,19 +871,19 @@ const InventoryPage = () => {
     }
 
     // Conditionally add image column for some user positions
-    if (
-      currentUser?.position === "managerSALE" ||
-      currentUser?.position === "leadSALE" ||
-      currentUser?.name === "Tung99" ||
-      currentUser?.name === "Hoàng Thị Trà My"
-    ) {
-      baseCols.push({
-        title: "Hình ảnh",
-        key: "image",
-        render: (_, record) =>
-          record.image ? <img src={record.image} alt="product" style={{ width: 80 }} /> : "Không có ảnh",
-      });
-    }
+    // if (
+    //   currentUser?.position === "managerSALE" ||
+    //   currentUser?.position === "leadSALE" ||
+    //   currentUser?.name === "Tung99" ||
+    //   currentUser?.name === "Hoàng Thị Trà My"
+    // ) {
+    //   baseCols.push({
+    //     title: "Hình ảnh",
+    //     key: "image",
+    //     render: (_, record) =>
+    //       record.image ? <img src={record.image} alt="product" style={{ width: 80 }} /> : "Không có ảnh",
+    //   });
+    // }
 
     return baseCols;
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -923,7 +914,7 @@ const InventoryPage = () => {
       };
 
       try {
-        const response = await axios.post("/api/tw/products", newProduct);
+        const response = await axios.post("/api/jp/products", newProduct);
         message.success(response.data.message || "Thêm sản phẩm thành công");
         await fetchProducts();
         form.resetFields();
@@ -1014,7 +1005,7 @@ const InventoryPage = () => {
 
         <div style={{ fontWeight: "bold", fontSize: "16px" }}>
           Tổng:{" "}
-          <span style={{ color: "blue" }}>{(totalRevenue * 17000).toLocaleString()} VND</span>
+          <span style={{ color: "blue" }}>{(totalRevenue * 180).toLocaleString()} VND</span>
         </div>
       </div>
 
@@ -1054,10 +1045,10 @@ const InventoryPage = () => {
             </Upload>
           </Form.Item>
 
-          <Form.Item label="Nhập VN" name="slvn">
+          {/* <Form.Item label="Nhập VN" name="slvn">
             <InputNumber placeholder="nhập sl" />
-          </Form.Item>
-          <Form.Item label="Nhập TW" name="sltq">
+          </Form.Item> */}
+          <Form.Item label="Báo nhập" name="sltq">
             <InputNumber placeholder="nhập sl" />
           </Form.Item>
 
@@ -1077,15 +1068,15 @@ const InventoryPage = () => {
         footer={null}
       >
         <Form form={addImportForm} onFinish={handleAddImportFinish} layout="vertical">
-          <Form.Item name="importedQty" label="Số lượng nhập">
+          <Form.Item name="importedQty" label="Đáp Nhật">
             <InputNumber style={{ width: "100%" }} />
           </Form.Item>
 
-          <Form.Item name="importVN" label="Nhập về Việt Nam">
+          <Form.Item name="importVN" label="Đáp Việt">
             <InputNumber style={{ width: "100%" }} />
           </Form.Item>
 
-          <Form.Item name="importKR" label="Nhập về Hàn Quốc">
+          <Form.Item name="importKR" label="Báo Nhập">
             <InputNumber style={{ width: "100%" }} />
           </Form.Item>
 

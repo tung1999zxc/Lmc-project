@@ -2649,7 +2649,7 @@ const summaryData = [
         
         {/* Vinh danh TOP 3 SALE NHẬP ĐƠN */}
       
-        {currentUser.name !== "Trần" &&
+        {/* {currentUser.name !== "Trần" &&
           (
             <div className="marquee">
               {top5Employees2.map((emp, index) => (
@@ -2684,7 +2684,7 @@ const summaryData = [
                 </div>
               ))}
             </div>
-          )}
+          )} */}
           </div>
         {/* {currentUser.name !== "Trần Ngọc Lâm" &&
           currentUser.name !== "Diệp Anh" &&

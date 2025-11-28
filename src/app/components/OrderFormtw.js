@@ -44,6 +44,11 @@ const revenue = Form.useWatch("revenue", form);
       orderDate5: dayjs(), // ngày giờ hiện tại
     });
   }
+  if (numericProfit !== 0) {
+    form.setFieldsValue({
+      orderDate5: null, // ngày giờ hiện tại
+    });
+  }
 }, [revenue]);
 
 const handleSearchCustomerModal = async (name) => {

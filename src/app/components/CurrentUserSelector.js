@@ -12,6 +12,12 @@ const { Option } = Select;
 
 const CurrentUserSelector = () => {
   const [employees, setEmployees] = useState([]);
+const currentUser = useSelector((state) => state.user.currentUser);
+  
+  const employeeshanh = employees
+    .filter((order) => order.name === "KHO" || order.name === "Trần Mỹ Hạnh")
+    ;
+
   const fetchEmployees = async () => {
       
       try {
@@ -54,19 +60,33 @@ useEffect(() => {
 
   return (
     <div>
-      <Select
-        placeholder="Chọn nhân viên"
-        style={{ width: 500 }}
-        onChange={handleChange}
-        optionFilterProp="children"
-      >
-        {employees.map((emp) => (
-          // Mỗi Option hiển thị tên và vị trí của nhân viên
-          <Option key={emp.employee_code} value={emp.employee_code}>
-            Tên nv: {emp.name} ---Chức vụ: {emp.position}--- Team: {emp.team_id} 
-          </Option>
-        ))}
-      </Select>
+      {(currentUser?.name === "Trần Mỹ Hạnh" || currentUser?.name === "KHO" ) ? (
+  <Select
+    placeholder="Chọn nhân viên"
+    style={{ width: 500 }}
+    onChange={handleChange}
+    optionFilterProp="children"
+  >
+    {employeeshanh.map((emp) => (
+      <Option key={emp.employee_code} value={emp.employee_code}>
+        Tên nv: {emp.name} --- Chức vụ: {emp.position} --- Team: {emp.team_id}
+      </Option>
+    ))}
+  </Select>
+) : (
+  <Select
+    placeholder="Chọn nhân viên"
+    style={{ width: 500 }}
+    onChange={handleChange}
+    optionFilterProp="children"
+  >
+    {employees.map((emp) => (
+      <Option key={emp.employee_code} value={emp.employee_code}>
+        Tên nv: {emp.name} --- Chức vụ: {emp.position} --- Team: {emp.team_id}
+      </Option>
+    ))}
+  </Select>
+)}
     </div>
   );
 };

@@ -18,7 +18,7 @@ import {
 import { EditOutlined, DeleteOutlined ,SearchOutlined} from "@ant-design/icons";
 import FullScreenLoading from './FullScreenLoading.js';
 import dayjs from "dayjs";
-import OrderForm from "./OrderForm.js";
+import OrderFormtw from "./OrderFormtw.js";
 import isBetween from "dayjs/plugin/isBetween";
 import { useDispatch, useSelector } from "react-redux";
 import axios from "axios";
@@ -2318,7 +2318,7 @@ onChange={(e) => handleColumnSelect("istick", e.target.checked)}
       trackingCode: values.trackingCode || "",
       orderDate: values.orderDate || moment().format("YYYY-MM-DD"),
       orderDate4: values.orderDate4 || moment().format("YYYY-MM-DD HH:mm:ss"),
-      orderDate5: values.orderDate5.format("YYYY-MM-DD HH:mm:ss")||null ,
+      orderDate5: values.orderDate5||null ,
       shippingDate1: values.shippingDate1 || "",
       shippingDate2: values.shippingDate2 || "",
       employee_code_order: currentUser.employee_code,
@@ -2901,7 +2901,7 @@ const handleResetAllSTT = async () => {
     allowClear 
     showSearch
   />
-  {currentUser.position !=="salenhapdon" &&
+  {currentUser.position !=="sale" &&
    <span ><strong>
   Tổng Doanh Số: {(filteredOrders.reduce((acc, order) => {
         // Chuyển revenue về số nếu chưa phải số
@@ -3074,7 +3074,7 @@ const handleResetAllSTT = async () => {
 />
         </Col>
       </Row>
-      <OrderForm
+      <OrderFormtw
         visible={formVisible}
         onCancel={() => setFormVisible(false)}
         onSubmit={handleSubmit}
