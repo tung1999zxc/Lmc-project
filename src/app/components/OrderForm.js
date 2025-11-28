@@ -30,15 +30,21 @@ const OrderForm = ({ visible, onCancel,loading, onSubmit, resetPagename,initialV
   const revenue = Form.useWatch("revenue", form);
 
   
-//   useEffect(() => {
-//   const numericProfit = Number(revenue); // chuyển về số
-//   if (numericProfit === 0) {
-//     form.setFieldsValue({
-//       orderDate5: dayjs(), // ngày giờ hiện tại
+  useEffect(() => {
+  const numericProfit = Number(revenue); // chuyển về số
+  if (numericProfit === 0) {
+    form.setFieldsValue({
+      orderDate5: dayjs(), // ngày giờ hiện tại
      
-//     });
-//   }
-// }, [revenue]);
+    });
+  }
+  if (numericProfit !== 0) {
+    form.setFieldsValue({
+      orderDate5: null, // ngày giờ hiện tại
+     
+    });
+  }
+}, [revenue]);
 
   // Danh sách options
   const [products, setProducts] = useState([]);
@@ -162,6 +168,7 @@ const productOptions = products.map((p) => p.name);
         orderDate: initialValues.orderDate ? dayjs(initialValues.orderDate) : null,
         shippingDate1: initialValues.shippingDate1 ? dayjs(initialValues.shippingDate1) : null,
         shippingDate2: initialValues.shippingDate2 ? dayjs(initialValues.shippingDate2) : null,
+        // orderDate5: initialValues.orderDate5 ? dayjs(initialValues.orderDate5) : null,
       });
     } else {
       form.resetFields();
@@ -175,6 +182,8 @@ const productOptions = products.map((p) => p.name);
       orderDate: values.orderDate ? values.orderDate.format("YYYY-MM-DD") : null,
       shippingDate1: values.shippingDate1 ? values.shippingDate1.format("YYYY-MM-DD") : null,
       shippingDate2: values.shippingDate2 ? values.shippingDate2.format("YYYY-MM-DD") : null,
+      // orderDate5: values.orderDate5 ? values.orderDate5.format("YYYY-MM-DD") : null,
+
     };
     onSubmit(submitValues);
     form.resetFields();
@@ -329,11 +338,12 @@ const productOptions = products.map((p) => p.name);
             <Form.Item label="odate4" name="orderDate4" hidden={true}>
               <Input type="number" />
             </Form.Item>
-            {/* <Form.Item label="Ngày xóa ds" name="orderDate5" hidden={true}>
-                 <Input type="number" />
-            </Form.Item> */}
+           
             <Form.Item label="DOANH SỐ" name="revenue" hidden={true}>
               <Input type="number" />
+            </Form.Item>
+             <Form.Item label="Ngày xóa ds" name="orderDate5"  hidden={true} >
+                 <Input type="number" />
             </Form.Item>
             <Form.Item label="SỐ ĐIỆN THOẠI" name="phone" hidden={true}>
               <Input type="tel" />
@@ -420,6 +430,9 @@ const productOptions = products.map((p) => p.name);
             </Form.Item>
             <Form.Item label="DOANH SỐ" name="revenue" hidden={true}>
               <Input type="number" />
+            </Form.Item>
+             <Form.Item label="Ngày xóa ds" name="orderDate5"  hidden={true} >
+                 <Input type="number" />
             </Form.Item>
             <Form.Item label="TT SALE XỬ LÍ ĐƠN" name="processStatus" hidden={true}>
               <Select>
@@ -636,15 +649,15 @@ const productOptions = products.map((p) => p.name);
                <Form.Item label="DOANH SỐ" name="revenue" >
   <Input
     type="number"
-    // onChange={(e) => {
-    //   const value = e.target.value ? Number(e.target.value) : 0;
-    //   form.setFieldsValue({ revenue: value });
-    // }}
+    onChange={(e) => {
+      const value = e.target.value ? Number(e.target.value) : 0;
+      form.setFieldsValue({ revenue: value });
+    }}
   />
 </Form.Item>
-                {/* <Form.Item label="Ngày xóa ds" name="orderDate5"  hidden={true} >
+                <Form.Item label="Ngày xóa ds" name="orderDate5"  hidden={true} >
                  <Input type="number" />
-            </Form.Item> */}
+            </Form.Item>
 
                 <Form.Item label="SALE CHAT" name="sale" initialValue={currentUser.name}  hidden={currentUser.position==='salenhapdon'||currentUser.position==='salexuly'}>
                
