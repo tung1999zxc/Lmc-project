@@ -745,7 +745,7 @@ const productOptions = products.map((p) => p.name);
                   </Select>
                 </Form.Item>
                 <Form.Item label="THANH TOÁN" name="paymentStatus"
-                rules={[{ required: true, message: 'Vui lòng nhập THANH TOÁN' }]}>
+                >
                   <Select>
                     {thanhToanOptions.map((status) => (
                       <Option key={status} value={status}>
