@@ -155,7 +155,7 @@ const handlePageNameChange = (value) => {
   const saleBaoOptions = ["DONE","OK", "HỦY", "ĐỢI XN","CHUYỂN ĐƠN", "BOOK TB","THIẾU TT","50/50", "NGUY CƠ", "BÙNG", "ĐANG UP", "CHECK"];
   const massOptions = ["Nặng", "Nhẹ"];
   const thanhToanOptions = ["ĐÃ THANH TOÁN", "CHƯA THANH TOÁN"];
-  const tinhTrangGHOptions = ["ĐÃ GỬI HÀNG", "GIAO THÀNH CÔNG","BỊ BẮT CHỜ GỬI LẠI","CHECK ĐỊA CHỈ"];
+  const tinhTrangGHOptions = ["ĐÃ GỬI HÀNG", "GIAO THÀNH CÔNG","VẮNG MẶT","HẸN GIAO LẠI","CUỘC ĐIỀU TRA","HOÀN"];
 
   // Khi có initialValues (dữ liệu cũ) thì chuyển các trường ngày về đối tượng dayjs
  
