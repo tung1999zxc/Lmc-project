@@ -25,7 +25,7 @@ const SidebarMenu = () => {
     currentUser?.name === "Trần Mỹ Hạnh";
 
   const isJP =
-    currentUser?.name === "Nguyễn Quốc Hiếu"||currentUser?.name === "Hà Minh Sang"||currentUser?.name === "Nguyễn Thị Hồng Nhung"||currentUser?.name === "KHO";
+    currentUser?.name === "Nguyễn Quốc Hiếu"||currentUser?.name === "Hà Minh Sang"||currentUser?.name === "Nguyễn Thị Hồng Nhungg"||currentUser?.name === "KHO";
   const isTW =
     currentUser?.name === "Trần Ngọc Diện";
 
