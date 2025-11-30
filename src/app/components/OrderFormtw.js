@@ -675,7 +675,7 @@ const productOptions = products.map((p) => p.name);
                 </Form.Item>
                 
                
-                <Form.Item label="VẬN ĐƠN" name="salexuly" initialValue={namesalexuly}>
+                <Form.Item label="VẬN ĐƠN" name="salexuly" initialValue={namesalexuly} hidden>
   <Select showSearch
     disabled={
       (currentUser.position === "salexuly" ||
@@ -694,7 +694,7 @@ const productOptions = products.map((p) => p.name);
     ))}
   </Select>
 </Form.Item>
-                <Form.Item label="SALE XÁC NHẬN" name="salexacnhan" initialValue={currentUser.name}> 
+                <Form.Item label="SALE XÁC NHẬN" name="salexacnhan" initialValue={currentUser.name} hidden> 
                 <Select
                     
                     showSearch
@@ -744,7 +744,7 @@ const productOptions = products.map((p) => p.name);
                     ))}
                   </Select>
                 </Form.Item>
-                <Form.Item label="THANH TOÁN" name="paymentStatus"
+                <Form.Item label="THANH TOÁN" name="paymentStatus" hidden
                 >
                   <Select>
                     {thanhToanOptions.map((status) => (

@@ -216,11 +216,12 @@ const productOptions = products.map((p) => p.name);
       render: (text) => <div style={{ width: 200,  }}><h3>{text} </h3></div>,
     },{
       title:
-          "TT XỬ LÍ",
+          "GIỜ NHẬN",
        
       dataIndex: "processStatus",
       key: "processStatus",
     },
+
     {
       title: 
           'ĐƠN'
@@ -242,15 +243,7 @@ const productOptions = products.map((p) => p.name);
       render: (text) => (
         <Tag color={text === "GIAO THÀNH CÔNG" ? "blue" : "orange"}>{text}</Tag>
       ),
-    }, {
-      title: "THANH TOÁN",
-      dataIndex: "paymentStatus",
-      key: "paymentStatus",
-      width: 100,
-      render: (text) => (
-        <Tag color={text === "ĐÃ THANH TOÁN" ? "green" : "red"}>{text}</Tag>
-      )
-    },
+    }, 
     ]}
     rowKey="id"
 />
@@ -447,6 +440,9 @@ const productOptions = products.map((p) => p.name);
                 ))}
               </Select>
             </Form.Item>
+            <Form.Item label="MÃ BƯU CHÍNH" name="pcode">
+                <Input />
+                </Form.Item>
             <Form.Item label="SALE BÁO" name="saleReport" hidden={true}>
               <Select>
                 {saleBaoOptions.map((report) => (
@@ -683,6 +679,9 @@ const productOptions = products.map((p) => p.name);
                     ))}
                   </Select>
                 </Form.Item>
+                <Form.Item label="MÃ BƯU CHÍNH" name="pcode">
+                <Input />
+                </Form.Item>
                 
                
                 <Form.Item label="VẬN ĐƠN" name="salexuly" initialValue={namesalexuly} hidden>
@@ -736,7 +735,7 @@ const productOptions = products.map((p) => p.name);
                 <Form.Item label="Link FB" name="fb">
                 <Input />
                 </Form.Item>
-                <Form.Item label="Giờ Nhận" name="processStatus">
+                <Form.Item label="GIỜ NHẬN" name="processStatus">
                   <Select showSearch>
                     {handleTTXLOptions.map((status) => (
                       <Option key={status} value={status}>
@@ -745,6 +744,7 @@ const productOptions = products.map((p) => p.name);
                     ))}
                   </Select>
                 </Form.Item>
+                
                 <Form.Item label="ĐƠN" name="saleReport">
                   <Select allowClear>
                     {saleBaoOptions.map((report) => (
@@ -754,7 +754,7 @@ const productOptions = products.map((p) => p.name);
                     ))}
                   </Select>
                 </Form.Item>
-                <Form.Item label="THANH TOÁN" name="paymentStatus"
+                <Form.Item label="THANH TOÁN" name="paymentStatus" hidden
                 >
                   <Select>
                     {thanhToanOptions.map((status) => (

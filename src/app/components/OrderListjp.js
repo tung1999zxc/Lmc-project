@@ -1606,6 +1606,30 @@ onChange={(e) => handleColumnSelect("istick", e.target.checked)}
     {
       title: (
         <Checkbox
+          checked={selectedColumns.includes("processStatus")}
+          onChange={(e) => handleColumnSelect("processStatus", e.target.checked)}
+        >
+          Giờ Nhận
+        </Checkbox>
+      ),
+      dataIndex: "processStatus",
+      key: "processStatus",
+    },
+       {
+      title: (
+        <Checkbox
+          checked={selectedColumns.includes("pcode")}
+          onChange={(e) => handleColumnSelect("pcode", e.target.checked)}
+        >
+          Mã bưu chính
+        </Checkbox>
+      ),
+      dataIndex: "pcode",
+      key: "pcode",
+    },
+    {
+      title: (
+        <Checkbox
           checked={selectedColumns.includes("paymentStatus")}
           onChange={(e) => handleColumnSelect("paymentStatus", e.target.checked)}
         >
@@ -1695,18 +1719,7 @@ onChange={(e) => handleColumnSelect("istick", e.target.checked)}
       dataIndex: "noteKHO",
       key: "noteKHO",
     },
-    {
-      title: (
-        <Checkbox
-          checked={selectedColumns.includes("processStatus")}
-          onChange={(e) => handleColumnSelect("processStatus", e.target.checked)}
-        >
-          TT XỬ LÍ
-        </Checkbox>
-      ),
-      dataIndex: "processStatus",
-      key: "processStatus",
-    },
+    
     ...((currentUser.name === "Tung99"
     ) ? [
          {
@@ -2157,6 +2170,30 @@ onChange={(e) => handleColumnSelect("istick", e.target.checked)}
       dataIndex: "address",
       key: "address",
     },
+    {
+      title: (
+        <Checkbox
+          checked={selectedColumns.includes("processStatus")}
+          onChange={(e) => handleColumnSelect("processStatus", e.target.checked)}
+        >
+          Giờ Nhận
+        </Checkbox>
+      ),
+      dataIndex: "processStatus",
+      key: "processStatus",
+    },
+    {
+      title: (
+        <Checkbox
+          checked={selectedColumns.includes("pcode")}
+          onChange={(e) => handleColumnSelect("pcode", e.target.checked)}
+        >
+          Mã bưu chính
+        </Checkbox>
+      ),
+      dataIndex: "pcode",
+      key: "pcode",
+    },
    
     {
       title: (
@@ -2310,6 +2347,7 @@ onChange={(e) => handleColumnSelect("istick", e.target.checked)}
       note: values.note || "",
       noteKHO: values.noteKHO || "",
       processStatus: values.processStatus || "",
+      pcode: values.pcode || "",
       saleReport: values.saleReport || "",
       paymentStatus: values.paymentStatus || "",
       deliveryStatus: values.deliveryStatus || "",
@@ -3198,13 +3236,7 @@ const handleResetAllSTT = async () => {
             const parts = text.split(":");
             return <div style={{ width: 200 }}><h3>{parts.length > 1 ? parts.slice(1).join(":").trim() : text}</h3></div>;
           },
-        },{
-      title:
-          "TT XỬ LÍ",
-       
-      dataIndex: "processStatus",
-      key: "processStatus",
-    }, 
+        },
     {
       title: 
           'ĐƠN'

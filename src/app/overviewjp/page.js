@@ -52,8 +52,7 @@ const Dashboard = () => {
 
   const employees = employees2.filter(
     (emp) =>
-      emp.quocgia === "jp" ||
-      emp.quocgia === "tw" 
+      emp.quocgia === "jp" 
       
   );
   const fetchOrders = async () => {
