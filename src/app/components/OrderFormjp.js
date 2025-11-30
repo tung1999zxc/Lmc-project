@@ -122,21 +122,16 @@ const handlePageNameChange = (value) => {
 };
   // Nếu có mapping, tự động cập nhật tên nhân viên tương ứng
   const handleTTXLOptions = [
-    "THIẾU/SAI",
-    "KHO SAI",
-    "SALE SAI",
-    "TÌM HÀNG",
-    "LỖI SP",
-    "CHẶN KHÁCH",
-    "BOOK ĐƠN",
-    "GỬI LẠI",
-    "MUA LẠI",
-    "HẸN",
-    "ĐỢI GỬI LẠI",
-    "ĐỔI Đ.CHỈ",
-    "HOÀN",
-    "S.BAY",
-  ];
+ 
+
+  // --- Thêm khung giờ Nhật Bản ---
+  "09:00 – 12:00",
+  "12:00 – 14:00",
+  "14:00 – 16:00",
+  "16:00 – 18:00",
+  "18:00 – 20:00",
+  "19:00 – 21:00",
+];
 
   const saleOptions = employees
     .filter((order) => order.position_team === "sale")
@@ -443,7 +438,7 @@ const productOptions = products.map((p) => p.name);
                <Form.Item label="ngày xóa ds" name="orderDate5" hidden>
        <Input type="number" />
       </Form.Item>
-            <Form.Item label="TT SALE XỬ LÍ ĐƠN" name="processStatus" hidden={true}>
+            <Form.Item label="Giờ Nhận" name="processStatus" hidden={true}>
               <Select>
                 {handleTTXLOptions.map((status) => (
                   <Option key={status} value={status}>
@@ -690,7 +685,7 @@ const productOptions = products.map((p) => p.name);
                 </Form.Item>
                 
                
-                <Form.Item label="VẬN ĐƠN" name="salexuly" initialValue={namesalexuly}>
+                <Form.Item label="VẬN ĐƠN" name="salexuly" initialValue={namesalexuly} hidden>
   <Select showSearch
     disabled={
       (currentUser.position === "salexuly" ||
@@ -741,7 +736,7 @@ const productOptions = products.map((p) => p.name);
                 <Form.Item label="Link FB" name="fb">
                 <Input />
                 </Form.Item>
-                <Form.Item label="TT SALE XỬ LÍ ĐƠN" name="processStatus">
+                <Form.Item label="Giờ Nhận" name="processStatus">
                   <Select showSearch>
                     {handleTTXLOptions.map((status) => (
                       <Option key={status} value={status}>

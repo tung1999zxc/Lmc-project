@@ -38,9 +38,17 @@ const LoginPage = () => {
       }
       if (response.data.data.position === "lead" ||response.data.data.position === "leadSALE"||response.data.data.position === "managerSALE"||response.data.data.position==="admin"||response.data.data.position==="managerMKT"){
         router.push("/");
-      }else if(response.data.data.position === "mkt"){
+      }
+      else if(response.data.data.position === "mkt"){
         router.push("/mkt");
       }
+      else if(response.data.data.quocgia === "jp"){
+        router.push("/ordersjp");
+      }
+      else if(response.data.data.quocgia === "tw"){
+        router.push("/orderstw");
+      }
+      
       else {
         router.push("/orders");
       }

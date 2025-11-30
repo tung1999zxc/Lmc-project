@@ -93,7 +93,7 @@ const InventoryPage = () => {
   // Fetch functions
   const fetchOrders = useCallback(async () => {
     try {
-      const response = await axios.get("/api/jp/orderssanpham");
+      const response = await axios.get("/api/tw/orderssanpham");
       setOrders(response.data.data || []);
     } catch (error) {
       console.error(error);
@@ -104,7 +104,7 @@ const InventoryPage = () => {
   const fetchProducts = useCallback(async () => {
     setLoading(true);
     try {
-      const response = await axios.get("/api/jp/products");
+      const response = await axios.get("/api/tw/products");
       setProducts(response.data.data || []);
     } catch (error) {
       console.error(error);
@@ -431,7 +431,7 @@ const InventoryPage = () => {
           slvn: values.slvn,
           sltq: values.sltq,
         };
-        await axios.put(`/api/jp/products/${editingProduct.key}`, updatedProduct);
+        await axios.put(`/api/tw/products/${editingProduct.key}`, updatedProduct);
         message.success("Cập nhật sản phẩm thành công");
         setEditingProduct(null);
         await fetchProducts();
@@ -473,7 +473,7 @@ const InventoryPage = () => {
         }
         const updatedImports = [...(productToUpdate.imports || []), newImport];
         const response = await axios.put(
-          `/api/jp/products/${productToUpdate.key}`,
+          `/api/tw/products/${productToUpdate.key}`,
           { imports: updatedImports }
         );
         message.success(response.data.message || "Cập nhật số lượng nhập thành công");
@@ -493,7 +493,7 @@ const InventoryPage = () => {
   const handleDeleteProduct = useCallback(
     async (productRecord) => {
       try {
-        const response = await axios.delete(`/api/jp/products/${productRecord.key}`);
+        const response = await axios.delete(`/api/tw/products/${productRecord.key}`);
         message.success(response.data.message);
         await fetchProducts();
       } catch (error) {
@@ -914,7 +914,7 @@ const InventoryPage = () => {
       };
 
       try {
-        const response = await axios.post("/api/jp/products", newProduct);
+        const response = await axios.post("/api/tw/products", newProduct);
         message.success(response.data.message || "Thêm sản phẩm thành công");
         await fetchProducts();
         form.resetFields();
