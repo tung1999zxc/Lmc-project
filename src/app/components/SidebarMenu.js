@@ -26,7 +26,11 @@ const SidebarMenu = () => {
 
   const isJP =
     currentUser?.name === "Nguyễn Quốc Hiếu"||currentUser?.name === "Hà Minh Sang"||currentUser?.name === "Nguyễn Thị Hồng Nhungg"||currentUser?.name === "KHO"||currentUser?.name === "Tô Mỹ Hạnh";
-  const isTW =
+  const isJP2 =
+    currentUser?.quocgia === "jp";
+  const isTW =  
+    currentUser?.name === "Trần Tuấn Linh";
+  const isKRTW =
     currentUser?.name === "Trần Ngọc Diện";
 
   // -------------------------
@@ -159,7 +163,7 @@ const SidebarMenu = () => {
     { key: "sub8", label: "Chấm công SALE", icon: <CalendarOutlined />, href: "/attendance" },
     { key: "sub9", label: "Quản lý thông báo", icon: <BellOutlined />, href: "/NotificationManagement" },
   ];
-  const menuItemstw = [
+  const menuItemskrtw = [
     {
       key: "sub0",
       label: (
@@ -250,6 +254,81 @@ const SidebarMenu = () => {
       icon: <ShopOutlined />,
       children: [
         { key: "sub4", label: "HÀN QUỐC", href: "/products" },
+       
+        { key: "sub42", label: "ĐÀI LOAN", href: "/productstw" },
+      ],
+    },
+
+    { key: "sub7", label: "Tên page", icon: <FileTextOutlined />, href: "/pagesName" },
+    { key: "sub5", label: "Quản lý tài khoản", icon: <UserOutlined />, href: "/accounts" },
+   
+    { key: "sub9", label: "Quản lý thông báo", icon: <BellOutlined />, href: "/NotificationManagement" },
+  ];
+  const menuItemstw = [
+   
+    
+    {
+      key: "sub02",
+      label: (
+        <span>
+          <img src="/tw.png" style={{ width: 18, marginRight: 6 }} /> Tổng Quan
+          Đài
+        </span>
+      ),
+      href: "/overviewtw",
+    },
+
+   
+
+   
+
+    {
+      key: "sub13",
+      label: (
+        <span>
+          <img src="/tw.png" style={{ width: 18, marginRight: 6 }} /> Quản lý đơn
+          hàng Đài
+        </span>
+      ),
+      href: "/orderstw",
+    },
+
+    {
+      key: "sub211",
+      label: "Báo cáo MKT",
+      icon: <MoneyCollectOutlined />,
+      children: [
+     
+       
+        {
+          key: "sub22",
+          label: (
+            <span>
+              <img src="/tw.png" style={{ width: 18, marginRight: 6 }} /> MKT Đài
+            </span>
+          ),
+          href: "/mkttw",
+        },
+      ],
+    },
+
+    {
+      key: "sub3",
+      label: "Báo cáo Sale",
+      icon: <MoneyCollectOutlined />,
+      children: [
+        { key: "99", label: "Sale CHAT", href: "/sale/saleOrder" },
+        { key: "699", label: "Sale DONE", href: "/sale/saleConfirm" },
+        { key: "799", label: "Sale VẬN ĐƠN", href: "/sale/saleProcessing" },
+      ],
+    },
+
+    {
+      key: "products",
+      label: "Sản Phẩm",
+      icon: <ShopOutlined />,
+      children: [
+        
        
         { key: "sub42", label: "ĐÀI LOAN", href: "/productstw" },
       ],
@@ -413,12 +492,11 @@ const SidebarMenu = () => {
     { key: "sub9", label: "Quản lý thông báo", icon: <BellOutlined />, href: "/NotificationManagement" },
   ];
 
- const menuToUse = isAdmin
-  ? menuItems
-  : isJP
-    ? menuItems3: isTW
-    ? menuItemstw
-    : menuItems2;
+ const menuToUse = 
+ isAdmin ? menuItems : isJP
+    ? menuItems3 : isKRTW
+    ? menuItemskrtw: isTW
+    ? menuItemstw: menuItems2;
  
   // -------------------------
   // RENDER MENU
