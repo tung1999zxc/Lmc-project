@@ -965,7 +965,7 @@ const InventoryPage = () => {
             disabled={
               currentUser?.position !== "admin" &&
               currentUser?.position !== "leadSALE" &&
-              currentUser?.position !== "managerSALE"
+              currentUser?.position !== "managerSALE" && currentUser?.position  !== "salenhapdon"
             }
             type="primary"
             htmlType="submit"
