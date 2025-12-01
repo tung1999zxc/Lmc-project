@@ -168,9 +168,9 @@ const Dashboard = () => {
       Promise.resolve(({ data }) => {
         const { PieChart, Pie, Cell, Tooltip, Legend } = require("recharts");
         const COLORS = [
-          "#AA336A",
-          " #FFBB28",
-          "#00C49F",
+         " #FFBB28",
+          "#0f9714ff",
+          "#c6471dff",
           "#FF8042",
           "#0088FA",
           "#5A2D82",
