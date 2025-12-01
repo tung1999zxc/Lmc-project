@@ -426,6 +426,7 @@ const SidebarMenu = () => {
         { key: "sub42", label: "ĐÀI LOAN", href: "/productstw" },
       ],
     },
+    { key: "sub8", label: "Chấm công SALE", icon: <CalendarOutlined />, href: "/attendance" },
 
     { key: "sub7", label: "Tên page", icon: <FileTextOutlined />, href: "/pagesName" },
     { key: "sub5", label: "Quản lý tài khoản", icon: <UserOutlined />, href: "/accounts" },
