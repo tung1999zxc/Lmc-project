@@ -432,13 +432,7 @@ const productOptions = products.map((p) => p.name);
        <Input type="number" />
       </Form.Item>
             <Form.Item label="Giờ Nhận" name="processStatus" hidden={true}>
-              <Select>
-                {handleTTXLOptions.map((status) => (
-                  <Option key={status} value={status}>
-                    {status}
-                  </Option>
-                ))}
-              </Select>
+              <Input />
             </Form.Item>
             <Form.Item label="MÃ BƯU CHÍNH" name="pcode">
                 <Input />
@@ -736,13 +730,7 @@ const productOptions = products.map((p) => p.name);
                 <Input />
                 </Form.Item>
                 <Form.Item label="GIỜ NHẬN" name="processStatus">
-                  <Select showSearch>
-                    {handleTTXLOptions.map((status) => (
-                      <Option key={status} value={status}>
-                        {status}
-                      </Option>
-                    ))}
-                  </Select>
+                 <Input />
                 </Form.Item>
                 
                 <Form.Item label="ĐƠN" name="saleReport">
