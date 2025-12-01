@@ -2649,7 +2649,7 @@ const summaryData = [
         
         {/* Vinh danh TOP 3 SALE NHẬP ĐƠN */}
       
-        {/* {currentUser.name !== "Trần" &&
+        {currentUser.name !== "Trần" &&
           (
             <div className="marquee">
               {top5Employees2.map((emp, index) => (
@@ -2666,7 +2666,8 @@ const summaryData = [
                   }`}
                 >
                   <img
-                    src={`/${emp.name.trim()}.jpg`}
+                    // src={`/${emp.name.trim()}.jpg`}
+                    src={`/Nguyễn Thị Hồng Nhungg.jpg`}
                     alt={emp.name.trim()}
                     className="employee-image"
                     onError={(e) => {
@@ -2674,7 +2675,7 @@ const summaryData = [
                       e.currentTarget.src = "/ngockem.jpg";
                     }}
                   />
-                  <span className="employee-name">{emp.name}</span>
+                  <span className="employee-name">Nguyễn Thị Hồng Nhungg</span>
                   <br />
                   {index === 0 && (
                     <span className="top-badge">Cảnh báo doanh số thấp</span>
@@ -2684,7 +2685,7 @@ const summaryData = [
                 </div>
               ))}
             </div>
-          )} */}
+          )}
           </div>
         {/* {currentUser.name !== "Trần Ngọc Lâm" &&
           currentUser.name !== "Diệp Anh" &&
