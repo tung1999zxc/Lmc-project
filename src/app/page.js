@@ -1460,7 +1460,9 @@ const filteredAdsByArea =
 
 // 🧩 Chọn người có doanh số thấp nhất từ đầu tháng
 const warningEmployeesList = marketingReportData3.filter(
-  (emp) => emp.adsThisMonth > 0
+  (emp) =>
+    emp.adsThisMonth > 0 &&
+    emp.name.trim().toLowerCase() !== "Đỗ Ngọc Ánh"
 );
 
 const minMonthSales = Math.min(...warningEmployeesList.map(e => e.totalMonth));
