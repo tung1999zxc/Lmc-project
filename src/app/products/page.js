@@ -56,9 +56,9 @@ const InventoryPage = () => {
     // redirect if not logged in or restrictions
     if (!currentUser?.name) {
       router.push("/login");
-    } else if (currentUser.position_team === "mkt"&& currentUser.name !== "Đỗ Ngọc Ánh") {
+    } else if (currentUser.position_team === "mkt"&& currentUser.name !== "Đỗ Ngọc Ánh"&& currentUser.name !== "Nguyễn Tuấn Anh") {
       router.push("/orders");
-    } else if (currentUser.name === "Đỗ Ngọc Ánh") {
+    } else if (currentUser.name === "Đỗ Ngọc Ánh" ||currentUser.name === "Nguyễn Tuấn Anh" ) {
        router.push("/products");
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
