@@ -119,8 +119,7 @@ const PraiseBanner = ({ top5Employees }) => {
       "{{name}} là minh chứng cho việc: nỗ lực không bao giờ phản bội!",
       "{{name}} vừa vượt mốc 15 triệu đồng! Chúng tôi tự hào về bạn!",
       "Cột mốc 15 triệu đã được {{name}} chinh phục!",
-      "Với {{sales}}, {{name}} đang làm bùng nổ bảng xếp hạng!",
-      "{{name}} đã cán mốc {{sales}}, tiếp tục giữ vững phong độ nhé!",
+      
       "Tăng trưởng liên tục! {{name}} đang trở thành hình mẫu lý tưởng!",
       "Chúc mừng {{name}} đã chinh phục mốc {{sales}}!",
       "{{name}} đã chính thức bước vào “Câu lạc bộ 15 triệu” hôm nay!",
