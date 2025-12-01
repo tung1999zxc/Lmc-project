@@ -177,7 +177,7 @@ export default function AttendanceManagement() {
   const renderCell = (record, employeeId, field, editable) => {
     const cellData = record[employeeId] || {};
   
-    if (field === 'timeIn' || field === 'timeOut'||field === 'timeIn2' || field === 'timeOut2') {
+    if (field === 'timeIn' || field === 'timeOut'||field === 'timeIn2' || field === 'timeOut2'||field === 'timeIn3' || field === 'timeOut3') {
       // Nếu là privileged, không disable bất kỳ trường hợp nào
       if (isPrivileged) {
         return (
@@ -278,6 +278,18 @@ export default function AttendanceManagement() {
             title: 'Giờ ra 2',
             key: `timeOut2-${emp.employee_id}`,
             render: (record) => renderCell(record, emp.employee_id, 'timeOut2', editable),
+            width: 100,
+          },
+          {
+            title: 'Giờ vào 3',
+            key: `timeIn3-${emp.employee_id}`,
+            render: (record) => renderCell(record, emp.employee_id, 'timeIn3', editable),
+            width: 100,
+          },
+          {
+            title: 'Giờ ra 3',
+            key: `timeOut3-${emp.employee_id}`,
+            render: (record) => renderCell(record, emp.employee_id, 'timeOut3', editable),
             width: 100,
           },
           {
