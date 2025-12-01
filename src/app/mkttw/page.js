@@ -221,7 +221,7 @@ const Dashboard = () => {
             filterSampleOrdersByPeriod(p)
         )
         .reduce((sum, p) => sum + p.profit, 0) * 800;
-    return totalProfit * 0.95;
+    return totalProfit ;
   };
   const computeTotalADS = (employeeName) => {
     const totalADS = records
@@ -518,7 +518,7 @@ const Dashboard = () => {
     totalTienDuThangNay;
   const totalPercentAds =
     totalDSTong > 0
-      ? ((totalTongAdsXin / (totalDSTong * 0.95)) * 100).toFixed(2)
+      ? ((totalTongAdsXin / (totalDSTong)) * 100).toFixed(2)
       : 0;
 
   const adminSummaryColumns = [
@@ -599,7 +599,7 @@ const Dashboard = () => {
   const data2 = [
     {
       key: "1",
-      dsTong: totalDSTong * 0.95,
+      dsTong: totalDSTong ,
       tongCapADS: totalTongAdsXin,
       tienThuaTatCa: totalTienThua,
       percentADS: totalPercentAds,
@@ -840,7 +840,7 @@ const Dashboard = () => {
           record.date,
           record.name
         );
-        return (totalSalesForSelectedDate * 0.95 * 800).toLocaleString(
+        return (totalSalesForSelectedDate  * 800).toLocaleString(
           "vi-VN"
         );
       },
@@ -853,7 +853,7 @@ const Dashboard = () => {
           record.date,
           record.name
         );
-        const total = totalSalesForSelectedDate * 800 * 0.95;
+        const total = totalSalesForSelectedDate * 800 ;
         if (totalSalesForSelectedDate === 0) return 0;
         const percent = Number(
           ((record.request1 + record.request2) / total) * 100

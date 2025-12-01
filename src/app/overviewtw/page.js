@@ -823,7 +823,7 @@ const Dashboard = () => {
         (ad) => ad.name.trim().toLowerCase() === emp.name.trim().toLowerCase()
       )
       .reduce((sum, ad) => sum + (ad.request1 + ad.request2), 0);
-    return { name: emp.name, profit: sales * 800 * 0.95, adsCost };
+    return { name: emp.name, profit: sales * 800 , adsCost };
   });
 
   const teamEmployees = mktEmployees.filter(
@@ -847,7 +847,7 @@ const Dashboard = () => {
         (ad) => ad.name.trim().toLowerCase() === emp.name.trim().toLowerCase()
       )
       .reduce((sum, ad) => sum + (ad.request1 + ad.request2), 0);
-    return { name: emp.name, profit: sales * 800 * 0.95, adsCost };
+    return { name: emp.name, profit: sales * 800 , adsCost };
   });
 
   const saleEmployees = employees.filter((emp) => emp.position_team === "sale");
@@ -909,7 +909,7 @@ const Dashboard = () => {
         .reduce((sum, ad) => sum + (ad.request1 + ad.request2), 0);
       return acc + empAds;
     }, 0);
-    return { name: team.label, profit: sales * 800 * 0.95, adsCost };
+    return { name: team.label, profit: sales * 800 , adsCost };
   });
   // const teamChartDataNew = teams.map(team => {
   //   const teamEmps = employees.filter(emp => emp.position_team === "mkt" && emp.team_id === team.value);
@@ -990,7 +990,7 @@ const Dashboard = () => {
       const adsCost = filteredAds
         .filter((ad) => ad.date === date)
         .reduce((sum, ad) => sum + (ad.request1 + ad.request2), 0);
-      return { name: date, profit: sales * 800 * 0.95, adsCost };
+      return { name: date, profit: sales * 800 , adsCost };
     });
   } else {
     const last30Days = getLast30Days();
@@ -1001,7 +1001,7 @@ const Dashboard = () => {
       const adsCost = adsMoneyData
         .filter((ad) => ad.date === date)
         .reduce((sum, ad) => sum + (ad.request1 + ad.request2), 0);
-      return { name: date, profit: sales * 800 * 0.95, adsCost };
+      return { name: date, profit: sales * 800 , adsCost };
     });
   }
 
@@ -1063,7 +1063,7 @@ const Dashboard = () => {
       const adsCost = filteredAds
         .filter((ad) => ad.date === date)
         .reduce((sum, ad) => sum + (ad.request1 + ad.request2), 0);
-      return { name: date, profit: sales * 800 * 0.95, adsCost };
+      return { name: date, profit: sales * 800 , adsCost };
     });
   } else {
     const last30Days = getLast30Days();
@@ -1074,7 +1074,7 @@ const Dashboard = () => {
       const adsCost = adsMoneyData
         .filter((ad) => ad.date === date)
         .reduce((sum, ad) => sum + (ad.request1 + ad.request2), 0);
-      return { name: date, profit: sales * 800 * 0.95, adsCost };
+      return { name: date, profit: sales * 800 , adsCost };
     });
   }
 
@@ -1123,7 +1123,7 @@ const Dashboard = () => {
       return acc + empSales;
     }, 0);
     const avgProfit = teamEmps.length > 0 ? teamProfit / teamEmps.length : 0;
-    return { name: team.label, profit: avgProfit * 800 * 0.95 };
+    return { name: team.label, profit: avgProfit * 800  };
   });
 
   // === Biểu đồ so sánh doanh số giữa leader và các nhân viên khác trong team (Grouped Bar Chart) ===
@@ -1199,7 +1199,7 @@ const Dashboard = () => {
       )
       .reduce((sum, order) => sum + order.profit, 0);
     const total = paid + unpaid;
-    const tienVND = total * exchangeRate * 0.95;
+    const tienVND = total * exchangeRate;
     const totalAds = filteredAds
       .filter(
         (ad) => ad.name.trim().toLowerCase() === emp.name.trim().toLowerCase()
@@ -1451,7 +1451,7 @@ const top5Employees2 = randomEmployee ? [randomEmployee] : [];
       .reduce((sum, order) => sum + order.profit, 0);
 
     const total = paid + unpaid;
-    const tienVND = total * 0.95 * exchangeRate;
+    const tienVND = total * exchangeRate;
 
     const totalAds = teamFilteredAds
       .filter(
@@ -2160,7 +2160,7 @@ const top5Employees2 = randomEmployee ? [randomEmployee] : [];
         order.paymentStatus === "CHƯA THANH TOÁN" || order.paymentStatus === ""
     )
     .reduce((sum, order) => sum + order.profit, 0);
-  const tongKW3 = (daThanhToanKW3 + chuaThanhToanKW3) * 0.95;
+  const tongKW3 = (daThanhToanKW3 + chuaThanhToanKW3) ;
 
   const totalAdsKW3 = filteredAds.reduce(
     (sum, ad) => sum + (ad.request1 + ad.request2),
@@ -2311,7 +2311,7 @@ const top5Employees2 = randomEmployee ? [randomEmployee] : [];
       key: "VND",
       // daThanhToan: daThanhToanKW2*0.95 * exchangeRate,
       // chuaThanhToan: chuaThanhToanKW2*0.95 * exchangeRate,
-      tong: tongKW2 * 0.95 * exchangeRate,
+      tong: tongKW2  * exchangeRate,
       // thanhToanDat: thanhToanDat2,
       totalAds: totalAdsKW2,
       percentAds: percentAds2,
@@ -2639,9 +2639,9 @@ const summaryData = [
                 <span className="top-badge">🏆 TOP 1 SERVER</span>
               )}
               <br />
-              {emp.totalToday * 800 * 0.95 > 15000000 && (
+              {emp.totalToday * 800  > 15000000 && (
                 <span className="employee-name2">
-                  {(emp.totalToday * 800 * 0.95).toLocaleString()} VNĐ
+                  {(emp.totalToday * 800 ).toLocaleString()} VNĐ
                 </span>
               )}
             </div>
