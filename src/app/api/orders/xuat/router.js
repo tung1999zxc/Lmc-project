@@ -41,44 +41,91 @@ export async function GET(req) {
       });
     }
 
-    // --- Gộp các điều kiện ---
     if (andConditions.length > 0) {
       query.$and = andConditions;
     }
 
     console.log("Query:", JSON.stringify(query, null, 2));
 
-    // --- Lấy đơn nhưng loại bỏ trackingCode trùng nhau ---
-    const orders = await db.collection('orders').aggregate([
-      { $match: query },
-
-      // Ưu tiên bản ghi mới nhất khi bị trùng
-      { $sort: { orderDate: -1 } },
-
+    // Build aggregation pipeline
+    const pipeline = [
+      // Nhóm 1: các đơn có trackingCode -> group (loại duplicate)
+      {
+        $match: {
+          ...query,
+          trackingCode: { $exists: true, $ne: "" }
+        }
+      },
+      { $sort: { orderDate: -1 } }, // ưu tiên mới nhất
       {
         $group: {
           _id: "$trackingCode",
-          doc: { $first: "$$ROOT" }  // lấy bản ghi mới nhất
+          doc: { $first: "$$ROOT" }
+        }
+      },
+      { $replaceRoot: { newRoot: "$doc" } },
+
+      // Gộp với nhóm 2: các đơn không có trackingCode (giữ nguyên)
+      {
+        $unionWith: {
+          coll: "orders",
+          pipeline: [
+            {
+              $match: {
+                ...query,
+                $or: [
+                  { trackingCode: { $exists: false } },
+                  { trackingCode: "" },
+                  { trackingCode: null }
+                ]
+              }
+            }
+          ]
         }
       },
 
-      // Trả về tài liệu bình thường
-      { $replaceRoot: { newRoot: "$doc" } }
-    ]).toArray();
+      // (Tùy chọn) sort một lần nữa kết quả đầu ra theo orderDate giảm dần
+      { $sort: { orderDate: -1 } }
+    ];
+
+    // Thực hiện aggregation
+    const cursor = db.collection('orders').aggregate(pipeline);
+    const orders = await cursor.toArray();
+
+    // Tránh trả payload quá lớn gây timeout/truncate trên client (nếu cần)
+    // Nếu bạn muốn giới hạn: uncomment line bên dưới (ví dụ 5000)
+    // const limitedOrders = orders.slice(0, 5000);
 
     return new Response(
       JSON.stringify({
         message: 'Lấy danh sách đơn hàng thành công',
+        count: orders.length,
         data: orders
       }),
-      { status: 200 }
+      {
+        status: 200,
+        headers: {
+          'Content-Type': 'application/json; charset=utf-8'
+        }
+      }
     );
 
   } catch (error) {
     console.error("Lỗi GET /api/orders:", error);
-    return new Response(
-      JSON.stringify({ error: 'Lỗi server nội bộ' }),
-      { status: 500 }
-    );
+
+    // Trả JSON rõ ràng để client không bị lỗi parse khi server bị crash
+    const safe = {
+      error: true,
+      message: error.message || 'Lỗi server nội bộ',
+      // stack có thể giúp debug — nếu production bạn có thể loại bỏ stack
+      stack: error.stack ? String(error.stack).split('\n').slice(0, 10) : undefined
+    };
+
+    return new Response(JSON.stringify(safe), {
+      status: 500,
+      headers: {
+        'Content-Type': 'application/json; charset=utf-8'
+      }
+    });
   }
 }
