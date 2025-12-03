@@ -2088,14 +2088,14 @@ onChange={(e) => handleColumnSelect("istick", e.target.checked)}
         <Tag color={text === "GIAO THÀNH CÔNG" ? "blue" : "orange"}>{text}</Tag>
       ),
     },
-    {
-      title: "BÊN ĐÓNG HÀNG",
-      key: "isShipping",
-      dataIndex: "isShipping",
-      width: 90,
-      render: (_, record) =>
-        record.isShipping ? "Công ty đóng hàng" : "Kho đóng hàng",
-    },
+    // {
+    //   title: "BÊN ĐÓNG HÀNG",
+    //   key: "isShipping",
+    //   dataIndex: "isShipping",
+    //   width: 90,
+    //   render: (_, record) =>
+    //     record.isShipping ? "Công ty đóng hàng" : "Kho đóng hàng",
+    // },
     {
       title: (
         <Checkbox
@@ -2443,7 +2443,8 @@ onChange={(e) => handleColumnSelect("istick", e.target.checked)}
       : "",
     Category: order.category,
     PostalCode: order.pcode,
-    PickUpHours: order.processStatus
+    PickUpHours: order.processStatus,
+    Note : order.note
   }));
 
   const handleBatchUpdateTrackingCodes = async () => {
