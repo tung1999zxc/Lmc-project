@@ -710,6 +710,9 @@ const InventoryPage = () => {
               return (
                 acc +
                 (Number(cur.importedQty) || 0) 
+                +
+                (Number(cur.importVN) || 0) +
+                (Number(cur.importKR) || 0) 
               );
             }, 0) + (Number(record.slvn) || 0) + (Number(record.sltq) || 0) + agg.ordersHOAN;
 
