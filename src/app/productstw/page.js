@@ -853,7 +853,7 @@ const InventoryPage = () => {
                 fontWeight: "bold",
               }}
             >
-              {(totalProfit * 17000).toLocaleString()} VND
+              {(totalProfit * 1750).toLocaleString()} VND
             </div>
           );
         },
@@ -988,7 +988,7 @@ const InventoryPage = () => {
 
         <div style={{ fontWeight: "bold", fontSize: "16px" }}>
           Tổng:{" "}
-          <span style={{ color: "blue" }}>{(totalRevenue * 17000).toLocaleString()} VND</span>
+          <span style={{ color: "blue" }}>{(totalRevenue * 1750).toLocaleString()} VND</span>
         </div>
       </div>
 

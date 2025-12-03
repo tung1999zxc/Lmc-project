@@ -43,6 +43,38 @@ const getBase64 = (file) =>
     reader.onerror = (error) => reject(error);
   });
 
+// const dapviet = Form.useWatch("importVN", editForm);
+
+  
+//   useEffect(() => {
+//   const numericProfit = Number(dapviet); // chuyển về số
+//   if (numericProfit !== 0) {
+//     editForm.setFieldsValue({
+//       importKR: 0 - numericProfit, // ngày giờ hiện tại
+//     });
+//   }
+//   if (numericProfit === 0) {
+//     editForm.setFieldsValue({
+//       importKR: 0, // ngày giờ hiện tại
+//     });
+//   }
+// }, [dapviet]);
+// const revenue = Form.useWatch("revenue", form);
+
+  
+//   useEffect(() => {
+//   const numericProfit = Number(revenue); // chuyển về số
+//   if (numericProfit === 0) {
+//     form.setFieldsValue({
+//       orderDate5: dayjs(), // ngày giờ hiện tại
+//     });
+//   }
+//   if (numericProfit !== 0) {
+//     form.setFieldsValue({
+//       orderDate5: null, // ngày giờ hiện tại
+//     });
+//   }
+// }, [revenue]);
 /**
  * InventoryPage (Optimized)
  * - Pre-aggregates orders per product to avoid per-row heavy computations
