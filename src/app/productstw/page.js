@@ -56,9 +56,9 @@ const InventoryPage = () => {
     // redirect if not logged in or restrictions
     if (!currentUser?.name) {
       router.push("/login");
-    } else if (currentUser.position_team === "mkt"&& currentUser.name !== "Đỗ Ngọc Ánh") {
+    } else if (currentUser.position_team === "mkt"&& currentUser.name !== "Đỗ Ngọc Ánh"&& currentUser.name !== "Nguyễn Tuấn Anh"&& currentUser.name !== "Bùi Văn Phi") {
       router.push("/orders");
-    } else if (currentUser.name === "Đỗ Ngọc Ánh") {
+    } else if (currentUser.name === "Đỗ Ngọc Ánh" ||currentUser.name === "Nguyễn Tuấn Anh"||currentUser.name === "Bùi Văn Phi" ) {
        router.push("/products");
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -266,7 +266,6 @@ const InventoryPage = () => {
         if (!map[pname]) {
           map[pname] = {
             ordersDone: 0,
-            ordersHOAN: 0,
             deliveredQty: 0,
             ordersNotDone: 0,
             totalProfit: 0,
@@ -281,9 +280,7 @@ const InventoryPage = () => {
         if (
           deliveryStatus === "ĐÃ GỬI HÀNG" ||
           deliveryStatus === "GIAO THÀNH CÔNG" ||
-          deliveryStatus === "VẮNG MẶT" ||
-          deliveryStatus === "HẸN GIAO LẠI" ||
-          deliveryStatus === "CUỘC ĐIỀU TRA"
+          deliveryStatus === "BỊ BẮT CHỜ GỬI LẠI"
         ) {
           map[pname].deliveredQty += qty;
         }
@@ -291,9 +288,6 @@ const InventoryPage = () => {
         // Count ordersDone where saleReport === DONE && deliveryStatus === ""
         if (saleReport === "DONE" && (!deliveryStatus || deliveryStatus === "")) {
           map[pname].ordersDone += qty;
-        }
-        if (saleReport === "DONE" &&  deliveryStatus === "HOÀN") {
-          map[pname].ordersHOAN += qty;
         }
 
         // Count ordersNotDone
@@ -352,7 +346,6 @@ const InventoryPage = () => {
     (productName) => {
       return ordersAggMap[productName] || {
         ordersDone: 0,
-        ordersHOAN: 0,
         deliveredQty: 0,
         ordersNotDone: 0,
         totalProfit: 0,
@@ -364,7 +357,7 @@ const InventoryPage = () => {
   // Name-specific manual adjustments from original file
   const nameAdjustments = useMemo(
     () => ({
-      "KEM NỀN THỎIii": { slAmAdd: 2 },
+      "KEM NỀN THỎIiiii": { slAmAdd: 2 },
      
     }),
     []
@@ -552,15 +545,16 @@ const InventoryPage = () => {
         ),
       },
       {
-        title: "Đáp Nhật",
+        title: "SL nhập hàng Tổng",
         key: "importedQty",
         render: (_, record) => {
-          const agg = getAggregatesFor(record.name);
           const totalImported =
             (record.imports || []).reduce((acc, cur) => {
               return (
                 acc +
-                (Number(cur.importedQty) || 0) 
+                (Number(cur.importedQty) || 0) +
+                (Number(cur.importVN) || 0) +
+                (Number(cur.importKR) || 0)
               );
             }, 0) ;
 
@@ -570,8 +564,10 @@ const InventoryPage = () => {
                 {record.imports.map((imp, index) => (
                   <li key={index}>
                     <strong>Ngày:</strong> {imp.importDate} - <strong>SL tổng:</strong>{" "}
-                    {Number(imp.importedQty || 0)}
-                    
+                    {Number(imp.importedQty || 0) +
+                      Number(imp.importVN || 0) +
+                      Number(imp.importKR || 0)}{" "}
+                    VN: {imp.importVN || 0} | Hàn: {imp.importKR || 0}
                   </li>
                 ))}
               </ul>
@@ -586,7 +582,35 @@ const InventoryPage = () => {
           );
         },
       },
+     
       {
+        title: "Đáp Đài",
+        key: "importedQtyKR",
+        render: (_, record) => {
+          const totalImported = (record.imports || []).reduce(
+            (acc, cur) => acc + (Number(cur.importKR) || 0),
+            0
+          );
+          const historyContent =
+            record.imports && record.imports.length > 0 ? (
+              <ul style={{ padding: 0, margin: 0, listStyle: "none" }}>
+                {record.imports.map((imp, index) => (
+                  <li key={index}>
+                    <strong>Ngày:</strong> {imp.importDate} - ĐÀI: {imp.importKR || 0}
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              "Chưa có lịch sử nhập"
+            );
+          return (
+            <Popover content={historyContent} title="Lịch sử nhập hàng" trigger="hover">
+              <span>{totalImported}</span>
+            </Popover>
+          );
+        },
+      },
+       {
         title: "Đáp Việt",
         key: "importedQtyVN",
         render: (_, record) => {
@@ -614,33 +638,6 @@ const InventoryPage = () => {
         },
       },
       {
-        title: "Báo Nhập",
-        key: "importedQtyKR",
-        render: (_, record) => {
-          const totalImported = (record.imports || []).reduce(
-            (acc, cur) => acc + (Number(cur.importKR) || 0),
-            0
-          );
-          const historyContent =
-            record.imports && record.imports.length > 0 ? (
-              <ul style={{ padding: 0, margin: 0, listStyle: "none" }}>
-                {record.imports.map((imp, index) => (
-                  <li key={index}>
-                    <strong>Ngày:</strong> {imp.importDate} - SL: {imp.importKR || 0}
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              "Chưa có lịch sử nhập"
-            );
-          return (
-            <Popover content={historyContent} title="Lịch sử nhập hàng" trigger="hover">
-              <span>{totalImported}</span>
-            </Popover>
-          );
-        },
-      },
-      {
         title: "DONE + Chưa đóng",
         key: "ordersDone",
         sorter: (a, b) => {
@@ -653,6 +650,7 @@ const InventoryPage = () => {
           const agg = getAggregatesFor(record.name);
           // original had special-case subtractions for a few product names
           let value = agg.ordersDone;
+          if (record.name === "KEM NỀN THỎI111111") value = value - 2;
          
           return value;
         },
@@ -666,17 +664,9 @@ const InventoryPage = () => {
         },
       },
       {
-        title: "Hoàn",
-        key: "Totalhoan",
-        render: (_, record) => {
-          const agg = getAggregatesFor(record.name);
-          return agg.ordersHOAN || 0;
-        },
-      },
-      {
-        title: "SL Âm (DONE - Đã nhập)",
+        title: "SL Âm Đơn Done",
         key: "SLAMDONE",
-        width: 120,
+        width: 80,
         sorter: (a, b) => {
           const aAgg = getAggregatesFor(a.name);
           const bAgg = getAggregatesFor(b.name);
@@ -686,8 +676,9 @@ const InventoryPage = () => {
             (a.imports || []).reduce((acc, cur) => {
               return (
                 acc +
-                (Number(cur.importedQty) || 0) 
-              
+                (Number(cur.importedQty) || 0) +
+                (Number(cur.importVN) || 0) +
+                (Number(cur.importKR) || 0)
               );
             }, 0) + (Number(a.slvn) || 0) + (Number(a.sltq) || 0);
 
@@ -695,7 +686,9 @@ const InventoryPage = () => {
             (b.imports || []).reduce((acc, cur) => {
               return (
                 acc +
-                (Number(cur.importedQty) || 0) 
+                (Number(cur.importedQty) || 0) +
+                (Number(cur.importVN) || 0) +
+                (Number(cur.importKR) || 0)
               );
             }, 0) + (Number(b.slvn) || 0) + (Number(b.sltq) || 0);
 
@@ -709,9 +702,11 @@ const InventoryPage = () => {
             (record.imports || []).reduce((acc, cur) => {
               return (
                 acc +
-                (Number(cur.importedQty) || 0) 
+                (Number(cur.importedQty) || 0) +
+                (Number(cur.importVN) || 0) +
+                (Number(cur.importKR) || 0)
               );
-            }, 0) + (Number(record.slvn) || 0) + (Number(record.sltq) || 0) + agg.ordersHOAN;
+            }, 0) + (Number(record.slvn) || 0) + (Number(record.sltq) || 0);
 
           const slAm = totalImported - (agg.ordersDone || 0) - (agg.deliveredQty || 0);
 
@@ -738,80 +733,80 @@ const InventoryPage = () => {
           );
         },
       },
-//       {
-//   title: "Nhập VN",
-//   dataIndex: "slvn",
-//   key: "slvn",
-//   width: 80,
-//   render: (_, record) => {
-//     const historyContent =
-//       record.slvnHistory && record.slvnHistory.length > 0 ? (
-//         <ul style={{ padding: 0, margin: 0, listStyle: "none" }}>
-//           {record.slvnHistory.map((item, index) => (
-//             <li key={index}>
-//               <strong>Ngày:</strong> {item.date} - <strong>SL:</strong> {item.qty}
-//             </li>
-//           ))}
-//         </ul>
-//       ) : (
-//         "Chưa có lịch sử nhập VN"
-//       );
+      {
+  title: "Nhập VN",
+  dataIndex: "slvn",
+  key: "slvn",
+  width: 80,
+  render: (_, record) => {
+    const historyContent =
+      record.slvnHistory && record.slvnHistory.length > 0 ? (
+        <ul style={{ padding: 0, margin: 0, listStyle: "none" }}>
+          {record.slvnHistory.map((item, index) => (
+            <li key={index}>
+              <strong>Ngày:</strong> {item.date} - <strong>SL:</strong> {item.qty}
+            </li>
+          ))}
+        </ul>
+      ) : (
+        "Chưa có lịch sử nhập VN"
+      );
 
-//     const value =
-//       record.slvn !== undefined && record.slvn !== null ? Number(record.slvn) : 0;
+    const value =
+      record.slvn !== undefined && record.slvn !== null ? Number(record.slvn) : 0;
 
-//     // ✅ Nếu có giá trị khác 0 thì bôi đậm
-//      const style = {
-//       fontWeight: value !== 0 ? "bold" : "normal",
-//       color: value !== 0 ? "#000" : "#999",
-//       backgroundColor: value !== 0 ? "#e6f7ff" : "transparent",
-//       padding: "2px 6px",
-//       borderRadius: "4px",
-//     };
+    // ✅ Nếu có giá trị khác 0 thì bôi đậm
+     const style = {
+      fontWeight: value !== 0 ? "bold" : "normal",
+      color: value !== 0 ? "#000" : "#999",
+      backgroundColor: value !== 0 ? "#e6f7ff" : "transparent",
+      padding: "2px 6px",
+      borderRadius: "4px",
+    };
 
-//     return (
-//       <Popover content={historyContent} title="Lịch sử nhập VN" trigger="hover">
-//         <span style={style}>{value}</span>
-//       </Popover>
-//     );
-//   },
-// },
-//    {
-//   title: "Báo nhập",
-//   key: "sltq",
-//   width: 80,
-//   render: (_, record) => {
-//     const historyContent =
-//       record.sltqHistory && record.sltqHistory.length > 0 ? (
-//         <ul style={{ padding: 0, margin: 0, listStyle: "none" }}>
-//           {record.sltqHistory.map((item, index) => (
-//             <li key={index}>
-//               <strong>Ngày:</strong> {item.date} - <strong>SL:</strong> {item.qty}
-//             </li>
-//           ))}
-//         </ul>
-//       ) : (
-//         "Chưa có lịch sử nhập JP"
-//       );
+    return (
+      <Popover content={historyContent} title="Lịch sử nhập VN" trigger="hover">
+        <span style={style}>{value}</span>
+      </Popover>
+    );
+  },
+},
+   {
+  title: "Nhập Đài",
+  key: "sltq",
+  width: 80,
+  render: (_, record) => {
+    const historyContent =
+      record.sltqHistory && record.sltqHistory.length > 0 ? (
+        <ul style={{ padding: 0, margin: 0, listStyle: "none" }}>
+          {record.sltqHistory.map((item, index) => (
+            <li key={index}>
+              <strong>Ngày:</strong> {item.date} - <strong>SL:</strong> {item.qty}
+            </li>
+          ))}
+        </ul>
+      ) : (
+        "Chưa có lịch sử nhập ĐL"
+      );
 
-//     const value =
-//       record.sltq !== undefined && record.sltq !== null ? Number(record.sltq) : 0;
+    const value =
+      record.sltq !== undefined && record.sltq !== null ? Number(record.sltq) : 0;
 
-//     const style = {
-//       fontWeight: value !== 0 ? "bold" : "normal",
-//       color: value !== 0 ? "#000" : "#999",
-//       backgroundColor: value !== 0 ? "#e6f7ff" : "transparent",
-//       padding: "2px 6px",
-//       borderRadius: "4px",
-//     };
+    const style = {
+      fontWeight: value !== 0 ? "bold" : "normal",
+      color: value !== 0 ? "#000" : "#999",
+      backgroundColor: value !== 0 ? "#e6f7ff" : "transparent",
+      padding: "2px 6px",
+      borderRadius: "4px",
+    };
 
-//     return (
-//       <Popover content={historyContent} title="Lịch sử nhập JP" trigger="hover">
-//         <span style={style}>{value}</span>
-//       </Popover>
-//     );
-//   },
-// },
+    return (
+      <Popover content={historyContent} title="Lịch sử nhập ĐL" trigger="hover">
+        <span style={style}>{value}</span>
+      </Popover>
+    );
+  },
+},
       {
         title: "Hành động",
         key: "actions",
@@ -826,7 +821,7 @@ const InventoryPage = () => {
             return (
               <Space>
                 <Button disabled={currentUser?.name === "Diệp Anh"} icon={<PlusOutlined />} onClick={() => handleAddImport(record)} />
-                {/* <Button icon={<EditOutlined />} onClick={() => handleEditProduct(record)} /> */}
+                <Button icon={<EditOutlined />} onClick={() => handleEditProduct(record)} />
                 <Popconfirm title="Xóa bản ghi?" onConfirm={() => handleDeleteProduct(record)}>
                   <Button danger icon={<DeleteOutlined />} />
                 </Popconfirm>
@@ -846,8 +841,8 @@ const InventoryPage = () => {
           const agg = getAggregatesFor(record.name);
           const totalProfit = agg.totalProfit || 0;
           let bgColor = "";
-          if (totalProfit >= 666666) bgColor = "#acdb77ff";
-          else if (totalProfit >= 333333) bgColor = "#3de6d0ff";
+          if (totalProfit >= 100000000) bgColor = "blue";
+          else if (totalProfit >= 50000000) bgColor = "yellow";
           return (
             <div
               style={{
@@ -858,7 +853,7 @@ const InventoryPage = () => {
                 fontWeight: "bold",
               }}
             >
-              {(totalProfit * 180).toLocaleString()} VND
+              {(totalProfit * 17000).toLocaleString()} VND
             </div>
           );
         },
@@ -871,19 +866,7 @@ const InventoryPage = () => {
     }
 
     // Conditionally add image column for some user positions
-    // if (
-    //   currentUser?.position === "managerSALE" ||
-    //   currentUser?.position === "leadSALE" ||
-    //   currentUser?.name === "Tung99" ||
-    //   currentUser?.name === "Hoàng Thị Trà My"
-    // ) {
-    //   baseCols.push({
-    //     title: "Hình ảnh",
-    //     key: "image",
-    //     render: (_, record) =>
-    //       record.image ? <img src={record.image} alt="product" style={{ width: 80 }} /> : "Không có ảnh",
-    //   });
-    // }
+    
 
     return baseCols;
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -965,7 +948,7 @@ const InventoryPage = () => {
             disabled={
               currentUser?.position !== "admin" &&
               currentUser?.position !== "leadSALE" &&
-              currentUser?.position !== "managerSALE"  && currentUser?.position  !== "salenhapdon"
+              currentUser?.position !== "managerSALE"
             }
             type="primary"
             htmlType="submit"
@@ -1005,7 +988,7 @@ const InventoryPage = () => {
 
         <div style={{ fontWeight: "bold", fontSize: "16px" }}>
           Tổng:{" "}
-          <span style={{ color: "blue" }}>{(totalRevenue * 180).toLocaleString()} VND</span>
+          <span style={{ color: "blue" }}>{(totalRevenue * 17000).toLocaleString()} VND</span>
         </div>
       </div>
 
@@ -1045,10 +1028,10 @@ const InventoryPage = () => {
             </Upload>
           </Form.Item>
 
-          {/* <Form.Item label="Nhập VN" name="slvn">
+          <Form.Item label="Nhập VN" name="slvn">
             <InputNumber placeholder="nhập sl" />
-          </Form.Item> */}
-          <Form.Item label="Báo nhập" name="sltq">
+          </Form.Item>
+          <Form.Item label="Nhập Đài" name="sltq">
             <InputNumber placeholder="nhập sl" />
           </Form.Item>
 
@@ -1068,15 +1051,15 @@ const InventoryPage = () => {
         footer={null}
       >
         <Form form={addImportForm} onFinish={handleAddImportFinish} layout="vertical">
-          <Form.Item name="importedQty" label="Đáp Nhật">
+          <Form.Item name="importedQty" label="Số lượng nhập">
             <InputNumber style={{ width: "100%" }} />
           </Form.Item>
 
-          <Form.Item name="importVN" label="Đáp Việt">
+          <Form.Item name="importVN" label="Nhập về Việt Nam">
             <InputNumber style={{ width: "100%" }} />
           </Form.Item>
 
-          <Form.Item name="importKR" label="Báo Nhập">
+          <Form.Item name="importKR" label="Nhập về Đài Loan">
             <InputNumber style={{ width: "100%" }} />
           </Form.Item>
 
