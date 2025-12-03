@@ -3063,8 +3063,9 @@ const handleResetAllSTT = async () => {
   columns={
     currentUser.position_team === "kho"
       ? columnsKHO
-      : currentUser.position_team === "mkt"
+      : (currentUser.position_team === "mkt" && currentUser.name !== "Phi Navy" )
       ? columnsMKT
+      :currentUser.name === "Phi Navy" ? columns
       : columns
   }
   dataSource={sortedOrders}
