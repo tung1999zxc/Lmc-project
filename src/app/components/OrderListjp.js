@@ -1359,49 +1359,49 @@ onChange={(e) => handleColumnSelect("istick", e.target.checked)}
         key: "pageName",
         render: (text) => text ? text.split("||")[0].trim() : "",
       },
-    ...((currentUser.position === "managerSALE"||currentUser.position === "leadSALE"||currentUser.name === "Hoàng Lan Phương"||currentUser.name === "Đỗ Uyển Nhi"
-     ) ? [
-          {
-            title: (<>
-            <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-             <Checkbox
-  checked={selectedColumns.includes("isShipping")}
-  onChange={(e) => handleColumnSelect("isShipping", e.target.checked)}
->
+//     ...((currentUser.position === "managerSALE"||currentUser.position === "leadSALE"||currentUser.name === "Hoàng Lan Phương"||currentUser.name === "Đỗ Uyển Nhi"
+//      ) ? [
+//           {
+//             title: (<>
+//             <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+//              <Checkbox
+//   checked={selectedColumns.includes("isShipping")}
+//   onChange={(e) => handleColumnSelect("isShipping", e.target.checked)}
+// >
   
-</Checkbox>
+// </Checkbox>
 
-<Checkbox.Group
-  options={[
-    { label: "CTY đóng hàng", value: "istick2" }
-  ]}
-  value={allRowsSelected2 ? ["istick2"] : []}
-  onChange={(checkedValues) => handleSelectAllIstick2(checkedValues.length > 0)}
-  style={{
-    border: "1px solid #1890ff",
-    padding: "5px 10px",
-    borderRadius: "5px",
-    background: allRowsSelected2 ? "#1890ff" : "#f5f5f5",
-    color: allRowsSelected2 ? "white" : "black",
-    fontWeight: "bold"
-  }}
-/></div>
-              <Button  type="primary" onClick={handleSaveIstick2}>
-              Lưu 
-            </Button></>
-            ),
+// <Checkbox.Group
+//   options={[
+//     { label: "CTY đóng hàng", value: "istick2" }
+//   ]}
+//   value={allRowsSelected2 ? ["istick2"] : []}
+//   onChange={(checkedValues) => handleSelectAllIstick2(checkedValues.length > 0)}
+//   style={{
+//     border: "1px solid #1890ff",
+//     padding: "5px 10px",
+//     borderRadius: "5px",
+//     background: allRowsSelected2 ? "#1890ff" : "#f5f5f5",
+//     color: allRowsSelected2 ? "white" : "black",
+//     fontWeight: "bold"
+//   }}
+// /></div>
+//               <Button  type="primary" onClick={handleSaveIstick2}>
+//               Lưu 
+//             </Button></>
+//             ),
             
-            key: "isShipping",
-            dataIndex: "isShipping",
-            render: (_, record) => (
-              <MemoizedCheckbox
-              checked={record.isShipping}
-              onChange={e => handleIstickChange2(record.id, e.target.checked)}
-            />
-            ),
-          },
-        ]
-      : []),
+//             key: "isShipping",
+//             dataIndex: "isShipping",
+//             render: (_, record) => (
+//               <MemoizedCheckbox
+//               checked={record.isShipping}
+//               onChange={e => handleIstickChange2(record.id, e.target.checked)}
+//             />
+//             ),
+//           },
+//         ]
+//       : []),
     
     {
       title: (
