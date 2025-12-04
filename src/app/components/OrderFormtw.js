@@ -155,6 +155,7 @@ const handlePageNameChange = (value) => {
   const saleBaoOptions = ["DONE","OK", "HỦY", "ĐỢI XN","CHUYỂN ĐƠN", "BOOK TB","THIẾU TT","50/50", "NGUY CƠ", "BÙNG", "ĐANG UP", "CHECK"];
   const massOptions = ["Nặng", "Nhẹ"];
   const thanhToanOptions = ["ĐÃ THANH TOÁN", "CHƯA THANH TOÁN"];
+  const thanhToanOptions2 = ["T-CAT", "FAMILY","7-11"];
   const tinhTrangGHOptions = ["ĐÃ GỬI HÀNG", "GIAO THÀNH CÔNG","VẮNG MẶT","HẸN GIAO LẠI","CUỘC ĐIỀU TRA","HOÀN"];
 
   // Khi có initialValues (dữ liệu cũ) thì chuyển các trường ngày về đối tượng dayjs
@@ -465,6 +466,15 @@ const productOptions = products.map((p) => p.name);
                 ))}
               </Select>
             </Form.Item>
+            <Form.Item label="PHƯƠNG THỨC VẬN CHUYỂN" name="paymentStatus2" hidden={true}>
+              <Select>
+                {thanhToanOptions2.map((status) => (
+                  <Option key={status} value={status}>
+                    {status}
+                  </Option>
+                ))}
+              </Select>
+            </Form.Item>
             <Form.Item label="SALE XÁC NHẬN" hidden={true} name="salexacnhan"> 
                
                 </Form.Item>
@@ -748,6 +758,16 @@ const productOptions = products.map((p) => p.name);
                 >
                   <Select>
                     {thanhToanOptions.map((status) => (
+                      <Option key={status} value={status}>
+                        {status}
+                      </Option>
+                    ))}
+                  </Select>
+                </Form.Item>
+                <Form.Item label="PHƯƠNG THỨC VẬN CHUYỂN" name="paymentStatus3" 
+                >
+                  <Select>
+                    {thanhToanOptions2.map((status) => (
                       <Option key={status} value={status}>
                         {status}
                       </Option>

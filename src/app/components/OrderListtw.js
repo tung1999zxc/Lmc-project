@@ -1622,6 +1622,19 @@ width: 80,
     {
       title: (
         <Checkbox
+          checked={selectedColumns.includes("paymentStatus2")}
+          onChange={(e) => handleColumnSelect("paymentStatus2", e.target.checked)}
+        >
+          PHƯƠNG THỨC VẬN CHUYỂN
+        </Checkbox>
+      ),
+      dataIndex: "paymentStatus2",
+      key: "paymentStatus2",
+     
+    },
+    {
+      title: (
+        <Checkbox
           checked={selectedColumns.includes("note")}
           onChange={(e) => handleColumnSelect("note", e.target.checked)}
         >
@@ -1884,6 +1897,19 @@ width: 80,
       render: (text) => (
         <Tag color={text === "ĐÃ THANH TOÁN" ? "green" : "red"}>{text}</Tag>
       )
+    },
+        {
+      title: (
+        <Checkbox
+          checked={selectedColumns.includes("paymentStatus2")}
+          onChange={(e) => handleColumnSelect("paymentStatus2", e.target.checked)}
+        >
+          PHƯƠNG THỨC VẬN CHUYỂN
+        </Checkbox>
+      ),
+      dataIndex: "paymentStatus2",
+      key: "paymentStatus2",
+     
     },
    
     
@@ -2314,6 +2340,7 @@ onChange={(e) => handleColumnSelect("istick", e.target.checked)}
       processStatus: values.processStatus || "",
       saleReport: values.saleReport || "",
       paymentStatus: values.paymentStatus || "",
+      paymentStatus2: values.paymentStatus2 || "",
       deliveryStatus: values.deliveryStatus || "",
       trackingCode: values.trackingCode || "",
       orderDate: values.orderDate || moment().format("YYYY-MM-DD"),
@@ -2406,6 +2433,7 @@ onChange={(e) => handleColumnSelect("istick", e.target.checked)}
           .join("\n")
       : "",
     category: order.category,
+    Note : order.note
   }));
 
   const handleBatchUpdateTrackingCodes = async () => {

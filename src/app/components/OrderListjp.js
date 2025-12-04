@@ -2444,7 +2444,8 @@ onChange={(e) => handleColumnSelect("istick", e.target.checked)}
     Category: order.category,
     PostalCode: order.pcode,
     PickUpHours: order.processStatus,
-    Note : order.note
+    Note : order.note,
+    DS : order.revenue
   }));
 
   const handleBatchUpdateTrackingCodes = async () => {
