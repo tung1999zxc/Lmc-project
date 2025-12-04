@@ -533,6 +533,13 @@ const resetPagename =()=>{
                 );
               case "delivered":
                 return order.deliveryStatus === "GIAO THÀNH CÔNG";
+              case "vangmat":
+                return order.deliveryStatus === "VẮNG MẶT";
+              case "cuocdieutra":
+                return order.deliveryStatus === "CUỘC ĐIỀU TRA";
+              case "hoan":
+                return order.deliveryStatus === "HOÀN";
+              
               case "unpaid_success":
                 return (
                   (order.paymentStatus === "CHƯA THANH TOÁN"|| order.paymentStatus === "") &&
@@ -1846,6 +1853,21 @@ const selectedTableColumns = columns.filter((col) =>
         },
     { title: "TÊN PAGE", dataIndex: "pageName", key: "pageName",width: 100, },
     { title: "TÊN KHÁCH", width: 100,dataIndex: "customerName", key: "customerName" },
+     {
+          title: (
+            <Checkbox
+              checked={selectedColumns.includes("saleReport")}
+              onChange={(e) => handleColumnSelect("saleReport", e.target.checked)}
+            >
+              ĐƠN
+            </Checkbox>
+          ),
+          dataIndex: "saleReport",
+          key: "saleReport",
+          render: (text) => (
+            <Tag color={text === "DONE" ? "green" : "red"}>{text}</Tag>
+          ),
+        },
     // ...(currentUser.position === "mkt"
     //   ? [
         {
@@ -2856,36 +2878,41 @@ const handleResetAllSTT = async () => {
             allowClear
             options={[
               
-              { value: "unpaid_success", label: "Chưa thanh toán & Giao Thành công" },   
-              { value: "donechuaguichuagui", label: "Done + Chưa Gửi Hàng" },   
-
-              { value: "waiting_done", label: "Đơn chưa Done" },
-              { value: "ok", label: "Đơn OK" },
-              { value: "check", label: "Đơn CHECK" },
+             
+              { value: "done", label: "Đơn DONE" },
+              { value: "waiting_done", label: "Đơn chưa DONE" },          
               { value: "ds0", label: "Doanh số bằng 0" },
               { value: "dskhac0", label: "Doanh số khác 0" },
+              { value: "not_delivered", label: "ĐÃ GỬI HÀNG" },
+              { value: "vangmat", label: "Đơn VẮNG MẶT " },
+              { value: "cuocdieutra", label: "Đơn CUỘC ĐIỀU TRA" },
+              { value: "hoan", label: "Đơn HOÀN" },
               
-              { value: "even_stt", label: "Đơn STT CHẴN" },
-              { value: "odd_stt", label: "Đơn STT LẺ" },
-              { value: "slam", label: "Điền sl âm" },
+              { value: "delivered", label: "Đơn GIAO THÀNH CÔNG" },
+              { value: "waitDelivered", label: "Đơn chưa gửi hàng" },
+              { value: "deliveredkomavandon", label: "Đơn ĐÃ GỬI HÀNG + Chưa mã vận đơn" },
 
-              { value: "chuyendon", label: "Đơn CHUYỂN ĐƠN" },
-              { value: "booktb", label: "BOOK TB" },
-              { value: "waiting_approval", label: "Đợi xác nhận" },
-              { value: "done", label: "Đơn đã Done" },
-              { value: "duplicate_name", label: "Trùng tên khách" },
-              { value: "duplicate_phone", label: "Trùng số điện thoại" },
-              { value: "unpaid", label: "Chưa thanh toán" },
-              { value: "paid", label: "Đã thanh toán" },
-              { value: "ero", label: "Đơn thiếu sale xử lý" },
-              { value: "ctyshiping2", label: "Công Ty đóng hàng + Chưa mã" },
-              { value: "ctyshiping", label: "Công Ty đóng hàng" },
-              { value: "khoshiping", label: "Kho đóng hàng" },
-              { value: "waitDelivered", label: "Chưa gửi hàng" },
-              { value: "deliveredkomavandon", label: "Đã gửi hàng + chưa mã" },
-              { value: "not_delivered", label: "Đã gửi hàng" },
-              { value: "delivered", label: "Giao thành công" },
-              { value: "donechuaguichuagui2", label: "Khác Done + Đã Gửi Hàng" },  
+              //  { value: "unpaid_success", label: "Chưa thanh toán & Giao Thành công" },   
+              // { value: "donechuaguichuagui", label: "Done + Chưa Gửi Hàng" },   
+              // { value: "even_stt", label: "Đơn STT CHẴN" },
+              // { value: "odd_stt", label: "Đơn STT LẺ" },
+              // { value: "slam", label: "Điền sl âm" },
+
+              // { value: "chuyendon", label: "Đơn CHUYỂN ĐƠN" },
+              // { value: "booktb", label: "BOOK TB" },
+              // { value: "waiting_approval", label: "Đợi xác nhận" },
+            
+              // { value: "duplicate_name", label: "Trùng tên khách" },
+              // { value: "duplicate_phone", label: "Trùng số điện thoại" },
+              // { value: "unpaid", label: "Chưa thanh toán" },
+              // { value: "paid", label: "Đã thanh toán" },
+              // { value: "ero", label: "Đơn thiếu sale xử lý" },
+              // { value: "ctyshiping2", label: "Công Ty đóng hàng + Chưa mã" },
+              // { value: "ctyshiping", label: "Công Ty đóng hàng" },
+              // { value: "khoshiping", label: "Kho đóng hàng" },
+              
+              
+              // { value: "donechuaguichuagui2", label: "Khác Done + Đã Gửi Hàng" },  
 
               
              
