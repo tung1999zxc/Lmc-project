@@ -764,7 +764,7 @@ const productOptions = products.map((p) => p.name);
                     ))}
                   </Select>
                 </Form.Item>
-                <Form.Item label="PHƯƠNG THỨC VẬN CHUYỂN" name="paymentStatus3" 
+                <Form.Item label="PHƯƠNG THỨC VẬN CHUYỂN" name="paymentStatus2" 
                 >
                   <Select>
                     {thanhToanOptions2.map((status) => (
