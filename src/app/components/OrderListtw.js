@@ -2432,8 +2432,9 @@ onChange={(e) => handleColumnSelect("istick", e.target.checked)}
           .map(item => item.quantity)
           .join("\n")
       : "",
-    category: order.category,
-    Note : order.note
+    Category: order.category,
+    Note : order.note,
+    PTVC : order.paymentStatus2
   }));
 
   const handleBatchUpdateTrackingCodes = async () => {
