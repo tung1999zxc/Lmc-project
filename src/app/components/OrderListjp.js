@@ -1528,30 +1528,30 @@ onChange={(e) => handleColumnSelect("istick", e.target.checked)}
       dataIndex: "sale",
       key: "sale",
     },
-    {
-      title: (
-        <Checkbox
-          checked={selectedColumns.includes("salexuly")}
-          onChange={(e) => handleColumnSelect("salexuly", e.target.checked)}
-        >
-          VẬN ĐƠN
-        </Checkbox>
-      ),
-      dataIndex: "salexuly",
-      key: "salexuly",
-    },
-    {
-      title: (
-        <Checkbox
-          checked={selectedColumns.includes("salexacnhan")}
-          onChange={(e) => handleColumnSelect("salexacnhan", e.target.checked)}
-        >
-          SALE XÁC NHẬN
-        </Checkbox>
-      ),
-      dataIndex: "salexacnhan",
-      key: "salexacnhan",
-    },
+    // {
+    //   title: (
+    //     <Checkbox
+    //       checked={selectedColumns.includes("salexuly")}
+    //       onChange={(e) => handleColumnSelect("salexuly", e.target.checked)}
+    //     >
+    //       VẬN ĐƠN
+    //     </Checkbox>
+    //   ),
+    //   dataIndex: "salexuly",
+    //   key: "salexuly",
+    // },
+    // {
+    //   title: (
+    //     <Checkbox
+    //       checked={selectedColumns.includes("salexacnhan")}
+    //       onChange={(e) => handleColumnSelect("salexacnhan", e.target.checked)}
+    //     >
+    //       SALE XÁC NHẬN
+    //     </Checkbox>
+    //   ),
+    //   dataIndex: "salexacnhan",
+    //   key: "salexacnhan",
+    // },
     
     ...(currentUser.position !== "salenhapdon"
       ? [
@@ -1909,15 +1909,15 @@ const selectedTableColumns = columns.filter((col) =>
     //     ]
     //   : []),
     
-    {
-      title: "THANH TOÁN",
-      dataIndex: "paymentStatus",
-      key: "paymentStatus",
-      width: 100,
-      render: (text) => (
-        <Tag color={text === "ĐÃ THANH TOÁN" ? "green" : "red"}>{text}</Tag>
-      )
-    },
+    // {
+    //   title: "THANH TOÁN",
+    //   dataIndex: "paymentStatus",
+    //   key: "paymentStatus",
+    //   width: 100,
+    //   render: (text) => (
+    //     <Tag color={text === "ĐÃ THANH TOÁN" ? "green" : "red"}>{text}</Tag>
+    //   )
+    // },
    
     
     
@@ -3290,15 +3290,16 @@ const handleResetAllSTT = async () => {
       render: (text) => (
         <Tag color={text === "GIAO THÀNH CÔNG" ? "blue" : "orange"}>{text}</Tag>
       ),
-    }, {
-      title: "THANH TOÁN",
-      dataIndex: "paymentStatus",
-      key: "paymentStatus",
-      width: 100,
-      render: (text) => (
-        <Tag color={text === "ĐÃ THANH TOÁN" ? "green" : "red"}>{text}</Tag>
-      )
-    },
+    }, 
+    // {
+    //   title: "THANH TOÁN",
+    //   dataIndex: "paymentStatus",
+    //   key: "paymentStatus",
+    //   width: 100,
+    //   render: (text) => (
+    //     <Tag color={text === "ĐÃ THANH TOÁN" ? "green" : "red"}>{text}</Tag>
+    //   )
+    // },
     ]}
     rowKey="id"
 />

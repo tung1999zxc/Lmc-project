@@ -1528,30 +1528,30 @@ width: 80,
       dataIndex: "sale",
       key: "sale",
     },
-    {
-      title: (
-        <Checkbox
-          checked={selectedColumns.includes("salexuly")}
-          onChange={(e) => handleColumnSelect("salexuly", e.target.checked)}
-        >
-          VẬN ĐƠN
-        </Checkbox>
-      ),
-      dataIndex: "salexuly",
-      key: "salexuly",
-    },
-    {
-      title: (
-        <Checkbox
-          checked={selectedColumns.includes("salexacnhan")}
-          onChange={(e) => handleColumnSelect("salexacnhan", e.target.checked)}
-        >
-          SALE XÁC NHẬN
-        </Checkbox>
-      ),
-      dataIndex: "salexacnhan",
-      key: "salexacnhan",
-    },
+    // {
+    //   title: (
+    //     <Checkbox
+    //       checked={selectedColumns.includes("salexuly")}
+    //       onChange={(e) => handleColumnSelect("salexuly", e.target.checked)}
+    //     >
+    //       VẬN ĐƠN
+    //     </Checkbox>
+    //   ),
+    //   dataIndex: "salexuly",
+    //   key: "salexuly",
+    // },
+    // {
+    //   title: (
+    //     <Checkbox
+    //       checked={selectedColumns.includes("salexacnhan")}
+    //       onChange={(e) => handleColumnSelect("salexacnhan", e.target.checked)}
+    //     >
+    //       SALE XÁC NHẬN
+    //     </Checkbox>
+    //   ),
+    //   dataIndex: "salexacnhan",
+    //   key: "salexacnhan",
+    // },
     
     ...(currentUser.position !== "salenhapdon"
       ? [
@@ -1610,21 +1610,21 @@ width: 80,
       render: (text) => <div style={{ width: 200,  }}>{text}</div>,
       
     },
-    {
-      title: (
-        <Checkbox
-          checked={selectedColumns.includes("paymentStatus")}
-          onChange={(e) => handleColumnSelect("paymentStatus", e.target.checked)}
-        >
-          THANH TOÁN
-        </Checkbox>
-      ),
-      dataIndex: "paymentStatus",
-      key: "paymentStatus",
-      render: (text) => (
-        <Tag color={text === "ĐÃ THANH TOÁN" ? "green" : "red"}>{text}</Tag>
-      ),
-    },
+    // {
+    //   title: (
+    //     <Checkbox
+    //       checked={selectedColumns.includes("paymentStatus")}
+    //       onChange={(e) => handleColumnSelect("paymentStatus", e.target.checked)}
+    //     >
+    //       THANH TOÁN
+    //     </Checkbox>
+    //   ),
+    //   dataIndex: "paymentStatus",
+    //   key: "paymentStatus",
+    //   render: (text) => (
+    //     <Tag color={text === "ĐÃ THANH TOÁN" ? "green" : "red"}>{text}</Tag>
+    //   ),
+    // },
     {
       title: (
         <Checkbox
@@ -1910,15 +1910,15 @@ width: 80,
     //     ]
     //   : []),
     
-    {
-      title: "THANH TOÁN",
-      dataIndex: "paymentStatus",
-      key: "paymentStatus",
-      width: 100,
-      render: (text) => (
-        <Tag color={text === "ĐÃ THANH TOÁN" ? "green" : "red"}>{text}</Tag>
-      )
-    },
+    // {
+    //   title: "THANH TOÁN",
+    //   dataIndex: "paymentStatus",
+    //   key: "paymentStatus",
+    //   width: 100,
+    //   render: (text) => (
+    //     <Tag color={text === "ĐÃ THANH TOÁN" ? "green" : "red"}>{text}</Tag>
+    //   )
+    // },
         {
       title: (
         <Checkbox

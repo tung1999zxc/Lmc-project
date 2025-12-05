@@ -648,6 +648,17 @@ const InventoryPage = () => {
       {
         title: "Báo Nhập",
         key: "importedQtyKR",
+        sorter: (a, b) => {
+  const totalA = (a.imports || []).reduce(
+    (acc, cur) => acc + (Number(cur.importKR) || 0),
+    0
+  );
+  const totalB = (b.imports || []).reduce(
+    (acc, cur) => acc + (Number(cur.importKR) || 0),
+    0
+  );
+  return totalA - totalB;
+},
         render: (_, record) => {
           const totalImported = (record.imports || []).reduce(
             (acc, cur) => acc + (Number(cur.importKR) || 0),
@@ -709,32 +720,32 @@ const InventoryPage = () => {
         title: "SL Âm (DONE - Đã nhập)",
         key: "SLAMDONE",
         width: 120,
-        sorter: (a, b) => {
-          const aAgg = getAggregatesFor(a.name);
-          const bAgg = getAggregatesFor(b.name);
+    sorter: (a, b) => {
+  const aAgg = getAggregatesFor(a.name);
+  const bAgg = getAggregatesFor(b.name);
 
-          // totalImported: compute from product record (cheap)
-          const aImported =
-            (a.imports || []).reduce((acc, cur) => {
-              return (
-                acc +
-                (Number(cur.importedQty) || 0) 
-              
-              );
-            }, 0) + (Number(a.slvn) || 0) + (Number(a.sltq) || 0);
+  const aImported =
+    (a.imports || []).reduce((acc, cur) => {
+      return acc + (Number(cur.importedQty) || 0);
+    }, 0) +
+    (Number(a.importVN) || 0) +
+    (Number(a.importKR) || 0);
 
-          const bImported =
-            (b.imports || []).reduce((acc, cur) => {
-              return (
-                acc +
-                (Number(cur.importedQty) || 0) 
-              );
-            }, 0) + (Number(b.slvn) || 0) + (Number(b.sltq) || 0);
+  const bImported =
+    (b.imports || []).reduce((acc, cur) => {
+      return acc + (Number(cur.importedQty) || 0);
+    }, 0) +
+    (Number(b.importVN) || 0) +
+    (Number(b.importKR) || 0);
 
-          const aSlAm = aImported - aAgg.ordersDone - aAgg.deliveredQty;
-          const bSlAm = bImported - bAgg.ordersDone - bAgg.deliveredQty;
-          return aSlAm - bSlAm;
-        },
+  // Tính SL âm đúng
+  const aSlAm = aImported - aAgg.ordersDone - aAgg.deliveredQty;
+  const bSlAm = bImported - bAgg.ordersDone - bAgg.deliveredQty;
+
+  // SẮP XẾP: Âm lớn → âm bé (Ví dụ: -2 → -20)
+  return bSlAm - aSlAm;
+},
+
         render: (_, record) => {
           const agg = getAggregatesFor(record.name);
           const totalImported =

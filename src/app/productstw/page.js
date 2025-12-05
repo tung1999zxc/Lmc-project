@@ -736,8 +736,9 @@ const InventoryPage = () => {
       {
   title: "Nhập VN",
   dataIndex: "slvn",
+  sorter: (a, b) => (Number(a.slvn) || 0) - (Number(b.slvn) || 0),
   key: "slvn",
-  width: 80,
+  width: 90,
   render: (_, record) => {
     const historyContent =
       record.slvnHistory && record.slvnHistory.length > 0 ? (
@@ -774,7 +775,7 @@ const InventoryPage = () => {
    {
   title: "Nhập Đài",
   key: "sltq",
-  width: 80,
+  width: 90,
   render: (_, record) => {
     const historyContent =
       record.sltqHistory && record.sltqHistory.length > 0 ? (
@@ -806,6 +807,7 @@ const InventoryPage = () => {
       </Popover>
     );
   },
+  sorter: (a, b) => (Number(a.sltq) || 0) - (Number(b.sltq) || 0),
 },
       {
         title: "Hành động",
