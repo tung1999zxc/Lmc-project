@@ -1320,7 +1320,16 @@ onChange={(e) => handleColumnSelect("istick", e.target.checked)}
           ),
           dataIndex: "stt",       
           key: "stt",
-         
+          render: (stt, record) => {
+          // Lọc ra các đơn hàng của khách hàng này
+          
+          
+          return (
+            <div >
+              {stt} <strong>(Nhật)</strong>
+            </div>
+          );
+        },
          
         },
      
@@ -1348,7 +1357,7 @@ onChange={(e) => handleColumnSelect("istick", e.target.checked)}
           
           return (
             <div style={{ backgroundColor: bgColor, padding: "4px" }}>
-              {customerName}
+              {customerName} 
             </div>
           );
         },
@@ -2167,6 +2176,34 @@ onChange={(e) => handleColumnSelect("istick", e.target.checked)}
       ),
       dataIndex: "customerName",
       key: "customerName",
+        render: (text) => {
+    const names = text.split(",").map(name => name.trim());
+    return (
+      <div style={{ display: "flex", flexWrap: "wrap", gap: "5px" }}>
+        {names.map((name, idx) => {
+          const isDuplicate = customerNameCountMap.get(name) > 1;
+          const bgColor = isDuplicate ? getCustomerColor(name) : "transparent";
+
+          return (
+            <div
+              key={idx}
+              style={{
+                backgroundColor: bgColor,
+                padding: "2px 6px",
+                borderRadius: "4px",
+                color: isDuplicate ? "#000" : "#333",
+                fontSize: "12px",
+                border: isDuplicate ? "1px solid #ccc" : "none",
+                whiteSpace: "nowrap"
+              }}
+            >
+              {name} - Nhật Bản
+            </div>
+          );
+        })}
+      </div>
+    );
+  },
     },
     {
       title: (
@@ -3110,7 +3147,7 @@ const handleResetAllSTT = async () => {
                 whiteSpace: "nowrap"
               }}
             >
-              {name}
+              {name} - Nhật Bản
             </div>
           );
         })}
@@ -3207,7 +3244,35 @@ const handleResetAllSTT = async () => {
         record.products?.map(p => `${p.product} - SL: ${p.quantity}`).join(', ')
       )},
       { title: 'Tên Khách', dataIndex: "customerName",
-        key: "customerName"},
+        key: "customerName",  render: (text) => {
+    const names = text.split(",").map(name => name.trim());
+    return (
+      <div style={{ display: "flex", flexWrap: "wrap", gap: "5px" }}>
+        {names.map((name, idx) => {
+          const isDuplicate = customerNameCountMap.get(name) > 1;
+          const bgColor = isDuplicate ? getCustomerColor(name) : "transparent";
+
+          return (
+            <div
+              key={idx}
+              style={{
+                backgroundColor: bgColor,
+                padding: "2px 6px",
+                borderRadius: "4px",
+                color: isDuplicate ? "#000" : "#333",
+                fontSize: "12px",
+                border: isDuplicate ? "1px solid #ccc" : "none",
+                whiteSpace: "nowrap"
+              }}
+            >
+              {name} - Nhật Bản
+            </div>
+          );
+        })}
+      </div>
+    );
+  },
+},
          ...((currentUser.position === "leadSALE" || currentUser.position === "managerSALE" )
       ? [
        {

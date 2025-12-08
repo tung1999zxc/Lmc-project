@@ -1319,6 +1319,16 @@ onChange={(e) => handleColumnSelect("istick", e.target.checked)}
           ),
           dataIndex: "stt",       
           key: "stt",
+          render: (stt, record) => {
+          // Lọc ra các đơn hàng của khách hàng này
+          
+          
+          return (
+            <div >
+              {stt} <strong>(Đài)</strong>
+            </div>
+          );
+        },
          
          
         },
@@ -1336,21 +1346,7 @@ onChange={(e) => handleColumnSelect("istick", e.target.checked)}
         ),
         dataIndex: "customerName",
         key: "customerName",
-        render: (customerName, record) => {
-          // Lọc ra các đơn hàng của khách hàng này
-          const customerOrders = orders.filter(
-            (order) => order.customerName === record.customerName
-          );
-          const count = customerOrders.length;
-          // Nếu có nhiều đơn, gán màu nền dựa trên tên khách
-          const bgColor = count > 1 ? getColorForCustomer(customerName) : "";
-          
-          return (
-            <div style={{ backgroundColor: bgColor, padding: "4px" }}>
-              {customerName}
-            </div>
-          );
-        },
+        
       },
       {
         title: (
