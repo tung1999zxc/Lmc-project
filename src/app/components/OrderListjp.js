@@ -701,7 +701,7 @@ case "odd_stt":
     shiftFilter 
   ]);
   const customerNameCountMap = useMemo(() => {
-    if (currentUser.name !== 'Tung99') return [];
+    if (currentUser.name !== 'Tung99') return new Map();
   const map = new Map();
   filteredOrders.forEach(order => {
     const name = order.customerName?.trim() || "Không rõ";
