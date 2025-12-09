@@ -2463,6 +2463,7 @@ onChange={(e) => handleColumnSelect("istick", e.target.checked)}
           .join("\n")
       : "",
     Category: order.category,
+    Price: order.revenue,
     Note : order.note,
     PTVC : order.paymentStatus2
   }));
