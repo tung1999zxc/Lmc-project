@@ -1053,9 +1053,9 @@ const InventoryPage = () => {
         footer={null}
       >
         <Form form={addImportForm} onFinish={handleAddImportFinish} layout="vertical">
-          {/* <Form.Item name="importedQty" label="Số lượng nhập">
+          <Form.Item name="importedQty" label="Số lượng nhập">
             <InputNumber style={{ width: "100%" }} />
-          </Form.Item> */}
+          </Form.Item>
 
           <Form.Item name="importVN" label="SL hàng đáp VN">
             <InputNumber style={{ width: "100%" }} />
