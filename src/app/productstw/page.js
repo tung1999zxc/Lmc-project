@@ -1008,7 +1008,7 @@ const InventoryPage = () => {
           <Form.Item name="name" label="Tên sản phẩm" rules={[{ required: true, message: "Vui lòng nhập tên sản phẩm" }]}>
             <Input />
           </Form.Item>
-          <Form.Item label="Kịch bản sản phẩm" name="description">
+          {/* <Form.Item label="Kịch bản sản phẩm" name="description">
             <Input.TextArea rows={2} placeholder="Kịch bản sản phẩm" />
           </Form.Item>
           <Form.Item
@@ -1028,12 +1028,12 @@ const InventoryPage = () => {
             >
               <Button icon={<UploadOutlined />}>Chọn ảnh hoặc dán ảnh</Button>
             </Upload>
-          </Form.Item>
+          </Form.Item> */}
 
-          <Form.Item label="Nhập VN" name="slvn">
+          <Form.Item label="Báo nhập - VIỆT ĐÀI" name="slvn">
             <InputNumber placeholder="nhập sl" />
           </Form.Item>
-          <Form.Item label="Nhập Đài" name="sltq">
+          <Form.Item label="Báo nhập - TRUNG ĐÀI" name="sltq">
             <InputNumber placeholder="nhập sl" />
           </Form.Item>
 
@@ -1053,15 +1053,15 @@ const InventoryPage = () => {
         footer={null}
       >
         <Form form={addImportForm} onFinish={handleAddImportFinish} layout="vertical">
-          <Form.Item name="importedQty" label="Số lượng nhập">
+          {/* <Form.Item name="importedQty" label="Số lượng nhập">
+            <InputNumber style={{ width: "100%" }} />
+          </Form.Item> */}
+
+          <Form.Item name="importVN" label="SL hàng đáp VN">
             <InputNumber style={{ width: "100%" }} />
           </Form.Item>
 
-          <Form.Item name="importVN" label="Nhập về Việt Nam">
-            <InputNumber style={{ width: "100%" }} />
-          </Form.Item>
-
-          <Form.Item name="importKR" label="Nhập về Đài Loan">
+          <Form.Item name="importKR" label="SL hàng đáp ĐL">
             <InputNumber style={{ width: "100%" }} />
           </Form.Item>
 
