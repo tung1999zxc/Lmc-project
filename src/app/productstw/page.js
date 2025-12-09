@@ -567,7 +567,7 @@ const InventoryPage = () => {
                     {Number(imp.importedQty || 0) +
                       Number(imp.importVN || 0) +
                       Number(imp.importKR || 0)}{" "}
-                    VN: {imp.importVN || 0} | Hàn: {imp.importKR || 0}
+                    VN: {imp.importVN || 0} | ĐÀI: {imp.importKR || 0}
                   </li>
                 ))}
               </ul>
