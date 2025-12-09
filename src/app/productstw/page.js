@@ -545,7 +545,7 @@ const InventoryPage = () => {
         ),
       },
       {
-        title: "SL nhập hàng Tổng",
+        title: "Tổng SL ĐÁP Đài + Việt",
         key: "importedQty",
         render: (_, record) => {
           const totalImported =
