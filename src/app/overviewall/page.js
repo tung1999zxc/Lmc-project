@@ -14,7 +14,7 @@ import {
 } from "antd";
 import { useDispatch, useSelector } from "react-redux";
 import axios from "axios";
-import PraiseBanner from "./components/PraiseBanner";
+import PraiseBanner from "../components/PraiseBanner";
 // import PraiseBanner2 from "./components/PraiseBanner2";
 const { Option } = Select;
 import { useRouter } from "next/navigation";
@@ -30,14 +30,20 @@ const Dashboard = () => {
   const [selectedDate, setSelectedDate] = useState(today);
   const [selectedPreset, setSelectedPreset] = useState("currentMonth");
   const [selectedArea, setSelectedArea] = useState("all");
-  
   // Ngày hiện tại định dạng YYYY-MM-DD
+const [ordersKR, setOrdersKR] = useState([]);
+const [ordersJP, setOrdersJP] = useState([]);
+const [ordersTW, setOrdersTW] = useState([]);
 
+const [adsKR, setAdsKR] = useState([]);
+const [adsJP, setAdsJP] = useState([]);
+const [adsTW, setAdsTW] = useState([]);
   // State cho bộ lọc: selectedDate mặc định là ngày hiện tại, và preset
+const [selectedMKT, setSelectedMKT] = useState(null);
 
   // State cho tỉ giá VNĐ và ô nhập giá trị
-  const [exchangeRate, setExchangeRate] = useState(17000);
-  const [exchangeRateInput, setExchangeRateInput] = useState(17000);
+  const [exchangeRate, setExchangeRate] = useState(1);
+  const [exchangeRateInput, setExchangeRateInput] = useState(1);
   const reduxCurrentUser = useSelector((state) => state.user.currentUser) || {};
 
   const currentUser = useMemo(() => {
@@ -52,32 +58,97 @@ const Dashboard = () => {
     }
   }, []);
 
-  const fetchOrders = async () => {
-    try {
-      let url = "/api/orders2";
-
-      if (selectedPreset && selectedPreset !== "all") {
-        url += `?selectedPreset=${selectedPreset}`;
-      } else if (selectedDate) {
-        url += `?selectedDate=${selectedDate}`;
-      }
-
-      const response = await axios.get(url);
-      setOrders(response.data.data);
-    } catch (error) {
-      console.error(error);
-      message.error("Lỗi khi lấy đơn hàng");
+  const convertOrdersWithRate = (orders, rate) => {
+  return orders.map(o => ({
+    ...o,
+    revenue: (o.revenue || 0) * rate,
+    profit: (o.profit || 0) * rate,
+    totalAmount: o.totalAmount ? o.totalAmount * rate : 0
+  }));
+};
+ const fetchOrders = async () => {
+  try {
+    let path = "";
+    if (selectedPreset && selectedPreset !== "all") {
+      path = `?selectedPreset=${selectedPreset}`;
+    } else if (selectedDate) {
+      path = `?selectedDate=${selectedDate}`;
     }
-  };
+
+    const [krRes, jpRes, twRes] = await Promise.all([
+      axios.get(`/api/orders2${path}`),
+      axios.get(`/api/jp/orders2${path}`),
+      axios.get(`/api/tw/orders2${path}`)
+    ]);
+
+    const KR_raw = krRes.data.data;
+    const JP_raw = jpRes.data.data;
+    const TW_raw = twRes.data.data;
+
+    // lưu raw để tính riêng
+    setOrdersKR(KR_raw);
+    setOrdersJP(JP_raw);
+    setOrdersTW(TW_raw);
+
+    // convert theo tỷ giá
+    const KR = convertOrdersWithRate(KR_raw, 17000);
+    const JP = convertOrdersWithRate(JP_raw, 150);
+    const TW = convertOrdersWithRate(TW_raw, 750);
+
+    // tổng 3 thị trường → đã nhân tỉ giá
+    setOrders([...KR, ...JP, ...TW]);
+
+  } catch (error) {
+    console.error(error);
+    message.error("Lỗi khi lấy đơn hàng");
+  }
+};
+//   const fetchOrders = async () => {
+//     try {
+//       let url = "/api/orders2";
+
+//       if (selectedPreset && selectedPreset !== "all") {
+//         url += `?selectedPreset=${selectedPreset}`;
+//       } else if (selectedDate) {
+//         url += `?selectedDate=${selectedDate}`;
+//       }
+
+//       const response = await axios.get(url);
+//       setOrders(response.data.data);
+//     } catch (error) {
+//       console.error(error);
+//       message.error("Lỗi khi lấy đơn hàng");
+//     }
+//   };
   const fetchRecords = async () => {
-    try {
-      const response = await axios.get("/api/recordsMKT");
-      setAdsMoneyData(response.data.data);
-    } catch (error) {
-      console.error(error);
-      message.error("Lỗi khi lấy danh sách");
-    }
-  };
+  try {
+    const path =
+      selectedPreset && selectedPreset !== "all"
+        ? `?selectedPreset=${selectedPreset}`
+        : selectedDate
+        ? `?selectedDate=${selectedDate}`
+        : "";
+
+    const [kr, jp, tw] = await Promise.all([
+      axios.get(`/api/recordsMKT${path}`),     // Hàn
+      axios.get(`/api/jp/recordsMKT${path}`),  // Nhật
+      axios.get(`/api/tw/recordsMKT${path}`),  // Đài
+    ]);
+
+    // từng thị trường
+    setAdsKR(kr.data.data);
+    setAdsJP(jp.data.data);
+    setAdsTW(tw.data.data);
+
+    // tổng 3 thị trường
+    setAdsMoneyData([...kr.data.data, ...jp.data.data, ...tw.data.data]);
+  } catch (error) {
+    console.error(error);
+    message.error("Lỗi khi lấy danh sách ADS");
+  }
+};
+
+  
   const fetchEmployees = async () => {
     try {
       const response = await axios.get("/api/employees");
@@ -135,7 +206,32 @@ const Dashboard = () => {
   }
 }, [employees, selectedArea]);
 
+const calcRevenue = (orders, rate) => {
+  const today = new Date();
+  const todayStr = today.toISOString().split("T")[0];
 
+  const yesterday = new Date();
+  yesterday.setDate(yesterday.getDate() - 1);
+  const yesterdayStr = yesterday.toISOString().split("T")[0];
+
+  const todayRevenue = orders
+    .filter(o => o.orderDate === todayStr)
+    .reduce((a, b) => a + b.profit, 0) * rate;
+
+  const yesterdayRevenue = orders
+    .filter(o => o.orderDate === yesterdayStr)
+    .reduce((a, b) => a + b.profit, 0) * rate;
+
+  const percent = yesterdayRevenue > 0
+    ? ((todayRevenue / yesterdayRevenue) * 100).toFixed(2)
+    : 0;
+
+  return { todayRevenue, yesterdayRevenue, percent };
+};
+
+const kr = calcRevenue(ordersKR, 17000);
+const jp = calcRevenue(ordersJP, 150);
+const tw = calcRevenue(ordersTW, 750);
 
   const BarChartComponent = dynamic(
     () =>
@@ -187,6 +283,9 @@ const Dashboard = () => {
           "#0088FA",
           "#5A2D82",
           "#144523",
+          "#c51e1eff",
+          "#43e474ff",
+          "#20aeebff",
         ];
         return (
           <PieChart width={450} height={300}>
@@ -796,6 +895,8 @@ const Dashboard = () => {
     { label: "TEAM TUẤN ANH", value: "TUANANH" },
     { label: "TEAM DIỆN ONLINE", value: "DIENON" },
     { label: "TEAM DIỆN", value: "DIEN" },
+    //  { label: "TEAM NHẬT", value: "JP" },
+    // { label: "TEAM ĐÀI", value: "TW" },
   ],
 };
 
@@ -822,6 +923,8 @@ const teams = teamsByArea[selectedArea] || [];
     { label: "TEAM TUẤN ANH", value: "TUANANH" },
     { label: "TEAM DIỆN ONLINE", value: "DIENON" },
     { label: "TEAM DIỆN", value: "DIEN" },
+    //  { label: "TEAM NHẬT", value: "JP" },
+    // { label: "TEAM ĐÀI", value: "TW" },
   ],
 };
 
@@ -842,7 +945,7 @@ const areaEmployeeNames = filteredEmployeesByArea.map((e) =>
   e.name.trim().toLowerCase()
 );
 
-const filteredOrdersByArea =
+const filteredOrdersByArea0mkt =
   selectedArea === "all"
     ? filteredOrders
     : filteredOrders.filter((order) => {
@@ -854,25 +957,31 @@ const filteredOrdersByArea =
           // areaEmployeeNames.includes(salexulyName)
         );
       });
-const filteredOrdersByArea2 =
-  selectedArea === "all"
-    ? filteredOrders
-    : filteredOrders.filter((order) => {
-        const mkt = order.mkt?.trim().toLowerCase();
-      
-        return (
-         
-          areaEmployeeNames.includes(mkt) 
-      
-        );
-      });
+
+      const filteredOrdersByArea =
+  selectedMKT
+    ? filteredOrdersByArea0mkt.filter(
+        (order) =>
+          order.mkt &&
+          order.mkt.trim().toLowerCase() === selectedMKT.trim().toLowerCase()
+      )
+    : filteredOrdersByArea0mkt;
 
 
 
   // Lọc chi phí ads theo cùng bộ lọc (dùng field 'date')
-  let filteredAds = adsMoneyData;
-  let filteredOrdersOriginal = filteredOrders;
-  let filteredAdsOriginal = filteredAds;
+  let filteredAds2 = adsMoneyData;
+  let filteredAds = selectedMKT
+  ? filteredAds2.filter((ad) => {
+      const adName = (ad.name || "").trim().toLowerCase();
+      const mktName = selectedMKT.trim().toLowerCase();
+      return adName === mktName;
+    })
+  : filteredAds2;
+
+ 
+
+ 
   if (selectedPreset) {
     filteredAds = filterByPreset(
       adsMoneyData.map((ad) => ({ ...ad, orderDate: ad.date })),
@@ -881,15 +990,23 @@ const filteredOrdersByArea2 =
   } else if (selectedDate) {
     filteredAds = adsMoneyData.filter((ad) => ad.date === selectedDate);
   }
-const filteredAdsByArea =
+  
+const filteredAdsByArea2 =
   selectedArea === "all"
     ? filteredAds
     : filteredAds.filter((ad) => {
         const name = ad.name?.trim().toLowerCase();
         return areaEmployeeNames.includes(name);
       });
+      const filteredAdsByArea = selectedMKT
+  ? filteredAdsByArea2.filter((ad) => {
+      const adName = (ad.name || "").trim().toLowerCase();
+      const mktName = selectedMKT.trim().toLowerCase();
+      return adName === mktName;
+    })
+  : filteredAdsByArea2;
   // === Biểu đồ doanh số theo nhân viên (Grouped Double Bar Chart) ===
-  const mktEmployees = filteredEmployeesByArea.filter((emp) => emp.position_team === "mkt" && emp.quocgia !== "jp");
+  const mktEmployees = filteredEmployeesByArea.filter((emp) => emp.position_team === "mkt" );
   const mktEmployeesPVD = filteredEmployeesByArea.filter((emp) => emp.position_team === "mkt" && emp.quocgia !== "jp"&&emp.khuvuc === "pvd");
 
   const employeeChartDataNew = mktEmployees.map((emp) => {
@@ -904,7 +1021,7 @@ const filteredAdsByArea =
         (ad) => ad.name.trim().toLowerCase() === emp.name.trim().toLowerCase()
       )
       .reduce((sum, ad) => sum + (ad.request1 + ad.request2), 0);
-    return { name: emp.name, profit: sales * 17000 * 0.95, adsCost };
+    return { name: emp.name, profit: sales * 1 * 0.95, adsCost };
   });
 
   const teamEmployees = mktEmployees.filter(
@@ -928,7 +1045,7 @@ const filteredAdsByArea =
         (ad) => ad.name.trim().toLowerCase() === emp.name.trim().toLowerCase()
       )
       .reduce((sum, ad) => sum + (ad.request1 + ad.request2), 0);
-    return { name: emp.name, profit: sales * 17000 * 0.95, adsCost };
+    return { name: emp.name, profit: sales * 1 * 0.95, adsCost };
   });
 
   const saleEmployees = filteredEmployeesByArea.filter((emp) => emp.position_team === "sale" && emp.quocgia !== "jp" );
@@ -965,33 +1082,112 @@ const filteredAdsByArea =
       fillColor = "#AA336A"; // ví dụ: màu vàng
     }
 
-    return { name: emp.name, profit: sales * 17000, fill: fillColor };
+    return { name: emp.name, profit: sales * 1, fill: fillColor };
   });
 
+  const teamChartDataNew = teams2.map((team) => {
+  const teamEmps = filteredEmployeesByArea.filter(
+    (emp) => emp.position_team === "mkt" && emp.team_id === team.value
+  );
+
+  const teamEmps2 = filteredEmployeesByArea.filter(
+    (emp) =>
+      emp.position_team === "mkt" &&
+      emp.team_id === team.value &&
+      emp.position !== "lead" &&
+      emp.position !== "managerMKT"
+  );
+
+  const calcSaleByName = (name) => {
+    return filteredOrdersByArea
+      .filter(
+        (order) =>
+          (order.mkt || "").trim().toLowerCase() === name.trim().toLowerCase()
+      )
+      .reduce((sum, order) => sum + (order.profit || 0), 0);
+  };
+
+  // SỬA: dùng let để có thể += sau này
+  let sales = teamEmps.reduce((acc, emp) => {
+    return acc + calcSaleByName(emp.name);
+  }, 0);
+
+  let members = teamEmps2.reduce((acc, emp) => {
+    return acc + calcSaleByName(emp.name);
+  }, 0);
+
+  // Nếu team JP: thêm Phi Navy
+  if (team.value === "JP") {
+    const extra = calcSaleByName("Phi Navy");
+    sales += extra;
+    members += extra;
+  }
+
+  // Nếu team TW: thêm 3 người
+  if (team.value === "TW") {
+    const extraTW = [ "Trần Ngọc Diện"];
+    extraTW.forEach((name) => {
+      const extraSale = calcSaleByName(name);
+      sales += extraSale;
+      members += extraSale;
+    });
+  }
+
+  return {
+    name: team.label,
+    LeadAndMembers: sales * 1,
+    members: members * 1,
+  };
+});
   // // === Biểu đồ doanh số theo team (Grouped Double Bar Chart) ===
-  const teamChartDataNew2 = teams.map((team) => {
-    const teamEmps = filteredEmployeesByArea.filter(
-      (emp) => emp.position_team === "mkt" && emp.team_id === team.value
-    );
-    const sales = teamEmps.reduce((acc, emp) => {
-      const empSales = filteredOrdersByArea
-        .filter(
-          (order) =>
-            order.mkt.trim().toLowerCase() === emp.name.trim().toLowerCase()
-        )
-        .reduce((sum, order) => sum + order.profit, 0);
-      return acc + empSales;
-    }, 0);
-    const adsCost = teamEmps.reduce((acc, emp) => {
-      const empAds = filteredAds
-        .filter(
-          (ad) => ad.name.trim().toLowerCase() === emp.name.trim().toLowerCase()
-        )
-        .reduce((sum, ad) => sum + (ad.request1 + ad.request2), 0);
-      return acc + empAds;
-    }, 0);
-    return { name: team.label, profit: sales * 17000 * 0.95, adsCost };
-  });
+const teamChartDataNew2 = teams.map((team) => {
+  const teamEmps = filteredEmployeesByArea.filter(
+    (emp) => emp.position_team === "mkt" && emp.team_id === team.value
+  );
+
+  const calcProfitByName = (name) => {
+    return filteredOrdersByArea
+      .filter(
+        (order) =>
+          (order.mkt || "").trim().toLowerCase() === name.trim().toLowerCase()
+      )
+      .reduce((sum, order) => sum + (order.profit || 0), 0);
+  };
+
+  const calcAdsByName = (name) => {
+    return filteredAds
+      .filter(
+        (ad) => (ad.name || "").trim().toLowerCase() === name.trim().toLowerCase()
+      )
+      .reduce((sum, ad) => sum + ((ad.request1 || 0) + (ad.request2 || 0)), 0);
+  };
+
+  // SỬA: let để có thể cộng thêm
+  let sales = teamEmps.reduce((acc, emp) => {
+    return acc + calcProfitByName(emp.name);
+  }, 0);
+
+  let adsCost = teamEmps.reduce((acc, emp) => {
+    return acc + calcAdsByName(emp.name);
+  }, 0);
+
+  // Thêm theo yêu cầu
+  if (team.value === "JP") {
+    sales += calcProfitByName("Phi Navy");
+    adsCost += calcAdsByName("Phi Navy");
+  }
+
+  if (team.value === "TW") {
+    const extraTW = ["Nguyễn Quốc Hiếu", "Hà Minh Sang", "Trần Ngọc Diện"];
+    extraTW.forEach((name) => {
+      sales += calcProfitByName(name);
+      adsCost += calcAdsByName(name);
+    });
+  }
+
+  return { name: team.label, profit: sales * 0.95, adsCost };
+});
+
   // const teamChartDataNew = teams.map(team => {
   //   const teamEmps = filteredEmployeesByArea.filter(emp => emp.position_team === "mkt" && emp.team_id === team.value);
   //   const sales = teamEmps.reduce((acc, emp) => {
@@ -1006,45 +1202,11 @@ const filteredAdsByArea =
   //       .reduce((sum, ad) => sum + (ad.request1 + ad.request2), 0);
   //     return acc + empAds;
   //   }, 0);
-  //   return { name: team.label, profit: sales*17000, adsCost };
+  //   return { name: team.label, profit: sales*1, adsCost };
   // });
 
-  const teamChartDataNew = teams2.map((team) => {
-    const teamEmps = filteredEmployeesByArea.filter(
-      (emp) => emp.position_team === "mkt" && emp.team_id === team.value
-    );
-    const teamEmps2 = filteredEmployeesByArea.filter(
-      (emp) =>
-        emp.position_team === "mkt" &&
-        emp.team_id === team.value &&
-        emp.position !== "lead" &&
-        emp.position !== "managerMKT"
-    );
-    const sales = teamEmps.reduce((acc, emp) => {
-      const empSales = filteredOrdersByArea
-        .filter(
-          (order) =>
-            order.mkt.trim().toLowerCase() === emp.name.trim().toLowerCase()
-        )
-        .reduce((sum, order) => sum + order.profit, 0);
-      return acc + empSales;
-    }, 0);
-    const members = teamEmps2.reduce((acc, emp) => {
-      const empSales = filteredOrdersByArea
-        .filter(
-          (order) =>
-            order.mkt.trim().toLowerCase() === emp.name.trim().toLowerCase()
-        )
-        .reduce((sum, order) => sum + order.profit, 0);
-      return acc + empSales;
-    }, 0);
+  
 
-    return {
-      name: team.label,
-      LeadAndMembers: sales * 17000,
-      members: members * 17000,
-    };
-  });
 
   // === Biểu đồ doanh số hàng ngày (Grouped Double Bar Chart) ===
   let dailyChartDataNew;
@@ -1071,7 +1233,7 @@ const filteredAdsByArea =
       const adsCost = filteredAds
         .filter((ad) => ad.date === date)
         .reduce((sum, ad) => sum + (ad.request1 + ad.request2), 0);
-      return { name: date, profit: sales * 17000 * 0.95, adsCost };
+      return { name: date, profit: sales * 1 * 0.95, adsCost };
     });
   } else {
     const last30Days = getLast30Days();
@@ -1082,7 +1244,7 @@ const filteredAdsByArea =
       const adsCost = adsMoneyData
         .filter((ad) => ad.date === date)
         .reduce((sum, ad) => sum + (ad.request1 + ad.request2), 0);
-      return { name: date, profit: sales * 17000 * 0.95, adsCost };
+      return { name: date, profit: sales * 1 * 0.95, adsCost };
     });
   }
 
@@ -1144,7 +1306,7 @@ const filteredAdsByArea =
       const adsCost = filteredAds
         .filter((ad) => ad.date === date)
         .reduce((sum, ad) => sum + (ad.request1 + ad.request2), 0);
-      return { name: date, profit: sales * 17000 * 0.95, adsCost };
+      return { name: date, profit: sales * 1 * 0.95, adsCost };
     });
   } else {
     const last30Days = getLast30Days();
@@ -1155,7 +1317,7 @@ const filteredAdsByArea =
       const adsCost = adsMoneyData
         .filter((ad) => ad.date === date)
         .reduce((sum, ad) => sum + (ad.request1 + ad.request2), 0);
-      return { name: date, profit: sales * 17000 * 0.95, adsCost };
+      return { name: date, profit: sales * 1 * 0.95, adsCost };
     });
   }
 
@@ -1204,7 +1366,7 @@ const filteredAdsByArea =
       return acc + empSales;
     }, 0);
     const avgProfit = teamEmps.length > 0 ? teamProfit / teamEmps.length : 0;
-    return { name: team.label, profit: avgProfit * 17000 * 0.95 };
+    return { name: team.label, profit: avgProfit * 1 * 0.95 };
   });
 
   // === Biểu đồ so sánh doanh số giữa leader và các nhân viên khác trong team (Grouped Bar Chart) ===
@@ -1253,11 +1415,11 @@ const filteredAdsByArea =
     }, 0);
     const leaderSales =
       leaderSales0 !== 0
-        ? ((adsCost / (leaderSales0 * 17000)) * 100).toFixed(2)
+        ? ((adsCost / (leaderSales0 * 1)) * 100).toFixed(2)
         : 0;
     const othersSales =
       othersSales0 !== 0
-        ? ((adsCost2 / (othersSales0 * 17000)) * 100).toFixed(2)
+        ? ((adsCost2 / (othersSales0 * 1)) * 100).toFixed(2)
         : 0;
     return { team: team.label, leader: leaderSales, others: othersSales };
   });
@@ -1424,6 +1586,7 @@ const filteredAdsByArea =
   const now = new Date();
   const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
   const twoDaysAgo = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 2);
+
   const endOfMonth = new Date(
     now.getFullYear(),
     now.getMonth() + 1,
@@ -1464,9 +1627,11 @@ const filteredAdsByArea =
 const warningEmployeesList = marketingReportData3.filter(
   (emp) =>
     emp.adsThisMonth > 0 &&
-    (emp.name.trim().toLowerCase() !== "Đỗ Ngọc Ánh" && emp.name.trim().toLowerCase() !== "Nguyễn Bảo Ngọc" && emp.name.trim().toLowerCase() !== "Hồ Ngọc Lan"
+    (emp.name.trim().toLowerCase() !== "Đỗ Ngọc Ánh" && emp.name.trim().toLowerCase() !== "Nguyễn Bảo Ngọc"&& emp.name.trim().toLowerCase() !== "Hồ Ngọc Lan"
     && emp.name.trim().toLowerCase() !== "Ngô Anh Đào"
-    && emp.name.trim().toLowerCase() !== "Hồ Ngọc Lan")
+    && emp.name.trim().toLowerCase() !== "Hồ Ngọc Lan"
+&& emp.name.trim().toLowerCase() !== "Hồ Ngọc Lan"
+&& emp.name.trim().toLowerCase() !== "Hồ Ngọc Lan" )
 );
 
 const minMonthSales = Math.min(...warningEmployeesList.map(e => e.totalMonth));
@@ -2021,7 +2186,7 @@ const top5Employees2 = randomEmployee ? [randomEmployee] : [];
       title: "VNĐ",
       dataIndex: "total",
       key: "total",
-      render: (value) => (value * 17000).toLocaleString(),
+      render: (value) => (value * 1).toLocaleString(),
     },
     {
       title: "SL Đơn",
@@ -2374,15 +2539,7 @@ const top5Employees2 = randomEmployee ? [randomEmployee] : [];
       ? Number(((totalAdsKW2 / (tongKW2 * exchangeRate)) * 100).toFixed(2))
       : 0;
   const totalData = [
-    {
-      key: "KW",
-      daThanhToan: daThanhToanKW,
-      chuaThanhToan: chuaThanhToanKW,
-      tong: tongKW,
-      thanhToanDat: thanhToanDat,
-      totalAds: totalAdsKW,
-      percentAds: percentAds,
-    },
+  
     {
       key: "VND",
       daThanhToan: daThanhToanKW * exchangeRate,
@@ -2606,24 +2763,100 @@ const top5Employees2 = randomEmployee ? [randomEmployee] : [];
     .sort((a, b) => b.orderCount - a.orderCount)
     .slice(0, 3);
 
- const now = new Date();
+ const calcMarketSummary = (ordersMarket, rate) => {
+  const now = new Date();
 
-// Hôm nay: từ 00:00 đến thời điểm hiện tại
+  // Hôm nay: từ 00:00 đến thời điểm hiện tại
+  const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const todayNow = now;
+
+  const totalToday = ordersMarket
+    .filter((order) => {
+      const orderDate = new Date(order.createdAt);
+      return orderDate >= todayStart && orderDate <= todayNow;
+    })
+    .reduce((sum, order) => sum + (order.revenue || 0) * rate, 0);
+
+  // Hôm qua: từ 00:00 hôm qua → đến đúng giờ hiện tại hôm nay
+  const yesterdayStart = new Date(
+    now.getFullYear(),
+    now.getMonth(),
+    now.getDate() - 1
+  );
+
+  const yesterdaySameTime = new Date(
+    now.getFullYear(),
+    now.getMonth(),
+    now.getDate() - 1,
+    now.getHours(),
+    now.getMinutes(),
+    now.getSeconds()
+  );
+
+  const totalYesterday = ordersMarket
+    .filter((order) => {
+      const orderDate = new Date(order.createdAt);
+      return orderDate >= yesterdayStart && orderDate <= yesterdaySameTime;
+    })
+    .reduce((sum, order) => sum + (order.revenue || 0) * rate, 0);
+
+  const percent =
+    totalYesterday > 0
+      ? ((totalToday / totalYesterday) * 100).toFixed(2)
+      : 0;
+
+  return { totalToday, totalYesterday, percent };
+};
+
+const KR = calcMarketSummary(ordersKR, 17000);
+const JP = calcMarketSummary(ordersJP, 150);
+const TW = calcMarketSummary(ordersTW, 750);
+const summaryKR = [
+  {
+    key: "1",
+    today: KR.totalToday.toLocaleString("vi-VN") + " VNĐ",
+    yesterday: KR.totalYesterday.toLocaleString("vi-VN") + " VNĐ",
+    percent: KR.percent + "%",
+  },
+];
+
+const summaryJP = [
+  {
+    key: "1",
+    today: JP.totalToday.toLocaleString("vi-VN") + " VNĐ",
+    yesterday: JP.totalYesterday.toLocaleString("vi-VN") + " VNĐ",
+    percent: JP.percent + "%",
+  },
+];
+
+const summaryTW = [
+  {
+    key: "1",
+    today: TW.totalToday.toLocaleString("vi-VN") + " VNĐ",
+    yesterday: TW.totalYesterday.toLocaleString("vi-VN") + " VNĐ",
+    percent: TW.percent + "%",
+  },
+];
+const now = new Date();
+
+// ===== Hôm nay =====
 const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
 const todayNow = now;
-const totalTodayProfit = orders
+
+const totalTodayMKT = filteredOrdersByArea
   .filter((order) => {
     const orderDate = new Date(order.createdAt);
     return orderDate >= todayStart && orderDate <= todayNow;
   })
-  .reduce((sum, order) => sum + order.revenue, 0);
+  .reduce((sum, order) => sum + (order.revenue || 0), 0);
 
-// Hôm qua: từ 00:00 đến cùng giờ như hiện tại hôm nay
+// ===== Hôm qua =====
 const yesterdayStart = new Date(
   now.getFullYear(),
   now.getMonth(),
   now.getDate() - 1
 );
+
 const yesterdaySameTime = new Date(
   now.getFullYear(),
   now.getMonth(),
@@ -2632,26 +2865,31 @@ const yesterdaySameTime = new Date(
   now.getMinutes(),
   now.getSeconds()
 );
-const totalYesterdayProfit = orders
+
+const totalYesterdayMKT = filteredOrdersByArea
   .filter((order) => {
     const orderDate = new Date(order.createdAt);
     return orderDate >= yesterdayStart && orderDate <= yesterdaySameTime;
   })
-  .reduce((sum, order) => sum + order.revenue, 0);
+  .reduce((sum, order) => sum + (order.revenue || 0), 0);
 
-// % hôm nay vs hôm qua
-const percentTodayVsYesterday =
-  totalYesterdayProfit > 0
-    ? ((totalTodayProfit / totalYesterdayProfit) * 100).toFixed(2)
+// ===== % hôm nay vs hôm qua =====
+const percentMKT =
+  totalYesterdayMKT > 0
+    ? ((totalTodayMKT / totalYesterdayMKT) * 100).toFixed(2)
     : 0;
 
-// ===== Data cho bảng =====
-const summaryData = [
+// ===== Summary cho bảng =====
+
+
+
+// ===== Summary cho bảng =====
+const summaryMKT = [
   {
     key: "1",
-    today: (totalTodayProfit * 17000).toLocaleString("vi-VN") + " VNĐ",
-    yesterday: (totalYesterdayProfit * 17000).toLocaleString("vi-VN") + " VNĐ",
-    percent: percentTodayVsYesterday + "%",
+    today: totalTodayMKT.toLocaleString("vi-VN") + " VNĐ",
+    yesterday: totalYesterdayMKT.toLocaleString("vi-VN") + " VNĐ",
+    percent: percentMKT + "%",
   },
 ];
 
@@ -2756,9 +2994,9 @@ const summaryData = [
                 <span className="top-badge">🏆 TOP 1 SERVER</span>
               )}
               <br />
-              {emp.totalToday * 17000 * 0.95 > 15000000 && (
+              {emp.totalToday * 1 * 0.95 > 15000000 && (
                 <span className="employee-name2">
-                  {(emp.totalToday * 17000 * 0.95).toLocaleString()} VNĐ
+                  {(emp.totalToday * 1 * 0.95).toLocaleString()} VNĐ
                 </span>
               )}
             </div>
@@ -3160,7 +3398,7 @@ const summaryData = [
           <Row gutter={[16, 16]}>
             <Col xs={24} md={16}>
               <Row>
-                <Col xs={24} md={7}>
+                <Col xs={24} md={5}>
                   <div style={{ marginBottom: "1rem" }}>
                     <label
                       htmlFor="dateFilter"
@@ -3179,7 +3417,7 @@ const summaryData = [
                     />
                   </div>
                 </Col>
-                <Col xs={24} md={9}>
+                <Col xs={24} md={7}>
                   <div style={{ marginBottom: "1rem" }}>
                     {/* <label htmlFor="presetFilter" style={{ marginRight: "0.5rem" }}>Chọn khoảng thời gian:</label> */}
 
@@ -3206,7 +3444,8 @@ const summaryData = [
                     </Select>
                   </div>
                 </Col>
-                <Col xs={24} sm={12} md={8}>
+               
+                <Col xs={24}  md={7}>
                   <div style={{ display: "flex", alignItems: "center" }}>
                     <span style={{ marginRight: 8 }}>Chọn team: </span>
                     <Select
@@ -3223,12 +3462,34 @@ const summaryData = [
                     </Select>
                   </div>
                 </Col>
+                 <Col xs={24} md={7}>
+                  <div style={{ marginBottom: "1rem" }}>
+                    {/* <label htmlFor="presetFilter" style={{ marginRight: "0.5rem" }}>Chọn khoảng thời gian:</label> */}
+
+                    <Select
+      showSearch                
+  allowClear
+  placeholder="Chọn nhân viên MKT"
+  style={{ width: 250 }}
+  value={selectedMKT}
+  onChange={(value) => setSelectedMKT(value)}
+  options={filteredEmployeesByArea
+    .filter((emp) => emp.position_team === "mkt")
+    .map((emp) => ({
+      label: emp.name,
+      value: emp.name,
+    }))
+  }
+/>
+
+                  </div>
+                </Col>
               </Row>
             </Col>
           </Row>
           <Row>
             <Col xs={24} md={12}>
-              <Card
+              {/* <Card
                 bordered={true}
                 // style={{
                 //   width: "50%", // nửa màn hình
@@ -3245,7 +3506,57 @@ const summaryData = [
                   size="middle"
                   style={{ borderRadius: "8px" }}
                 />
-              </Card>
+              </Card> */}
+            {selectedMKT ? (
+  <>
+    <h3>MKT</h3>
+    <Table
+      columns={summaryColumns}
+      dataSource={summaryMKT}
+      pagination={false}
+      bordered
+      size="middle"
+      style={{ marginBottom: 20 }}
+    />
+  </>
+) : (
+  <>
+    <h3>HÀN QUỐC</h3>
+    <Table
+      columns={summaryColumns}
+      dataSource={summaryKR}
+      pagination={false}
+      bordered
+      size="middle"
+      style={{ marginBottom: 20 }}
+    />
+
+    <h3>NHẬT BẢN</h3>
+    <Table
+      columns={summaryColumns}
+      dataSource={summaryJP}
+      pagination={false}
+      bordered
+      size="middle"
+      style={{ marginBottom: 20 }}
+    />
+
+    <h3>ĐÀI LOAN</h3>
+    <Table
+      columns={summaryColumns}
+      dataSource={summaryTW}
+      pagination={false}
+      bordered
+      size="middle"
+    />
+  </>
+)}
+
+              
+
+
+
+            
               <h2 style={{ marginTop: "2rem" }}>Tổng khách thanh toán</h2>
               <Table
                 columns={totalColumns}
@@ -3293,6 +3604,7 @@ const summaryData = [
           <Tabs.TabPane tab="MKT" key="MKT">
             <Row gutter={[16, 16]} style={{ marginTop: "2rem" }}>
               <Col xs={24} md={24}>
+              
                 <h3>Doanh số Nhân viên MKT</h3>
 
                 <GroupedDoubleBarChartComponent data={employeeChartDataNew} />

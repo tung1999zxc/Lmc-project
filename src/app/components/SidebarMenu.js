@@ -38,6 +38,16 @@ const SidebarMenu = () => {
   // -------------------------
   const menuItems = [
     {
+      key: "sub000",
+      label: (
+        <span>
+          <img src="/kr.png" style={{ width: 18, marginRight: 6 }} /> Tổng Quan
+          
+        </span>
+      ),
+      href: "/overviewall",
+    },
+    {
       key: "sub0",
       label: (
         <span>
@@ -142,7 +152,7 @@ const SidebarMenu = () => {
       icon: <MoneyCollectOutlined />,
       children: [
         { key: "99", label: "Sale CHAT", href: "/sale/saleOrder" },
-        { key: "699", label: "Sale DONE", href: "/sale/saleConfirm" },
+        // { key: "699", label: "Sale DONE", href: "/sale/saleConfirm" },
         { key: "799", label: "Sale VẬN ĐƠN", href: "/sale/saleProcessing" },
       ],
     },
@@ -243,7 +253,7 @@ const SidebarMenu = () => {
       icon: <MoneyCollectOutlined />,
       children: [
         { key: "99", label: "Sale CHAT", href: "/sale/saleOrder" },
-        { key: "699", label: "Sale DONE", href: "/sale/saleConfirm" },
+        // { key: "699", label: "Sale DONE", href: "/sale/saleConfirm" },
         { key: "799", label: "Sale VẬN ĐƠN", href: "/sale/saleProcessing" },
       ],
     },
@@ -318,7 +328,7 @@ const SidebarMenu = () => {
       icon: <MoneyCollectOutlined />,
       children: [
         { key: "99", label: "Sale CHAT", href: "/sale/saleOrder" },
-        { key: "699", label: "Sale DONE", href: "/sale/saleConfirm" },
+        // { key: "699", label: "Sale DONE", href: "/sale/saleConfirm" },
         { key: "799", label: "Sale VẬN ĐƠN", href: "/sale/saleProcessing" },
       ],
     },
@@ -474,7 +484,7 @@ const SidebarMenu = () => {
       icon: <MoneyCollectOutlined />,
       children: [
         { key: "99", label: "Sale CHAT", href: "/sale/saleOrder" },
-        { key: "699", label: "Sale DONE", href: "/sale/saleConfirm" },
+        // { key: "699", label: "Sale DONE", href: "/sale/saleConfirm" },
         { key: "799", label: "Sale VẬN ĐƠN", href: "/sale/saleProcessing" },
       ],
     },

@@ -85,6 +85,8 @@ export default function EmployeeManagement() {
     { label: "TEAM TUẤN ANH", value: "TUANANH" },
     { label: "TEAM DIỆN", value: "DIEN" },
     { label: "TEAM DIỆN ONLINE", value: "DIENON" },
+    { label: "TEAM NHẬT", value: "JP" },
+    { label: "TEAM ĐÀI", value: "TW" },
   ];
 
   const fetchEmployees = async () => {

@@ -36,8 +36,11 @@ const LoginPage = () => {
           position_team: response.data.data.position_team,
         }));
       }
-      if (response.data.data.position === "lead" ||response.data.data.position === "leadSALE"||response.data.data.position === "managerSALE"||response.data.data.position==="admin"||response.data.data.position==="managerMKT"){
+      if (response.data.data.position === "lead" ||response.data.data.position === "leadSALE"||response.data.data.position==="managerMKT"){
         router.push("/");
+      }
+      else if(response.data.data.position === "managerSALE"||response.data.data.position==="admin"){
+        router.push("/overviewall");
       }
       else if(response.data.data.position === "mkt" && response.data.data.quocgia === "jp" && response.data.data.quocgia === "tw"){
         router.push("/mkt");
