@@ -6,6 +6,7 @@ import {
   Row,
   Col,
   Table,
+  
   Card,
   Button,
   Input,
@@ -2840,58 +2841,58 @@ const summaryTW = [
 const now = new Date();
 
 // ===== Hôm nay =====
-const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-const todayNow = now;
+// const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+// const todayNow = now;
 
-const totalTodayMKT = filteredOrdersByArea
-  .filter((order) => {
-    const orderDate = new Date(order.createdAt);
-    return orderDate >= todayStart && orderDate <= todayNow;
-  })
-  .reduce((sum, order) => sum + (order.revenue || 0), 0);
+// const totalTodayMKT = filteredOrdersByArea
+//   .filter((order) => {
+//     const orderDate = new Date(order.createdAt);
+//     return orderDate >= todayStart && orderDate <= todayNow;
+//   })
+//   .reduce((sum, order) => sum + (order.revenue || 0), 0);
 
-// ===== Hôm qua =====
-const yesterdayStart = new Date(
-  now.getFullYear(),
-  now.getMonth(),
-  now.getDate() - 1
-);
+// // ===== Hôm qua =====
+// const yesterdayStart = new Date(
+//   now.getFullYear(),
+//   now.getMonth(),
+//   now.getDate() - 1
+// );
 
-const yesterdaySameTime = new Date(
-  now.getFullYear(),
-  now.getMonth(),
-  now.getDate() - 1,
-  now.getHours(),
-  now.getMinutes(),
-  now.getSeconds()
-);
+// const yesterdaySameTime = new Date(
+//   now.getFullYear(),
+//   now.getMonth(),
+//   now.getDate() - 1,
+//   now.getHours(),
+//   now.getMinutes(),
+//   now.getSeconds()
+// );
 
-const totalYesterdayMKT = filteredOrdersByArea
-  .filter((order) => {
-    const orderDate = new Date(order.createdAt);
-    return orderDate >= yesterdayStart && orderDate <= yesterdaySameTime;
-  })
-  .reduce((sum, order) => sum + (order.revenue || 0), 0);
+// const totalYesterdayMKT = filteredOrdersByArea
+//   .filter((order) => {
+//     const orderDate = new Date(order.createdAt);
+//     return orderDate >= yesterdayStart && orderDate <= yesterdaySameTime;
+//   })
+//   .reduce((sum, order) => sum + (order.revenue || 0), 0);
 
-// ===== % hôm nay vs hôm qua =====
-const percentMKT =
-  totalYesterdayMKT > 0
-    ? ((totalTodayMKT / totalYesterdayMKT) * 100).toFixed(2)
-    : 0;
+// // ===== % hôm nay vs hôm qua =====
+// const percentMKT =
+//   totalYesterdayMKT > 0
+//     ? ((totalTodayMKT / totalYesterdayMKT) * 100).toFixed(2)
+//     : 0;
 
-// ===== Summary cho bảng =====
+// // ===== Summary cho bảng =====
 
 
 
-// ===== Summary cho bảng =====
-const summaryMKT = [
-  {
-    key: "1",
-    today: totalTodayMKT.toLocaleString("vi-VN") + " VNĐ",
-    yesterday: totalYesterdayMKT.toLocaleString("vi-VN") + " VNĐ",
-    percent: percentMKT + "%",
-  },
-];
+// // ===== Summary cho bảng =====
+// const summaryMKT = [
+//   {
+//     key: "1",
+//     today: totalTodayMKT.toLocaleString("vi-VN") + " VNĐ",
+//     yesterday: totalYesterdayMKT.toLocaleString("vi-VN") + " VNĐ",
+//     percent: percentMKT + "%",
+//   },
+// ];
 
   const summaryColumns = [
     {
@@ -3512,7 +3513,7 @@ const summaryMKT = [
     <h3>MKT</h3>
     <Table
       columns={summaryColumns}
-      dataSource={summaryMKT}
+      dataSource={summaryKR}
       pagination={false}
       bordered
       size="middle"
