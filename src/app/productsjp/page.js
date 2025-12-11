@@ -155,6 +155,31 @@ const [productStats2Days, setProductStats2Days] = useState([]);
     fetchProducts();
   }, [fetchOrders, fetchProducts]);
 
+ const [activeField, setActiveField] = useState(null);
+
+const importVNValue = Form.useWatch("importVN", addImportForm);
+const importKRValue = Form.useWatch("importedQty", addImportForm);
+
+useEffect(() => {
+  if (activeField !== "VN") return;
+
+  const numeric = Number(importVNValue) || 0;
+
+  addImportForm.setFieldsValue({
+    importKR: numeric === 0 ? 0 : -Math.abs(numeric),
+  });
+}, [importVNValue]);
+
+useEffect(() => {
+  if (activeField !== "KR") return;
+
+  const numeric = Number(importKRValue) || 0;
+
+  addImportForm.setFieldsValue({
+    importVN: numeric === 0 ? 0 : -Math.abs(numeric),
+  });
+}, [importKRValue]);
+
   /** ===========
    * Date filter helpers (same behavior as original)
    * =========== */
@@ -1090,10 +1115,10 @@ const calculateStats2Days = useCallback(() => {
         <Form.Item name="name" rules={[{ required: true, message: "Vui lòng nhập tên sản phẩm" }]}>
           <Input placeholder="Tên sản phẩm" />
         </Form.Item>
-        <Form.Item name="importedQty">
+        <Form.Item name="importedQty" hidden>
           <InputNumber placeholder="SL nhập hàng" min={0} />
         </Form.Item>
-        <Form.Item name="description">
+        <Form.Item name="description" hidden>
           <Input.TextArea rows={1} placeholder="Kịch bản sản phẩm" />
         </Form.Item>
         <Form.Item
@@ -1223,18 +1248,19 @@ const calculateStats2Days = useCallback(() => {
       >
         <Form form={addImportForm} onFinish={handleAddImportFinish} layout="vertical">
           <Form.Item name="importedQty" label="Đáp Nhật">
-            <InputNumber style={{ width: "100%" }} />
+            <InputNumber style={{ width: "100%" }}  onFocus={() => setActiveField("KR")}/>
           </Form.Item>
 
           <Form.Item name="importVN" label="Đáp Việt">
-            <InputNumber style={{ width: "100%" }} />
+            <InputNumber style={{ width: "100%" }} 
+             onFocus={() => setActiveField("VN")}/>
           </Form.Item>
 
           <Form.Item name="importKR" label="Báo Nhập">
             <InputNumber style={{ width: "100%" }} />
           </Form.Item>
 
-          <Form.Item name="importDate" label="Ngày nhập" rules={[{ required: true, message: "Vui lòng chọn ngày nhập" }]}>
+          <Form.Item name="importDate" label="Ngày nhập" >
             <DatePicker initialValue={moment()} style={{ width: "100%" }} />
           </Form.Item>
 

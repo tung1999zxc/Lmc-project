@@ -1059,10 +1059,10 @@ const calculateStats2Days = useCallback(() => {
         <Form.Item name="name" rules={[{ required: true, message: "Vui lòng nhập tên sản phẩm" }]}>
           <Input placeholder="Tên sản phẩm" />
         </Form.Item>
-        <Form.Item name="importedQty">
+        <Form.Item name="importedQty" hidden>
           <InputNumber placeholder="SL nhập hàng" min={0} />
         </Form.Item>
-        <Form.Item name="description">
+        <Form.Item name="description" hidden>
           <Input.TextArea rows={1} placeholder="Kịch bản sản phẩm" />
         </Form.Item>
         <Form.Item

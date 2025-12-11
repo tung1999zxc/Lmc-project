@@ -449,43 +449,70 @@ const InventoryPage = () => {
   }, []);
 
   const handleAddImportFinish = useCallback(
-    async (values) => {
-      if (!addingImportProduct) return;
-      const newImport = {
-        importedQty: values.importedQty || 0,
-        importVN: values.importVN || 0,
-        importKR: values.importKR || 0,
-        importDate: values.importDate
-          ? values.importDate.format("YYYY-MM-DD")
-          : moment().format("YYYY-MM-DD"),
-      };
-      try {
-        // find product
-        const productToUpdate = products.find(
-          (product) => product.key === addingImportProduct.key
-        );
-        if (!productToUpdate) {
-          message.error("Sản phẩm không tồn tại");
-          return;
-        }
-        const updatedImports = [...(productToUpdate.imports || []), newImport];
-        const response = await axios.put(
-          `/api/tw/products/${productToUpdate.key}`,
-          { imports: updatedImports }
-        );
-        message.success(response.data.message || "Cập nhật số lượng nhập thành công");
-        setAddImportModalVisible(false);
-        setAddingImportProduct(null);
-        await fetchProducts();
-      } catch (error) {
-        console.error(error.response?.data?.error || error.message);
-        message.error("Lỗi khi cập nhật số lượng nhập hàng");
-        setAddImportModalVisible(false);
-        setAddingImportProduct(null);
+  async (values) => {
+    if (!addingImportProduct) return;
+
+    // SL hàng đáp VN
+    const vnQty = Number(values.importVN || 0);
+    const slvnToAdd = vnQty === 0 ? 0 : -Math.abs(vnQty);
+
+    // SL hàng đáp ĐL
+    const krQty = Number(values.importKR || 0);
+    const sltqToAdd = krQty === 0 ? 0 : -Math.abs(krQty);
+
+    const newImport = {
+      importedQty: values.importedQty || 0,
+      importVN: vnQty,
+      importKR: krQty,
+      importDate: values.importDate
+        ? values.importDate.format("YYYY-MM-DD")
+        : moment().format("YYYY-MM-DD"),
+    };
+
+    try {
+      const product = products.find(
+        (p) => p.key === addingImportProduct.key
+      );
+
+      if (!product) {
+        message.error("Sản phẩm không tồn tại");
+        return;
       }
-    },
-    [addingImportProduct, products, fetchProducts]
-  );
+
+      // cập nhật lịch sử nhập
+      const updatedImports = [...(product.imports || []), newImport];
+
+      // Cộng dồn vào Báo nhập - Việt Đài (slvn)
+      const newSLVN = (Number(product.slvn) || 0) + slvnToAdd;
+
+      // Cộng dồn vào Báo nhập - Trung Đài (sltq)
+      const newSLTQ = (Number(product.sltq) || 0) + sltqToAdd;
+
+      // ===== GỬI API UPDATE DB =====
+      const response = await axios.put(
+        `/api/tw/products/${product.key}`,
+        {
+          imports: updatedImports,
+          slvn: newSLVN,
+          sltq: newSLTQ,
+        }
+      );
+
+      message.success("Cập nhật nhập hàng thành công!");
+
+      setAddImportModalVisible(false);
+      setAddingImportProduct(null);
+      await fetchProducts();
+    } catch (error) {
+      console.error(error);
+      message.error("Lỗi khi cập nhật nhập hàng");
+      setAddImportModalVisible(false);
+    }
+  },
+  [addingImportProduct, products, fetchProducts]
+);
+
+
 
   const handleDeleteProduct = useCallback(
     async (productRecord) => {
@@ -1028,10 +1055,10 @@ const calculateStats2Days = useCallback(() => {
         <Form.Item name="name" rules={[{ required: true, message: "Vui lòng nhập tên sản phẩm" }]}>
           <Input placeholder="Tên sản phẩm" />
         </Form.Item>
-        <Form.Item name="importedQty">
+        <Form.Item name="importedQty" hidden>
           <InputNumber placeholder="SL nhập hàng" min={0} />
         </Form.Item>
-        <Form.Item name="description">
+        <Form.Item name="description" hidden>
           <Input.TextArea rows={1} placeholder="Kịch bản sản phẩm" />
         </Form.Item>
         <Form.Item
