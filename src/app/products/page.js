@@ -77,7 +77,8 @@ const InventoryPage = () => {
   // UI state
   const [searchText, setSearchText] = useState("");
   const [selectedPreset, setSelectedPreset] = useState("all");
-
+const [showStatTable, setShowStatTable] = useState(false);
+const [productStats2Days, setProductStats2Days] = useState([]);
   const [editModalVisible, setEditModalVisible] = useState(false);
   const [editingProduct, setEditingProduct] = useState(null);
 
@@ -972,13 +973,88 @@ const InventoryPage = () => {
     },
     [form, fetchProducts]
   );
+// ======== BẢNG LIST SẢN PHẨM ĐANG CHẠY 2 HÔM GẦN ĐÂY ========= //
+const calculateStats2Days = useCallback(() => {
+  const now = new Date();
+  const twoDaysAgo = new Date();
+  twoDaysAgo.setDate(now.getDate() - 2);
 
+  const stats = {};
+
+  orders2.forEach((order) => {
+    if (!order.orderDate) return;
+
+    const orderDate = new Date(order.orderDate);
+    if (orderDate < twoDaysAgo || orderDate > now) return;
+
+    if (!Array.isArray(order.products)) return;
+
+    order.products.forEach((item) => {
+      const name = item.product?.trim();
+      const qty = Number(item.quantity) || 0;
+      const mkt = order.mkt?.trim() || "Không rõ";
+
+      if (!name) return;
+
+      if (!stats[name]) {
+        stats[name] = {
+          product: name,
+          quantity: 0,
+          mkts: new Set(),
+        };
+      }
+
+      stats[name].quantity += qty;
+      stats[name].mkts.add(mkt);
+    });
+  });
+
+  const result = Object.values(stats)
+    .map((item) => ({
+      product: item.product,
+      quantity: item.quantity,
+      mkts: Array.from(item.mkts).join(", "),
+    }))
+    .sort((a, b) => b.quantity - a.quantity); // ⬅ SORT từ nhiều → ít
+
+  setProductStats2Days(result);
+  setShowStatTable(true);
+}, [orders2]);
   /** ===========
    * UI render
    * =========== */
   return (
     <div style={{ padding: 24 }}>
       <FullScreenLoading loading={loading} tip="Đang tải dữ liệu..." />
+     <div style={{ marginBottom: 20, display: "flex", gap: 10 }}>
+  <Button type="primary" onClick={calculateStats2Days}>
+    📊 Tính thống kê 2 hôm gần đây
+  </Button>
+
+  {showStatTable && (
+    <Button danger onClick={() => setShowStatTable(false)}>
+      ❌ Tắt bảng
+    </Button>
+  )}
+</div>
+{showStatTable && (
+  <Table
+    title={() => "📌 BẢNG LIST SẢN PHẨM ĐANG CHẠY 2 HÔM GẦN ĐÂY"}
+    columns={[
+      { title: "Tên sản phẩm", dataIndex: "product", key: "product" },
+      { title: "Số lượng (2 hôm)", dataIndex: "quantity", key: "quantity", sorter: (a, b) => b.quantity - a.quantity },
+      { title: "MKT đang chạy", dataIndex: "mkts", key: "mkts" },
+    ]}
+    dataSource={productStats2Days.map((item, index) => ({
+      key: index,
+      ...item,
+    }))}
+    pagination={false}
+    style={{ marginBottom: 24 }}
+  />
+)}
+
+
       <Form form={form} layout="inline" onFinish={onFinish} style={{ marginBottom: 16 }}>
         <Form.Item name="name" rules={[{ required: true, message: "Vui lòng nhập tên sản phẩm" }]}>
           <Input placeholder="Tên sản phẩm" />
