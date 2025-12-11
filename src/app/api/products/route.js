@@ -35,6 +35,7 @@ export async function POST(req) {
       importVN = 0,
       importKR = 0,
       slvn = 0,
+      status,
       sltq = 0,
     } = await req.json();
 
@@ -53,6 +54,7 @@ export async function POST(req) {
       description,
       slvn,
       sltq,
+      status,
       imports: [
         {
           importedQty: Number(importedQty) || 0,

@@ -30,12 +30,13 @@ const OrderFormjp = ({ visible, onCancel,loading, onSubmit, resetPagename,initia
    
 
   // Danh sách options
-  const [products, setProducts] = useState([]);
+  const [products2, setProducts] = useState([]);
   const [employeeNamepage, setEmployeeNamepage] = useState("");
   const [modalCustomerOrders, setModalCustomerOrders] = useState([]);
 const [modalVisible, setModalVisible] = useState(false);
 const revenue = Form.useWatch("revenue", form);
 
+const products = products2.filter(p => p.status === true);
   
   useEffect(() => {
   const numericProfit = Number(revenue); // chuyển về số

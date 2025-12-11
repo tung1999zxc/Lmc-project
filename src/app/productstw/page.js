@@ -4,6 +4,7 @@ import {
   Table,
   Form,
   Input,
+  Switch,
   InputNumber,
   Button,
   Modal,
@@ -832,6 +833,35 @@ const InventoryPage = () => {
           } else return <span>Chỉ xem</span>;
         },
       },
+       {
+  title: "Trạng thái",
+  key: "status",
+  width: 100,
+  render: (_, record) => (
+    <Switch
+      checked={record.status}
+      checkedChildren="Bật"
+      unCheckedChildren="Tắt"
+      onChange={async (checked) => {
+        try {
+          await axios.post("/api/tw/products/update-status", {
+            key: record.key,
+            status: checked,
+          });
+          message.success(`Đã ${checked ? "bật" : "tắt"} sản phẩm`);
+          fetchProducts(); // reload
+        } catch (error) {
+          message.error("Lỗi khi cập nhật trạng thái");
+        }
+      }}
+      disabled={
+        currentUser.position !== "admin" &&
+        currentUser.position !== "managerSALE" &&
+        currentUser.position !== "leadSALE"
+      }
+    />
+  ),
+},
     ];
 
     // Conditionally add "Tổng doanh số" column if currentUser.name !== "nhii"
@@ -890,6 +920,7 @@ const InventoryPage = () => {
         importedQty: values.importedQty,
         slvn: 0,
         sltq: 0,
+          status: true,
         imports: [
           {
             importedQty: values.importedQty || 0,
@@ -1065,7 +1096,7 @@ const InventoryPage = () => {
             <InputNumber style={{ width: "100%" }} />
           </Form.Item>
 
-          <Form.Item name="importDate" label="Ngày nhập" rules={[{ required: true, message: "Vui lòng chọn ngày nhập" }]}>
+          <Form.Item name="importDate" label="Ngày nhập" >
             <DatePicker initialValue={moment()} style={{ width: "100%" }} />
           </Form.Item>
 

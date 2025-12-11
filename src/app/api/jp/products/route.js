@@ -29,6 +29,7 @@ export async function POST(req) {
   try {
     const {
       name,
+      status,
       image,
       description,
       importedQty = 0,
@@ -53,6 +54,7 @@ export async function POST(req) {
       description,
       slvn,
       sltq,
+      status,
       imports: [
         {
           importedQty: Number(importedQty) || 0,

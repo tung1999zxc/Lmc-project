@@ -31,6 +31,7 @@ export async function POST(req) {
       name,
       image,
       description,
+      status,
       importedQty = 0,
       importVN = 0,
       importKR = 0,
@@ -51,6 +52,7 @@ export async function POST(req) {
       name,
       image,
       description,
+      status,
       slvn,
       sltq,
       imports: [
