@@ -746,10 +746,7 @@ const productOptions = products.map((p) => p.name);
                   </Select>
                 </Form.Item>
                 <Form.Item label="ĐƠN" name="saleReport">
-                   onChange={(e) => {
-      const value = e.target.value ? Number(e.target.value) : 0;
-      form.setFieldsValue({ revenue: value });
-    }}
+                   
                   <Select allowClear>
                     {saleBaoOptions.map((report) => (
                       <Option key={report} value={report}>
