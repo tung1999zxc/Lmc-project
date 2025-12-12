@@ -975,7 +975,7 @@ const InventoryPage = () => {
 const calculateStats2Days = useCallback(() => {
   const now = new Date();
   const twoDaysAgo = new Date();
-  twoDaysAgo.setDate(now.getDate() - 2);
+  twoDaysAgo.setDate(now.getDate() - 3);
 
   const stats = {};
 
@@ -1026,7 +1026,7 @@ const calculateStats2Days = useCallback(() => {
       <FullScreenLoading loading={loading} tip="Đang tải dữ liệu..." />
        <div style={{ marginBottom: 20, display: "flex", gap: 10 }}>
         <Button type="primary" onClick={calculateStats2Days}>
-          📊 Tính thống kê 2 hôm gần đây
+          📊 Tính thống kê 3 hôm gần đây
         </Button>
       
         {showStatTable && (
