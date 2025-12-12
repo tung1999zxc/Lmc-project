@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect,useRef } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios"; 
 import FullScreenLoading from './FullScreenLoading';
 
@@ -27,44 +27,27 @@ const OrderForm = ({ visible, onCancel,loading, onSubmit, resetPagename,initialV
   
   const [loading2, setLoading2] = useState(false);
   
- const revenue = Form.useWatch("revenue", form);
-const saleReport = Form.useWatch("saleReport", form);
+  const revenue = Form.useWatch("revenue", form);
+  
 
-const prevRevenue = useRef();
-const prevSaleReport = useRef();
-
-useEffect(() => {
-  if (prevRevenue.current === revenue) return; // nếu không đổi thì không chạy
-  prevRevenue.current = revenue;
-
-  const numericProfit = Number(revenue);
-
+  
+  useEffect(() => {
+  const numericProfit = Number(revenue); // chuyển về số
   if (numericProfit === 0) {
     form.setFieldsValue({
-      orderDate5: dayjs(),
+      orderDate5: dayjs(), // ngày giờ hiện tại
+     
     });
-  } else {
+  }
+  if (numericProfit !== 0) {
     form.setFieldsValue({
-      orderDate5: null,
+      orderDate5: null, // ngày giờ hiện tại
+     
     });
   }
 }, [revenue]);
 
-useEffect(() => {
-  if (prevSaleReport.current === saleReport) return;
-  prevSaleReport.current = saleReport;
-
-  if (saleReport === "DONE") {
-    form.setFieldsValue({
-      orderDate6: dayjs(),
-    });
-  } else {
-    form.setFieldsValue({
-      orderDate6: null,
-    });
-  }
-}, [saleReport]);
-
+  
 
   // Danh sách options
   const [products2, setProducts] = useState([]);
@@ -73,7 +56,6 @@ useEffect(() => {
 const [modalVisible, setModalVisible] = useState(false);
 
 const products = products2.filter(p => p.status === true);
-
 const handleSearchCustomerModal = async (name) => {
   try {
     const res = await axios.get(`/api/orders/search-by-customer?name=${encodeURIComponent(name)}`);
@@ -366,9 +348,6 @@ const productOptions = products.map((p) => p.name);
              <Form.Item label="Ngày xóa ds" name="orderDate5"  hidden={true} >
                  <Input type="number" />
             </Form.Item>
-             <Form.Item label="Ngày done" name="orderDate6"  hidden={true} >
-                 <Input type="number" />
-            </Form.Item>
             <Form.Item label="SỐ ĐIỆN THOẠI" name="phone" hidden={true}>
               <Input type="tel" />
             </Form.Item>
@@ -456,9 +435,6 @@ const productOptions = products.map((p) => p.name);
               <Input type="number" />
             </Form.Item>
              <Form.Item label="Ngày xóa ds" name="orderDate5"  hidden={true} >
-                 <Input type="number" />
-            </Form.Item>
-             <Form.Item label="Ngày done" name="orderDate6"  hidden={true} >
                  <Input type="number" />
             </Form.Item>
             <Form.Item label="TT SALE XỬ LÍ ĐƠN" name="processStatus" hidden={true}>
@@ -685,9 +661,6 @@ const productOptions = products.map((p) => p.name);
                 <Form.Item label="Ngày xóa ds" name="orderDate5"  hidden={true} >
                  <Input type="number" />
             </Form.Item>
-                <Form.Item label="Ngày done" name="orderDate6"  hidden={true} >
-                 <Input type="number" />
-            </Form.Item>
 
                 <Form.Item label="SALE CHAT" name="sale" initialValue={currentUser.name}  hidden={currentUser.position==='salenhapdon'||currentUser.position==='salexuly'}>
                
@@ -773,12 +746,11 @@ const productOptions = products.map((p) => p.name);
                   </Select>
                 </Form.Item>
                 <Form.Item label="ĐƠN" name="saleReport">
-                 
-                  <Select allowClear
-                    onChange={(value) => {
-      const num = value ? Number(value) : null;
-      form.setFieldsValue({ revenue: num });
-    }}>
+                   onChange={(e) => {
+      const value = e.target.value ? Number(e.target.value) : 0;
+      form.setFieldsValue({ revenue: value });
+    }}
+                  <Select allowClear>
                     {saleBaoOptions.map((report) => (
                       <Option key={report} value={report}>
                         {report}
