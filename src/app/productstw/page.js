@@ -1037,10 +1037,10 @@ const calculateStats2Days = useCallback(() => {
       </div>
       {showStatTable && (
         <Table
-          title={() => "📌 BẢNG LIST SẢN PHẨM ĐANG CHẠY 2 HÔM GẦN ĐÂY"}
+          title={() => "📌 BẢNG LIST SẢN PHẨM ĐANG CHẠY 3 HÔM GẦN ĐÂY"}
           columns={[
             { title: "Tên sản phẩm", dataIndex: "product", key: "product" },
-            { title: "Số lượng (2 hôm)", dataIndex: "quantity", key: "quantity", sorter: (a, b) => b.quantity - a.quantity },
+            { title: "Số lượng (3 hôm)", dataIndex: "quantity", key: "quantity", sorter: (a, b) => b.quantity - a.quantity },
             { title: "MKT đang chạy", dataIndex: "mkts", key: "mkts" },
           ]}
           dataSource={productStats2Days.map((item, index) => ({
