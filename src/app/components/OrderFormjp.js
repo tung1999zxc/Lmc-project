@@ -35,22 +35,48 @@ const OrderFormtw = ({ visible, onCancel,loading, onSubmit, resetPagename,initia
   const [modalCustomerOrders, setModalCustomerOrders] = useState([]);
 const [modalVisible, setModalVisible] = useState(false);
 
-const revenue = Form.useWatch("revenue", form);
+
 
  const products = products2.filter(p => p.status === true);
+    const revenue = Form.useWatch("revenue", form);
+    const saleReport = Form.useWatch("saleReport", form);
+  
+  const orderDate6 = Form.useWatch("orderDate6", form);
+  const orderDate5 = Form.useWatch("orderDate5", form);
+  
+    
+    useEffect(() => {
+    const numericProfit = Number(revenue); // chuyển về số
+    if (numericProfit === 0) {
+      if (!orderDate5 ) {
+        form.setFieldsValue({
+          orderDate5: dayjs(),
+        });
+      } 
+    }else {
+      form.setFieldsValue({
+        orderDate5: null,
+      });
+    }
+     
+  
+  }, [revenue]);
+  
+  
   useEffect(() => {
-  const numericProfit = Number(revenue); // chuyển về số
-  if (numericProfit === 0) {
-    form.setFieldsValue({
-      orderDate5: dayjs(), // ngày giờ hiện tại
-    });
-  }
-  if (numericProfit !== 0) {
-    form.setFieldsValue({
-      orderDate5: null, // ngày giờ hiện tại
-    });
-  }
-}, [revenue]);
+    if (saleReport === "DONE") {
+      // ✅ Chỉ set ngày DONE nếu CHƯA có
+      if (!orderDate6 ) {
+        form.setFieldsValue({
+          orderDate6: dayjs(),
+        });
+      } 
+    }else {
+      form.setFieldsValue({
+        orderDate6: null,
+      });
+    }
+  }, [saleReport]);
 
 const handleSearchCustomerModal = async (name) => {
   try {
@@ -336,6 +362,9 @@ const productOptions = products.map((p) => p.name);
              <Form.Item label="Ngày xóa ds" name="orderDate5"  hidden>
                              <Input type="number" />
                             </Form.Item>
+             <Form.Item label="Ngày xóa ds" name="orderDate6"  hidden>
+                             <Input type="number" />
+                            </Form.Item>
             <Form.Item label="SỐ ĐIỆN THOẠI" name="phone" hidden={true}>
               <Input type="tel" />
             </Form.Item>
@@ -429,6 +458,9 @@ const productOptions = products.map((p) => p.name);
                   />
             </Form.Item>
                <Form.Item label="ngày xóa ds" name="orderDate5" hidden>
+       <Input type="number" />
+      </Form.Item>
+               <Form.Item label="ngày xóa ds" name="orderDate6" hidden>
        <Input type="number" />
       </Form.Item>
             <Form.Item label="Giờ Nhận" name="processStatus" hidden={true}>
@@ -649,6 +681,9 @@ const productOptions = products.map((p) => p.name);
                   />
                 </Form.Item>
                                 <Form.Item label="Ngày xóa ds" name="orderDate5"  hidden>
+                             <Input type="number" />
+                            </Form.Item>
+                                <Form.Item label="Ngày xóa ds" name="orderDate6"  hidden>
                              <Input type="number" />
                             </Form.Item>
 
