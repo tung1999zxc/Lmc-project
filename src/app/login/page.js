@@ -78,7 +78,7 @@ const LoginPage = () => {
           "linear-gradient(135deg, #4B0082 0%, #9400D3 100%)",
           "linear-gradient(135deg, #9400D3 0%, #FF0000 100%)",
         ],
-        transition: { duration: 6, repeat: Infinity, repeatType: "mirror" },
+        transition: { duration: 20, repeat: Infinity, repeatType: "mirror" },
       });
     };
     animateBackground();
@@ -87,21 +87,21 @@ const LoginPage = () => {
   // Mảng chứa các hình ảnh rơi
   const fallingImages = [
     
-    "/6.jpg",
-    "/7.jpg",
-    "/8.jpg",
-    "/9.jpg",
-    "/10.jpg",
-    "/11.jpg",
-    "/12.jpg",
-    "/13.jpg",
-    "/14.jpg",
-    "/15.jpg",
-    "/16.jpg",
-    "/17.jpg",
-    "/18.jpg",
-    "/19.jpg",
-    "/20.jpg",
+    // "/6.jpg",
+    // "/7.jpg",
+    // "/8.jpg",
+    // "/9.jpg",
+    // "/10.jpg",
+    // "/11.jpg",
+    // "/12.jpg",
+    // "/13.jpg",
+    // "/14.jpg",
+    // "/15.jpg",
+    // "/16.jpg",
+    // "/17.jpg",
+    // "/18.jpg",
+    // "/19.jpg",
+    // "/20.jpg",
   ];
 
   // Tạo hiệu ứng rơi với nhiều loại ảnh (CHỈ CHẠY TRÊN CLIENT)
