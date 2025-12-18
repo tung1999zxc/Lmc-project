@@ -1,17 +1,77 @@
-// src/app/api/recordsSale/route.js
+
 import { connectToDatabase } from '../../../app/lib/mongodb.js';
 
+
+/* ================== HÀM TẠO KHOẢNG THỜI GIAN ================== */
+function getDateRangeByPeriod(period) {
+  const now = new Date();
+  let start, end;
+
+  switch (period) {
+    case 'day':
+      start = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      end = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      break;
+
+    case 'week':
+      start = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 7);
+      end = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      break;
+
+    case 'month':
+      start = new Date(now.getFullYear(), now.getMonth(), 1);
+      end = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      break;
+
+    case 'lastMonth':
+      start = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+      end = new Date(now.getFullYear(), now.getMonth(), 0);
+      break;
+
+    case 'twoMonthsAgo':
+      start = new Date(now.getFullYear(), now.getMonth() - 2, 1);
+      end = new Date(now.getFullYear(), now.getMonth() - 1, 0);
+      break;
+
+    default:
+      return null;
+  }
+
+  return {
+    $gte: start.toISOString().split('T')[0],
+    $lte: end.toISOString().split('T')[0],
+  };
+}
+
+/* ================== GET (CÓ LỌC THỜI GIAN) ================== */
 export async function GET(req) {
   try {
     const { db } = await connectToDatabase();
-    // Lấy tất cả các record từ collection "records"
-    const records = await db.collection('recordsSale').find({}).toArray();
+    const url = new URL(req.url);
+    const period = url.searchParams.get('period');
+
+    const query = {};
+
+    if (period) {
+      const range = getDateRangeByPeriod(period);
+      if (range) query.date = range;
+    }
+
+    const records = await db
+      .collection('recordsSale')
+      .find(query)
+      .sort({ date: -1 })
+      .toArray();
+
     return new Response(
-      JSON.stringify({ message: 'Lấy danh sách thành công', data: records }),
+      JSON.stringify({
+        message: 'Lấy danh sách recordsSale thành công',
+        data: records,
+      }),
       { status: 200 }
     );
   } catch (error) {
-    console.error("Lỗi GET /api/recordsSale:", error);
+    console.error('GET /api/recordsSale error:', error);
     return new Response(
       JSON.stringify({ error: 'Lỗi server nội bộ' }),
       { status: 500 }
@@ -19,36 +79,35 @@ export async function GET(req) {
   }
 }
 
+/* ================== POST (GIỮ NGUYÊN) ================== */
 export async function POST(req) {
   try {
+    const body = await req.json();
     const {
       id,
       date,
       newMess,
-      closedOrders,
       dailySales,
       totalRemarketing,
-      ratio,
       employeeId,
       employeeName,
-    } = await req.json();
+    } = body;
 
-    // Kiểm tra một số trường bắt buộc (bạn có thể mở rộng kiểm tra nếu cần)
-    if (!id || !date) {
+    if (!id || !date || !employeeId) {
       return new Response(
-        JSON.stringify({ error: 'Thiếu thông tin bắt buộc' }),
+        JSON.stringify({ error: 'Thiếu dữ liệu bắt buộc' }),
         { status: 400 }
       );
     }
 
     const newRecord = {
-      id, // định danh duy nhất, kiểu số
-      date, // kiểu string "YYYY-MM-DD"
-      newMess,
-      closedOrders,
-      dailySales,
-      totalRemarketing,
-      ratio,
+      id,
+      date, // YYYY-MM-DD
+      newMess: Number(newMess) || 0,
+      closedOrders: 0,
+      dailySales: Number(dailySales) || 0,
+      totalRemarketing: Number(totalRemarketing) || 0,
+      ratio: 0,
       employeeId,
       employeeName,
       createdAt: new Date(),
@@ -58,11 +117,14 @@ export async function POST(req) {
     await db.collection('recordsSale').insertOne(newRecord);
 
     return new Response(
-      JSON.stringify({ message: 'Thêm mới thành công', data: newRecord }),
+      JSON.stringify({
+        message: 'Thêm record sale thành công',
+        data: newRecord,
+      }),
       { status: 201 }
     );
   } catch (error) {
-    console.error("Lỗi POST /api/recordsSale:", error);
+    console.error('POST /api/recordsSale error:', error);
     return new Response(
       JSON.stringify({ error: 'Lỗi server nội bộ' }),
       { status: 500 }

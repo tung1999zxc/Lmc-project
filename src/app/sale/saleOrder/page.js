@@ -33,7 +33,7 @@ const Dashboard = () => {
     const [loading, setLoading] = useState(false);
   
   // period có thể là: "week", "month", "lastMonth", "twoMonthsAgo"
-  const [period, setPeriod] = useState("week");
+  const [period, setPeriod] = useState("month");
   // editingKey dùng để xác định record nào đang được chỉnh sửa
   const [editingKey, setEditingKey] = useState(null);
   const [shiftFilter, setShiftFilter] = useState(null);
@@ -54,7 +54,7 @@ const fetchEmployees = async () => {
 };
 const fetchOrders = async () => {
   try {
-    const response = await axios.get(`/api/orders2?selectedPreset=${period}`);
+    const response = await axios.get(`/api/orderssale?selectedPreset=${period}`);
     setSampleOrders(response.data.data);
   } catch (error) {
     console.error(error);
@@ -75,7 +75,7 @@ useEffect(() => {
 
   const fetchRecords = async () => {
     try {
-      const response = await axios.get('/api/recordsSale');
+      const response = await axios.get(`/api/recordsSale?period=${period}`);
       setRecords(response.data.data);
     } catch (error) {
       console.error(error);
