@@ -892,6 +892,35 @@ const InventoryPage = () => {
     />
   ),
 },
+ {
+  title: "",
+  key: "status2",
+  width: 100,
+  render: (_, record) => (
+    <Switch
+      checked={record.status2}
+      checkedChildren="VN"
+      unCheckedChildren="TQ"
+      onChange={async (checked) => {
+        try {
+          await axios.post("/api/tw/products/update-status2", {
+            key: record.key,
+            status2: checked,
+          });
+          message.success(`Đã ${checked ? "bật" : "tắt"} sản phẩm`);
+          fetchProducts(); // reload
+        } catch (error) {
+          message.error("Lỗi khi cập nhật trạng thái");
+        }
+      }}
+      disabled={
+        currentUser.position !== "admin" &&
+        currentUser.position !== "managerSALE" &&
+        currentUser.position !== "leadSALE"
+      }
+    />
+  ),
+},
     ];
 
     // Conditionally add "Tổng doanh số" column if currentUser.name !== "nhii"
@@ -951,6 +980,7 @@ const InventoryPage = () => {
         slvn: 0,
         sltq: 0,
           status: true,
+          status2: false,
         imports: [
           {
             importedQty: values.importedQty || 0,
