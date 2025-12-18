@@ -74,6 +74,7 @@ const InventoryPage = () => {
   const [editForm] = Form.useForm();
   const [addImportForm] = Form.useForm();
 
+const [filterStatus2, setFilterStatus2] = useState("all");
   // UI state
   const [searchText, setSearchText] = useState("");
   const [selectedPreset, setSelectedPreset] = useState("all");
@@ -308,12 +309,32 @@ const InventoryPage = () => {
    * This is memoized so Table sees stable reference when inputs unchanged.
    * =========== */
   const filteredProducts = useMemo(() => {
-    const q = (searchText || "").trim().toLowerCase();
-    if (!q) return products || [];
-    return (products || []).filter((p) =>
+  let data = products || [];
+
+  // search theo tên
+  if (searchText) {
+    const q = searchText.trim().toLowerCase();
+    data = data.filter((p) =>
       String(p.name || "").toLowerCase().includes(q)
     );
-  }, [products, searchText]);
+  }
+
+  // lọc theo nguồn
+  if (filterStatus2 === "vn") {
+    // CHỈ những cái === true
+    data = data.filter((p) => p.status2 === true);
+  }
+
+  if (filterStatus2 === "cn") {
+    // false HOẶC không tồn tại
+    data = data.filter(
+      (p) => p.status2 !== true
+    );
+  }
+
+  return data;
+}, [products, searchText, filterStatus2]);
+
 
   /** Compute derived "orders" list filtered by preset to match original behavior */
   const ordersByPreset = useMemo(() => {
@@ -1138,6 +1159,15 @@ const calculateStats2Days = useCallback(() => {
           style={{ width: 300 }}
           suffix={<SearchOutlined style={{ fontSize: "16px", color: "#1890ff" }} />}
         />
+        <Select
+  value={filterStatus2}
+  onChange={setFilterStatus2}
+  style={{ width: 180 }}
+>
+  <Option value="all">Tất cả nguồn</Option>
+  <Option value="vn">Nhập Việt Nam</Option>
+  <Option value="cn">Nhập Trung Quốc</Option>
+</Select>
 
         <Select value={selectedPreset} onChange={(value) => setSelectedPreset(value)} style={{ width: 200 }}>
           <Option value="all">Tất cả</Option>
