@@ -33,7 +33,7 @@ const Dashboard = () => {
     const [loading, setLoading] = useState(false);
   
   // period có thể là: "week", "month", "lastMonth", "twoMonthsAgo"
-  const [period, setPeriod] = useState("month");
+  const [period, setPeriod] = useState("week");
   // editingKey dùng để xác định record nào đang được chỉnh sửa
   const [editingKey, setEditingKey] = useState(null);
   const [shiftFilter, setShiftFilter] = useState(null);
