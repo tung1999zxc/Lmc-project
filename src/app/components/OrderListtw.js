@@ -2236,6 +2236,40 @@ onChange={(e) => handleColumnSelect("istick", e.target.checked)}
       dataIndex: "address",
       key: "address",
     },
+     {
+                  title: (
+                    <Checkbox
+                      checked={selectedColumns.includes("orderDate6")}
+                      onChange={(e) => handleColumnSelect("orderDate6", e.target.checked)}
+                    >
+                      Ngày DONE
+                    </Checkbox>
+                  ),
+                  dataIndex: "orderDate6",
+                  key: "orderDate6",
+                 render: (text, record) => {
+                    // Kiểm tra nếu orderDate4 không hợp lệ thì lấy orderDate
+                    const dateValue = text || record.orderDate6;
+                
+                    if (!dateValue) return "N/A"; // Nếu không có cả hai giá trị, hiển thị "N/A"
+                
+                    const formattedDate = dayjs(dateValue).isValid()
+                      ? dayjs(dateValue).format("DD/MM")
+                      : "N/A";
+                    const formattedTime = dayjs(dateValue).isValid()
+                      ? dayjs(dateValue).format("HH:mm:ss")
+                      : "N/A";
+                
+                    return (
+                      <div>
+                        {formattedDate}
+                        <br />
+                        {formattedTime}
+                      </div>
+                    );
+                  },
+                  width: 80, // Tăng width nếu cần để hiển thị đủ thông tin
+                },
    {
       title: (
         <Checkbox
