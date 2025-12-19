@@ -624,6 +624,8 @@ case "odd_stt":
                 return order.deliveryStatus === "ĐÃ GỬI HÀNG" && order.trackingCode !=="";
               case "deliveredcomavandon2":
                 return order.deliveryStatus === "" && order.trackingCode !=="";
+                 case "DALENDON":
+                return order.deliveryStatus === "ĐÃ LÊN ĐƠN" ;
               case "deliveredkomavandon":
                 return order.deliveryStatus === "ĐÃ GỬI HÀNG" && order.trackingCode ==="";
               case "deliveredchuatick":
@@ -1450,7 +1452,17 @@ onChange={(e) => handleColumnSelect("istick", e.target.checked)}
       dataIndex: "deliveryStatus",
       key: "deliveryStatus",
       render: (text) => (
-        <Tag color={text === "GIAO THÀNH CÔNG" ? "blue" : "orange"}>{text}</Tag>
+       <Tag
+  color={
+    text === "GIAO THÀNH CÔNG"
+      ? "blue"
+      : text === "ĐÃ GỬI HÀNG"
+      ? "orange"
+      : "green"
+  }
+>
+  {text}
+</Tag>
       ),
     },
     {
@@ -1847,6 +1859,27 @@ const selectedTableColumns = columns.filter((col) =>
     { title: "DOANH SỐ",width: 100, dataIndex: "revenue", key: "revenue" },
 
     { title: "DOANH THU", dataIndex: "profit", key: "profit" ,width: 20,},
+    {
+      title:
+          'TÌNH TRẠNG GH',
+      
+      dataIndex: "deliveryStatus",
+      width: 90,
+      key: "deliveryStatus",
+      render: (text) => (
+      <Tag
+  color={
+    text === "GIAO THÀNH CÔNG"
+      ? "blue"
+      : text === "ĐÃ GỬI HÀNG"
+      ? "orange"
+      : "green"
+  }
+>
+  {text}
+</Tag>
+      ),
+    }, 
       {
           title: (
             <Checkbox
@@ -2151,7 +2184,17 @@ onChange={(e) => handleColumnSelect("istick", e.target.checked)}
       width: 90,
       key: "deliveryStatus",
       render: (text) => (
-        <Tag color={text === "GIAO THÀNH CÔNG" ? "blue" : "orange"}>{text}</Tag>
+       <Tag
+  color={
+    text === "GIAO THÀNH CÔNG"
+      ? "blue"
+      : text === "ĐÃ GỬI HÀNG"
+      ? "orange"
+      : "green"
+  }
+>
+  {text}
+</Tag>
       ),
     },
     // {
@@ -2512,7 +2555,7 @@ onChange={(e) => handleColumnSelect("istick", e.target.checked)}
   .filter(order =>
     order.saleReport === "DONE" &&
     order.istick === true &&
-    order.deliveryStatus === "ĐÃ GỬI HÀNG" &&
+    order.deliveryStatus === "ĐÃ LÊN ĐƠN" &&
     order.trackingCode === ""&&
     (order.istick4 ?? false) === false 
   )
@@ -2918,6 +2961,7 @@ const handleResetAllSTT = async () => {
             allowClear
             options={[
               { value: "deliveredchuatick", label: "Đã gửi hàng + CẦN TÍCH ĐÃ IN" },
+              { value: "DALENDON", label: "Đơn ĐÃ LÊN ĐƠN" },
               { value: "unpaid", label: "Chưa thanh toán" },
               { value: "paid", label: "Đã thanh toán" },
               { value: "deliveredkomavandon", label: "Đã gửi hàng + chưa mã" },
@@ -2947,6 +2991,7 @@ const handleResetAllSTT = async () => {
               
              
               { value: "done", label: "Đơn DONE" },
+              { value: "DALENDON", label: "Đơn ĐÃ LÊN ĐƠN" },
               { value: "waiting_done", label: "Đơn chưa DONE" },          
               { value: "ds0", label: "Doanh số bằng 0" },
               { value: "dskhac0", label: "Doanh số khác 0" },
@@ -3357,7 +3402,17 @@ const handleResetAllSTT = async () => {
       width: 90,
       key: "deliveryStatus",
       render: (text) => (
-        <Tag color={text === "GIAO THÀNH CÔNG" ? "blue" : "orange"}>{text}</Tag>
+      <Tag
+  color={
+    text === "GIAO THÀNH CÔNG"
+      ? "blue"
+      : text === "ĐÃ GỬI HÀNG"
+      ? "orange"
+      : "green"
+  }
+>
+  {text}
+</Tag>
       ),
     }, 
     // {

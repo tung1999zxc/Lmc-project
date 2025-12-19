@@ -183,7 +183,7 @@ const handlePageNameChange = (value) => {
   const massOptions = ["Nặng", "Nhẹ"];
   const thanhToanOptions = ["ĐÃ THANH TOÁN", "CHƯA THANH TOÁN"];
   const thanhToanOptions2 = ["T-CAT", "FAMILY","7-11"];
-  const tinhTrangGHOptions = ["ĐÃ GỬI HÀNG", "GIAO THÀNH CÔNG","VẮNG MẶT","HẸN GIAO LẠI","ĐÃ GỬI VÀO CỬA HÀNG","HOÀN"];
+  const tinhTrangGHOptions = ["ĐÃ GỬI HÀNG","ĐÃ LÊN ĐƠN", "GIAO THÀNH CÔNG","VẮNG MẶT","HẸN GIAO LẠI","ĐÃ GỬI VÀO CỬA HÀNG","HOÀN"];
 
   // Khi có initialValues (dữ liệu cũ) thì chuyển các trường ngày về đối tượng dayjs
  
