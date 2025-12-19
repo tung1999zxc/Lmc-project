@@ -6,10 +6,10 @@ import bcrypt from 'bcryptjs';
  * API cập nhật thông tin nhân viên
  * Endpoint: PUT /api/employees/[employee_id]
  */
-export async function PUT(request, { params }) {
+export async function PUT(request, context) {
   try {
     // Lấy employee_id từ URL
-    const { employee_id } = params;
+   const { employee_id } = await context.params;
 
     // Kết nối tới MongoDB và tạo bộ lọc dựa trên employee_id
     const { db } = await connectToDatabase();
