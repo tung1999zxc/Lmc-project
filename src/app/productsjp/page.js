@@ -352,7 +352,7 @@ useEffect(() => {
         }
 
         // Count ordersDone where saleReport === DONE && deliveryStatus === ""
-        if (saleReport === "DONE" && (!deliveryStatus || deliveryStatus === "")) {
+        if (saleReport === "DONE" && (!deliveryStatus || deliveryStatus === ""||deliveryStatus === "ĐÃ LÊN ĐƠN")) {
           map[pname].ordersDone += qty;
         }
         if (saleReport === "DONE" &&  deliveryStatus === "HOÀN") {
