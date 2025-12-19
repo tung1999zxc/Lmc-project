@@ -71,7 +71,7 @@ export async function PUT(request, context) {
  */
 export async function DELETE(request, { params }) {
   try {
-    const { employee_id } = params;
+    const { employee_id } =  await params;
     console.log("Deleting employee with ID:", employee_id);
 
     const { db } = await connectToDatabase();

@@ -9,7 +9,7 @@ import bcrypt from 'bcryptjs';
 export async function PUT(request, { params }) {
   try {
     // Lấy username từ URL (params)
-    const { username } = params;
+    const { username } = await params;
     // Lấy dữ liệu cập nhật từ request body
     const data = await request.json();
 
@@ -59,7 +59,7 @@ export async function PUT(request, { params }) {
 export async function DELETE(request, { params }) {
   try {
     // Lấy username từ URL
-    const { username } = params;
+    const { username } = await params;
     console.log('Deleting user with username:', username);
 
     const { db } = await connectToDatabase();
