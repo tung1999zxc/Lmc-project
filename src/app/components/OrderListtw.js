@@ -629,7 +629,7 @@ case "odd_stt":
               case "deliveredkomavandon":
                 return order.deliveryStatus === "ĐÃ GỬI HÀNG" && order.trackingCode ==="";
               case "deliveredchuatick":
-                return order.deliveryStatus === "ĐÃ GỬI HÀNG" && !order.istick4;
+                return order.deliveryStatus === "ĐÃ LÊN ĐƠN" && !order.istick4;
               case "slam":
   return Array.isArray(order.products) &&
          order.products.some(p => parseInt(p.quantity) < 0);
