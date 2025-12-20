@@ -2960,7 +2960,7 @@ const handleResetAllSTT = async () => {
             placeholder="Chọn bộ lọc"
             allowClear
             options={[
-              { value: "deliveredchuatick", label: "Đã gửi hàng + CẦN TÍCH ĐÃ IN" },
+              { value: "deliveredchuatick", label: "Đã lên đơn + CẦN TÍCH ĐÃ IN" },
               { value: "DALENDON", label: "Đơn ĐÃ LÊN ĐƠN" },
               { value: "unpaid", label: "Chưa thanh toán" },
               { value: "paid", label: "Đã thanh toán" },
