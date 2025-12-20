@@ -446,12 +446,16 @@ const [filterStatus2, setFilterStatus2] = useState("all");
           name: values.name,
           description: values.description,
           image: imageValue,
-          slvn: values.slvn,
-          sltq: values.sltq,
+          slvn: values.slvn+ values.slvn2,
+          sltq: values.sltq+values.sltq2 ,  
         };
         await axios.put(`/api/tw/products/${editingProduct.key}`, updatedProduct);
         message.success("Cập nhật sản phẩm thành công");
         setEditingProduct(null);
+        editForm.setFieldsValue({
+  slvn2: 0,
+  sltq2: 0,
+});
         await fetchProducts();
       } catch (error) {
         console.error(error);
@@ -1227,7 +1231,13 @@ const calculateStats2Days = useCallback(() => {
           <Form.Item label="Báo nhập - VIỆT ĐÀI" name="slvn">
             <InputNumber placeholder="nhập sl" />
           </Form.Item>
+          <Form.Item label="" name="slvn2">
+            <InputNumber placeholder="nhập sl" />
+          </Form.Item>
           <Form.Item label="Báo nhập - TRUNG ĐÀI" name="sltq">
+            <InputNumber placeholder="nhập sl" />
+          </Form.Item>
+          <Form.Item label="" name="sltq2">
             <InputNumber placeholder="nhập sl" />
           </Form.Item>
 
