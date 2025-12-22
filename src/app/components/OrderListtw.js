@@ -59,6 +59,7 @@ const OrderListtw = () => {
   const [sttInput, setSttInput] = useState("");
   const [codeInput, setCodeInput] = useState("");
   const [sttDoneInput, setSttDoneInput] = useState("");
+  const [sttDoneInput2, setSttDoneInput2] = useState("");
   const [showProductColumn, setShowProductColumn] = useState(false);
   
   
@@ -2649,6 +2650,22 @@ onChange={(e) => handleColumnSelect("istick", e.target.checked)}
       alert("Lỗi khi cập nhật trạng thái");
     }
   };
+  const handleUpdateDeliveredStatus2 = async () => {
+    const sttList = sttDoneInput2.trim().split(/\s+/).map(Number);
+    if (!sttList.length) {
+      alert("Vui lòng nhập STT đơn hàng");
+      return;
+    }
+
+    try {
+      await axios.post("/api/tw/orders/mark-done2", { sttList });
+      alert("Cập nhật thành công");
+      fetchOrders();
+    } catch (error) {
+      console.error(error);
+      alert("Lỗi khi cập nhật trạng thái");
+    }
+  };
 
   
   const sanitizeValue = (value) => {
@@ -3097,7 +3114,7 @@ const handleResetAllSTT = async () => {
       </Row>
       {( currentUser.position_team==="kho"
  ) && (<>
-  <Row gutter={10} style={{ marginBottom: 10 }}>
+  {/* <Row gutter={10} style={{ marginBottom: 10 }}>
   <Col span={12}>
     <Input.TextArea
       rows={3}
@@ -3117,9 +3134,23 @@ const handleResetAllSTT = async () => {
 </Row>
 <Button type="dashed" onClick={handleBatchUpdateTrackingCodes}>
   Cập nhật mã đơn hàng hàng loạt
-</Button>
+</Button> */}
 <br></br>  <br></br> <br></br> 
 <Row gutter={10} style={{ marginBottom: 10 }}>
+        <Col span={24}>
+          <Input.TextArea
+            rows={2}
+            placeholder="Nhập STT đơn hàng cần đánh dấu ĐÃ GỬI HÀNG (cách nhau bằng dấu cách)"
+            value={sttDoneInput2}
+            onChange={(e) => setSttDoneInput2(e.target.value)}
+          />
+        </Col>
+      </Row>
+      <Button type="primary" primary onClick={handleUpdateDeliveredStatus2} style={{ marginBottom: 20 }}>
+        Đánh dấu ĐÃ GỬI HÀNG 
+      </Button>
+      
+      <Row gutter={10} style={{ marginBottom: 10 }}>
         <Col span={24}>
           <Input.TextArea
             rows={2}
