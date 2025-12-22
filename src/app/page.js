@@ -4,6 +4,7 @@ import dynamic from "next/dynamic";
 import {
   Select,Radio ,
   Row,
+  Tag,
   Col,
   Table,
   Card,
@@ -2715,6 +2716,67 @@ const summaryData = [
   },
 }
   ];
+
+ const DONE_REPORTS = ["DONE", "BOOK TB"];
+  const DONE_REPORTS2 = [ "BOOK TB"];
+const SENT_DELIVERY_STATUS = ["GIAO THÀNH CÔNG", "ĐÃ GỬI HÀNG"];
+
+
+const shippingReport = useMemo(() => {
+  if (!filteredOrders?.length) return null;
+
+  let A = 0;
+  let B = 0;
+  let E = 0;
+
+  for (const o of filteredOrders) {
+    const isDone = DONE_REPORTS.includes(o.saleReport);
+    const isSent =
+      isDone && SENT_DELIVERY_STATUS.includes(o.deliveryStatus);
+    const isSent2 =
+       DONE_REPORTS2.includes(o.saleReport);
+
+    if (isDone) A++;
+    if (isSent) B++;
+    if (isSent2) E++;
+  }
+
+  const C = filteredOrders.length;
+  const notSent = A - B-E;
+
+  return {
+    key: 1,
+    C,
+    A,
+    B,
+    notSent,
+    percentDoneText: C ? ((A / C) * 100).toFixed(2) + "%" : "0%",
+    percentSentText: A ? (((B+E) / A) * 100).toFixed(2) + "%" : "0%",
+    percentNotSentText: A ? ((notSent / A) * 100).toFixed(2) + "%" : "0%",
+  };
+}, [filteredOrders]);
+const columns = useMemo(() => [
+  { title: "Tổng đơn (C)", dataIndex: "C" },
+  { title: "Đơn DONE (A)", dataIndex: "A" },
+  { title: "Đã gửi (B)", dataIndex: "B" },
+  { title: "Chưa gửi (A-B)", dataIndex: "notSent" },
+  {
+    title: "% DONE",
+    dataIndex: "percentDoneText",
+    render: t => <Tag color="green">{t}</Tag>,
+  },
+  {
+    title: "% ĐÃ GỬI",
+    dataIndex: "percentSentText",
+    render: t => <Tag color="blue">{t}</Tag>,
+  },
+  {
+    title: "% CHƯA GỬI",
+    dataIndex: "percentNotSentText",
+    render: t => <Tag color="red">{t}</Tag>,
+  },
+], []);
+
   return (
     <div
       style={{
@@ -2723,6 +2785,8 @@ const summaryData = [
         width: "115%", // Để bù lại không gian khi scale
       }}
     >
+    
+
       <PraiseBanner top5Employees={top1Employees} />
       {/* <PraiseBanner2 /> */}
 
@@ -3228,6 +3292,7 @@ const summaryData = [
           </Row>
           <Row>
             <Col xs={24} md={12}>
+            
               <Card
                 bordered={true}
                 // style={{
@@ -3261,6 +3326,19 @@ const summaryData = [
             </Col>
             <Col xs={24} md={2}></Col>
             <Col xs={24} md={10}>
+          
+             {(currentUser.position === "admin" ||
+                currentUser.position === "managerMKT"||currentUser.position === "managerSALE"||currentUser.position === "leadSALE" ) && (
+                <>
+                  <h2 style={{  }}>Thống kê đơn hàng</h2>
+                  <Table
+  pagination={false}
+  dataSource={shippingReport ? [shippingReport] : []}
+  columns={columns}
+/>
+                </>
+              )}
+              <br></br>
               <h2 style={{ marginTop: "2rem" }}>
                 Thống kê để giục chuyển khoản
               </h2>
@@ -3280,6 +3358,7 @@ const summaryData = [
                   />
                 </>
               )}
+             
             </Col>
           </Row>
         </>
