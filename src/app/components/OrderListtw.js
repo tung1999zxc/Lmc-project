@@ -2485,7 +2485,7 @@ onChange={(e) => handleColumnSelect("istick", e.target.checked)}
       noteKHO: values.noteKHO || "",
       processStatus: values.processStatus || "",
       saleReport: values.saleReport || "",
-      paymentStatus: values.paymentStatus || "",
+      paymentStatus: "ĐÃ THANH TOÁN",
       paymentStatus2: values.paymentStatus2 || "",
       deliveryStatus: values.deliveryStatus || "",
       trackingCode: values.trackingCode || "",

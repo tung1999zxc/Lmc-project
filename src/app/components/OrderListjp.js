@@ -2523,7 +2523,7 @@ onChange={(e) => handleColumnSelect("istick", e.target.checked)}
       processStatus: values.processStatus || "",
       pcode: values.pcode || "",
       saleReport: values.saleReport || "",
-      paymentStatus: values.paymentStatus || "",
+      paymentStatus: "ĐÃ THANH TOÁN",
       deliveryStatus: values.deliveryStatus || "",
       trackingCode: values.trackingCode || "",
       orderDate: values.orderDate || moment().format("YYYY-MM-DD"),
