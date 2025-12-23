@@ -500,20 +500,27 @@ const resetPagename =()=>{
     }
 
  
-    if (
-      !filteredEmpIds
-        .map((name) => name.trim().toLowerCase())
-        .includes(order.sale.trim().toLowerCase())
-    ) {
-      return false;
-    }
- if (
-  order.mkt.trim() !== "" &&
-  !filteredEmpIds2
-    .map((name) => name.trim().toLowerCase())
-    .includes(order.mkt.trim().toLowerCase())
-) {
-  return false;
+    if (shiftFilter) {
+  if (
+    order.sale &&
+    order.sale.trim() !== "" &&
+    !filteredEmpIds
+      .map((name) => name.trim().toLowerCase())
+      .includes(order.sale.trim().toLowerCase())
+  ) {
+    return false;
+  }
+}
+ if (shiftFilter2) {
+  if (
+    order.mkt &&
+    order.mkt.trim() !== "" &&
+    !filteredEmpIds2
+      .map((name) => name.trim().toLowerCase())
+      .includes(order.mkt.trim().toLowerCase())
+  ) {
+    return false;
+  }
 }
 
         // Điều kiện lọc theo từ khóa tìm kiếm

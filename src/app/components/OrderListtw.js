@@ -491,13 +491,17 @@ const resetPagename =()=>{
     }
 
  
-    if (
-      !filteredEmpIds
-        .map((name) => name.trim().toLowerCase())
-        .includes(order.sale.trim().toLowerCase())
-    ) {
-      return false;
-    }
+    if (shiftFilter) {
+  if (
+    order.sale &&
+    order.sale.trim() !== "" &&
+    !filteredEmpIds
+      .map((name) => name.trim().toLowerCase())
+      .includes(order.sale.trim().toLowerCase())
+  ) {
+    return false;
+  }
+}
 
         // Điều kiện lọc theo từ khóa tìm kiếm
         const searchMatch = (() => {
