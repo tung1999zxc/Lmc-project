@@ -1485,7 +1485,8 @@ const top5Employees2 = randomEmployee ? [randomEmployee] : [];
 
   // Lọc chỉ những người có ads tháng này > 0
   const top5Employees = marketingReportData3
-    .filter((emp) => emp.adsThisMonth > 0)
+    .filter((emp) => emp.adsThisMonth > 0 &&
+    (emp.name.trim().toLowerCase() !== "Quách Phú Thành"))
     .sort((a, b) => b.totalToday - a.totalToday)
     .slice(0, 2);
   // Lọc ra nhân viên có chi phí ads tháng này > 0
