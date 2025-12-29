@@ -284,6 +284,7 @@ const [filterStatus2, setFilterStatus2] = useState("all");
         // Count delivered
         if (
           deliveryStatus === "ĐÃ GỬI HÀNG" ||
+          deliveryStatus === "ĐÃ GỬI VÀO CỬA HÀNG" ||
           deliveryStatus === "GIAO THÀNH CÔNG" ||
           deliveryStatus === "BỊ BẮT CHỜ GỬI LẠI"
         ) {

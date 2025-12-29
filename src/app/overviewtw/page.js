@@ -2045,7 +2045,7 @@ const top5Employees2 = randomEmployee ? [randomEmployee] : [];
       (order) =>
         (order.paymentStatus === "CHƯA THANH TOÁN" ||
           order.paymentStatus === "") &&
-        order.deliveryStatus === "ĐÃ GỬI HÀNG" &&
+        (order.deliveryStatus === "ĐÃ GỬI HÀNG" ||order.deliveryStatus === "ĐÃ GỬI VÀO CỬA HÀNG") &&
         order.saleReport === "DONE"
     )
     .reduce((sum, order) => sum + order.revenue, 0);
@@ -2071,7 +2071,7 @@ const top5Employees2 = randomEmployee ? [randomEmployee] : [];
     (order) =>
       (order.paymentStatus === "CHƯA THANH TOÁN" ||
         order.paymentStatus === "") &&
-      order.deliveryStatus === "ĐÃ GỬI HÀNG" &&
+      (order.deliveryStatus === "ĐÃ GỬI HÀNG" ||order.deliveryStatus === "ĐÃ GỬI VÀO CỬA HÀNG")&&
       order.saleReport === "DONE"
   );
 
@@ -2602,7 +2602,7 @@ const summaryData = [
 
    const DONE_REPORTS = ["DONE", "BOOK TB"];
     const DONE_REPORTS2 = [ "BOOK TB"];
-  const SENT_DELIVERY_STATUS = ["GIAO THÀNH CÔNG", "ĐÃ GỬI HÀNG"];
+  const SENT_DELIVERY_STATUS = ["GIAO THÀNH CÔNG", "ĐÃ GỬI HÀNG", "ĐÃ GỬI VÀO CỬA HÀNG"];
   
   
   const shippingReport = useMemo(() => {
