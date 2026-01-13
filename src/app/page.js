@@ -1462,13 +1462,22 @@ const filteredAdsByArea =
 });
 
 // 🧩 Chọn người có doanh số thấp nhất từ đầu tháng
-const warningEmployeesList = marketingReportData3.filter(
-  (emp) =>
+const excludedNames = [
+  "đỗ ngọc ánh",
+  "trần ngọc diện",
+  "nguyễn bảo ngọc",
+  "hồ ngọc lan",
+  "ngô anh đào",
+];
+
+const warningEmployeesList = marketingReportData3.filter((emp) => {
+  const name = emp.name.trim().toLowerCase();
+
+  return (
     emp.adsThisMonth > 0 &&
-    (emp.name.trim().toLowerCase() !== "Đỗ Ngọc Ánh" && emp.name.trim().toLowerCase() !== "Nguyễn Bảo Ngọc" && emp.name.trim().toLowerCase() !== "Hồ Ngọc Lan"
-    && emp.name.trim().toLowerCase() !== "Ngô Anh Đào"
-    && emp.name.trim().toLowerCase() !== "Hồ Ngọc Lan")
-);
+    !excludedNames.includes(name)
+  );
+});
 
 const minMonthSales = Math.min(...warningEmployeesList.map(e => e.totalMonth));
 const lowestMonthEmployees = warningEmployeesList.filter(
@@ -1484,16 +1493,21 @@ const randomEmployee =
 const top5Employees2 = randomEmployee ? [randomEmployee] : [];
 
   // Lọc chỉ những người có ads tháng này > 0
-  const top5Employees = marketingReportData3
-    .filter((emp) => emp.adsThisMonth > 0 &&
-    (emp.name.trim().toLowerCase() !== "Quách Phú Thành"))
-    .sort((a, b) => b.totalToday - a.totalToday)
-    .slice(0, 2);
+  const excludedNames2 = ["quách phú"];
+
+const top5Employees = marketingReportData3
+  .filter((emp) => {
+    const name = emp.name.trim().toLowerCase();
+    return emp.adsThisMonth > 0 && !excludedNames2.includes(name);
+  })
+  .sort((a, b) => b.totalToday - a.totalToday)
+  .slice(0, 2);
   // Lọc ra nhân viên có chi phí ads tháng này > 0
 
 
   const top1Employees = marketingReportData3
-    .filter((emp) => emp.adsThisMonth > 0)
+    .filter((emp) => emp.adsThisMonth > 0 &&
+    (emp.name.trim().toLowerCase() !== "Quách Phú Thành"))
     .sort((a, b) => b.totalToday - a.totalToday)
     .slice(0, 1);
 
