@@ -19,11 +19,12 @@ export async function POST(req) {
               ? { 
                   // shippingDate1: dayjs().format("YYYY-MM-DD"), 
                   deliveryStatus: "ĐÃ LÊN ĐƠN", 
-                  
+                  shippingDate1: dayjs().format("YYYY-MM-DD"), 
                 }
               : {
                 // shippingDate1: "", 
                 deliveryStatus: "",
+                shippingDate1: "",
                 
               istick4:false })
           }
