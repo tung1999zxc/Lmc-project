@@ -117,9 +117,9 @@ const Dashboard = () => {
     // },
     {
       id: 4,
-      name: `TEAM PHONG `,
+      name: `TEAM LẺ `,
       members: safeEmployees
-        .filter((employee) => employee.team_id === "PHONG")
+        .filter((employee) => employee.team_id === "LE")
         .map((employee) => employee.employee_code),
     },
     {

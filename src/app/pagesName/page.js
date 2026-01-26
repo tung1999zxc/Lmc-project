@@ -86,9 +86,9 @@ const EmployeePageTable = () => {
     // },
     {
       id: 4,
-      name: `TEAM PHONG `,
+      name: `TEAM LẺ `,
       members: employees
-        .filter((employee) => employee.team_id === "PHONG")
+        .filter((employee) => employee.team_id === "LE")
         .map((employee) => employee.employee_code),
     },
     {
@@ -443,7 +443,31 @@ const EmployeePageTable = () => {
         Xoá toàn bộ page
       </Button>
     </Popconfirm>
+     <Space style={{ marginTop: 20 }}>
+    
+    {/* ================== NÚT CHUYỂN PAGE SANG DIỆN ================== */}
+    <Popconfirm
+      title="Bạn có chắc muốn chuyển toàn bộ page sang Trần Ngọc Diện?"
+      okText="Chuyển"
+      cancelText="Hủy"
+      onConfirm={async () => {
+        try {
+          const response = await axios.put("/api/pageName/transferPages");
+          message.success(response.data.message);
+          fetchNamePage(); // load lại danh sách
+        } catch (error) {
+          console.error(error);
+          message.error("Lỗi khi chuyển page");
+        }
+      }}
+    >
+      <Button type="primary" style={{ background: "#722ed1", width: 250 }}>
+        Chuyển page sang Diện
+      </Button>
+    </Popconfirm>
   </Space>
+  </Space>
+  
 )}
       <br></br>
       <Input.Search
@@ -476,7 +500,7 @@ const EmployeePageTable = () => {
         <Option value="SON">TEAM SƠN</Option>
         <Option value="QUAN">TEAM QUÂN</Option>
         {/* <Option value="CHI">TEAM CHI</Option> */}
-        <Option value="PHONG">TEAM PHONG</Option>
+        <Option value="LE">TEAM LE</Option>
         <Option value="TUANANH">TEAM TUẤN ANH</Option>
         <Option value="DIEN">TEAM DIỆN</Option>
 

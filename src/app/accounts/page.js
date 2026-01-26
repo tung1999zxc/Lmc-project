@@ -81,7 +81,7 @@ export default function EmployeeManagement() {
     { label: "TEAM SƠN", value: "SON" },
     { label: "TEAM QUÂN", value: "QUAN" },
     // { label: 'TEAM CHI', value: 'CHI' },
-    { label: "TEAM PHONG", value: "PHONG" },
+    { label: "TEAM LẺ", value: "LE" },
     { label: "TEAM TUẤN ANH", value: "TUANANH" },
     { label: "TEAM DIỆN", value: "DIEN" },
     { label: "TEAM DIỆN ONLINE", value: "DIENON" },

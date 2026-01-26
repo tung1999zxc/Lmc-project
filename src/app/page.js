@@ -784,7 +784,7 @@ const Dashboard = () => {
     { label: "TEAM DIỆU", value: "DIEU" },
     { label: "TEAM SƠN", value: "SON" },
     { label: "TEAM QUÂN", value: "QUAN" },
-    { label: "TEAM PHONG", value: "PHONG" },
+    { label: "TEAM LẺ", value: "LE" },
     { label: "TEAM DIỆN ONLINE", value: "DIENON" },
     { label: "TEAM DIỆN", value: "DIEN" },
   ],
@@ -793,7 +793,7 @@ const Dashboard = () => {
     { label: "TEAM DIỆU", value: "DIEU" },
     { label: "TEAM SƠN", value: "SON" },
     { label: "TEAM QUÂN", value: "QUAN" },
-    { label: "TEAM PHONG", value: "PHONG" },
+    { label: "TEAM LẺ", value: "LE" },
     { label: "TEAM TUẤN ANH", value: "TUANANH" },
     { label: "TEAM DIỆN ONLINE", value: "DIENON" },
     { label: "TEAM DIỆN", value: "DIEN" },
@@ -810,7 +810,7 @@ const teams = teamsByArea[selectedArea] || [];
     { label: "TEAM DIỆU", value: "DIEU" },
     { label: "TEAM SƠN", value: "SON" },
     { label: "TEAM QUÂN", value: "QUAN" },
-    { label: "TEAM PHONG", value: "PHONG" },
+    { label: "TEAM LẺ", value: "LE" },
     { label: "TEAM DIỆN ONLINE", value: "DIENON" },
     { label: "TEAM DIỆN", value: "DIEN" },
   ],
@@ -819,7 +819,7 @@ const teams = teamsByArea[selectedArea] || [];
     { label: "TEAM DIỆU", value: "DIEU" },
     { label: "TEAM SƠN", value: "SON" },
     { label: "TEAM QUÂN", value: "QUAN" },
-    { label: "TEAM PHONG", value: "PHONG" },
+    { label: "TEAM LẺ", value: "LE" },
     { label: "TEAM TUẤN ANH", value: "TUANANH" },
     { label: "TEAM DIỆN ONLINE", value: "DIENON" },
     { label: "TEAM DIỆN", value: "DIEN" },
@@ -913,8 +913,9 @@ const filteredAdsByArea =
       emp.team_id === currentUser.team_id ||
       (currentUser.team_id === "SON" &&
         (emp.name.trim() === "Nguyễn Thị Xuân Diệu" ||
-          emp.name.trim() === "Nguyễn Bá Quân")) ||
-      (currentUser.team_id === "PHONG" && emp.name.trim() === "Bùi Văn Phi")
+          emp.name.trim() === "Nguyễn Bá Quân")) 
+      //     ||
+      // (currentUser.team_id === "PHONG" && emp.name.trim() === "Bùi Văn Phi")
   );
 
   const employeeChartDataNewTEAM = teamEmployees.map((emp) => {
@@ -1106,9 +1107,10 @@ const filteredAdsByArea =
           (currentUser.team_id === "SON" &&
             ["Nguyễn Thị Xuân Diệu", "Nguyễn Bá Quân"].includes(
               (emp.name || "").trim()
-            )) ||
-          (currentUser.team_id === "PHONG" &&
-            ["Bùi Văn Phi"].includes((emp.name || "").trim()))
+            )) 
+          //   ||
+          // (currentUser.team_id === "PHONG" &&
+          //   ["Bùi Văn Phi"].includes((emp.name || "").trim()))
       )
       .map((emp) => (emp.name || "").trim().toLowerCase());
 
@@ -1517,8 +1519,9 @@ const top5Employees = marketingReportData3
     (emp) =>
       emp.team_id === currentUser.team_id ||
       (currentUser.team_id === "SON" &&
-        ["Nguyễn Thị Xuân Diệu", "Nguyễn Bá Quân"].includes(emp.name.trim())) ||
-      (currentUser.team_id === "PHONG" && emp.name.trim() === "Bùi Văn Phi")
+        ["Nguyễn Thị Xuân Diệu", "Nguyễn Bá Quân"].includes(emp.name.trim()))
+        //  ||
+      // (currentUser.team_id === "PHONG" && emp.name.trim() === "Bùi Văn Phi")
   );
 
   // Lọc riêng dữ liệu đơn hàng và ads của team (KHÔNG ghi đè biến gốc)
@@ -2348,9 +2351,10 @@ const top5Employees = marketingReportData3
           emp.team_id === currentUser.team_id ||
           (currentUser.team_id === "SON" &&
             ((emp.name || "").trim() === "Nguyễn Thị Xuân Diệu" ||
-              (emp.name || "").trim() === "Nguyễn Bá Quân")) ||
-          (currentUser.team_id === "PHONG" &&
-            (emp.name || "").trim() === "Bùi Văn Phi")
+              (emp.name || "").trim() === "Nguyễn Bá Quân")) 
+          //     ||
+          // (currentUser.team_id === "PHONG" &&
+          //   (emp.name || "").trim() === "Bùi Văn Phi")
       )
       .map((emp) => (emp.name || "").trim().toLowerCase());
 
@@ -3209,7 +3213,7 @@ const columns = useMemo(() => [
                       {currentUser.employee_code === 4365 && (
                         <>
                           <Option key={1234435} value="PHONG">
-                            TEAM PHONG
+                            TEAM LẺ
                           </Option>
                           <Option key={1235657434} value="PHI">
                             TEAM PHI
