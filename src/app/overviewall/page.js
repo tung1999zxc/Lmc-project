@@ -1774,12 +1774,12 @@ const top5Employees = marketingReportData3
       key: "unpaid",
       render: (value) => value.toLocaleString(),
     },
-    {
-      title: "Tổng",
-      dataIndex: "total",
-      key: "total",
-      render: (value) => value.toLocaleString(),
-    },
+    // {
+    //   title: "Tổng",
+    //   dataIndex: "total",
+    //   key: "total",
+    //   render: (value) => value.toLocaleString(),
+    // },
     {
       title: "Tiền VNĐ",
       dataIndex: "tienVND",
