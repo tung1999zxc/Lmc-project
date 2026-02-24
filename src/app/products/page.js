@@ -5,6 +5,7 @@ import {
   Form,
   Switch ,
   Input,
+  Tag ,
   InputNumber,
   Button,
   Modal,
@@ -86,7 +87,7 @@ const [productStats2Days, setProductStats2Days] = useState([]);
   const [addingImportProduct, setAddingImportProduct] = useState(null);
 
   const [loading, setLoading] = useState(false);
-
+const [employees, setEmployees] = useState([]);
   const [previewVisible, setPreviewVisible] = useState(false);
   const [previewImage, setPreviewImage] = useState(null);
 
@@ -115,12 +116,27 @@ const [productStats2Days, setProductStats2Days] = useState([]);
       setLoading(false);
     }
   }, []);
-
+const fetchEmployees = async () => {
+      
+      try {
+        const response = await axios.get('/api/employees');
+        // response.data.data chứa danh sách nhân viên theo API đã viết
+        setEmployees(response.data.data);
+      } catch (error) {
+        console.error('Lỗi khi lấy danh sách nhân viên:', error);
+      } finally {
+       
+      }
+    };
   useEffect(() => {
     fetchOrders();
+    fetchEmployees(),
     fetchProducts();
   }, [fetchOrders, fetchProducts]);
 
+const mktOptions = employees
+    .filter((emp) => emp.position_team === "mkt")
+    .map((emp) => emp.name);
   /** ===========
    * Date filter helpers (same behavior as original)
    * =========== */
@@ -434,6 +450,8 @@ const [productStats2Days, setProductStats2Days] = useState([]);
           name: values.name,
           description: values.description,
           image: imageValue,
+          mkttest: values.mkttest,
+          testday: values.testday,
           slvn: values.slvn,
           sltq: values.sltq,
         };
@@ -830,6 +848,69 @@ const [productStats2Days, setProductStats2Days] = useState([]);
     );
   },
 },
+ {
+  title: "MKT Test",
+  dataIndex: "mkttest", // phải có nếu muốn lấy đúng field
+  key: "mkttest",
+  width: 200,
+  render: (text, record, index) => {
+    // Tránh lỗi nếu text null hoặc undefined
+    if (!text) return "Unlimit";
+
+    return (
+      <div style={{ width: 200 }}>
+        <h3>{text}</h3>
+      </div>
+    );
+  },
+},
+ {
+  title: "Ngày Test",
+  dataIndex: "testday",
+  key: "testday",
+  width: 180,
+  render: (text) => {
+    if (!text) return "+100%";
+
+    const today = new Date();
+    const testDate = new Date(text);
+
+    today.setHours(0, 0, 0, 0);
+    testDate.setHours(0, 0, 0, 0);
+
+    const diffDays = Math.floor(
+      (today - testDate) / (1000 * 60 * 60 * 24)
+    );
+
+    let tagColor = "red";
+    let extraText = "";
+
+    if (diffDays < 3) {
+      tagColor = "red";
+      extraText = "- SP KHÓA";
+    } 
+    else if (diffDays > 3 && diffDays <= 6) {
+      tagColor = "orange";
+      extraText = "+85%";
+    } 
+    else if (diffDays > 6 && diffDays <= 8) {
+      tagColor = "green";
+      extraText = "+90%";
+    }
+    else if (diffDays > 8) {
+      tagColor = "green";
+      extraText = "+100%";
+    }
+
+    return (
+      <div style={{ display: "flex", gap: 8 }}>
+       <h2> <Tag color="blue">{diffDays} ngày</Tag>
+        {extraText && <Tag color={tagColor}>{extraText}</Tag>}
+      </h2>
+      </div>
+    );
+  },
+},
       {
         title: "Hành động",
         key: "actions",
@@ -891,7 +972,7 @@ const [productStats2Days, setProductStats2Days] = useState([]);
         key: "totalProfit",
         render: (_, record) => {
           const agg = getAggregatesFor(record.name);
-          const totalProfit = agg.totalProfit || 0;
+          const totalProfit = agg.totalProfit  || 0;
           let bgColor = "";
           if (totalProfit >= 100000000) bgColor = "blue";
           else if (totalProfit >= 50000000) bgColor = "yellow";
@@ -1146,10 +1227,22 @@ const calculateStats2Days = useCallback(() => {
           <Form.Item name="name" label="Tên sản phẩm" rules={[{ required: true, message: "Vui lòng nhập tên sản phẩm" }]}>
             <Input />
           </Form.Item>
-          <Form.Item label="Kịch bản sản phẩm" name="description">
+          <Form.Item label="Kịch bản sản phẩm" name="description" hidden>
             <Input.TextArea rows={2} placeholder="Kịch bản sản phẩm" />
           </Form.Item>
-          <Form.Item
+          <Form.Item label="MKT TEST" name="mkttest" >
+             <Select allowClear showSearch >
+                                {mktOptions.map((report) => (
+                                  <Option key={report} value={report}>
+                                    {report}
+                                  </Option>
+                                ))}
+                              </Select>
+          </Form.Item>
+           <Form.Item name="testday" label="Ngày Test" >
+            <DatePicker initialValue={moment()} style={{ width: "100%" }} />
+          </Form.Item>
+          <Form.Item hidden
             name="image"
             valuePropName="fileList"
             getValueFromEvent={(e) => (e?.fileList && e.fileList.length > 0 ? [e.fileList[0]] : [])}

@@ -19,7 +19,7 @@ import dayjs from "dayjs";
 import moment from "moment";
 import { useDispatch, useSelector } from "react-redux";
 
-const OrderForm = ({ visible, onCancel,loading, onSubmit, resetPagename,initialValues, namesalexuly, employees=[] ,dataPagename=[]}) => {
+const OrderForm = ({ visible, onCancel,loading, onSubmit, resetPagename,initialValues, namesalexuly, employees=[] ,dataPagename=[],onProductsChange}) => {
   const [form] = Form.useForm();
   const { Option } = Select;
   const currentUser = useSelector((state) => state.user.currentUser);
@@ -70,6 +70,11 @@ useEffect(() => {
 
   // Danh sách options
   const [products2, setProducts] = useState([]);
+  useEffect(() => {
+  if (onProductsChange) {
+    onProductsChange(products2);
+  }
+}, [products2]);
   const [employeeNamepage, setEmployeeNamepage] = useState("");
   const [modalCustomerOrders, setModalCustomerOrders] = useState([]);
 const [modalVisible, setModalVisible] = useState(false);

@@ -220,7 +220,10 @@ const Dashboard = () => {
             p.mkt.trim().toLowerCase() === employeeName.trim().toLowerCase() &&
             filterSampleOrdersByPeriod(p)
         )
-        .reduce((sum, p) => sum + p.profit, 0) * 17000;
+         .reduce((sum, order) => {
+    const value = Number(order.profitmkt ?? order.profit ?? 0);
+    return sum + (isNaN(value) ? 0 : value);
+  }, 0) * 17000;
     return totalProfit * 0.95;
   };
   const computeTotalADS = (employeeName) => {
@@ -719,7 +722,10 @@ const Dashboard = () => {
               p.orderDate === date &&
               p.mkt.trim().toLowerCase() === recordname.trim().toLowerCase()
           )
-          .reduce((sum, p) => sum + p.profit, 0)
+          .reduce((sum, order) => {
+    const value = Number(order.profitmkt ?? order.profit ?? 0);
+    return sum + (isNaN(value) ? 0 : value);
+  }, 0)
       : 0;
   };
 

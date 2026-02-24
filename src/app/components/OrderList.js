@@ -62,7 +62,7 @@ const OrderList = () => {
   const [sttDoneInput, setSttDoneInput] = useState("");
   const [showProductColumn, setShowProductColumn] = useState(false);
   
-  
+const [products2, setProducts] = useState([]);
   const [namesalexuly, setnamesalexuly] = useState("");
   // Cho phép chọn nhiều filter
   const [employees, setEmployees] = useState([]);
@@ -103,6 +103,18 @@ const OrderList = () => {
     setFilterType(value);
     // Gọi lại API hoặc filter lại danh sách nếu cần
   };
+  const fetchProducts = async () => {
+    
+      try {
+        const response = await axios.get('/api/products');
+        setProducts(response.data.data);
+        
+      } catch (error) {
+        console.error(error);
+        message.error("Lỗi khi lấy danh sách sản phẩm");
+      
+      }
+    };
   const fetchEmployees = async () => {
       
       try {
@@ -121,6 +133,7 @@ const OrderList = () => {
       
       fetchOrders();
     }
+    // fetchProducts();
     fetchEmployees();
     fetchNamePage();
   }, []);
@@ -1484,11 +1497,23 @@ onChange={(e) => handleColumnSelect("istick", e.target.checked)}
           checked={selectedColumns.includes("revenue")}
           onChange={(e) => handleColumnSelect("revenue", e.target.checked)}
         >
-          DOANH SỐ
+          DOANH SỐ SALE
         </Checkbox>
       ),
       dataIndex: "revenue",
       key: "revenue",
+    },
+    {
+      title: (
+        <Checkbox
+          checked={selectedColumns.includes("revenuemkt")}
+          onChange={(e) => handleColumnSelect("revenuemkt", e.target.checked)}
+        >
+          DOANH SỐ MKT
+        </Checkbox>
+      ),
+      dataIndex: "revenuemkt",
+      key: "revenuemkt",
     },
     {
       title: (
@@ -1906,9 +1931,10 @@ const selectedTableColumns = columns.filter((col) =>
         </>
       )
     },
-    { title: "DOANH SỐ",width: 100, dataIndex: "revenue", key: "revenue" },
-
-    { title: "DOANH THU", dataIndex: "profit", key: "profit" ,width: 20,},
+    { title: "DOANH SỐ SALE",width: 100, dataIndex: "revenue", key: "revenue" },
+    { title: "DOANH THU SALE", dataIndex: "profit", key: "profit" ,width: 20,},
+    { title: "DOANH SỐ MKT",width: 100, dataIndex: "revenuemkt", key: "revenuemkt" },
+    { title: "DOANH THU MKT", dataIndex: "profitmkt", key: "profitmkt" ,width: 20,},
       {
       title: (
         <Checkbox
@@ -2451,9 +2477,61 @@ onChange={(e) => handleColumnSelect("istick", e.target.checked)}
   const handleSubmit = async (values) => {
     const revenue = Number(values.revenue) || 0;
     const profit = revenue === 0 ? 0 : Math.max(revenue - 5, 0);
+    
     const products = values.products || [];
     
-    let stt;
+    const fullProducts = products.map((item) => {
+    return products2.find((p) => p.name === item.product);
+  });
+  
+  const validDates = fullProducts
+  .map(p => p?.testday)
+  .filter(Boolean)
+  .map(date => new Date(date))
+  .filter(d => !isNaN(d));
+
+let diffDays;
+
+// 🔥 Nếu không có testday → coi như > 8 ngày
+if (validDates.length === 0) {
+  diffDays = 999; // giá trị lớn để rơi vào case > 8 ngày
+} else {
+  const testDay = validDates.sort((a, b) => b - a)[0];
+
+  const today2 = values.orderDate
+  ? new Date(values.orderDate)
+  : new Date();
+  today2.setHours(0, 0, 0, 0);
+  testDay.setHours(0, 0, 0, 0);
+
+  diffDays = Math.floor(
+    (today2 - testDay) / (1000 * 60 * 60 * 24)
+  );
+}
+     let revenuemkt = revenue;
+  let profitmkt = profit;
+
+  if (diffDays <= 6) {
+    revenuemkt = revenue * 0.85;
+    profitmkt = revenuemkt === 0 ? 0 : Math.max(revenuemkt - 5, 0);
+  } 
+  else if (diffDays > 6 && diffDays <= 8) {
+    revenuemkt = revenue * 0.9;
+    profitmkt = revenuemkt === 0 ? 0 : Math.max(revenuemkt - 5, 0);
+  } 
+  else {
+    revenuemkt = revenue;
+    profitmkt = profit;
+  }
+const isFullCommission = fullProducts.some(
+  (p) => !p?.mkttest || p.mkttest.trim().toLowerCase() === values.mkt.trim().toLowerCase()
+);
+
+if (isFullCommission) {
+  revenuemkt = revenue;
+  profitmkt = profit;
+}
+  let stt;
     if (currentEditId) {
       // Nếu đang chỉnh sửa, giữ nguyên stt cũ
       stt = orders.find((order) => order.id === currentEditId)?.stt;
@@ -2475,7 +2553,9 @@ onChange={(e) => handleColumnSelect("istick", e.target.checked)}
       id: currentEditId || Date.now().toString(),
       stt, // Sử dụng stt lấy từ API
       revenue,
+      revenuemkt,
       profit,
+      profitmkt,
       products,
       customerName: values.customerName || "",
       pageName: values.pageName || "",
@@ -3100,7 +3180,7 @@ const handleResetAllSTT = async () => {
    <span ><strong>
   Tổng Doanh Số: {(filteredOrders.reduce((acc, order) => {
         // Chuyển revenue về số nếu chưa phải số
-        return acc + (Number(order.revenue) || 0);
+        return acc + (Number(order.revenuemkt ?? order.revenue ?? 0) || 0);
       }, 0)*17000).toLocaleString()}
 </strong></span>}
 </Col>
@@ -3281,6 +3361,7 @@ const handleResetAllSTT = async () => {
         namesalexuly={namesalexuly}
         resetPagename={resetPagename}
         loading={loading}
+         onProductsChange={setProducts} 
       />
       <Modal
   title="Các đơn hàng của khách"

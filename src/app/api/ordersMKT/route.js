@@ -16,6 +16,8 @@ if (start && end) {
     const projection = {
       orderDate: 1,
       revenue: 1,
+      revenuemkt: 1,
+      profitmkt: 1,
       profit: 1,
       mkt: 1,
       salexuly: 1,

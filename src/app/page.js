@@ -899,7 +899,10 @@ const filteredAdsByArea =
         (order) =>
           order.mkt.trim().toLowerCase() === emp.name.trim().toLowerCase()
       )
-      .reduce((sum, order) => sum + order.profit, 0);
+      .reduce((sum, order) => {
+    const value = Number(order.profitmkt ?? order.profit ?? 0);
+    return sum + (isNaN(value) ? 0 : value);
+  }, 0);
     const adsCost = filteredAdsByArea
       .filter(
         (ad) => ad.name.trim().toLowerCase() === emp.name.trim().toLowerCase()
@@ -924,7 +927,10 @@ const filteredAdsByArea =
         (order) =>
           order.mkt.trim().toLowerCase() === emp.name.trim().toLowerCase()
       )
-      .reduce((sum, order) => sum + order.profit, 0);
+      .reduce((sum, order) => {
+    const value = Number(order.profitmkt ?? order.profit ?? 0);
+    return sum + (isNaN(value) ? 0 : value);
+  }, 0);
     const adsCost = filteredAds
       .filter(
         (ad) => ad.name.trim().toLowerCase() === emp.name.trim().toLowerCase()
@@ -1028,7 +1034,10 @@ const filteredAdsByArea =
           (order) =>
             order.mkt.trim().toLowerCase() === emp.name.trim().toLowerCase()
         )
-        .reduce((sum, order) => sum + order.profit, 0);
+       .reduce((sum, order) => {
+    const value = Number(order.profitmkt ?? order.profit ?? 0);
+    return sum + (isNaN(value) ? 0 : value);
+  }, 0);
       return acc + empSales;
     }, 0);
     const members = teamEmps2.reduce((acc, emp) => {
@@ -1037,7 +1046,10 @@ const filteredAdsByArea =
           (order) =>
             order.mkt.trim().toLowerCase() === emp.name.trim().toLowerCase()
         )
-        .reduce((sum, order) => sum + order.profit, 0);
+      .reduce((sum, order) => {
+    const value = Number(order.profitmkt ?? order.profit ?? 0);
+    return sum + (isNaN(value) ? 0 : value);
+  }, 0);
       return acc + empSales;
     }, 0);
 
@@ -1069,7 +1081,10 @@ const filteredAdsByArea =
     dailyChartDataNew = dateArray.map((date) => {
       const sales = filteredOrdersByArea
         .filter((order) => order.orderDate === date)
-        .reduce((sum, order) => sum + order.profit, 0);
+         .reduce((sum, order) => {
+    const value = Number(order.profitmkt ?? order.profit ?? 0);
+    return sum + (isNaN(value) ? 0 : value);
+  }, 0);
       const adsCost = filteredAds
         .filter((ad) => ad.date === date)
         .reduce((sum, ad) => sum + (ad.request1 + ad.request2), 0);
@@ -1080,7 +1095,10 @@ const filteredAdsByArea =
     dailyChartDataNew = last30Days.map((date) => {
       const sales = orders
         .filter((order) => order.orderDate === date)
-        .reduce((sum, order) => sum + order.profit, 0);
+       .reduce((sum, order) => {
+    const value = Number(order.profitmkt ?? order.profit ?? 0);
+    return sum + (isNaN(value) ? 0 : value);
+  }, 0);
       const adsCost = adsMoneyData
         .filter((ad) => ad.date === date)
         .reduce((sum, ad) => sum + (ad.request1 + ad.request2), 0);
@@ -1143,7 +1161,10 @@ const filteredAdsByArea =
     dailyChartDataNewTEAM = dateArray.map((date) => {
       const sales = filteredOrdersByArea
         .filter((order) => order.orderDate === date)
-        .reduce((sum, order) => sum + order.profit, 0);
+        .reduce((sum, order) => {
+    const value = Number(order.profitmkt ?? order.profit ?? 0);
+    return sum + (isNaN(value) ? 0 : value);
+  }, 0);
       const adsCost = filteredAds
         .filter((ad) => ad.date === date)
         .reduce((sum, ad) => sum + (ad.request1 + ad.request2), 0);
@@ -1154,7 +1175,10 @@ const filteredAdsByArea =
     dailyChartDataNewTEAM = last30Days.map((date) => {
       const sales = orders
         .filter((order) => order.orderDate === date)
-        .reduce((sum, order) => sum + order.profit, 0);
+          .reduce((sum, order) => {
+    const value = Number(order.profitmkt ?? order.profit ?? 0);
+    return sum + (isNaN(value) ? 0 : value);
+  }, 0);
       const adsCost = adsMoneyData
         .filter((ad) => ad.date === date)
         .reduce((sum, ad) => sum + (ad.request1 + ad.request2), 0);
@@ -1273,7 +1297,10 @@ const filteredAdsByArea =
           order.mkt.trim().toLowerCase() === emp.name.trim().toLowerCase() &&
           order.paymentStatus === "ĐÃ THANH TOÁN"
       )
-      .reduce((sum, order) => sum + order.profit, 0);
+      .reduce((sum, order) => {
+    const value = Number(order.profitmkt ?? order.profit ?? 0);
+    return sum + (isNaN(value) ? 0 : value);
+  }, 0);
     const unpaid = filteredOrdersByArea
     .filter(
         (order) =>
@@ -1281,7 +1308,10 @@ const filteredAdsByArea =
           (order.paymentStatus === "CHƯA THANH TOÁN" ||
             order.paymentStatus === "")
       )
-      .reduce((sum, order) => sum + order.profit, 0);
+      .reduce((sum, order) => {
+    const value = Number(order.profitmkt ?? order.profit ?? 0);
+    return sum + (isNaN(value) ? 0 : value);
+  }, 0);
     const total = paid + unpaid;
     const tienVND = total * exchangeRate * 0.95;
     const totalAds = filteredAds
@@ -1544,7 +1574,10 @@ const top5Employees = marketingReportData3
           order.mkt.trim().toLowerCase() === emp.name.trim().toLowerCase() &&
           order.paymentStatus === "ĐÃ THANH TOÁN"
       )
-      .reduce((sum, order) => sum + order.profit, 0);
+     .reduce((sum, order) => {
+    const value = Number(order.profitmkt ?? order.profit ?? 0);
+    return sum + (isNaN(value) ? 0 : value);
+  }, 0);
 
     const unpaid = teamFilteredOrders
       .filter(
@@ -1553,7 +1586,10 @@ const top5Employees = marketingReportData3
           (order.paymentStatus === "CHƯA THANH TOÁN" ||
             order.paymentStatus === "")
       )
-      .reduce((sum, order) => sum + order.profit, 0);
+     .reduce((sum, order) => {
+    const value = Number(order.profitmkt ?? order.profit ?? 0);
+    return sum + (isNaN(value) ? 0 : value);
+  }, 0);
 
     const total = paid + unpaid;
     const tienVND = total * 0.95 * exchangeRate;
@@ -2258,13 +2294,19 @@ const top5Employees = marketingReportData3
   // THỰC TẾ ĐÃ TRỪ 5
   const daThanhToanKW3 = filteredOrders
     .filter((order) => order.paymentStatus === "ĐÃ THANH TOÁN")
-    .reduce((sum, order) => sum + order.profit, 0);
+    .reduce((sum, order) => {
+    const value = Number(order.profitmkt ?? order.profit ?? 0);
+    return sum + (isNaN(value) ? 0 : value);
+  }, 0);
   const chuaThanhToanKW3 = filteredOrders
     .filter(
       (order) =>
         order.paymentStatus === "CHƯA THANH TOÁN" || order.paymentStatus === ""
     )
-    .reduce((sum, order) => sum + order.profit, 0);
+   .reduce((sum, order) => {
+    const value = Number(order.profitmkt ?? order.profit ?? 0);
+    return sum + (isNaN(value) ? 0 : value);
+  }, 0);
   const tongKW3 = (daThanhToanKW3 + chuaThanhToanKW3) * 0.95;
 
   const totalAdsKW3 = filteredAds.reduce(

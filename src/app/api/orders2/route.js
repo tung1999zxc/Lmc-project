@@ -64,7 +64,9 @@ export async function GET(req) {
     const projection = {
       orderDate: 1,
       revenue: 1,
+      revenuemkt: 1,
       profit: 1,
+      profitmkt: 1,
       mkt: 1,
       sale: 1,
       salexuly: 1,
