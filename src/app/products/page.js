@@ -1000,10 +1000,11 @@ const mktOptions = employees
 
     // Conditionally add image column for some user positions
     if (
-      currentUser?.position === "managerSALE" ||
-      currentUser?.position === "leadSALE" ||
-      currentUser?.name === "Tung99" ||
-      currentUser?.name === "Hoàng Thị Trà My"
+      currentUser?.position === "managerSALEeeee" 
+      // ||
+      // currentUser?.position === "leadSALE" ||
+      // currentUser?.name === "Tung99" ||
+      // currentUser?.name === "Hoàng Thị Trà My"
     ) {
       baseCols.push({
         title: "Hình ảnh",
@@ -1105,7 +1106,15 @@ const calculateStats2Days = useCallback(() => {
    * UI render
    * =========== */
   return (
+    <div
+      style={{
+        transform: "scale(0.78)",
+        transformOrigin: "top left",
+        width: "130%", // Để bù lại không gian khi scale
+      }}
+    >
     <div style={{ padding: 24 }}>
+      
       <FullScreenLoading loading={loading} tip="Đang tải dữ liệu..." />
      <div style={{ marginBottom: 20, display: "flex", gap: 10 }}>
   <Button type="primary" onClick={calculateStats2Days}>
@@ -1320,7 +1329,7 @@ const calculateStats2Days = useCallback(() => {
           <img src={previewImage} alt="Preview" style={{ width: "100%" }} />
         )}
       </Modal>
-    </div>
+    </div></div>
   );
 };
 
