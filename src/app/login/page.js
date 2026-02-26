@@ -74,7 +74,7 @@ export default function LoginPage() {
           </Form.Item>
 
           <Form.Item
-           label={<span style={{ fontWeight: 700 }}>mật khẩu</span>}
+           label={<span style={{ fontWeight: 700 }}>Mật khẩu</span>}
             name="password"
             rules={[{ required: true, message: "Vui lòng nhập mật khẩu" }]}
           >
