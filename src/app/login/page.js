@@ -62,11 +62,11 @@ export default function LoginPage() {
   return (
     <div className="login-container">
       <Card className="login-card" bordered={false}>
-        <div className="card-title">LMC GROUPS</div>
+        <div className="card-title"> </div>
 
         <Form layout="vertical" onFinish={onFinish}>
           <Form.Item
-            label="Tài khoản"
+            label={<span style={{ fontWeight: 700 }}>Tài khoản</span>}
             name="username"
             rules={[{ required: true, message: "Vui lòng nhập tài khoản" }]}
           >
@@ -74,7 +74,7 @@ export default function LoginPage() {
           </Form.Item>
 
           <Form.Item
-            label="Mật khẩu"
+           label={<span style={{ fontWeight: 700 }}>mật khẩu</span>}
             name="password"
             rules={[{ required: true, message: "Vui lòng nhập mật khẩu" }]}
           >
@@ -101,19 +101,24 @@ export default function LoginPage() {
   align-items: center;
   position: relative;
   overflow: hidden;
+  
+  
 }
 
 .login-container::before {
+ align-items: flex-start;  /* không còn giữa */
+       /* đẩy xuống 18% màn hình */
+  padding-top: 50vh; 
   content: "";
   position: absolute;
   inset: 0;
-  background-image: url("/horse.jpg");
+  background-image: url("/horse4.jpg");
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
 
   /* Làm ảnh sáng và nét hơn */
-  filter: brightness(1) contrast(1) saturate(2);
+  filter: brightness(1) contrast(1) saturate(3);
 
   z-index: -2;
 }
@@ -135,8 +140,8 @@ export default function LoginPage() {
 
   background: linear-gradient(
     145deg,
-    rgba(17,17,17,0.8) 0%,
-    rgba(26,26,26,0.6) 100%
+    rgba(17,17,17,0.5) 0%,
+    rgba(26,26,26,0.8) 100%
   ) !important;
    backdrop-filter: blur(10px);
 
