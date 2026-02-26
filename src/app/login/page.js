@@ -95,16 +95,31 @@ export default function LoginPage() {
       <style jsx global>{`
         /* ===== BACKGROUND ===== */
         .login-container {
-          min-height: 100vh;
-          display: flex;
-          justify-content: center;
-          align-items: center;
-          position: relative;
-          background-image: url("/horse.jpg");
-          background-size: cover;
-          background-position: center;
-          background-repeat: no-repeat;
-        }
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.login-container::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: url("/horse.jpg");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+
+  /* Làm ảnh sáng và nét hơn */
+  filter: brightness(1) contrast(1) saturate(2);
+
+  z-index: -2;
+}
+
+
+}
 
         .login-container::before {
           content: "";
@@ -116,16 +131,28 @@ export default function LoginPage() {
 
         /* ===== CARD ===== */
         .login-card {
-          width: 380px;
-          background: linear-gradient(145deg, #111 0%, #1a1a1a 100%) !important;
-          border-radius: 18px;
-          border: 1px solid rgba(212, 175, 55, 0.6);
-          box-shadow:
-            0 0 25px rgba(212, 175, 55, 0.3),
-            inset 0 0 20px rgba(212, 175, 55, 0.08);
-          padding: 30px;
-          z-index: 2;
-        }
+  width: 380px;
+
+  background: linear-gradient(
+    145deg,
+    rgba(17,17,17,0.8) 0%,
+    rgba(26,26,26,0.6) 100%
+  ) !important;
+   backdrop-filter: blur(10px);
+
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+
+  border-radius: 18px;
+  border: 1px solid rgba(212, 175, 55, 0.6);
+
+  box-shadow:
+    0 0 25px rgba(212, 175, 55, 0.25),
+    inset 0 0 20px rgba(212, 175, 55, 0.06);
+
+  padding: 30px;
+  z-index: 2;
+}
 
         .card-title {
           color: #d4af37;
