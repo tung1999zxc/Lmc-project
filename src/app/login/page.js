@@ -108,13 +108,13 @@ export default function LoginPage() {
 .login-container::before {
  align-items: flex-start;  /* không còn giữa */
        /* đẩy xuống 18% màn hình */
-  padding-top: 10vh; 
+  padding-left: 10vh; 
   content: "";
   position: absolute;
   inset: 0;
-  background-image: url("/horse5.jpg");
-  background-size: 100% 100%;
-  background-position: center;
+  background-image: url("/horse9.jpg");
+  background-size: 100% 115%;
+  background-position: 12px center;
   background-repeat: no-repeat;
 
   /* Làm ảnh sáng và nét hơn */
