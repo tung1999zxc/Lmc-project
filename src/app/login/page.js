@@ -112,13 +112,13 @@ export default function LoginPage() {
   content: "";
   position: absolute;
   inset: 0;
-  background-image: url("/horse9.jpg");
+  background-image: url("/horse10.jpg");
   background-size: 100% 115%;
-  background-position: 12px center;
+  background-position: center;
   background-repeat: no-repeat;
 
   /* Làm ảnh sáng và nét hơn */
-  filter: brightness(1) contrast(1) saturate(1);
+  filter: brightness(1) contrast(1) saturate(1.2);
 
   z-index: -2;
 }
