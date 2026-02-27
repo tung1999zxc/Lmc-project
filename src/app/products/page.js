@@ -848,7 +848,10 @@ const mktOptions = employees
     );
   },
 },
- {
+ 
+...((currentUser.name !== "nhii"  )
+      ? [
+     {
   title: "MKT Test",
   dataIndex: "mkttest", // phải có nếu muốn lấy đúng field
   key: "mkttest",
@@ -864,7 +867,11 @@ const mktOptions = employees
     );
   },
 },
- {
+        ]
+      : []),
+ ...((currentUser.name !== "nhii"  )
+      ? [
+      {
   title: "Ngày Test",
   dataIndex: "testday",
   key: "testday",
@@ -911,6 +918,9 @@ const mktOptions = employees
     );
   },
 },
+        ]
+      : []),
+ 
       {
         title: "Hành động",
         key: "actions",
@@ -967,7 +977,8 @@ const mktOptions = employees
 
     // Conditionally add "Tổng doanh số" column if currentUser.name !== "nhii"
     if ((currentUser?.name || "").toLowerCase() !== "nhii") {
-      baseCols.push({
+      baseCols.push(
+        {
         title: "Tổng doanh số",
         key: "totalProfit",
         render: (_, record) => {
@@ -1108,9 +1119,9 @@ const calculateStats2Days = useCallback(() => {
   return (
     <div
       style={{
-        transform: "scale(0.78)",
+        transform: "scale(0.85)",
         transformOrigin: "top left",
-        width: "130%", // Để bù lại không gian khi scale
+        width: "115%", // Để bù lại không gian khi scale
       }}
     >
     <div style={{ padding: 24 }}>
