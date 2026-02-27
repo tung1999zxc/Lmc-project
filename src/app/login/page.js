@@ -113,7 +113,7 @@ export default function LoginPage() {
   position: absolute;
   inset: 0;
   background-image: url("/horse7.jpg");
-  background-size: cover;
+  background-size: 100% 100%;
   background-position: center;
   background-repeat: no-repeat;
 
