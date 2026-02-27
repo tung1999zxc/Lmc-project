@@ -108,7 +108,7 @@ export default function LoginPage() {
 .login-container::before {
  align-items: flex-start;  /* không còn giữa */
        /* đẩy xuống 18% màn hình */
-  padding-top: 50vh; 
+  padding-top: 10vh; 
   content: "";
   position: absolute;
   inset: 0;
@@ -118,7 +118,7 @@ export default function LoginPage() {
   background-repeat: no-repeat;
 
   /* Làm ảnh sáng và nét hơn */
-  filter: brightness(1) contrast(1) saturate(2);
+  filter: brightness(1) contrast(1) saturate(1);
 
   z-index: -2;
 }
