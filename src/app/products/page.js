@@ -776,6 +776,8 @@ const mktOptions = employees
           );
         },
       },
+      ...((currentUser.position !== "mkt"  )
+      ? [
       {
   title: "Nhập VN",
   dataIndex: "slvn",
@@ -850,6 +852,9 @@ const mktOptions = employees
     );
   },
 },
+        ]
+      : []),
+     
  
 ...((currentUser.name !== "nhii"  )
       ? [
@@ -860,7 +865,7 @@ const mktOptions = employees
   width: 200,
   render: (text, record, index) => {
     // Tránh lỗi nếu text null hoặc undefined
-    if (!text) return "Unlimit";
+    if (!text) return "NoName";
 
     return (
       <div style={{ width: 200 }}>
@@ -874,7 +879,7 @@ const mktOptions = employees
  ...((currentUser.name !== "nhii"  )
       ? [
       {
-  title: "Ngày Test",
+  title: "Ngày Test / %",
   dataIndex: "testday",
   key: "testday",
   width: 180,
@@ -922,8 +927,9 @@ const mktOptions = employees
 },
         ]
       : []),
- 
-      {
+ ...((currentUser.position !== "mkt"  )
+      ? [
+     {
         title: "Hành động",
         key: "actions",
         width: 120,
@@ -975,6 +981,9 @@ const mktOptions = employees
     />
   ),
 },
+        ]
+      : []),
+     
     ];
 
     // Conditionally add "Tổng doanh số" column if currentUser.name !== "nhii"
@@ -1130,7 +1139,7 @@ const calculateStats2Days = useCallback(() => {
       
       <FullScreenLoading loading={loading} tip="Đang tải dữ liệu..." />
      <div style={{ marginBottom: 20, display: "flex", gap: 10 }}>
-  <Button type="primary" onClick={calculateStats2Days}>
+  <Button type="primary" disabled={currentUser.position==="mkt"} onClick={calculateStats2Days}>
     📊 Tính thống kê 3 hôm gần đây
   </Button>
 
