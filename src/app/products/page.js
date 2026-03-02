@@ -899,7 +899,7 @@ const mktOptions = employees
     let tagColor = "red";
     let extraText = "";
 
-    if (diffDays < 3) {
+    if (diffDays <= 3) {
       tagColor = "red";
       extraText = "- SP KHÓA";
     } 
