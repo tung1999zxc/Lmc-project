@@ -1935,7 +1935,18 @@ const selectedTableColumns = columns.filter((col) =>
     { title: "DOANH THU SALE", dataIndex: "profit", key: "profit" ,width: 20,},
     { title: "DOANH SỐ MKT",width: 100, dataIndex: "revenuemkt", key: "revenuemkt" },
     { title: "DOANH THU MKT", dataIndex: "profitmkt", key: "profitmkt" ,width: 20,},
-      {
+       {
+      title: 
+          'ĐƠN'
+        
+      ,
+      dataIndex: "saleReport",
+      key: "saleReport",
+      render: (text) => (
+        <Tag color={text === "DONE" ? "green" : "red"}>{text}</Tag>
+      ),
+    },
+    {
       title: (
         <Checkbox
           checked={selectedColumns.includes("orderDate5")}
