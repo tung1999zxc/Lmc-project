@@ -35,7 +35,7 @@ const Dashboard = () => {
     }
   }, []);
 
-  const [period, setPeriod] = useState("month");
+  const [period, setPeriod] = useState("null");
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
   const [safeOrders, setSafeOrders] = useState([]);
@@ -75,7 +75,15 @@ const Dashboard = () => {
       message.error("Lỗi khi lấy đơn hàng");
     }
   };
+useEffect(() => {
+  if (!currentUser) return;
 
+  if (currentUser.position === "lead") {
+    setPeriod("week");
+  } else {
+    setPeriod("month");
+  }
+}, [currentUser]);
   useEffect(() => {
     fetchRecords();
     fetchEmployees();
@@ -1117,7 +1125,7 @@ const Dashboard = () => {
               <Option value="day">Hôm Nay</Option>
               <Option value="yesterday">Hôm Qua</Option>
               <Option value="week">1 Tuần Gần Nhất</Option>
-              <Option value="month">Tháng Này</Option>
+              <Option disabled={currentUser.position === "lead"} value="month">Tháng Này</Option>
               <Option value="lastMonth">Tháng Trước</Option>
               <Option value="twoMonthsAgo">2 Tháng Trước</Option>
             </Select>

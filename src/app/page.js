@@ -29,7 +29,7 @@ const Dashboard = () => {
   const router = useRouter();
   const today = new Date().toISOString().split("T")[0];
   const [selectedDate, setSelectedDate] = useState(today);
-  const [selectedPreset, setSelectedPreset] = useState("currentMonth");
+  const [selectedPreset, setSelectedPreset] = useState("null");
   const [selectedArea, setSelectedArea] = useState("all");
   
   // Ngày hiện tại định dạng YYYY-MM-DD
@@ -53,6 +53,15 @@ const Dashboard = () => {
     }
   }, []);
 
+useEffect(() => {
+  if (!currentUser) return;
+
+  if (currentUser.position === "lead") {
+    setSelectedPreset("week");
+  } else {
+    setSelectedPreset("currentMonth");
+  }
+}, [currentUser]);
   const fetchOrders = async () => {
     try {
       let url = "/api/orders2";
@@ -3195,7 +3204,7 @@ const columns = useMemo(() => [
                     <Option value="today">Hôm Nay</Option>
                     <Option value="yesterday">Hôm Qua</Option>
                     <Option value="week">1 Tuần gần nhất</Option>
-                    <Option value="currentMonth">
+                    <Option disabled={currentUser.position==="lead"} value="currentMonth">
                       1 Tháng (Từ đầu tháng đến hiện tại)
                     </Option>
                     <Option value="lastMonth">Tháng trước</Option>
@@ -3319,10 +3328,10 @@ const columns = useMemo(() => [
                         setSelectedDate("");
                       }}
                     >
-                      <Option value="today">Hôm Nay</Option>
+                      <Option  value="today">Hôm Nay</Option>
                       <Option value="yesterday">Hôm Qua</Option>
                       <Option value="week">1 Tuần gần nhất</Option>
-                      <Option value="currentMonth">
+                      <Option  value="currentMonth">
                         1 Tháng (Từ đầu tháng đến hiện tại)
                       </Option>
                       <Option value="lastMonth">Tháng trước</Option>
@@ -3424,6 +3433,7 @@ const columns = useMemo(() => [
           </Row>
         </>
       )}
+      
       <br></br>
 
       {(currentUser.position === "admin" && !selectedTeam) ||
