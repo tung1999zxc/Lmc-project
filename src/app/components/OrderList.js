@@ -1940,6 +1940,7 @@ const selectedTableColumns = columns.filter((col) =>
           'ĐƠN'
         
       ,
+      width: 100,
       dataIndex: "saleReport",
       key: "saleReport",
       render: (text) => (
