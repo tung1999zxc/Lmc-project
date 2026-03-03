@@ -94,7 +94,8 @@ const [employees, setEmployees] = useState([]);
   const [previewImage, setPreviewImage] = useState(null);
 
   const [editFileList, setEditFileList] = useState([]);
-
+const [filterMktTest, setFilterMktTest] = useState(false);
+const [selectedMktFilter, setSelectedMktFilter] = useState(null);
   // Fetch functions
   const fetchOrders = useCallback(async () => {
     try {
@@ -323,13 +324,31 @@ const mktOptions = employees
    * filteredProducts: search by name.
    * This is memoized so Table sees stable reference when inputs unchanged.
    * =========== */
-  const filteredProducts = useMemo(() => {
-    const q = (searchText || "").trim().toLowerCase();
-    if (!q) return products || [];
-    return (products || []).filter((p) =>
+const filteredProducts = useMemo(() => {
+  let data = products || [];
+
+  // 🔍 Filter theo search
+  const q = (searchText || "").trim().toLowerCase();
+  if (q) {
+    data = data.filter((p) =>
       String(p.name || "").toLowerCase().includes(q)
     );
-  }, [products, searchText]);
+  }
+
+  // ✅ Filter có mkttest
+  if (filterMktTest) {
+    data = data.filter((p) => p.mkttest && p.mkttest !== "");
+  }
+
+  // ✅ Filter theo MKT được chọn
+  if (selectedMktFilter) {
+   data = data.filter(
+  (p) => (p.mkttest || "").trim() === selectedMktFilter.trim()
+);
+  }
+
+  return data;
+}, [products, searchText, filterMktTest, selectedMktFilter]);
 
   /** Compute derived "orders" list filtered by preset to match original behavior */
   const ordersByPreset = useMemo(() => {
@@ -404,6 +423,8 @@ const mktOptions = employees
         name: record.name,
         slvn: record.slvn,
         sltq: record.sltq,
+        mkttest:record.mkttest,
+        // testday:record.testday,
         description: record.description,
         image: record.image
           ? [
@@ -1139,7 +1160,7 @@ const calculateStats2Days = useCallback(() => {
       
       <FullScreenLoading loading={loading} tip="Đang tải dữ liệu..." />
      <div style={{ marginBottom: 20, display: "flex", gap: 10 }}>
-  <Button type="primary" disabled={currentUser.position==="mkt"} onClick={calculateStats2Days}>
+  <Button type="primary" disabled={currentUser.position_team ==="mkt"} onClick={calculateStats2Days}>
     📊 Tính thống kê 3 hôm gần đây
   </Button>
 
@@ -1224,8 +1245,27 @@ const calculateStats2Days = useCallback(() => {
           style={{ width: 300 }}
           suffix={<SearchOutlined style={{ fontSize: "16px", color: "#1890ff" }} />}
         />
-
-        <Select value={selectedPreset} onChange={(value) => setSelectedPreset(value)} style={{ width: 200 }}>
+  <Switch
+    checked={filterMktTest}
+    onChange={(checked) => setFilterMktTest(checked)}
+    checkedChildren="Có MKT Test"
+    unCheckedChildren="Tất cả"
+  />
+  <Select
+  allowClear
+  showSearch
+  placeholder="Lọc theo MKT Test"
+  style={{ width: 200 }}
+  value={selectedMktFilter}
+  onChange={(value) => setSelectedMktFilter(value)}
+>
+  {mktOptions.map((report) => (
+    <Option key={report} value={report}>
+      {report}
+    </Option>
+  ))}
+</Select>
+        {/* <Select value={selectedPreset} onChange={(value) => setSelectedPreset(value)} style={{ width: 200 }}>
           <Option value="all">Tất cả</Option>
           <Option value="today">Hôm Nay</Option>
           <Option value="yesterday">Hôm Qua</Option>
@@ -1236,7 +1276,7 @@ const calculateStats2Days = useCallback(() => {
           <Option value="lastMonth">Tháng trước</Option>
           <Option value="twoMonthsAgo">2 Tháng trước</Option>
           <Option value="threeMonthsAgo">3 Tháng trước</Option>
-        </Select>
+        </Select> */}
 
         <div style={{ fontWeight: "bold", fontSize: "16px" }}>
           Tổng:{" "}
