@@ -776,7 +776,7 @@ const mktOptions = employees
           );
         },
       },
-      ...((currentUser.position !== "mkt"  )
+      ...((currentUser.position_team !== "mkt"  )
       ? [
       {
   title: "Nhập VN",
@@ -927,7 +927,7 @@ const mktOptions = employees
 },
         ]
       : []),
- ...((currentUser.position !== "mkt"  )
+ ...((currentUser.position_team !== "mkt"  )
       ? [
      {
         title: "Hành động",
