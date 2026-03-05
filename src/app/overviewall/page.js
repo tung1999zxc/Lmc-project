@@ -1633,6 +1633,7 @@ const excludedNames = [
   "nguyễn bảo ngọc",
   "hồ ngọc lan",
   "ngô anh đào",
+  "Phan Thế Phong",
 ];
 
 const warningEmployeesList = marketingReportData3.filter((emp) => {
