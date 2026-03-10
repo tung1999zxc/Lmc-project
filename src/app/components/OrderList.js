@@ -1503,6 +1503,8 @@ onChange={(e) => handleColumnSelect("istick", e.target.checked)}
       dataIndex: "revenue",
       key: "revenue",
     },
+    ...( currentUser.position !== "salexuly" && currentUser.position !== "salenhapdon"&& currentUser.position !== "leadSALE"
+      ? [
     {
       title: (
         <Checkbox
@@ -1514,7 +1516,10 @@ onChange={(e) => handleColumnSelect("istick", e.target.checked)}
       ),
       dataIndex: "revenuemkt",
       key: "revenuemkt",
-    },
+    }
+     ]
+      : []),
+  
     {
       title: (
         <Checkbox
