@@ -3198,8 +3198,13 @@ const handleResetAllSTT = async () => {
   Tổng Doanh Số: {(filteredOrders.reduce((acc, order) => {
         // Chuyển revenue về số nếu chưa phải số
         return acc + (Number(order.revenuemkt ?? order.revenue ?? 0) || 0);
+      }, 0)*17000).toLocaleString()}<br></br>
+      Tổng Doanh Thu: {(filteredOrders.reduce((acc, order) => {
+        // Chuyển revenue về số nếu chưa phải số
+        return acc + (Number(order.profitmkt ?? order.profit ?? 0) || 0);
       }, 0)*17000).toLocaleString()}
-</strong></span>}
+</strong></span>
+}
 </Col>
         <Col span={3}>
          
