@@ -685,7 +685,7 @@ useEffect(() => {
     filtered = filtered.filter((record) => filterRecordsByPeriod(record));
 
     // Lọc theo quyền:
-    if (currentUser.position === "mkt") {
+    if (currentUser.position === "mkt"||period === "month") {
       filtered = filtered.filter(
         (record) => record.userId === currentUser.employee_code
       );
@@ -1125,7 +1125,7 @@ useEffect(() => {
               <Option value="day">Hôm Nay</Option>
               <Option value="yesterday">Hôm Qua</Option>
               <Option value="week">1 Tuần Gần Nhất</Option>
-              <Option disabled={currentUser.position === "lead"} value="month">Tháng Này</Option>
+              <Option value="month">Tháng Này</Option>
               <Option value="lastMonth">Tháng Trước</Option>
               <Option value="twoMonthsAgo">2 Tháng Trước</Option>
             </Select>
