@@ -3202,7 +3202,7 @@ const handleResetAllSTT = async () => {
       Tổng Doanh Thu: {(filteredOrders.reduce((acc, order) => {
         // Chuyển revenue về số nếu chưa phải số
         return acc + (Number(order.profitmkt ?? order.profit ?? 0) || 0);
-      }, 0)*17000).toLocaleString()}
+      }, 0)*17000*0.95).toLocaleString()}
 </strong></span>
 }
 </Col>
