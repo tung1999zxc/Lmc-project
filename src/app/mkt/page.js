@@ -685,8 +685,12 @@ useEffect(() => {
     filtered = filtered.filter((record) => filterRecordsByPeriod(record));
 
     // Lọc theo quyền:
-    if (currentUser.position === "mkt"||period === "month") {
+    if (currentUser.position === "mkt") {
       filtered = filtered.filter(
+        (record) => record.userId === currentUser.employee_code
+      );
+    } else if (currentUser.position === "lead" && period === "month") {
+     filtered = filtered.filter(
         (record) => record.userId === currentUser.employee_code
       );
     } else if (currentUser.position === "lead") {
