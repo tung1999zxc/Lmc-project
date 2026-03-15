@@ -1570,7 +1570,7 @@ const teamChartDataNew2 = teams.map((team) => {
   }
 
   // Tạo marketingReportData1 mới đúng điều kiện
- const marketingReportData3 = mktEmployeesPVD.map((emp, index) => {
+ const marketingReportData3 = mktEmployees.map((emp, index) => {
   const nameLC = emp.name.trim().toLowerCase();
 
   // 1️⃣ Doanh số hôm nay
@@ -1667,7 +1667,7 @@ const top5Employees = marketingReportData3
     return emp.adsThisMonth > 0 && !excludedNames2.includes(name);
   })
   .sort((a, b) => b.totalToday - a.totalToday)
-  .slice(0, 2);
+  .slice(0, 3);
   // Lọc ra nhân viên có chi phí ads tháng này > 0
 
 
@@ -3082,7 +3082,7 @@ const columns = useMemo(() => [
         
         {/* Vinh danh TOP 3 SALE NHẬP ĐƠN */}
       
-        {currentUser.name !== "Trần" &&
+        {/* {currentUser.name !== "Trần" &&
           (
             <div className="marquee">
               {top5Employees2.map((emp, index) => (
@@ -3117,7 +3117,7 @@ const columns = useMemo(() => [
                 </div>
               ))}
             </div>
-          )}
+          )} */}
           </div>
         {/* {currentUser.name !== "Trần Ngọc Lâm" &&
           currentUser.name !== "Diệp Anh" &&
