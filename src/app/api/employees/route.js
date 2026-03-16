@@ -13,6 +13,8 @@ export async function POST(req) {
     const {
       username,
       password,
+      stk,
+      nh,
       name,
       position,
       team_id,
@@ -53,6 +55,8 @@ export async function POST(req) {
       username,
       password: hashedPassword,
       name,
+      nh,
+      stk,
       position,
       status,
       quocgia,

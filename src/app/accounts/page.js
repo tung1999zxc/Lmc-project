@@ -136,6 +136,7 @@ export default function EmployeeManagement() {
     const pt = khuvuc.find((pt) => pt.value === ptValue);
     return pt ? pt.label : ptValue;
   };
+  
 const handleMassUpdateKhuvuc = async () => {
    
         try {
@@ -181,6 +182,16 @@ const handleMassUpdateKhuvuc = async () => {
       title: "Khu Vực",
       dataIndex: "khuvuc",
       render: (value) => getPositionTeamLabel4(value),
+    },
+    {
+      title: "STK",
+      dataIndex: "stk",
+      
+    },
+    {
+      title: "Ngân Hàng",
+      dataIndex: "nh",
+     
     },
     {
       title: "Thao tác",
@@ -260,6 +271,8 @@ const handleMassUpdateKhuvuc = async () => {
       status: employee.status,
       quocgia: employee.quocgia,
       khuvuc: employee.khuvuc,
+      stk: employee.stk,
+      nh: employee.nh,
     });
   };
 
@@ -278,6 +291,8 @@ const handleMassUpdateKhuvuc = async () => {
       position_team2: values.position_team2,
       quocgia: values.quocgia,
       khuvuc: values.khuvuc,
+      stk: values.stk,
+      nh: values.nh,
       status: values.status,
     };
 
@@ -471,6 +486,20 @@ const visibleEmployees =
                   }))}
                 />
               </Form.Item>
+              <Form.Item
+              // disabled={currentUser.position !== "admin"}
+                label="STK ADS"
+                name="stk"
+              >
+                <Input />
+              </Form.Item>
+              <Form.Item
+              // disabled={currentUser.position !== "admin"}
+                label="Ngân Hàng"
+                name="nh"
+              >
+                <Input />
+              </Form.Item>
 
         <Form.Item>
           <Button type="primary" htmlType="submit" loading={loading}>
@@ -601,6 +630,18 @@ const visibleEmployees =
                     value: p.value,
                   }))}
                 />
+              </Form.Item>
+              <Form.Item
+                label="STK ADS"
+                name="stk"
+              >
+                <Input />
+              </Form.Item>
+              <Form.Item
+                label="NGÂN HÀNG"
+                name="nh"
+              >
+             <Input />
               </Form.Item>
               <Form.Item
                 label="status"

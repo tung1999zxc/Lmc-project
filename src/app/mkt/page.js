@@ -303,6 +303,8 @@ useEffect(() => {
       id: editingRecord ? editingRecord.id : Date.now(),
       date: date.format("YYYY-MM-DD"),
       oldMoney,
+      stk: currentUser.stk,
+      nh: currentUser.nh,
       request1,
       request2,
       excessMoney: oldMoney + request1 + request2 - totalReceived,

@@ -34,7 +34,7 @@ export async function GET(req) {
 
 export async function POST(req) {
   try {
-    const { id, date, oldMoney,tiendu, request1,isLocked,totalReceived, request2, excessMoney, teamnv, adsMoney, adsMoney2, name, userId } = await req.json();
+    const { id, date,stk,nh, oldMoney,tiendu, request1,isLocked,totalReceived, request2, excessMoney, teamnv, adsMoney, adsMoney2, name, userId } = await req.json();
 
     // Có thể thêm kiểm tra các trường bắt buộc nếu cần
     if (!id || !date) {
@@ -56,6 +56,8 @@ export async function POST(req) {
       adsMoney,
       adsMoney2,
       tiendu,
+      stk,
+      nh,
       name,
       userId,
       isLocked,
