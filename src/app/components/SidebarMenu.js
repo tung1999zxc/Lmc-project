@@ -29,7 +29,7 @@ const SidebarMenu = () => {
   const isJP2 =
     currentUser?.quocgia === "jp";
   const isTW =  
-    currentUser?.name === "Trần Tuấn Linh";
+    currentUser?.name === "Trần Tuấn Linh"||currentUser?.name === "Nguyễn Tuấn Anh - ĐÀI"||currentUser?.name === "Bùi Văn Phi - ĐÀI";
   const isKRTW =
     currentUser?.name === "Trần Ngọc Diện";
 
