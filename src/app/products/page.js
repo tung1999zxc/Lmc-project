@@ -877,7 +877,7 @@ const filteredProducts = useMemo(() => {
       : []),
      
  
-...((currentUser.name !== "nhii"  )
+...((currentUser.name !== "nhi"  )
       ? [
      {
   title: "MKT Test",
