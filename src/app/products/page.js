@@ -76,7 +76,10 @@ const InventoryPage = () => {
   const [form] = Form.useForm();
   const [editForm] = Form.useForm();
   const [addImportForm] = Form.useForm();
-
+  
+const [selectedRowKeys, setSelectedRowKeys] = useState([]);
+const [bulkMkt, setBulkMkt] = useState(null);
+const [bulkDate, setBulkDate] = useState(null);
   // UI state
   const [searchText, setSearchText] = useState("");
   const [selectedPreset, setSelectedPreset] = useState("all");
@@ -257,7 +260,12 @@ const mktOptions = employees
       return itemDate >= start && itemDate <= end;
     });
   }
-
+const rowSelection = {
+  selectedRowKeys,
+  onChange: (keys) => {
+    setSelectedRowKeys(keys);
+  },
+};
   /** ===========
    * Precompute aggregations from orders to avoid per-row heavy computations
    * - ordersAggMap: {
@@ -1148,6 +1156,37 @@ const calculateStats2Days = useCallback(() => {
   /** ===========
    * UI render
    * =========== */
+  const handleBulkUpdate = async () => {
+  if (selectedRowKeys.length === 0) {
+    message.warning("Chưa chọn sản phẩm");
+    return;
+  }
+
+  try {
+    setLoading(true);
+
+    await axios.put("/api/products/bulk-update", {
+      keys: selectedRowKeys,
+      mkttest: bulkMkt,
+      testday: bulkDate
+        ? bulkDate.format("YYYY-MM-DD")
+        : null,
+    });
+
+    message.success("Cập nhật hàng loạt thành công");
+
+    setSelectedRowKeys([]);
+    setBulkMkt(null);
+    setBulkDate(null);
+
+    fetchProducts();
+  } catch (err) {
+    console.error(err);
+    message.error("Lỗi cập nhật");
+  } finally {
+    setLoading(false);
+  }
+};
   return (
     <div
       style={{
@@ -1283,8 +1322,35 @@ const calculateStats2Days = useCallback(() => {
           <span style={{ color: "blue" }}>{(totalRevenue * 17000).toLocaleString()} VND</span>
         </div>
       </div>
+<div style={{ display: "flex", gap: 10, marginBottom: 16 }}>
+  
+  <Select
+    allowClear
+    placeholder="Chọn MKT"
+    style={{ width: 200 }}
+    value={bulkMkt}
+    onChange={(value) => setBulkMkt(value)}
+  >
+    {mktOptions.map((mkt) => (
+      <Option key={mkt} value={mkt}>
+        {mkt}
+      </Option>
+    ))}
+  </Select>
 
+  <DatePicker
+    style={{ width: 200 }}
+    value={bulkDate}
+    onChange={(date) => setBulkDate(date)}
+  />
+
+  <Button disabled={currentUser.position==="mkt"||currentUser.position==="lele"} type="primary" onClick={handleBulkUpdate}>
+    ĐÁNH DẤU CHỦ QUYỀN
+  </Button>
+
+</div>
       <Table
+      rowSelection={rowSelection}
         sticky
         dataSource={filteredProducts}
         columns={columns}
