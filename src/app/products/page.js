@@ -1325,6 +1325,7 @@ const calculateStats2Days = useCallback(() => {
 <div style={{ display: "flex", gap: 10, marginBottom: 16 }}>
   
   <Select
+  showSearch
     allowClear
     placeholder="Chọn MKT"
     style={{ width: 200 }}
