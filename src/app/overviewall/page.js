@@ -1180,7 +1180,7 @@ const teamChartDataNew2 = teams.map((team) => {
   }
 
   if (team.value === "TW") {
-    const extraTW = ["Nguyễn Quốc Hiếu", "Hà Minh Sang", "Trần Ngọc Diện"];
+    const extraTW = ["Nguyễn Quốc Hiếu","Phạm Hương Giang", "Hà Minh Sang", "Trần Ngọc Diện"];
     extraTW.forEach((name) => {
       sales += calcProfitByName(name);
       adsCost += calcAdsByName(name);
