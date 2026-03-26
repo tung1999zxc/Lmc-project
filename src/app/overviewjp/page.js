@@ -774,6 +774,7 @@ const Dashboard = () => {
 
     { label: "TEAM DIỆN ONLINE", value: "DIENON" },
     { label: "TEAM DIỆN", value: "DIEN" },
+    { label: "TEAM HIẾU", value: "HIEU" },
   ];
   const teams2 = [
     { label: "TEAM PHI", value: "PHI" },
@@ -784,6 +785,7 @@ const Dashboard = () => {
     { label: "TEAM PHONG", value: "PHONG" },
     { label: "TEAM TUẤN ANH", value: "TUANANH" },
     { label: "TEAM DIỆN", value: "DIEN" },
+     { label: "TEAM HIẾU", value: "HIEU" },
   ];
 
   // Dữ liệu nhân viên (mẫu)

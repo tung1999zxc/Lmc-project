@@ -373,7 +373,7 @@ const resetPagename =()=>{
     return [start, end];
   }
   const { Option } = Select;
-  
+
   useEffect(() => {
     
       const range = getDateRangeByPreset(dateRange2);
@@ -1932,6 +1932,7 @@ width: 80,
           ĐƠN
         </Checkbox>
       ),
+      width: 100,
       dataIndex: "saleReport",
       key: "saleReport",
       render: (text) => (
@@ -1988,19 +1989,7 @@ width: 80,
     //     <Tag color={text === "ĐÃ THANH TOÁN" ? "green" : "red"}>{text}</Tag>
     //   )
     // },
-        {
-      title: (
-        <Checkbox
-          checked={selectedColumns.includes("paymentStatus2")}
-          onChange={(e) => handleColumnSelect("paymentStatus2", e.target.checked)}
-        >
-          PHƯƠNG THỨC VẬN CHUYỂN
-        </Checkbox>
-      ),
-      dataIndex: "paymentStatus2",
-      key: "paymentStatus2",
-     
-    },
+       
    
     
     

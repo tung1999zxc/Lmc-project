@@ -504,6 +504,7 @@ const EmployeePageTable = () => {
         <Option value="TUANANH">TEAM TUẤN ANH</Option>
         <Option value="DIEN">TEAM DIỆN</Option>
 
+        <Option value="HIEU">TEAM HIẾU</Option>
         <Option value="DIEU">TEAM DIỆU</Option>
       </Select>
       <br></br>

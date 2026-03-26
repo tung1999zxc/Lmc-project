@@ -96,61 +96,11 @@ const Dashboard = () => {
   const teamsList = [
     {
       id: 1,
-      name: `TEAM SƠN `,
+      name: `TEAM HIẾU `,
       members: safeEmployees
-        .filter((employee) => employee.team_id === "SON")
+        .filter((employee) => employee.team_id === "HIEU")
         .map((employee) => employee.employee_code),
-    },
-    {
-      id: 2,
-      name: `TEAM QUÂN `,
-      members: safeEmployees
-        .filter((employee) => employee.team_id === "QUAN")
-        .map((employee) => employee.employee_code),
-    },
-    // {
-    //   id: 3,
-    //   name: `TEAM CHI `,
-    //   members: safeEmployees
-    //     .filter(employee => employee.team_id === 'CHI')
-    //     .map(employee => employee.employee_code)
-    // },
-    {
-      id: 4,
-      name: `TEAM PHONG `,
-      members: safeEmployees
-        .filter((employee) => employee.team_id === "PHONG")
-        .map((employee) => employee.employee_code),
-    },
-    {
-      id: 5,
-      name: `TEAM TUẤN ANH `,
-      members: safeEmployees
-        .filter((employee) => employee.team_id === "TUANANH")
-        .map((employee) => employee.employee_code),
-    },
-    {
-      id: 6,
-      name: `TEAM DIỆN `,
-      members: safeEmployees
-        .filter((employee) => employee.team_id === "DIEN")
-        .map((employee) => employee.employee_code),
-    },
-
-    {
-      id: 8,
-      name: `TEAM DIỆU`,
-      members: safeEmployees
-        .filter((employee) => employee.team_id === "DIEU")
-        .map((employee) => employee.employee_code),
-    },
-    {
-      id: 8,
-      name: `TEAM PHI`,
-      members: safeEmployees
-        .filter((employee) => employee.team_id === "PHI")
-        .map((employee) => employee.employee_code),
-    },
+    }
   ];
 
   const filterSampleOrdersByPeriod = (order) => {
