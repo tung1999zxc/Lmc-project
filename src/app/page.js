@@ -3208,7 +3208,7 @@ const columns = useMemo(() => [
                     <Option value="today">Hôm Nay</Option>
                     <Option value="yesterday">Hôm Qua</Option>
                     <Option value="week">1 Tuần gần nhất</Option>
-                    <Option disabled={currentUser.position==="lead"} value="currentMonth">
+                    <Option  value="currentMonth">
                       1 Tháng (Từ đầu tháng đến hiện tại)
                     </Option>
                     <Option value="lastMonth">Tháng trước</Option>

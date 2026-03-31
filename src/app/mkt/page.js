@@ -371,6 +371,8 @@ useEffect(() => {
       oldMoney: record.oldMoney,
       request1: record.request1,
       request2: record.request2,
+      stk: record.stk,
+      nh: record.nh,
       totalReceived: record.totalReceived,
       excessMoney: record.excessMoney,
       adsMoney: record.request1 + record.request2,
@@ -691,10 +693,10 @@ useEffect(() => {
       filtered = filtered.filter(
         (record) => record.userId === currentUser.employee_code
       );
-    } else if (currentUser.position === "lead" && period === "month") {
-     filtered = filtered.filter(
-        (record) => record.userId === currentUser.employee_code
-      );
+    // } else if (currentUser.position === "lead" && period === "month") {
+    //  filtered = filtered.filter(
+    //     (record) => record.userId === currentUser.employee_code
+    //   );
     } else if (currentUser.position === "lead") {
       filtered = filtered.filter((record) =>
         leadTeamMembers.includes(record.userId)
