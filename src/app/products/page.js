@@ -71,12 +71,14 @@ const InventoryPage = () => {
   // Data
   const [orders2, setOrders] = useState([]);
   const [products, setProducts] = useState([]);
-
+const [lastFilterType, setLastFilterType] = useState(null);
   // Forms
   const [form] = Form.useForm();
   const [editForm] = Form.useForm();
   const [addImportForm] = Form.useForm();
-  
+  const [testDayRange, setTestDayRange] = useState(null);
+  const [testDayPreset, setTestDayPreset] = useState(null);
+
 const [selectedRowKeys, setSelectedRowKeys] = useState([]);
 const [bulkMkt, setBulkMkt] = useState(null);
 const [bulkDate, setBulkDate] = useState(null);
@@ -354,9 +356,38 @@ const filteredProducts = useMemo(() => {
   (p) => (p.mkttest || "").trim() === selectedMktFilter.trim()
 );
   }
+if (lastFilterType === "preset" && testDayPreset) {
+  const today = moment().startOf("day");
+
+  data = data.filter((p) => {
+    if (!p.testday) return false;
+
+    const testDate = moment(p.testday).startOf("day");
+    const diffDays = today.diff(testDate, "days");
+
+    return diffDays === testDayPreset;
+  });
+
+} else if (lastFilterType === "range" && testDayRange?.length === 2) {
+  const start = testDayRange[0].format("YYYY-MM-DD");
+  const end = testDayRange[1].format("YYYY-MM-DD");
+
+  data = data.filter((p) => {
+    if (!p.testday) return false;
+
+    const d = new Date(p.testday);
+    const localDate = new Date(
+      d.getTime() - d.getTimezoneOffset() * 60000
+    )
+      .toISOString()
+      .split("T")[0];
+
+    return localDate >= start && localDate <= end;
+  });
+}
 
   return data;
-}, [products, searchText, filterMktTest, selectedMktFilter]);
+}, [products, searchText, filterMktTest,lastFilterType, selectedMktFilter,testDayPreset,testDayRange]);
 
   /** Compute derived "orders" list filtered by preset to match original behavior */
   const ordersByPreset = useMemo(() => {
@@ -1301,6 +1332,31 @@ const calculateStats2Days = useCallback(() => {
   {mktOptions.map((report) => (
     <Option key={report} value={report}>
       {report}
+    </Option>
+  ))}
+</Select>
+<DatePicker.RangePicker
+  style={{ width: 260 }}
+  onChange={(dates) => {
+    setTestDayRange(dates);
+    setLastFilterType("range");
+  }}
+  format="YYYY-MM-DD"
+  placeholder={["Từ ngày test", "Đến ngày test"]}
+/>
+
+<Select
+  style={{ width: 160 }}
+  placeholder="Lọc ngày test"
+  allowClear
+  onChange={(value) => {
+    setTestDayPreset(value);
+    setLastFilterType("preset");
+  }}
+>
+  {Array.from({ length: 30 }, (_, i) => (
+    <Option key={i + 1} value={i + 1}>
+      {i + 1} ngày
     </Option>
   ))}
 </Select>
