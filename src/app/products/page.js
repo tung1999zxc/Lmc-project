@@ -928,7 +928,7 @@ if (lastFilterType === "preset" && testDayPreset) {
   width: 200,
   render: (text, record, index) => {
     // Tránh lỗi nếu text null hoặc undefined
-    if (!text) return "NoName";
+    if (!text) return "SP CHUNG";
 
     return (
       <div style={{ width: 200 }}>
@@ -1218,6 +1218,37 @@ const calculateStats2Days = useCallback(() => {
     setLoading(false);
   }
 };
+  const handleBulkUpdate2 = async () => {
+  if (selectedRowKeys.length === 0) {
+    message.warning("Chưa chọn sản phẩm");
+    return;
+  }
+
+  try {
+    setLoading(true);
+
+    await axios.put("/api/products/bulk-update2", {
+      keys: selectedRowKeys,
+      mkttest: bulkMkt,
+      testday: bulkDate
+        ? bulkDate.format("YYYY-MM-DD")
+        : null,
+    });
+
+    message.success("Cập nhật hàng loạt thành công");
+
+    setSelectedRowKeys([]);
+    setBulkMkt(null);
+    setBulkDate(null);
+
+    fetchProducts();
+  } catch (err) {
+    console.error(err);
+    message.error("Lỗi cập nhật");
+  } finally {
+    setLoading(false);
+  }
+};
   return (
     <div
       style={{
@@ -1402,7 +1433,10 @@ const calculateStats2Days = useCallback(() => {
   />
 
   <Button disabled={currentUser.position==="mkt"||currentUser.position==="lead"} type="primary" onClick={handleBulkUpdate}>
-    ĐÁNH DẤU CHỦ QUYỀN
+    ĐÁNH DẤU CHỦ QUYỀN ( HOẶC SP CHUNG)
+  </Button>
+  <Button disabled={currentUser.position==="mkt"||currentUser.position==="lead"} type="primary" onClick={handleBulkUpdate2}>
+    ĐÁNH DẤU SP MỚI( XÉT THƯỞNG )
   </Button>
 
 </div>
