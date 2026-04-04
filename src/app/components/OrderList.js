@@ -2544,7 +2544,7 @@ const isFullCommission = fullProducts.some(
   (p) => !p?.mkttest || p.mkttest.trim().toLowerCase() === values.mkt.trim().toLowerCase()
 );
 const isFullCommission2 = fullProducts.some(
-  (p) => p.mkttest.trim().toLowerCase() === "SP MỚI"
+  (p) => p.mkttest === "SP MỚI"
 );
 
 if (isFullCommission2) {
