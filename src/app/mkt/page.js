@@ -605,7 +605,7 @@ useEffect(() => {
               fontWeight: "bold",
             }}
           >
-            {(numValue-1).toFixed(2)}%
+            {numValue < 5 ? 0 : (numValue-1).toFixed(2)}%
           </div>
         );
       },
