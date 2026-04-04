@@ -959,19 +959,16 @@ if (lastFilterType === "preset" && testDayPreset) {
     let tagColor = "red";
     let extraText = "";
 
-    if (diffDays <= 3) {
+    if (diffDays <= 4) {
       tagColor = "red";
       extraText = "- SP KHÓA";
     } 
-    else if (diffDays > 3 && diffDays <= 6) {
+    else if (diffDays > 4 && diffDays <= 9) {
       tagColor = "orange";
-      extraText = "+85%";
-    } 
-    else if (diffDays > 6 && diffDays <= 8) {
-      tagColor = "green";
       extraText = "+90%";
-    }
-    else if (diffDays > 8) {
+    } 
+    
+    else if (diffDays > 9) {
       tagColor = "green";
       extraText = "+100%";
     }
@@ -1401,7 +1398,7 @@ const calculateStats2Days = useCallback(() => {
     onChange={(date) => setBulkDate(date)}
   />
 
-  <Button disabled={currentUser.position==="mkt"||currentUser.position==="lele"} type="primary" onClick={handleBulkUpdate}>
+  <Button disabled={currentUser.position==="mkt"||currentUser.position==="lead"} type="primary" onClick={handleBulkUpdate}>
     ĐÁNH DẤU CHỦ QUYỀN
   </Button>
 

@@ -2528,11 +2528,11 @@ if (validDates.length === 0) {
      let revenuemkt = revenue;
   let profitmkt = profit;
 
-  if (diffDays <= 6) {
-    revenuemkt = revenue * 0.85;
+  if (diffDays <= 4) {
+    revenuemkt = revenue * 0.5;
     profitmkt = revenuemkt === 0 ? 0 : Math.max(revenuemkt - 5, 0);
   } 
-  else if (diffDays > 6 && diffDays <= 8) {
+  else if (diffDays > 4 && diffDays <= 9) {
     revenuemkt = revenue * 0.9;
     profitmkt = revenuemkt === 0 ? 0 : Math.max(revenuemkt - 5, 0);
   } 
@@ -2805,7 +2805,7 @@ if (isFullCommission) {
 //     fetchOrders(); // Cập nhật lại danh sách đơn
 //   } catch (err) {
 //     console.error(err);
-//     messageApi.error("Lỗi khi chia đơn");
+//     messageApi.error("Lỗi khi chia đơn");1234
 //   }
 // };
 const handleResetAllSTT = async () => {
@@ -2840,9 +2840,9 @@ const handleResetAllSTT = async () => {
 >
   Cập nhật Salexuly cho Đỗ Uyển Nhi
 </Button> */}
-{/* <Button type="primary" danger onClick={handleResetAllSTT}>
+<Button type="primary" danger onClick={handleResetAllSTT}>
   Đặt STT về 0
-</Button> */}
+</Button>
       <Row>
       <Col span={6}><div style={{ marginBottom: 16 }}>
         <Button
