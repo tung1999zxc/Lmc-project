@@ -40,6 +40,7 @@ const Dashboard = () => {
   const [loading, setLoading] = useState(false);
   const [safeOrders, setSafeOrders] = useState([]);
   const [records, setRecords] = useState([]);
+  const [tienthuaall, settienthuaall] = useState([]);
   const [safeEmployees, setSafeEmployees] = useState([]);
   const [editingRecord, setEditingRecord] = useState(null);
   const [messageApi, contextHolder] = message.useMessage();
@@ -491,8 +492,9 @@ useEffect(() => {
       .reduce((sum, r) => sum + (r.totalReceived || 0), 0);
 
     const tienThua = tongAdsXin - tongTienTieu;
+    
     const percentAds =
-      dsTong > 0 ? ((tongTienTieu / dsTong) * 100).toFixed(2) : 0;
+      dsTong > 0 ? (((tongTienTieu - tienThua)/ dsTong) * 100).toFixed(2) : 0;
 
     return {
       key: date,
@@ -533,7 +535,7 @@ useEffect(() => {
     totalTienDuThangNay;
   const totalPercentAds =
     totalDSTong > 0
-      ? ((totalTongAdsXin / (totalDSTong * 0.95)) * 100).toFixed(2)
+      ? ((((totalTongAdsXin - totalTienThua)/ (totalDSTong * 0.95)) * 100)).toFixed(2)
       : 0;
 
   const adminSummaryColumns = [
@@ -603,7 +605,7 @@ useEffect(() => {
               fontWeight: "bold",
             }}
           >
-            {numValue.toFixed(2)}%
+            {(numValue-1).toFixed(2)}%
           </div>
         );
       },
