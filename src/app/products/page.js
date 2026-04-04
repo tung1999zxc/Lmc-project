@@ -142,9 +142,12 @@ const fetchEmployees = async () => {
     fetchProducts();
   }, [fetchOrders, fetchProducts]);
 
-const mktOptions = employees
+const mktOptions = [
+  "SP MỚI",
+  ...employees
     .filter((emp) => emp.position_team === "mkt")
-    .map((emp) => emp.name);
+    .map((emp) => emp.name)
+];
   /** ===========
    * Date filter helpers (same behavior as original)
    * =========== */
@@ -943,7 +946,7 @@ if (lastFilterType === "preset" && testDayPreset) {
   dataIndex: "testday",
   key: "testday",
   width: 180,
-  render: (text) => {
+  render: (text, record) => {
     if (!text) return "+100%";
 
     const today = new Date();
@@ -959,16 +962,16 @@ if (lastFilterType === "preset" && testDayPreset) {
     let tagColor = "red";
     let extraText = "";
 
-    if (diffDays <= 4) {
+    if (diffDays <= 4 && record.mkttest !== "SP MỚI") {
       tagColor = "red";
       extraText = "- SP KHÓA";
     } 
-    else if (diffDays > 4 && diffDays <= 9) {
+    else if (diffDays > 4 && diffDays <= 9 && record.mkttest !== "SP MỚI") {
       tagColor = "orange";
       extraText = "+90%";
     } 
     
-    else if (diffDays > 9) {
+    else if (diffDays > 9|| record.mkttest === "SP MỚI") {
       tagColor = "green";
       extraText = "+100%";
     }

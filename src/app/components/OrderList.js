@@ -2543,7 +2543,14 @@ if (validDates.length === 0) {
 const isFullCommission = fullProducts.some(
   (p) => !p?.mkttest || p.mkttest.trim().toLowerCase() === values.mkt.trim().toLowerCase()
 );
+const isFullCommission2 = fullProducts.some(
+  (p) => p.mkttest.trim().toLowerCase() === "SP MỚI"
+);
 
+if (isFullCommission2) {
+  revenuemkt = revenue;
+  profitmkt = profit;
+}
 if (isFullCommission) {
   revenuemkt = revenue;
   profitmkt = profit;
@@ -2840,9 +2847,9 @@ const handleResetAllSTT = async () => {
 >
   Cập nhật Salexuly cho Đỗ Uyển Nhi
 </Button> */}
-<Button type="primary" danger onClick={handleResetAllSTT}>
+{/* <Button type="primary"  danger onClick={handleResetAllSTT}>
   Đặt STT về 0
-</Button>
+</Button> */}
       <Row>
       <Col span={6}><div style={{ marginBottom: 16 }}>
         <Button
