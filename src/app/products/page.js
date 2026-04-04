@@ -142,12 +142,10 @@ const fetchEmployees = async () => {
     fetchProducts();
   }, [fetchOrders, fetchProducts]);
 
-const mktOptions = [
-  "SP MỚI",
-  ...employees
+const mktOptions = employees
     .filter((emp) => emp.position_team === "mkt")
     .map((emp) => emp.name)
-];
+;
   /** ===========
    * Date filter helpers (same behavior as original)
    * =========== */
