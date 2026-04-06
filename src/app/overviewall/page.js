@@ -886,6 +886,8 @@ const tw = calcRevenue(ordersTW, 750);
     { label: "TEAM LẺ", value: "LE" },
     { label: "TEAM DIỆN ONLINE", value: "DIENON" },
     { label: "TEAM DIỆN", value: "DIEN" },
+    { label: "TEAM PHÚ THÀNH", value: "PHUTHANH" },
+    
   ],
   all: [
     { label: "TEAM PHI", value: "PHI" },
@@ -896,6 +898,7 @@ const tw = calcRevenue(ordersTW, 750);
     { label: "TEAM TUẤN ANH", value: "TUANANH" },
     { label: "TEAM DIỆN ONLINE", value: "DIENON" },
     { label: "TEAM DIỆN", value: "DIEN" },
+    { label: "TEAM PHÚ THÀNH", value: "PHUTHANH" },
     //  { label: "TEAM NHẬT", value: "JP" },
     // { label: "TEAM ĐÀI", value: "TW" },
   ],
@@ -914,6 +917,7 @@ const teams = teamsByArea[selectedArea] || [];
     { label: "TEAM LẺ", value: "LE" },
     { label: "TEAM DIỆN ONLINE", value: "DIENON" },
     { label: "TEAM DIỆN", value: "DIEN" },
+    { label: "TEAM PHÚ THÀNH", value: "PHUTHANH" },
   ],
   all: [
     { label: "TEAM PHI", value: "PHI" },
@@ -924,6 +928,7 @@ const teams = teamsByArea[selectedArea] || [];
     { label: "TEAM TUẤN ANH", value: "TUANANH" },
     { label: "TEAM DIỆN ONLINE", value: "DIENON" },
     { label: "TEAM DIỆN", value: "DIEN" },
+    { label: "TEAM PHÚ THÀNH", value: "PHUTHANH" },
     //  { label: "TEAM NHẬT", value: "JP" },
     // { label: "TEAM ĐÀI", value: "TW" },
   ],

@@ -796,6 +796,7 @@ useEffect(() => {
     { label: "TEAM LẺ", value: "LE" },
     { label: "TEAM DIỆN ONLINE", value: "DIENON" },
     { label: "TEAM DIỆN", value: "DIEN" },
+    { label: "TEAM PHÚ THÀNH", value: "PHUTHANH" },
   ],
   all: [
     { label: "TEAM PHI", value: "PHI" },
@@ -806,6 +807,7 @@ useEffect(() => {
     { label: "TEAM TUẤN ANH", value: "TUANANH" },
     { label: "TEAM DIỆN ONLINE", value: "DIENON" },
     { label: "TEAM DIỆN", value: "DIEN" },
+    { label: "TEAM PHÚ THÀNH", value: "PHUTHANH" },
   ],
 };
 
@@ -822,6 +824,7 @@ const teams = teamsByArea[selectedArea] || [];
     { label: "TEAM LẺ", value: "LE" },
     { label: "TEAM DIỆN ONLINE", value: "DIENON" },
     { label: "TEAM DIỆN", value: "DIEN" },
+    { label: "TEAM PHÚ THÀNH", value: "PHUTHANH" },
   ],
   all: [
     { label: "TEAM PHI", value: "PHI" },
@@ -832,6 +835,7 @@ const teams = teamsByArea[selectedArea] || [];
     { label: "TEAM TUẤN ANH", value: "TUANANH" },
     { label: "TEAM DIỆN ONLINE", value: "DIENON" },
     { label: "TEAM DIỆN", value: "DIEN" },
+    { label: "TEAM PHÚ THÀNH", value: "PHUTHANH" },
   ],
 };
 
