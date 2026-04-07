@@ -89,7 +89,7 @@ const [showStatTable, setShowStatTable] = useState(false);
 const [productStats2Days, setProductStats2Days] = useState([]);
   const [editModalVisible, setEditModalVisible] = useState(false);
   const [editingProduct, setEditingProduct] = useState(null);
-
+const [createdAtRange, setCreatedAtRange] = useState(null);
   const [addImportModalVisible, setAddImportModalVisible] = useState(false);
   const [addingImportProduct, setAddingImportProduct] = useState(null);
 
@@ -142,10 +142,12 @@ const fetchEmployees = async () => {
     fetchProducts();
   }, [fetchOrders, fetchProducts]);
 
-const mktOptions = employees
+const mktOptions = [
+  "SP CHUNG",
+  ...employees
     .filter((emp) => emp.position_team === "mkt")
     .map((emp) => emp.name)
-;
+];
   /** ===========
    * Date filter helpers (same behavior as original)
    * =========== */
@@ -348,7 +350,7 @@ const filteredProducts = useMemo(() => {
 
   // ✅ Filter có mkttest
   if (filterMktTest) {
-    data = data.filter((p) => p.mkttest && p.mkttest !== "");
+    data = data.filter((p) =>!p.mkttest );
   }
 
   // ✅ Filter theo MKT được chọn
@@ -386,9 +388,26 @@ if (lastFilterType === "preset" && testDayPreset) {
     return localDate >= start && localDate <= end;
   });
 }
+else if (lastFilterType === "createdAt" && createdAtRange?.length === 2) {
+  const start = createdAtRange[0].format("YYYY-MM-DD");
+  const end = createdAtRange[1].format("YYYY-MM-DD");
+
+  data = data.filter((p) => {
+    if (!p.createdAt) return false;
+
+    const d = new Date(p.createdAt);
+    const localDate = new Date(
+      d.getTime() - d.getTimezoneOffset() * 60000
+    )
+      .toISOString()
+      .split("T")[0];
+
+    return localDate >= start && localDate <= end;
+  });
+}
 
   return data;
-}, [products, searchText, filterMktTest,lastFilterType, selectedMktFilter,testDayPreset,testDayRange]);
+}, [products, searchText, filterMktTest,lastFilterType, selectedMktFilter,testDayPreset,testDayRange,createdAtRange]);
 
   /** Compute derived "orders" list filtered by preset to match original behavior */
   const ordersByPreset = useMemo(() => {
@@ -926,7 +945,7 @@ if (lastFilterType === "preset" && testDayPreset) {
   width: 200,
   render: (text, record, index) => {
     // Tránh lỗi nếu text null hoặc undefined
-    if (!text) return "SP CHUNG";
+    if (!text) return "";
 
     return (
       <div style={{ width: 200 }}>
@@ -940,7 +959,7 @@ if (lastFilterType === "preset" && testDayPreset) {
  ...((currentUser.name !== "nhii"  )
       ? [
       {
-  title: "Ngày Test / %",
+  title: "Ngày Khóa / %",
   dataIndex: "testday",
   key: "testday",
   width: 180,
@@ -982,6 +1001,18 @@ if (lastFilterType === "preset" && testDayPreset) {
       </div>
     );
   },
+},
+        ]
+      : []),
+ ...((currentUser.name !== "nhii"  )
+      ? [
+      {
+  title: "Ngày lên Data",
+  dataIndex: "createdAt",
+  key: "createdAt",
+  width: 120,
+ 
+  
 },
         ]
       : []),
@@ -1050,6 +1081,7 @@ if (lastFilterType === "preset" && testDayPreset) {
         {
         title: "Tổng doanh số",
         key: "totalProfit",
+        width:150,
         render: (_, record) => {
           const agg = getAggregatesFor(record.name);
           const totalProfit = agg.totalProfit  || 0;
@@ -1347,7 +1379,7 @@ const calculateStats2Days = useCallback(() => {
   <Switch
     checked={filterMktTest}
     onChange={(checked) => setFilterMktTest(checked)}
-    checkedChildren="Có MKT Test"
+    checkedChildren="Xét Thưởng"
     unCheckedChildren="Tất cả"
   />
   <Select
@@ -1371,12 +1403,12 @@ const calculateStats2Days = useCallback(() => {
     setLastFilterType("range");
   }}
   format="YYYY-MM-DD"
-  placeholder={["Từ ngày test", "Đến ngày test"]}
+  placeholder={["Từ ngày khóa", "Đến ngày khóa"]}
 />
 
 <Select
   style={{ width: 160 }}
-  placeholder="Lọc ngày test"
+  placeholder="Lọc ngày khóa"
   allowClear
   onChange={(value) => {
     setTestDayPreset(value);
@@ -1433,9 +1465,18 @@ const calculateStats2Days = useCallback(() => {
   <Button disabled={currentUser.position==="mkt"||currentUser.position==="lead"} type="primary" onClick={handleBulkUpdate}>
     ĐÁNH DẤU CHỦ QUYỀN ( HOẶC SP CHUNG)
   </Button>
-  <Button disabled={currentUser.position==="mkt"||currentUser.position==="lead"} type="primary" onClick={handleBulkUpdate2}>
+  {/* <Button disabled={currentUser.position==="mkt"||currentUser.position==="lead"} type="primary" onClick={handleBulkUpdate2}>
     ĐÁNH DẤU SP MỚI( XÉT THƯỞNG )
-  </Button>
+  </Button> */}
+<DatePicker.RangePicker
+  style={{marginLeft: 150, width: 300 }}
+  onChange={(dates) => {
+    setCreatedAtRange(dates);
+    setLastFilterType("createdAt"); // phân biệt với testday
+  }}
+  format="YYYY-MM-DD"
+  placeholder={["Từ ngày lên data", "Đến ngày lên data"]}
+/>
 
 </div>
       <Table
@@ -1465,7 +1506,7 @@ const calculateStats2Days = useCallback(() => {
                                 ))}
                               </Select>
           </Form.Item>
-           <Form.Item name="testday" label="Ngày Test" >
+           <Form.Item name="testday" label="Ngày khóa" >
             <DatePicker initialValue={moment()} style={{ width: "100%" }} />
           </Form.Item>
           <Form.Item hidden

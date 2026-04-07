@@ -2544,7 +2544,7 @@ const isFullCommission = fullProducts.some(
   (p) => !p?.mkttest || p.mkttest.trim().toLowerCase() === values.mkt.trim().toLowerCase()
 );
 const isFullCommission2 = fullProducts.some(
-  (p) => p.mkttest === "SP MỚI"
+  (p) =>( p.mkttest === "SP MỚI" || p.mkttest === "SP CHUNG")
 );
 
 if (isFullCommission2) {
@@ -3099,7 +3099,7 @@ const handleResetAllSTT = async () => {
             placeholder="Chọn bộ lọc"
             allowClear
             options={[
-              
+              { value: "done", label: "Đơn Done" },
               { value: "unpaid_success", label: "Chưa thanh toán & Giao Thành công" },   
               { value: "donechuaguichuagui", label: "Done + Chưa Gửi Hàng" },   
 
@@ -3116,7 +3116,7 @@ const handleResetAllSTT = async () => {
               { value: "chuyendon", label: "Đơn CHUYỂN ĐƠN" },
               { value: "booktb", label: "BOOK TB" },
               { value: "waiting_approval", label: "Đợi xác nhận" },
-              { value: "done", label: "Đơn đã Done" },
+              
               { value: "duplicate_name", label: "Trùng tên khách" },
               { value: "duplicate_phone", label: "Trùng số điện thoại" },
               { value: "unpaid", label: "Chưa thanh toán" },
@@ -3202,14 +3202,11 @@ const handleResetAllSTT = async () => {
   />
   {currentUser.position !=="salenhapdon" &&
    <span ><strong>
-  Tổng Doanh Số: {(filteredOrders.reduce((acc, order) => {
+  Tổng Doanh Số (Chưa DONE): {(filteredOrders.reduce((acc, order) => {
         // Chuyển revenue về số nếu chưa phải số
         return acc + (Number(order.revenuemkt ?? order.revenue ?? 0) || 0);
       }, 0)*17000).toLocaleString()}<br></br>
-      Tổng Doanh Thu: {(filteredOrders.reduce((acc, order) => {
-        // Chuyển revenue về số nếu chưa phải số
-        return acc + (Number(order.profitmkt ?? order.profit ?? 0) || 0);
-      }, 0)*17000*0.95).toLocaleString()}
+      
 </strong></span>
 }
 </Col>
