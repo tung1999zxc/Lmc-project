@@ -1503,7 +1503,7 @@ onChange={(e) => handleColumnSelect("istick", e.target.checked)}
       dataIndex: "revenue",
       key: "revenue",
     },
-    ...( currentUser.position !== "salexuly" && currentUser.position !== "salenhapdon"&& currentUser.position !== "leadSALE"
+    ...( currentUser.position !== "salexuly" && currentUser.position !== "salenhapdon"&& currentUser.position !== "leadSALE"&& currentUser.position !== "managerSALE"
       ? [
     {
       title: (
@@ -2529,11 +2529,11 @@ if (validDates.length === 0) {
   let profitmkt = profit;
 
   if (diffDays <= 4) {
-    revenuemkt = revenue * 0.9;
+    revenuemkt = revenue * 1;
     profitmkt = revenuemkt === 0 ? 0 : Math.max(revenuemkt - 5, 0);
   } 
   else if (diffDays > 4 && diffDays <= 9) {
-    revenuemkt = revenue * 0.9;
+    revenuemkt = revenue * 1;
     profitmkt = revenuemkt === 0 ? 0 : Math.max(revenuemkt - 5, 0);
   } 
   else {
