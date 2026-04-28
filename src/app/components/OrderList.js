@@ -1601,7 +1601,7 @@ onChange={(e) => handleColumnSelect("istick", e.target.checked)}
       },
       width: 80, // Tăng width nếu cần để hiển thị đủ thông tin
     },
-     ...(  currentUser.position !== "salenhapdo"
+     ...(  currentUser.position !== "salexuly"
       ? [
     {
       title: (
