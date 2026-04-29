@@ -1404,7 +1404,7 @@ onChange={(e) => handleColumnSelect("istick", e.target.checked)}
         key: "pageName",
         render: (text) => text ? text.split("||")[0].trim() : "",
       },
-    ...((currentUser.name === "nhii"
+    ...((currentUser.position_team === "kho"
      ) ? [
           {
             title: (<>
