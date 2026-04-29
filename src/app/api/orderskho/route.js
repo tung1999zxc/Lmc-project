@@ -7,35 +7,37 @@ export async function GET(req) {
     const { searchParams } = new URL(req.url);
     const filter = searchParams.get("filter") || "failed";
 
-    let query = {};
+    // ✅ Lấy mốc thời gian 4 tháng trước
+    const now = new Date();
+    const fourMonthsAgo = new Date();
+    fourMonthsAgo.setMonth(now.getMonth() - 4);
+
+    let query = {
+      // ✅ luôn lọc theo 4 tháng gần nhất
+      createdAt: { $gte: fourMonthsAgo }
+    };
 
     if (filter === "failed") {
-      // Đơn đã được sale xử lý, nhưng chưa thanh toán hoặc chưa giao
-      query = {
-        $and: [
-          { saleReport: "DONE" },
-          {
-            $or: [
-              { paymentStatus: { $ne: "ĐÃ THANH TOÁN" } },
-              { deliveryStatus: { $ne: "GIAO THÀNH CÔNG" } }
-            ]
-          }
-        ]
-      };
+      query.$and = [
+        { saleReport: "DONE" },
+        {
+          $or: [
+            { paymentStatus: { $ne: "ĐÃ THANH TOÁN" } },
+            { deliveryStatus: { $ne: "GIAO THÀNH CÔNG" } }
+          ]
+        }
+      ];
     } else if (filter === "success") {
-      // Đơn đã giao thành công và được sale xử lý
-      query = {
-        deliveryStatus: "GIAO THÀNH CÔNG",
-        saleReport: "DONE"
-      };
+      query.saleReport = "DONE";
+      query.deliveryStatus = "GIAO THÀNH CÔNG";
     } else if (filter === "all") {
-      // Tất cả đơn đã được sale xử lý
-      query = {
-        saleReport: "DONE"
-      };
+      query.saleReport = "DONE";
     }
 
-    const orders = await db.collection('orders').find(query).toArray();
+    const orders = await db.collection('orders')
+      .find(query)
+      .sort({ createdAt: -1 }) // optional: mới nhất lên đầu
+      .toArray();
 
     return new Response(
       JSON.stringify({ message: 'Lấy đơn hàng kho thành công', data: orders }),

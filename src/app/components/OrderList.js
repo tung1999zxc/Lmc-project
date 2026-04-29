@@ -418,9 +418,13 @@ const resetPagename =()=>{
   const filteredOrders = useMemo(() => {
     let roleFilteredOrders = [...orders];
 
+  if (currentUser.position === "kho2") {
+    roleFilteredOrders = roleFilteredOrders.filter(
+      (order) => order.isShipping === true
+    );
+  }
   
-  
-    if (currentUser.position === "mkt") {
+    else if (currentUser.position === "mkt") {
       roleFilteredOrders = roleFilteredOrders.filter(
         (order) => order.mkt.trim().toLowerCase() === currentUser.name.trim().toLowerCase()
       );
@@ -613,6 +617,7 @@ const resetPagename =()=>{
                 return order.saleReport === "CHUYỂN ĐƠN";
               case "istick":
                 return order.istick === true;
+              
                 case "notick": {
                   // Tìm đơn hàng gốc từ initialOrders (đã lưu)
                   const originalOrder = initialOrders.find((o) => o.id === order.id);
@@ -1064,7 +1069,7 @@ const getCustomerColor = (name) => {
       });
       return copy;
     });
-  }, 3000);
+  }, 0);
 
   const handleIstickChangeDONE = useCallback((orderId, value) => {
     debouncedChangeDONE(orderId, value);
@@ -1399,49 +1404,49 @@ onChange={(e) => handleColumnSelect("istick", e.target.checked)}
         key: "pageName",
         render: (text) => text ? text.split("||")[0].trim() : "",
       },
-//     ...((currentUser.position === "managerSALE"||currentUser.position === "leadSALE"||currentUser.name === "Hoàng Lan Phương"||currentUser.name === "Đỗ Uyển Nhi"
-//      ) ? [
-//           {
-//             title: (<>
-//             <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-//              <Checkbox
-//   checked={selectedColumns.includes("isShipping")}
-//   onChange={(e) => handleColumnSelect("isShipping", e.target.checked)}
-// >
+    ...((currentUser.name === "nhii"
+     ) ? [
+          {
+            title: (<>
+            <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+             <Checkbox
+  checked={selectedColumns.includes("isShipping")}
+  onChange={(e) => handleColumnSelect("isShipping", e.target.checked)}
+>
   
-// </Checkbox>
+</Checkbox>
 
-// <Checkbox.Group
-//   options={[
-//     { label: "CTY đóng hàng", value: "istick2" }
-//   ]}
-//   value={allRowsSelected2 ? ["istick2"] : []}
-//   onChange={(checkedValues) => handleSelectAllIstick2(checkedValues.length > 0)}
-//   style={{
-//     border: "1px solid #1890ff",
-//     padding: "5px 10px",
-//     borderRadius: "5px",
-//     background: allRowsSelected2 ? "#1890ff" : "#f5f5f5",
-//     color: allRowsSelected2 ? "white" : "black",
-//     fontWeight: "bold"
-//   }}
-// /></div>
-//               <Button  type="primary" onClick={handleSaveIstick2}>
-//               Lưu 
-//             </Button></>
-//             ),
+<Checkbox.Group
+  options={[
+    { label: "KHO HQ đóng hàng", value: "istick2" }
+  ]}
+  value={allRowsSelected2 ? ["istick2"] : []}
+  onChange={(checkedValues) => handleSelectAllIstick2(checkedValues.length > 0)}
+  style={{
+    border: "1px solid #1890ff",
+    padding: "5px 10px",
+    borderRadius: "5px",
+    background: allRowsSelected2 ? "#1890ff" : "#f5f5f5",
+    color: allRowsSelected2 ? "white" : "black",
+    fontWeight: "bold"
+  }}
+/></div>
+              <Button  type="primary" onClick={handleSaveIstick2}>
+              Lưu 
+            </Button></>
+            ),
             
-//             key: "isShipping",
-//             dataIndex: "isShipping",
-//             render: (_, record) => (
-//               <MemoizedCheckbox
-//               checked={record.isShipping}
-//               onChange={e => handleIstickChange2(record.id, e.target.checked)}
-//             />
-//             ),
-//           },
-//         ]
-//       : []),
+            key: "isShipping",
+            dataIndex: "isShipping",
+            render: (_, record) => (
+              <MemoizedCheckbox
+              checked={record.isShipping}
+              onChange={e => handleIstickChange2(record.id, e.target.checked)}
+            />
+            ),
+          },
+        ]
+      : []),
     
     {
       title: (
@@ -2465,6 +2470,290 @@ onChange={(e) => handleColumnSelect("istick", e.target.checked)}
     },
     
   ];
+  const columnsKHO2 = [
+    {
+      title: "Thao Tác",
+      key: "action",
+      width: 30,
+      render: (_, record) => (
+        <Space>
+          <Button icon={<EditOutlined />} onClick={() => handleEdit(record)} />
+        </Space>
+      ),
+    },
+    {
+      title: (<>
+     
+       <Checkbox
+checked={selectedColumns.includes("istick")}
+onChange={(e) => handleColumnSelect("istick", e.target.checked)}
+>
+
+</Checkbox>
+
+
+        <Checkbox
+          checked={allRowsSelected}
+          onChange={(e) => handleSelectAllIstick(e.target.checked)}
+        >
+          In đơn
+        </Checkbox>
+        <Button type="primary" onClick={handleSaveIstick}>
+        Lưu 
+      </Button></>
+      ),
+      key: "istick",
+      dataIndex: "istick",
+      width: 50,
+      render: (_, record) => (
+       <MemoizedCheckbox
+    checked={record.istick || false}
+    onChange={(e) => handleIstickChange(record.id, e.target.checked)}
+  />
+      ),
+    },
+  
+   
+    {
+      title: (<>
+        <Checkbox
+          checked={allRowsSelected4}
+          onChange={(e) => handleSelectAllIstick4(e.target.checked)}
+        >
+         ĐÁNH DẤU ĐÃ IN
+        </Checkbox>
+        <Button type="primary" onClick={handleSaveIstick4}>
+        Lưu 
+      </Button></>
+      ),
+      key: "istick4",
+      dataIndex: "istick4",
+      width: 50,
+      render: (_, record) => (
+        <Checkbox
+          checked={record.istick4 || false}
+          onChange={(e) => handleIstickChange4(record.id, e.target.checked)}
+        />
+      ),
+    },
+    {
+      title: (<>
+        <Checkbox
+          checked={allRowsSelectedDONE}
+          onChange={(e) => handleSelectAllIstickDONE(e.target.checked)}
+        >
+          Xác nhận Giao thành công
+        </Checkbox>
+        <Button type="primary" onClick={handleSaveIstickDONE}>
+        Lưu 
+      </Button></>
+      ),
+      key: "istickDONE",
+      width: 50,
+      dataIndex: "istickDONE",
+      render: (_, record) => (
+        <MemoizedCheckbox
+        checked={record.istickDONE}
+        onChange={e => handleIstickChangeDONE(record.id, e.target.checked)}
+      />
+      ),
+    },
+    {
+      title: (
+        <Checkbox
+          checked={selectedColumns.includes("trackingCode")}
+          onChange={(e) => handleColumnSelect("trackingCode", e.target.checked)}
+        >
+          MÃ VẬN ĐƠN
+        </Checkbox>
+      ),
+      dataIndex: "trackingCode",
+      width: 90,
+      key: "trackingCode",
+    },
+    {
+      title: (
+        <Checkbox
+          checked={selectedColumns.includes("deliveryStatus")}
+          onChange={(e) => handleColumnSelect("deliveryStatus", e.target.checked)}
+        >
+          TÌNH TRẠNG GH
+        </Checkbox>
+      ),
+      dataIndex: "deliveryStatus",
+      width: 90,
+      key: "deliveryStatus",
+      render: (text) => (
+        <Tag color={text === "GIAO THÀNH CÔNG" ? "blue" : "orange"}>{text}</Tag>
+      ),
+    },
+     
+    // {
+    //   title: "BÊN ĐÓNG HÀNG",
+    //   key: "isShipping",
+    //   dataIndex: "isShipping",
+    //   width: 90,
+    //   render: (_, record) =>
+    //     record.isShipping ? "Công ty đóng hàng" : "Kho đóng hàng",
+    // },
+    {
+      title: (
+        <Checkbox
+          checked={selectedColumns.includes("products")}
+          onChange={(e) => handleColumnSelect("products", e.target.checked)}
+        >
+          SẢN PHẨM
+        </Checkbox>
+      ),
+      key: "products",
+      render: (_, record) => (
+        <>
+          {record.products &&
+            record.products.map((item, index) => (
+              <div key={index} style={{ whiteSpace: "nowrap" }}>
+                <strong>{item.product}</strong> - SL: <strong>{item.quantity}</strong>
+              </div>
+            ))}
+        </>
+      ),
+    },
+    
+        {
+          title: (
+            <Checkbox
+              checked={selectedColumns.includes("stt")}
+              onChange={(e) => handleColumnSelect("stt", e.target.checked)}
+            >
+              STT
+            </Checkbox>
+          ),
+          dataIndex: "stt",       
+          key: "stt",
+          width: 30,
+        
+         
+        },
+       
+    {
+      title: (
+        <Checkbox
+          checked={selectedColumns.includes("customerName")}
+          onChange={(e) => handleColumnSelect("customerName", e.target.checked)}
+        >
+          TÊN KHÁCH
+        </Checkbox>
+      ),
+      dataIndex: "customerName",
+      key: "customerName",
+    },
+    {
+      title: (
+        <Checkbox
+          checked={selectedColumns.includes("phone")}
+          onChange={(e) => handleColumnSelect("phone", e.target.checked)}
+        >
+          SĐT
+        </Checkbox>
+      ),
+      dataIndex: "phone",
+      key: "phone",
+    },
+    {
+      title: (
+        <Checkbox
+          checked={selectedColumns.includes("address")}
+          onChange={(e) => handleColumnSelect("address", e.target.checked)}
+        >
+          ĐỊA CHỈ
+        </Checkbox>
+      ),
+      dataIndex: "address",
+      key: "address",
+    },
+   
+    {
+      title: (
+        <Checkbox
+          checked={selectedColumns.includes("category")}
+          onChange={(e) => handleColumnSelect("category", e.target.checked)}
+        >
+          QUÀ
+        </Checkbox>
+      ),
+      dataIndex: "category",
+      key: "category",
+    },
+    {
+      title: (
+        <Checkbox
+          checked={selectedColumns.includes("orderDate")}
+          onChange={(e) => handleColumnSelect("orderDate", e.target.checked)}
+        >
+          NGÀY ĐẶT
+        </Checkbox>
+      ),
+      dataIndex: "orderDate",
+      key: "orderDate",
+      render: (text) => dayjs(text).format("DD/MM"),
+    },
+    
+    
+    {
+      title: (
+        <Checkbox
+          checked={selectedColumns.includes("shippingDate1")}
+          onChange={(e) => handleColumnSelect("shippingDate1", e.target.checked)}
+        >
+          NGÀY GỬI
+        </Checkbox>
+      ),
+      dataIndex: "shippingDate1",
+      key: "shippingDate1",
+      render: (text) => text && dayjs(text).format("DD/MM/YYYY"),
+    },
+    {
+      title: (
+        <Checkbox
+          checked={selectedColumns.includes("shippingDate2")}
+          onChange={(e) => handleColumnSelect("shippingDate2", e.target.checked)}
+        >
+          NGÀY NHẬN
+        </Checkbox>
+      ),
+      dataIndex: "shippingDate2",
+      key: "shippingDate2",
+      render: (text) => text && dayjs(text).format("DD/MM/YYYY"),
+    },
+    // Cột TÊN KHÁCH đã có checkbox, giữ nguyên:
+  
+    
+    // {
+    //   title: (
+    //     <Checkbox
+    //       checked={selectedColumns.includes("note")}
+    //       onChange={(e) => handleColumnSelect("note", e.target.checked)}
+    //     >
+    //       GHI CHÚ SALE
+    //     </Checkbox>
+    //   ),
+    //   dataIndex: "note",
+    //   key: "note",
+    //   render: (text) => <div style={{ width: 200,  }}><h3>{text} </h3></div>,
+    // },
+    // {
+    //   title: (
+    //     <Checkbox
+    //       checked={selectedColumns.includes("noteKHO")}
+    //       onChange={(e) => handleColumnSelect("noteKHO", e.target.checked)}
+    //     >
+    //       GHI CHÚ KHO
+    //     </Checkbox>
+    //   ),
+    //   dataIndex: "noteKHO",
+    //   key: "noteKHO",
+    // },
+    
+  ];
 
   // Xử lý mở form thêm mới, sửa và xóa đơn hàng
   const handleAddNew = () => {
@@ -3072,6 +3361,7 @@ const handleResetAllSTT = async () => {
             placeholder="Chọn bộ lọc"
             allowClear
             options={[
+              { value: "khoshiping", label: "NHI đóng hàng" },
               { value: "deliveredchuatick", label: "Đã gửi hàng + CẦN TÍCH ĐÃ IN" },
               { value: "unpaid", label: "Chưa thanh toán" },
               { value: "paid", label: "Đã thanh toán" },
@@ -3080,7 +3370,7 @@ const handleResetAllSTT = async () => {
               { value: "deliveredcomavandon2", label: "Chưa gửi hàng + Có mã" },
               { value: "waitDelivered", label: "Chưa gửi hàng" },
               { value: "not_delivered", label: "Đã gửi hàng" },
-              { value: "khoshiping", label: "Kho đóng hàng" },
+              
               { value: "delivered", label: "Giao thành công" },
               { value: "ctyshiping2", label: "Công Ty đóng hàng + Chưa mã" },
               { value: "ctyshiping", label: "Công Ty đóng hàng" },
@@ -3124,7 +3414,7 @@ const handleResetAllSTT = async () => {
               { value: "ero", label: "Đơn thiếu sale xử lý" },
               { value: "ctyshiping2", label: "Công Ty đóng hàng + Chưa mã" },
               { value: "ctyshiping", label: "Công Ty đóng hàng" },
-              { value: "khoshiping", label: "Kho đóng hàng" },
+              { value: "khoshiping", label: "NHI đóng hàng" },
               { value: "waitDelivered", label: "Chưa gửi hàng" },
               { value: "deliveredkomavandon", label: "Đã gửi hàng + chưa mã" },
               { value: "not_delivered", label: "Đã gửi hàng" },
@@ -3221,7 +3511,7 @@ const handleResetAllSTT = async () => {
           
         </Col>}
       </Row>
-      {( currentUser.position_team==="kho"
+      {( currentUser.position_team==="kho" &&currentUser.position !=="kho2"
  ) && (<>
   <Row gutter={10} style={{ marginBottom: 10 }}>
   <Col span={12}>
@@ -3365,7 +3655,7 @@ const handleResetAllSTT = async () => {
     currentUser.position_team === "kho"
       ? columnsKHO
       : (currentUser.position_team === "mkt" && currentUser.name !== "Phi Navy" )
-      ? columnsMKT
+      ? columnsMKT:currentUser.position === "kho2" ? columnsKHO2
       :currentUser.name === "Phi Navy" ? columns
       : columns
   }
