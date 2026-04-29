@@ -635,12 +635,70 @@ useEffect(() => {
       key: "tongCapADS",
       render: (value) => value.toLocaleString("vi-VN"),
     },
-    {
-      title: "TIỀN THỪA TẤT CẢ",
-      dataIndex: "tienThuaTatCa",
-      key: "tienThuaTatCa",
-      render: (value) => value.toLocaleString("vi-VN"),
-    },
+   {
+  title: "TIỀN THỪA TẤT CẢ",
+  dataIndex: "tienThuaTatCa",
+  key: "tienThuaTatCa",
+  render: (value) => {
+    const now = dayjs();
+
+    const currentMonth = now.month() + 1;
+    const currentYear = now.year();
+
+    const lastMonth = now.subtract(1, "month");
+    const lastMonthNumber = lastMonth.month() + 1;
+    const lastMonthYear = lastMonth.year();
+
+    const twoMonthsAgo = now.subtract(2, "month");
+    const twoMonthsAgoMonth = twoMonthsAgo.month() + 1;
+    const twoMonthsAgoYear = twoMonthsAgo.year();
+
+    let minusAmount = 0;
+
+    // 👉 xác định tháng theo filter
+    let month = currentMonth;
+    let year = currentYear;
+
+    if (period === "lastMonth") {
+      month = lastMonthNumber;
+      year = lastMonthYear;
+    }
+
+    if (period === "twoMonthsAgo") {
+      month = twoMonthsAgoMonth;
+      year = twoMonthsAgoYear;
+    }
+
+    // 👉 rule trừ tiền
+    if (month === 4 && year === 2026) {
+      minusAmount = 23000000;
+    }
+
+    if (month === 5 && year === 2026) {
+      minusAmount = 0;
+    }
+
+    // không có rule → trả luôn
+    if (minusAmount === 0) {
+      return (value || 0).toLocaleString("vi-VN");
+    }
+
+    const id = `money-${Math.random()}`;
+
+    setTimeout(() => {
+      const el = document.getElementById(id);
+      if (el) {
+        el.innerText = (value - minusAmount).toLocaleString("vi-VN");
+      }
+    }, 400);
+
+    return (
+      <span id={id}>
+        {(value || 0).toLocaleString("vi-VN")}
+      </span>
+    );
+  },
+},
     {
       title: "%ADS",
       dataIndex: "percentADS",
