@@ -2648,6 +2648,7 @@ onChange={(e) => handleColumnSelect("istick", e.target.checked)}
           SẢN PHẨM
         </Checkbox>
       ),
+       width: 300,
       key: "products",
       render: (_, record) => (
         <>
@@ -2688,6 +2689,7 @@ onChange={(e) => handleColumnSelect("istick", e.target.checked)}
       ),
       dataIndex: "customerName",
       key: "customerName",
+      width: 200,
     },
     {
       title: (
@@ -2700,6 +2702,7 @@ onChange={(e) => handleColumnSelect("istick", e.target.checked)}
       ),
       dataIndex: "phone",
       key: "phone",
+      width: 150,
     },
     {
       title: (
@@ -2724,6 +2727,7 @@ onChange={(e) => handleColumnSelect("istick", e.target.checked)}
         </Checkbox>
       ),
       dataIndex: "category",
+      width: 150,
       key: "category",
     },
     {
@@ -2735,6 +2739,7 @@ onChange={(e) => handleColumnSelect("istick", e.target.checked)}
           NGÀY ĐẶT
         </Checkbox>
       ),
+      width: 150,
       dataIndex: "orderDate",
       key: "orderDate",
       render: (text) => dayjs(text).format("DD/MM"),
@@ -2750,6 +2755,7 @@ onChange={(e) => handleColumnSelect("istick", e.target.checked)}
           NGÀY GỬI
         </Checkbox>
       ),
+      width: 150,
       dataIndex: "shippingDate1",
       key: "shippingDate1",
       render: (text) => text && dayjs(text).format("DD/MM/YYYY"),
@@ -2763,6 +2769,7 @@ onChange={(e) => handleColumnSelect("istick", e.target.checked)}
           NGÀY NHẬN
         </Checkbox>
       ),
+      width: 150,
       dataIndex: "shippingDate2",
       key: "shippingDate2",
       render: (text) => text && dayjs(text).format("DD/MM/YYYY"),
@@ -3344,7 +3351,7 @@ const handleResetAllSTT = async () => {
           
         />}
     />
-    
+  {currentUser.position !== "kho2" && (
  <Input
   placeholder="Tìm kiếm STT"
   allowClear
@@ -3361,8 +3368,8 @@ const handleResetAllSTT = async () => {
       
     />
   }
-/>
-{( currentUser.position_team==="kho" ||currentUser.position_team==="sale" )&&(<>
+/>)}  
+{( currentUser.position ==="kho1" ||currentUser.position_team==="sale" )&&(<>
   <Input
     placeholder="Tìm tên khách hàng..."
     allowClear
@@ -3695,10 +3702,10 @@ const handleResetAllSTT = async () => {
         <Table 
   scroll={{ x: 3000}}
   columns={
-    currentUser.position_team === "kho"
+    currentUser.position === "kho1"
       ? columnsKHO
       : (currentUser.position_team === "mkt" && currentUser.name !== "Phi Navy" )
-      ? columnsMKT:currentUser.position === "kho2" ? columnsKHO2
+      ? columnsMKT : currentUser.position === "kho2" ? columnsKHO2
       :currentUser.name === "Phi Navy" ? columns
       : columns
   }

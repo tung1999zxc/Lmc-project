@@ -23,6 +23,9 @@ const SidebarMenu = () => {
   const isAdmin =
     currentUser?.position === "admin" ||
     currentUser?.name === "Trần Mỹ Hạnh";
+  const khohq1 =
+    currentUser?.position === "kho2" ;
+   
 
   const isJP =
     currentUser?.name === "Nguyễn Quốc Hiếu"||currentUser?.name === "Hà Minh Sang"||currentUser?.name === "Nguyễn Thị Hồng Nhungg"||currentUser?.name === "KHO"||currentUser?.name === "Tô Mỹ Hạnh"||currentUser?.name === "Nguyễn Thị Minh Thư";
@@ -274,6 +277,7 @@ const SidebarMenu = () => {
    
     { key: "sub9", label: "Quản lý thông báo", icon: <BellOutlined />, href: "/NotificationManagement" },
   ];
+
   const menuItemstw = [
    
     
@@ -502,12 +506,27 @@ const SidebarMenu = () => {
     { key: "sub8", label: "Chấm công SALE", icon: <CalendarOutlined />, href: "/attendance" },
     { key: "sub9", label: "Quản lý thông báo", icon: <BellOutlined />, href: "/NotificationManagement" },
   ];
+  const menuItemKHOHQ1 = [
+    
+    {
+      key: "sub11",
+      label: (
+        <span>
+          <img src="/kr.png" style={{ width: 18, marginRight: 6 }} /> Quản lý đơn
+          hàng Hàn
+        </span>
+      ),
+      href: "/orders",
+    }
 
+   
+  ];
  const menuToUse = 
  isAdmin ? menuItems : isJP
     ? menuItems3 : isKRTW
     ? menuItemskrtw: isTW
-    ? menuItemstw: menuItems2;
+    ? menuItemstw: khohq1
+    ? menuItemKHOHQ1 : menuItems2;
  
   // -------------------------
   // RENDER MENU
