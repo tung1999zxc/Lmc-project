@@ -6,7 +6,10 @@ import axios from "axios";
 import { useDispatch } from "react-redux";
 import { useRouter } from "next/navigation";
 import { setCurrentUser } from "../store/userSlice";
-
+const COMPANY_LEGAL_NAME = 'CÔNG TY TNHH LMC GROUPS';
+const COMPANY_DISPLAY_NAME = 'LMC GROUPS';
+const COMPANY_LOGO_URL = 'lmc.jpg'; // Thay bằng link logo thực tế của bạn sau
+const COMPANY_WEBSITE = 'https://lmcgroupss.com';
 export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const dispatch = useDispatch();
@@ -61,6 +64,55 @@ export default function LoginPage() {
 
   return (
     <div className="login-container">
+      <header
+        style={{
+          position: 'absolute',
+          top: 20,
+          left: 20,
+          zIndex: 2,
+          display: 'flex',
+          alignItems: 'center',
+          gap: 12,
+          background: 'rgba(56, 255, 6, 0.85)',
+          padding: '8px 12px',
+          borderRadius: 8,
+          boxShadow: '0 4px 12px rgba(0,0,0,1)'
+        }}
+        aria-label="Thông tin công ty"
+      >
+        <img
+          src={COMPANY_LOGO_URL}
+          alt={`${COMPANY_DISPLAY_NAME} logo`}
+          width={190}
+          height={60}
+          style={{ objectFit: 'contain', display: 'block' }}
+        />
+        <div style={{ lineHeight: 1 }}>
+          <div style={{ fontWeight: 700, fontSize: 20}}>{COMPANY_DISPLAY_NAME}</div>
+          <div style={{ fontSize: 18, color: '#000000ff' }}>{COMPANY_LEGAL_NAME}</div>
+          <a href={COMPANY_WEBSITE} style={{ fontSize: 16, color: '#096dd9' }}>{COMPANY_WEBSITE}</a>
+        </div>
+      </header>
+
+      {/* Hiển thị thêm một phần footer nhỏ (cùng nội dung) để đảm bảo hiển thị rõ ràng */}
+      <footer
+        style={{
+          position: 'absolute',
+          bottom: 14,
+          left: '50%',
+          transform: 'translateX(-50%)',
+          zIndex: 2,
+          background: 'rgba(255,255,255,0.85)',
+          padding: '6px 10px',
+          borderRadius: 6,
+          fontSize: 18,
+          boxShadow: '0 2px 8px rgba(0,0,0,0.06)'
+        }}
+        aria-hidden={false}
+      >
+        <strong>{COMPANY_LEGAL_NAME}</strong> — Trang web: <a href={COMPANY_WEBSITE}>{COMPANY_WEBSITE}</a>
+      </footer>
+      
       <Card className="login-card" bordered={false}>
         <div className="card-title"> </div>
 
