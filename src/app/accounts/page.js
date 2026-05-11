@@ -60,7 +60,7 @@ export default function EmployeeManagement() {
   ];
   const quocgia = [
     { label: "Hàn", value: "kr" },
-    { label: "Nhật Bản", value: "jp" },
+    { label: "Malaysia", value: "jp" },
     { label: "Đài Loan", value: "tw" },
     
   ];
@@ -89,6 +89,7 @@ export default function EmployeeManagement() {
     { label: "TEAM ĐÀI", value: "TW" },
     { label: "TEAM HIẾU", value: "HIEU" },
     { label: "TEAM PHÚ THÀNH", value: "PHUTHANH" },
+    { label: "TEAM ÁNH ", value: "ANH" },
   ];
 
   const fetchEmployees = async () => {
