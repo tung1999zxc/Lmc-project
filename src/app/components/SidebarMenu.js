@@ -166,7 +166,7 @@ const SidebarMenu = () => {
       icon: <ShopOutlined />,
       children: [
         { key: "sub4", label: "HÀN QUỐC", href: "/products" },
-        { key: "sub41", label: "NHẬT BẢN", href: "/productsjp" },
+        { key: "sub41", label: "MALAYSIA", href: "/productsjp" },
         { key: "sub42", label: "ĐÀI LOAN", href: "/productstw" },
       ],
     },
@@ -436,7 +436,7 @@ const SidebarMenu = () => {
       icon: <ShopOutlined />,
       children: [
        
-        { key: "sub41", label: "NHẬT BẢN", href: "/productsjp" },
+        { key: "sub41", label: "MALAYSIA", href: "/productsjp" },
         { key: "sub42", label: "ĐÀI LOAN", href: "/productstw" },
       ],
     },

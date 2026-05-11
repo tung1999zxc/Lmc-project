@@ -424,7 +424,7 @@ const resetPagename =()=>{
         (order) => order.saleReport === "DONE"
       );
     } else if (currentUser.position === "lead") {
-      if (currentUser.name === "Phan Thế Phong") {
+      if (currentUser.name === "Phan Thế LE") {
         roleFilteredOrders = roleFilteredOrders.filter((order) =>
           leadTeamMembers.includes(order.mkt.trim().toLowerCase()) ||
           order.mkt.trim().toLowerCase() === "bùi văn phi".toLowerCase()||
@@ -2278,7 +2278,7 @@ onChange={(e) => handleColumnSelect("istick", e.target.checked)}
                 whiteSpace: "nowrap"
               }}
             >
-              {name} - Nhật Bản
+              {name} - Malaysia
             </div>
           );
         })}
@@ -2867,6 +2867,31 @@ const handleResetAllSTT = async () => {
         </Col>
         
         }
+        {/* <Button
+  type="primary"
+  danger
+  onClick={async () => {
+    try {
+      const res = await fetch('/api/tw/orders/update-payment-status', {
+        method: 'PUT',
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) throw new Error(data.error);
+
+      message.success(data.message || 'Cập nhật thành công');
+
+      // nếu bạn có load lại bảng
+      // fetchOrders();
+    } catch (err) {
+      message.error('Cập nhật thất bại');
+      console.error(err);
+    }
+  }}
+>
+  Cập nhật TẤT CẢ đơn → ĐÃ THANH TOÁN
+</Button> */}
 <Button
   type="primary"
   onClick={fetchOrders} // hoặc onClick={() => fetchOrders()}
@@ -3265,7 +3290,7 @@ const handleResetAllSTT = async () => {
                 whiteSpace: "nowrap"
               }}
             >
-              {name} - Nhật Bản
+              {name} - Malaysia
             </div>
           );
         })}
@@ -3383,7 +3408,7 @@ const handleResetAllSTT = async () => {
                 whiteSpace: "nowrap"
               }}
             >
-              {name} - Nhật Bản
+              {name} - Malaysia
             </div>
           );
         })}
