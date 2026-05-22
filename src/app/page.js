@@ -1177,7 +1177,7 @@ const filteredAdsByArea =
     }
 
     dailyChartDataNewTEAM = dateArray.map((date) => {
-      const sales = filteredOrdersByArea
+      const sales = filteredOrders
         .filter((order) => order.orderDate === date)
         .reduce((sum, order) => {
     const value = Number(order.profitmkt ?? order.profit ?? 0);
@@ -1191,7 +1191,7 @@ const filteredAdsByArea =
   } else {
     const last30Days = getLast30Days();
     dailyChartDataNewTEAM = last30Days.map((date) => {
-      const sales = orders
+      const sales = filteredOrders
         .filter((order) => order.orderDate === date)
           .reduce((sum, order) => {
     const value = Number(order.profitmkt ?? order.profit ?? 0);
