@@ -43,12 +43,58 @@ const EmployeePageTable = () => {
   const [selectedTeam, setSelectedTeam] = useState(null);
   const [pageListInput, setPageListInput] = useState("");
   const [filteredPages, setFilteredPages] = useState([]);
-
+const [viaData, setViaData] = useState([]);
+const [editingViaId, setEditingViaId] = useState(null);
+const [tempViaLink, setTempViaLink] = useState("");
   // Danh sách options
   useEffect(() => {
     fetchNamePage();
     fetchEmployees();
+    fetchViaLinks();
   }, []);
+
+  const fetchViaLinks = async () => {
+  try {
+    const res = await axios.get("/api/viaLinks");
+    let list = res.data.data;
+    // Đảm bảo luôn có ít nhất 8 hàng (hàng trống nếu chưa đủ)
+    const filler = Array.from({ length: Math.max(0, 8 - list.length) }).map((_, i) => ({
+      _id: `empty-${i}`,
+      link: "",
+      isEmpty: true
+    }));
+    setViaData([...list, ...filler]);
+  } catch (err) {
+    message.error("Không thể tải danh sách Via");
+  }
+};
+
+const saveVia = async (record) => {
+  if (!tempViaLink) return message.warning("Vui lòng nhập link");
+  try {
+    if (record.isEmpty) {
+      await axios.post("/api/viaLinks", { link: tempViaLink });
+    } else {
+      await axios.put("/api/viaLinks", { id: record._id, link: tempViaLink });
+    }
+    message.success("Thành công");
+    setEditingViaId(null);
+    fetchViaLinks();
+  } catch (err) {
+    message.error("Có lỗi xảy ra");
+  }
+};
+
+const deleteVia = async (id) => {
+  try {
+    await axios.delete(`/api/viaLinks?id=${id}`);
+    message.success("Đã xóa");
+    fetchViaLinks();
+  } catch (err) {
+    message.error("Lỗi khi xóa");
+  }
+};
+
   const fetchEmployees = async () => {
     try {
       const response = await axios.get("/api/employees");
@@ -272,7 +318,59 @@ const EmployeePageTable = () => {
   navigator.clipboard.writeText(text);
   messageApi.success(`  Đã copy: ${text}`);
 };
-
+const viaColumns = [
+  {
+    title: "STT",
+    render: (_, __, index) => index + 1,
+    width: 80,
+  },
+  {
+    title: "Link Via",
+    dataIndex: "link",
+    render: (text, record) => {
+      if (editingViaId === record._id) {
+        return <Input value={tempViaLink} onChange={(e) => setTempViaLink(e.target.value)} />;
+      }
+      return<Space><strong>{text}</strong><Button
+          type="primary"
+          size="middle"
+          icon={<CopyOutlined style={{ fontSize: 18 }} />}
+          onClick={() => handleCopy(text)}
+          style={{
+            borderRadius: 8,
+            fontSize: 16,
+            padding: "4px 12px",
+            background: "#1677ff",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          Copy
+        </Button></Space> ;
+    },
+  },
+  {
+    title: "Hành động",
+    render: (_, record) => (
+      <Space>
+        {editingViaId === record._id ? (
+          <Button disabled={currentUser.position !== "leadSALE" && currentUser.position !== "managerSALE" && currentUser.name !== "Tung99" } type="link" onClick={() => saveVia(record)}>Lưu</Button>
+        ) : (
+          <Button disabled={currentUser.position !== "leadSALE" && currentUser.position !== "managerSALE" && currentUser.name !== "Tung99" } type="link" onClick={() => {
+            setEditingViaId(record._id);
+            setTempViaLink(record.link);
+          }}>Sửa</Button>
+        )}
+        {!record.isEmpty && (
+          <Popconfirm title="Xóa link này?" onConfirm={() => deleteVia(record._id)}>
+            <Button disabled={currentUser.position !== "leadSALE" && currentUser.position !== "managerSALE" && currentUser.name !== "Tung99" } type="link" danger>Xóa</Button>
+          </Popconfirm>
+        )}
+      </Space>
+    ),
+  },
+];
   const columns = [
       {
     title: "Tên Page",
@@ -372,11 +470,22 @@ const EmployeePageTable = () => {
   ];
 
   const normalizeText = (text) =>
-    text.toLowerCase().trim().replace(/\s+/g, " "); // Giữ lại khoảng trắng giữa từ, nhưng loại bỏ thừa
+    text.toLowerCase().trim().replace(/\s+/g, " "); 
+  
+  // Giữ lại khoảng trắng giữa từ, nhưng loại bỏ thừa
   return (
     <div style={{ padding: 20 }}>
        {contextHolder}
-       
+       <div style={{ marginTop: 40, marginBottom: 40 }}>
+      <h2>Bảng Quản Lí  Via Share Page</h2>
+      <Table 
+        dataSource={viaData} 
+        columns={viaColumns} 
+        pagination={false} 
+        bordered 
+        rowKey="_id"
+      />
+    </div>
       <Space style={{ marginBottom: 20 }}>
         <Input
           style={{ width: 300 }}
