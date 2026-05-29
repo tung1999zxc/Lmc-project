@@ -476,7 +476,7 @@ const viaColumns = [
   return (
     <div style={{ padding: 20 }}>
        {contextHolder}
-       <div style={{ marginTop: 40, marginBottom: 40 }}>
+       {/* <div style={{ marginTop: 40, marginBottom: 40 }}>
       <h2>Bảng Quản Lí  Via Share Page</h2>
       <Table 
         dataSource={viaData} 
@@ -485,7 +485,7 @@ const viaColumns = [
         bordered 
         rowKey="_id"
       />
-    </div>
+    </div> */}
       <Space style={{ marginBottom: 20 }}>
         <Input
           style={{ width: 300 }}

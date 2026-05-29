@@ -682,7 +682,7 @@ useEffect(() => {
     }
 
     if (month === 5 && year === 2026) {
-      minusAmount = 0;
+      minusAmount = 40000000;
     }
 
     // không có rule → trả luôn
