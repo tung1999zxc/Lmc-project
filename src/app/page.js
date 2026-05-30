@@ -3687,7 +3687,7 @@ const columns = useMemo(() => [
             </Col>
           </Row>
           <Row gutter={[16, 16]}>
-            {/* <Col xs={24} md={14}>
+            <Col xs={24} md={14}>
               <h3 style={{ marginTop: "2rem" }}>
                 {isFilterApplied
                   ? "Doanh số hàng ngày "
@@ -3696,7 +3696,7 @@ const columns = useMemo(() => [
               <GroupedDoubleBarChartComponentTEAM
                 data={dailyChartDataNewTEAM}
               />
-            </Col> */}
+            </Col>
             <Col xs={24} md={10}>
               <br></br>
               <h3>Phần trăm doanh số thành viên</h3>

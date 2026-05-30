@@ -1606,6 +1606,7 @@ onChange={(e) => handleColumnSelect("istick", e.target.checked)}
       },
       width: 80, // Tăng width nếu cần để hiển thị đủ thông tin
     },
+    //mở sale
      ...(  currentUser.position !== "salexul"
       ? [
     {
@@ -3503,6 +3504,9 @@ const handleResetAllSTT = async () => {
         <Option value="DIEN">TEAM DIỆN</Option>
         <Option value="DIEU">TEAM DIỆU</Option>
         <Option value="PHI">TEAM PHI</Option>
+        <Option value="DIENON">TEAM DIỆN ON</Option>
+        <Option value="ANH">TEAM ÁNH</Option>
+        <Option value="PHUTHANH">TEAM Phú Thành</Option>
   </Select>
   <Input.Search
   placeholder="CHECK KHÁCH"
