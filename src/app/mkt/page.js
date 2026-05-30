@@ -697,7 +697,7 @@ useEffect(() => {
       if (el) {
         el.innerText = (value - minusAmount).toLocaleString("vi-VN");
       }
-    }, 700);
+    }, 1200);
 
     return (
       <span id={id}>
