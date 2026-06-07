@@ -4,13 +4,14 @@ import React, { useState, useEffect } from "react";
 import {
   Table,
   Form,
+  Modal,
   InputNumber,
   DatePicker,
   Popconfirm,
   Button,
   Select,
   message,
-  Modal,
+  
   Row,
   notification,
   Col,
@@ -47,7 +48,8 @@ const Dashboard = () => {
   // Bộ lọc theo khoảng thời gian (mặc định 7 ngày)
   // const [filterOption, setFilterOption] = useState("7"); // Đã loại bỏ
   // Nếu là manager, có thêm bộ lọc để chọn team (default "all" hiển thị tất cả các team)
-
+const [isPopupOpen, setIsPopupOpen] = useState(false);
+  const [popupData, setPopupData] = useState([]);
   const [selectedTeam, setSelectedTeam] = useState("all");
 
   const fetchEmployees = async () => {
@@ -249,6 +251,123 @@ useEffect(() => {
   }, 0) * 17000;
     return totalProfit * 0.95;
   };
+  // --- CHỨC NĂNG LỌC %ADS > 30% TRONG 3 NGÀY LIÊN TIẾP & GỬI TELEGRAM ---
+  // --- CHỨC NĂNG LỌC %ADS > 30% TRONG 3 NGÀY LIÊN TIẾP, HIỂN THỊ POPUP & GỬI TELEGRAM ---
+  const handleCheckAndSendTelegram = async () => {
+    try {
+      setLoading(true);
+      
+      // 1. Lấy danh sách 3 ngày gần nhất (Hôm nay, Hôm qua, Hôm kia)
+      const targetDates = [
+       
+        dayjs().subtract(1, "day").format("YYYY-MM-DD"),
+        dayjs().subtract(2, "day").format("YYYY-MM-DD"),
+        dayjs().subtract(3, "day").format("YYYY-MM-DD"),
+      ];
+
+      const highAdsEmployees = [];
+
+      // 2. Duyệt qua toàn bộ nhân viên để tính toán dữ liệu 3 ngày
+      safeEmployees.forEach((emp) => {
+        let continuousDaysCount = 0;
+        const details3Days = [];
+
+        targetDates.forEach((date) => {
+          const record = records.find(
+            (r) => r.userId === emp.employee_code && r.date === date
+          );
+          
+          // Tính doanh số thực tế ngày đó (áp dụng công thức giống trong bảng của bạn)
+          const totalSales = computeTotalSalesForDate(date, emp.name) * 17000 * 0.95;
+          // Tính số tiền xin ngày đó
+          const totalAdsRequest = record ? (record.request1 || 0) + (record.request2 || 0) : 0;
+          // Tính %ADS
+          const percentAds = totalSales > 0 ? (totalAdsRequest / totalSales) * 100 : 0;
+
+          details3Days.push({
+            key: date,
+            date: moment(date).format("DD/MM/YYYY"),
+            sales: totalSales,
+            adsRequest: totalAdsRequest,
+            percent: parseFloat(percentAds.toFixed(2))
+          });
+
+          if (percentAds > 33) {
+            continuousDaysCount++;
+          }
+        });
+
+        // Nếu đủ 3 ngày liên tiếp đều > 30%
+        if (continuousDaysCount === 3) {
+          highAdsEmployees.push({
+            key: emp.employee_code,
+            code: emp.employee_code,
+            name: emp.name,
+            details: details3Days // Mảng chứa dữ liệu chi tiết từng ngày
+          });
+        }
+      });
+
+      if (highAdsEmployees.length === 0) {
+        message.info("Không có nhân viên nào vượt quá 33% ADS trong 3 ngày liên tiếp.");
+        setLoading(false);
+        return;
+      }
+
+      // 3. Đổ dữ liệu vào state để hiển thị lên bảng Popup (Modal) trên trang web
+      setPopupData(highAdsEmployees);
+      setIsPopupOpen(true);
+
+      // 4. Xây dựng nội dung tin nhắn để gửi Telegram cùng lúc
+      let telegramMessage = `⚠️ *DANH SÁCH NHÂN VIÊN %ADS trên 33% (3 NGÀY LIÊN TIẾP)*\n\n`;
+      highAdsEmployees.forEach((emp) => {
+        telegramMessage += `👤 Nhân viên: ${emp.name}\n`;
+        // Tạo khung bảng giả lập bằng chữ bằng thẻ <pre>
+        telegramMessage += ``;
+        telegramMessage += `|   Ngày   | Doanh Số | Tiền ADS | %ADS  |\n`;
+        telegramMessage += `|----------|----------|----------|-------|\n`;
+        
+        emp.details.forEach(day => {
+          // Hàm bổ trợ cắt/thêm khoảng trắng giúp các cột luôn thẳng hàng hoàn hảo
+          const padCenter = (str, len) => str.padEnd(len - Math.floor((len - str.length)/2)).padStart(len);
+          const padLeft = (str, len) => str.padStart(len);
+          
+          const dateStr = day.date.substring(0, 5); // Lấy dạng DD/MM cho ngắn gọn, vừa khung bảng
+          const salesStr = day.sales > 0 ? `${Math.round(day.sales / 1000)}k` : "0";
+          const adsStr = day.adsRequest > 0 ? `${Math.round(day.adsRequest / 1000)}k` : "0";
+          const percentStr = `${day.percent}%`;
+
+          telegramMessage += `| ${padCenter(dateStr, 8)} | ${padLeft(salesStr, 8)} | ${padLeft(adsStr, 8)} | ${padLeft(percentStr, 5)} |\n`;
+        });
+        telegramMessage += `\n`;
+        telegramMessage += `─────────────────────────\n`;
+      });
+
+      // Cấu hình Bot Telegram (Điền Token và Chat ID thực tế của bạn vào đây)
+      const TELEGRAM_BOT_TOKEN = "8539446685:AAGPeAgad4e5Uv5WrTqYoahJQmMA98Y6plA"; 
+      const TELEGRAM_CHAT_ID = "1696923084"; 
+      // const TELEGRAM_CHAT_ID = "6280099511"; 
+
+      if (TELEGRAM_BOT_TOKEN !== "YOUR_BOT_TOKEN_HERE") {
+        await axios.post(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
+          chat_id: TELEGRAM_CHAT_ID,
+          text: telegramMessage,
+          parse_mode: "Markdown",
+        });
+        notification.success({
+          message: "Telegram",
+          description: "Đã gửi danh sách báo cáo qua Telegram!",
+        });
+      }
+
+    } catch (error) {
+      console.error("Lỗi hệ thống:", error);
+      message.error("Có lỗi xảy ra khi tính toán dữ liệu.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const computeTotalADS = (employeeName) => {
     const totalADS = records
       .filter(
@@ -1135,6 +1254,68 @@ useEffect(() => {
   return (
     <div style={{ padding: 24 }}>
       {contextHolder}
+      {/* POPUP CHI TIẾT NHÂN VIÊN %ADS > 30% TRONG 3 NGÀY */}
+      <Modal
+        title={<b style={{ color: '#ff4d4f', fontSize: 18 }}>⚠️ NHÂN VIÊN %ADS trên 33% TRONG 3 NGÀY LIÊN TIẾP</b>}
+        open={isPopupOpen}
+        onCancel={() => setIsPopupOpen(false)}
+        footer={[
+          <Button key="close" type="primary" onClick={() => setIsPopupOpen(false)}>
+            Đóng bảng
+          </Button>
+        ]}
+        width={900}
+        centered
+      >
+        <div style={{ marginTop: 16 }}>
+          {popupData.map((emp) => (
+            <div key={emp.code} style={{ marginBottom: 24, border: '1px solid #f0f0f0', borderRadius: 8, padding: 16, backgroundColor: '#fffbe6' }}>
+              <h4 style={{ margin: '0 0 12px 0', fontSize: 16, color: '#111' }}>
+                Nhân viên: <span style={{ color: '#ff4d4f' }}>{emp.name}</span> 
+              </h4>
+              <Table
+                dataSource={emp.details}
+                pagination={false}
+                bordered
+                size="small"
+                columns={[
+                  {
+                    title: "Ngày",
+                    dataIndex: "date",
+                    key: "date",
+                    align: "center",
+                  },
+                  {
+                    title: "Doanh số (đ)",
+                    dataIndex: "sales",
+                    key: "sales",
+                    render: (val) => val.toLocaleString("vi-VN"),
+                    align: "right",
+                  },
+                  {
+                    title: "Tiền xin ADS (đ)",
+                    dataIndex: "adsRequest",
+                    key: "adsRequest",
+                    render: (val) => val.toLocaleString("vi-VN"),
+                    align: "right",
+                  },
+                  {
+                    title: "% ADS",
+                    dataIndex: "percent",
+                    key: "percent",
+                    align: "center",
+                    render: (val) => (
+                      <span style={{ color: '#ff4d4f', fontWeight: 'bold', backgroundColor: '#fff1f0', padding: '2px 8px', borderRadius: 4, border: '1px solid #ffa39e' }}>
+                        {val}%
+                      </span>
+                    )
+                  },
+                ]}
+              />
+            </div>
+          ))}
+        </div>
+      </Modal>
       {/* Tiêu đề "Nhập thông tin" */}
       <Row gutter={[16, 16]}>
         <FullScreenLoading loading={loading} tip="Đang tải dữ liệu..." />
@@ -1214,6 +1395,7 @@ useEffect(() => {
             </Select>
           </div>
         </Col>
+
         {(currentUser.position === "managerMKT" ||
           currentUser.position === "admin") && (
           <Col xs={24} sm={12} md={5}>
@@ -1235,6 +1417,17 @@ useEffect(() => {
           </Col>
         )}
       </Row>
+      {(currentUser.position === "managerMKT" || currentUser.position === "admin") && (
+  <Col xs={24} sm={12} md={6} style={{ display: 'flex', alignItems: 'flex-end', marginBottom: 16 }}>
+    <Button 
+      type="primary" 
+      danger 
+      onClick={handleCheckAndSendTelegram}
+    >
+      Kiểm tra & Gửi Tele NV %ADS trên 33%
+    </Button>
+  </Col>
+)}
       {(currentUser.position === "managerMKT" ||
         currentUser.position === "admin") && (
         <>
@@ -1375,8 +1568,11 @@ useEffect(() => {
           </Row>
         </>
       )}
+      
     </div>
-  );
+  
+);
+  
 };
 
 export default Dashboard;
