@@ -2869,11 +2869,11 @@ if (validDates.length === 0) {
   let profitmkt = profit;
 
   if (diffDays <= 4) {
-    revenuemkt = revenue * 1;
+    revenuemkt = revenue * 0.9;
     profitmkt = revenuemkt === 0 ? 0 : Math.max(revenuemkt - 5, 0);
   } 
   else if (diffDays > 4 && diffDays <= 9) {
-    revenuemkt = revenue * 1;
+    revenuemkt = revenue * 0.9;
     profitmkt = revenuemkt === 0 ? 0 : Math.max(revenuemkt - 5, 0);
   } 
   else {

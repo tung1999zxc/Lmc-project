@@ -149,7 +149,7 @@ useEffect(() => {
     },
 
     {
-      id: 8,
+      id: 7,
       name: `TEAM DIỆU`,
       members: safeEmployees
         .filter((employee) => employee.team_id === "DIEU")
