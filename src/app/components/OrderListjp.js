@@ -1332,7 +1332,7 @@ onChange={(e) => handleColumnSelect("istick", e.target.checked)}
           
           return (
             <div >
-              {stt} <strong>(Nhật)</strong>
+              {stt} <strong>(Malaysia)</strong>
             </div>
           );
         },
@@ -3153,7 +3153,7 @@ const handleResetAllSTT = async () => {
   Tổng Doanh Số: {(filteredOrders.reduce((acc, order) => {
         // Chuyển revenue về số nếu chưa phải số
         return acc + (Number(order.revenue) || 0);
-      }, 0)*150).toLocaleString()}
+      }, 0)*6500).toLocaleString()}
 </strong></span>}
 </Col>
         <Col span={3}>

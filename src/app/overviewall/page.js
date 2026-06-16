@@ -93,7 +93,7 @@ const [selectedMKT, setSelectedMKT] = useState(null);
 
     // convert theo tỷ giá
     const KR = convertOrdersWithRate(KR_raw, 17000);
-    const JP = convertOrdersWithRate(JP_raw, 150);
+    const JP = convertOrdersWithRate(JP_raw, 6500);
     const TW = convertOrdersWithRate(TW_raw, 750);
 
     // tổng 3 thị trường → đã nhân tỉ giá
@@ -231,7 +231,7 @@ const calcRevenue = (orders, rate) => {
 };
 
 const kr = calcRevenue(ordersKR, 17000);
-const jp = calcRevenue(ordersJP, 150);
+const jp = calcRevenue(ordersJP, 6500);
 const tw = calcRevenue(ordersTW, 750);
 
   const BarChartComponent = dynamic(
@@ -2836,7 +2836,7 @@ const top5Employees = marketingReportData3
 };
 
 const KR = calcMarketSummary(ordersKR, 17000);
-const JP = calcMarketSummary(ordersJP, 150);
+const JP = calcMarketSummary(ordersJP, 6500);
 const TW = calcMarketSummary(ordersTW, 750);
 const summaryKR = [
   {
