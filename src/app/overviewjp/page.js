@@ -35,8 +35,8 @@ const Dashboard = () => {
   // State cho bộ lọc: selectedDate mặc định là ngày hiện tại, và preset
 
   // State cho tỉ giá VNĐ và ô nhập giá trị
-  const [exchangeRate, setExchangeRate] = useState(6500);
-  const [exchangeRateInput, setExchangeRateInput] = useState(6500);
+  const [exchangeRate, setExchangeRate] = useState(6000);
+  const [exchangeRateInput, setExchangeRateInput] = useState(6000);
   const reduxCurrentUser = useSelector((state) => state.user.currentUser) || {};
 
   const currentUser = useMemo(() => {
@@ -826,7 +826,7 @@ const Dashboard = () => {
         (ad) => ad.name.trim().toLowerCase() === emp.name.trim().toLowerCase()
       )
       .reduce((sum, ad) => sum + (ad.request1 + ad.request2), 0);
-    return { name: emp.name, profit: sales * 6500 , adsCost };
+    return { name: emp.name, profit: sales * 6000 , adsCost };
   });
 
   const teamEmployees = mktEmployees.filter(
@@ -850,7 +850,7 @@ const Dashboard = () => {
         (ad) => ad.name.trim().toLowerCase() === emp.name.trim().toLowerCase()
       )
       .reduce((sum, ad) => sum + (ad.request1 + ad.request2), 0);
-    return { name: emp.name, profit: sales * 6500 , adsCost };
+    return { name: emp.name, profit: sales * 6000 , adsCost };
   });
 
   const saleEmployees = employees.filter((emp) => emp.position_team === "sale");
@@ -887,7 +887,7 @@ const Dashboard = () => {
       fillColor = "#AA336A"; // ví dụ: màu vàng
     }
 
-    return { name: emp.name, profit: sales * 6500, fill: fillColor };
+    return { name: emp.name, profit: sales * 6000, fill: fillColor };
   });
 
   // // === Biểu đồ doanh số theo team (Grouped Double Bar Chart) ===
@@ -912,7 +912,7 @@ const Dashboard = () => {
         .reduce((sum, ad) => sum + (ad.request1 + ad.request2), 0);
       return acc + empAds;
     }, 0);
-    return { name: team.label, profit: sales * 6500 , adsCost };
+    return { name: team.label, profit: sales * 6000 , adsCost };
   });
   // const teamChartDataNew = teams.map(team => {
   //   const teamEmps = employees.filter(emp => emp.position_team === "mkt" && emp.team_id === team.value);
@@ -963,8 +963,8 @@ const Dashboard = () => {
 
     return {
       name: team.label,
-      LeadAndMembers: sales * 6500,
-      members: members * 6500,
+      LeadAndMembers: sales * 6000,
+      members: members * 6000,
     };
   });
 
@@ -993,7 +993,7 @@ const Dashboard = () => {
       const adsCost = filteredAds
         .filter((ad) => ad.date === date)
         .reduce((sum, ad) => sum + (ad.request1 + ad.request2), 0);
-      return { name: date, profit: sales * 6500 , adsCost };
+      return { name: date, profit: sales * 6000 , adsCost };
     });
   } else {
     const last30Days = getLast30Days();
@@ -1004,7 +1004,7 @@ const Dashboard = () => {
       const adsCost = adsMoneyData
         .filter((ad) => ad.date === date)
         .reduce((sum, ad) => sum + (ad.request1 + ad.request2), 0);
-      return { name: date, profit: sales * 6500 , adsCost };
+      return { name: date, profit: sales * 6000 , adsCost };
     });
   }
 
@@ -1066,7 +1066,7 @@ const Dashboard = () => {
       const adsCost = filteredAds
         .filter((ad) => ad.date === date)
         .reduce((sum, ad) => sum + (ad.request1 + ad.request2), 0);
-      return { name: date, profit: sales * 6500 , adsCost };
+      return { name: date, profit: sales * 6000 , adsCost };
     });
   } else {
     const last30Days = getLast30Days();
@@ -1077,7 +1077,7 @@ const Dashboard = () => {
       const adsCost = adsMoneyData
         .filter((ad) => ad.date === date)
         .reduce((sum, ad) => sum + (ad.request1 + ad.request2), 0);
-      return { name: date, profit: sales * 6500 , adsCost };
+      return { name: date, profit: sales * 6000 , adsCost };
     });
   }
 
@@ -1126,7 +1126,7 @@ const Dashboard = () => {
       return acc + empSales;
     }, 0);
     const avgProfit = teamEmps.length > 0 ? teamProfit / teamEmps.length : 0;
-    return { name: team.label, profit: avgProfit * 6500  };
+    return { name: team.label, profit: avgProfit * 6000  };
   });
 
   // === Biểu đồ so sánh doanh số giữa leader và các nhân viên khác trong team (Grouped Bar Chart) ===
@@ -1175,11 +1175,11 @@ const Dashboard = () => {
     }, 0);
     const leaderSales =
       leaderSales0 !== 0
-        ? ((adsCost / (leaderSales0 * 6500)) * 100).toFixed(2)
+        ? ((adsCost / (leaderSales0 * 6000)) * 100).toFixed(2)
         : 0;
     const othersSales =
       othersSales0 !== 0
-        ? ((adsCost2 / (othersSales0 * 6500)) * 100).toFixed(2)
+        ? ((adsCost2 / (othersSales0 * 6000)) * 100).toFixed(2)
         : 0;
     return { team: team.label, leader: leaderSales, others: othersSales };
   });
@@ -1938,7 +1938,7 @@ const top5Employees2 = randomEmployee ? [randomEmployee] : [];
       title: "VNĐ",
       dataIndex: "total",
       key: "total",
-      render: (value) => (value * 6500).toLocaleString(),
+      render: (value) => (value * 6000).toLocaleString(),
     },
     {
       title: "SL Đơn",
@@ -2535,8 +2535,8 @@ const percentTodayVsYesterday =
 const summaryData = [
   {
     key: "1",
-    today: (totalTodayProfit * 6500).toLocaleString("vi-VN") + " VNĐ",
-    yesterday: (totalYesterdayProfit * 6500).toLocaleString("vi-VN") + " VNĐ",
+    today: (totalTodayProfit * 6000).toLocaleString("vi-VN") + " VNĐ",
+    yesterday: (totalYesterdayProfit * 6000).toLocaleString("vi-VN") + " VNĐ",
     percent: percentTodayVsYesterday + "%",
   },
 ];
@@ -2703,9 +2703,9 @@ const columns = useMemo(() => [
                 <span className="top-badge">🏆 TOP 1 SERVER</span>
               )}
               <br />
-              {emp.totalToday * 6500  > 15000000 && (
+              {emp.totalToday * 6000  > 15000000 && (
                 <span className="employee-name2">
-                  {(emp.totalToday * 6500 ).toLocaleString()} VNĐ
+                  {(emp.totalToday * 6000 ).toLocaleString()} VNĐ
                 </span>
               )}
             </div>

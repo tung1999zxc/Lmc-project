@@ -172,7 +172,7 @@ const Dashboard = () => {
             p.mkt.trim().toLowerCase() === employeeName.trim().toLowerCase() &&
             filterSampleOrdersByPeriod(p)
         )
-        .reduce((sum, p) => sum + p.profit, 0) * 6500;
+        .reduce((sum, p) => sum + p.profit, 0) * 6000;
     return totalProfit ;
   };
   const computeTotalADS = (employeeName) => {
@@ -411,7 +411,7 @@ const Dashboard = () => {
           );
           return matchedEmployee && isMatchTeam(matchedEmployee.employee_code);
         })
-        .reduce((sum, order) => sum + order.profit, 0) * 6500;
+        .reduce((sum, order) => sum + order.profit, 0) * 6000;
 
     const adsSang = records
       .filter((r) => r.date === date && isMatchTeam(r.userId))
@@ -792,7 +792,7 @@ const Dashboard = () => {
           record.date,
           record.name
         );
-        return (totalSalesForSelectedDate  * 6500).toLocaleString(
+        return (totalSalesForSelectedDate  * 6000).toLocaleString(
           "vi-VN"
         );
       },
@@ -805,7 +805,7 @@ const Dashboard = () => {
           record.date,
           record.name
         );
-        const total = totalSalesForSelectedDate * 6500 ;
+        const total = totalSalesForSelectedDate * 6000 ;
         if (totalSalesForSelectedDate === 0) return 0;
         const percent = Number(
           ((record.request1 + record.request2) / total) * 100
