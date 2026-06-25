@@ -594,9 +594,9 @@ useEffect(() => {
       selectedTeam !== "all"
         ? teamsList.find((team) => team.id === selectedTeam)?.members || []
         : [];
-
-    const isMatchTeam = (userId) =>
-      selectedTeam === "all" || selectedTeamMembers.includes(userId);
+const isMatchTeam = (userId) =>
+  selectedTeam === "all" || selectedTeamMembers.includes(userId);
+  // const isMatchTeam = () => true;
 
     const dsTong =
       safeOrders
@@ -803,12 +803,15 @@ useEffect(() => {
     }
 
     // 👉 rule trừ tiền
-    if (month === 4 && year === 2026) {
+    if (month === 4 && year === 2026 && selectedTeam === "all") {
       minusAmount = 23000000;
     }
 
-    if (month === 5 && year === 2026) {
+    if (month === 5 && year === 2026 && selectedTeam === "all") {
       minusAmount = 26000000;
+    }
+    if (month === 6 && year === 2026 && selectedTeam === "all" ) {
+      minusAmount = 30000000;
     }
 
     // không có rule → trả luôn
