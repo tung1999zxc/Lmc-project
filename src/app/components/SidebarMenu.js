@@ -4,13 +4,15 @@ import { Menu } from "antd";
 import { useSelector } from "react-redux";
 import {
   ShoppingCartOutlined,
-  MoneyCollectOutlined,
-  ShopOutlined,
-  FileTextOutlined,
+  BarChartOutlined,
+  PrinterOutlined,
+  ScanOutlined,
+  InboxOutlined,
   UserOutlined,
-  BellOutlined,
-  CalendarOutlined,
-  HistoryOutlined,
+  SettingOutlined,
+  CheckCircleOutlined,
+  CarOutlined,
+  ClockCircleOutlined,
 } from "@ant-design/icons";
 import Link from "next/link";
 
@@ -64,8 +66,8 @@ const SidebarMenu = () => {
       key: "sub01",
       label: (
         <span>
-          <img src="/jp.png" style={{ width: 18, marginRight: 6 }} /> Tổng Quan
-          Nhật
+          <img src="/malay.svg" style={{ width: 18, marginRight: 6 }} /> Tổng Quan
+          Malaysia
         </span>
       ),
       href: "/overviewjp",
@@ -96,8 +98,8 @@ const SidebarMenu = () => {
       key: "sub12",
       label: (
         <span>
-          <img src="/jp.png" style={{ width: 18, marginRight: 6 }} /> Quản lý đơn
-          hàng Nhật
+          <img src="/malay.svg" style={{ width: 18, marginRight: 6 }} /> Quản lý đơn
+          hàng Malaysia
         </span>
       ),
       href: "/ordersjp",
@@ -132,7 +134,7 @@ const SidebarMenu = () => {
           key: "sub21",
           label: (
             <span>
-              <img src="/jp.png" style={{ width: 18, marginRight: 6 }} /> MKT Nhật
+              <img src="/malay.svg" style={{ width: 18, marginRight: 6 }} /> MKT Malaysia
             </span>
           ),
           href: "/mktjp",
@@ -360,8 +362,8 @@ const SidebarMenu = () => {
       key: "sub01",
       label: (
         <span>
-          <img src="/jp.png" style={{ width: 18, marginRight: 6 }} /> Tổng Quan
-          Nhật
+          <img src="/malay.svg" style={{ width: 18, marginRight: 6 }} /> Tổng Quan
+          Malaysia
         </span>
       ),
       href: "/overviewjp",
@@ -383,8 +385,8 @@ const SidebarMenu = () => {
       key: "sub12",
       label: (
         <span>
-          <img src="/jp.png" style={{ width: 18, marginRight: 6 }} /> Quản lý đơn
-          hàng Nhật
+          <img src="/malay.svg" style={{ width: 18, marginRight: 6 }} /> Quản lý đơn
+          hàng Malaysia
         </span>
       ),
       href: "/ordersjp",
@@ -411,7 +413,7 @@ const SidebarMenu = () => {
           key: "sub21",
           label: (
             <span>
-              <img src="/jp.png" style={{ width: 18, marginRight: 6 }} /> MKT Nhật
+              <img src="/malay.svg" style={{ width: 18, marginRight: 6 }} /> MKT Malaysia
             </span>
           ),
           href: "/mktjp",
