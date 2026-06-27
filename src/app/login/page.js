@@ -12,7 +12,7 @@ const COMPANY_DISPLAY_NAME = "LMC GROUPS";
 const COMPANY_LOGO_URL = "lmc.jpg";
 
 // ──────────────────────────────────────────────────────────────────────────────
-// Canvas background: golden flowing curves (ported from HTML)
+// Canvas background: golden flowing curves — ported 1-to-1 from HTML
 // ──────────────────────────────────────────────────────────────────────────────
 function GoldenCanvas() {
   const canvasRef = useRef(null);
@@ -23,8 +23,8 @@ function GoldenCanvas() {
     const ctx = canvas.getContext("2d");
     let animId;
     let t = 0;
-    const GOLD = "rgba(201,149,42,";
-    const PALE = "rgba(255,220,120,";
+    const GOLD = "rgba(255,215,0,";
+    const PALE = "rgba(255,235,140,";
 
     function resize() {
       canvas.width = window.innerWidth;
@@ -40,23 +40,23 @@ function GoldenCanvas() {
       return {
         ox: rnd(0, W), oy: rnd(0, H),
         ax: rnd(0.15, 0.45) * W, ay: rnd(0.12, 0.38) * H,
-        bx: rnd(0.1, 0.4) * W,  by: rnd(0.1, 0.35) * H,
+        bx: rnd(0.1,  0.4)  * W, by: rnd(0.1,  0.35) * H,
         px: rnd(0.0003, 0.0009) * (Math.random() < 0.5 ? 1 : -1),
         py: rnd(0.0003, 0.0009) * (Math.random() < 0.5 ? 1 : -1),
         qx: rnd(0.0002, 0.0008) * (Math.random() < 0.5 ? 1 : -1),
         qy: rnd(0.0002, 0.0008) * (Math.random() < 0.5 ? 1 : -1),
         rx: rnd(0.0001, 0.0006) * (Math.random() < 0.5 ? 1 : -1),
         ry: rnd(0.0001, 0.0006) * (Math.random() < 0.5 ? 1 : -1),
-        ph: rnd(0, Math.PI * 2),
+        ph:  rnd(0, Math.PI * 2),
         spd: rnd(0.0004, 0.0012),
-        alpha: rnd(0.04, 0.13),
-        width: rnd(0.6, 2.2),
-        len: rnd(0.55, 1.4),
-        glowR: Math.random() < 0.3,
+        alpha: rnd(0.2, 0.45),          // HTML values
+        width: rnd(1.0, 3.0),
+        len:   rnd(0.55, 1.4),
+        glowR: Math.random() < 0.6,
       };
     }
 
-    const NUM = 18;
+    const NUM = 30; // matches HTML
     const curves = Array.from({ length: NUM }, mkCurve);
 
     function evalCurve(c, tt) {
@@ -99,10 +99,13 @@ function GoldenCanvas() {
         ctx.lineWidth = c.width * 2;
       }
 
-      const grd = ctx.createLinearGradient(pts[0].x, pts[0].y, pts[pts.length - 1].x, pts[pts.length - 1].y);
+      const grd = ctx.createLinearGradient(
+        pts[0].x, pts[0].y,
+        pts[pts.length - 1].x, pts[pts.length - 1].y
+      );
       grd.addColorStop(0,    GOLD + (alpha * 0.05).toFixed(3) + ")");
-      grd.addColorStop(0.25, GOLD + (alpha * 0.9).toFixed(3) + ")");
-      grd.addColorStop(0.5,  PALE + (alpha * 1.0).toFixed(3) + ")");
+      grd.addColorStop(0.25, GOLD + (alpha * 0.9 ).toFixed(3) + ")");
+      grd.addColorStop(0.5,  PALE + (alpha * 1.0 ).toFixed(3) + ")");
       grd.addColorStop(0.75, GOLD + (alpha * 0.85).toFixed(3) + ")");
       grd.addColorStop(1,    GOLD + (alpha * 0.05).toFixed(3) + ")");
 
@@ -120,8 +123,8 @@ function GoldenCanvas() {
       const pulse = 0.5 + 0.5 * Math.sin(tt * 0.018);
       const cx = W / 2, cy = H / 2;
       const rg = ctx.createRadialGradient(cx, cy * 0.6, 0, cx, cy * 0.6, Math.max(W, H) * 0.55);
-      rg.addColorStop(0,   GOLD + (0.04 + pulse * 0.035).toFixed(3) + ")");
-      rg.addColorStop(0.4, GOLD + "0.015)");
+      rg.addColorStop(0,   GOLD + (0.12 + pulse * 0.08).toFixed(3) + ")");
+      rg.addColorStop(0.4, GOLD + "0.04)");
       rg.addColorStop(1,   GOLD + "0)");
       ctx.fillStyle = rg;
       ctx.fillRect(0, 0, W, H);
@@ -151,45 +154,232 @@ function GoldenCanvas() {
 }
 
 // ──────────────────────────────────────────────────────────────────────────────
-// Curtain intro animation
+// Floating particles + sparkle — ported from HTML
+// ──────────────────────────────────────────────────────────────────────────────
+function FloatingParticles() {
+  const containerRef = useRef(null);
+
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+
+    // Create 120 floating dots
+    for (let i = 0; i < 120; i++) {
+      const d = document.createElement("div");
+      const sz = Math.random() * 3.5 + 0.8;
+      d.className = "fp";
+      d.style.cssText = [
+        `width:${sz}px`,
+        `height:${sz}px`,
+        `left:${Math.random() * 100}%`,
+        `bottom:${Math.random() * 10}%`,
+        `--d:${(5 + Math.random() * 12).toFixed(1)}s`,
+        `--delay:-${(Math.random() * 15).toFixed(1)}s`,
+      ].join(";");
+      container.appendChild(d);
+    }
+
+    // Sparkle interval
+    const sparkInterval = setInterval(() => {
+      const s = document.createElement("div");
+      const size = Math.random() * 4 + 2;
+      s.style.cssText = [
+        "position:absolute",
+        `width:${size}px`,
+        `height:${size}px`,
+        "border-radius:50%",
+        "background:#fff9e6",
+        "pointer-events:none",
+        `left:${10 + Math.random() * 80}%`,
+        `top:${10 + Math.random() * 80}%`,
+        "animation:sparkFade 0.6s ease-out forwards",
+        "box-shadow:0 0 15px #c9952a,0 0 30px #fff",
+        "z-index:2",
+      ].join(";");
+      container.appendChild(s);
+      setTimeout(() => s.remove(), 700);
+    }, 200);
+
+    return () => {
+      clearInterval(sparkInterval);
+    };
+  }, []);
+
+  return (
+    <div
+      ref={containerRef}
+      style={{
+        position: "absolute",
+        inset: 0,
+        overflow: "hidden",
+        pointerEvents: "none",
+        zIndex: 2,
+      }}
+    />
+  );
+}
+
+// ──────────────────────────────────────────────────────────────────────────────
+// Curtain intro — including flash + spinning rings
 // ──────────────────────────────────────────────────────────────────────────────
 function Curtain() {
   const [visible, setVisible] = useState(true);
 
   useEffect(() => {
-    // Match HTML: curtain fades at 3s, panels slide at 1.6s for 1.2s
-    const timer = setTimeout(() => setVisible(false), 3600);
+    // HTML: curtainFade starts at 3.2s, duration 0.6s → fully gone ~3.8s
+    const timer = setTimeout(() => setVisible(false), 3800);
     return () => clearTimeout(timer);
   }, []);
 
   if (!visible) return null;
 
   return (
-    <div style={styles.curtain}>
-      <div style={styles.curtainLeft} />
-      <div style={styles.curtainRight} />
-      <div style={styles.curtainSeam} />
-      <div style={styles.curtainLogo}>
-        <div style={styles.curtainLogoRing}>
-          <img src={COMPANY_LOGO_URL} alt={COMPANY_DISPLAY_NAME} style={styles.curtainLogoImg} />
+    <div style={curtainStyles.curtain}>
+      {/* Flash overlay */}
+      <div style={curtainStyles.flash} />
+
+      {/* Two panels */}
+      <div style={curtainStyles.left} />
+      <div style={curtainStyles.right} />
+
+      {/* Center seam glow */}
+      <div style={curtainStyles.seam} />
+
+      {/* Logo */}
+      <div style={curtainStyles.logo}>
+        <div style={curtainStyles.ring}>
+          {/* Spinning decorative rings via class */}
+          <div className="curtain-spin-ring-1" />
+          <div className="curtain-spin-ring-2" />
+          <img
+            src={COMPANY_LOGO_URL}
+            alt={COMPANY_DISPLAY_NAME}
+            style={curtainStyles.img}
+          />
         </div>
-        <div style={styles.curtainWordmark}>{COMPANY_DISPLAY_NAME}</div>
-        <div style={styles.curtainTagline}>{COMPANY_LEGAL_NAME}</div>
+        <div style={curtainStyles.wordmark}>{COMPANY_DISPLAY_NAME}</div>
+        <div style={curtainStyles.tagline}>{COMPANY_LEGAL_NAME}</div>
       </div>
-      <style>{curtainKeyframes}</style>
+
+      <style>{curtainCSS}</style>
     </div>
   );
 }
 
+const curtainStyles = {
+  curtain: {
+    position: "absolute",
+    inset: 0,
+    zIndex: 50,
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    background: "#000",
+    animation: "curtainFade 0.6s ease-out 3.2s forwards",
+  },
+  flash: {
+    position: "absolute",
+    inset: 0,
+    zIndex: 60,
+    background: "white",
+    opacity: 0,
+    pointerEvents: "none",
+    animation: "flash 0.6s ease-out 2.9s forwards",
+  },
+  left: {
+    position: "absolute",
+    top: 0, bottom: 0, left: 0,
+    width: "50%",
+    background: "linear-gradient(to bottom,#0d0700,#1a0e00,#0d0700)",
+    borderRight: "1px solid #c9952a44",
+    animation: "slideLeft 1.2s cubic-bezier(.77,0,.175,1) 1.6s forwards",
+  },
+  right: {
+    position: "absolute",
+    top: 0, bottom: 0, right: 0,
+    width: "50%",
+    background: "linear-gradient(to bottom,#0d0700,#1a0e00,#0d0700)",
+    borderLeft: "1px solid #c9952a44",
+    animation: "slideRight 1.2s cubic-bezier(.77,0,.175,1) 1.6s forwards",
+  },
+  seam: {
+    position: "absolute",
+    top: 0, bottom: 0, left: "50%",
+    width: 2,
+    background: "linear-gradient(to bottom,transparent,#fff9e6,#c9952a,#fff9e6,transparent)",
+    transform: "translateX(-50%)",
+    animation: "seamGlow 1.5s ease-out 1s forwards",
+    opacity: 0,
+  },
+  logo: {
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+    gap: 14,
+    animation: "logoZoom 0.9s cubic-bezier(.34,1.56,.64,1) 0.3s both",
+    zIndex: 1,
+    position: "relative",
+  },
+  ring: {
+    width: 130, height: 130,
+    borderRadius: "50%",
+    border: "2px solid #c9952a",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    position: "relative",
+    animation: "ringPulse 1.5s ease-in-out infinite",
+    overflow: "hidden",
+    background: "#0a0600",
+  },
+  img: {
+    width: "100%", height: "100%",
+    objectFit: "cover",
+    display: "block",
+  },
+  wordmark: {
+    color: "#c9952a",
+    fontSize: 28,
+    letterSpacing: 10,
+    fontWeight: "bold",
+    textShadow: "0 0 30px #c9952a,0 0 60px #c9952a55",
+    animation: "wordmarkFlicker 0.1s linear 0.8s 3",
+  },
+  tagline: {
+    color: "#c9952a77",
+    fontSize: 10,
+    letterSpacing: 5,
+    fontFamily: "sans-serif",
+    textTransform: "uppercase",
+  },
+};
+
 // ──────────────────────────────────────────────────────────────────────────────
-// Corner ornament SVG
+// Corner ornament
 // ──────────────────────────────────────────────────────────────────────────────
-function Orn({ style }) {
+function Orn({ pos }) {
+  const transforms = {
+    tl: undefined,
+    tr: "scaleX(-1)",
+    bl: "scaleY(-1)",
+    br: "scale(-1,-1)",
+  };
+  const positions = {
+    tl: { top: 10, left: 10 },
+    tr: { top: 10, right: 10 },
+    bl: { bottom: 10, left: 10 },
+    br: { bottom: 10, right: 10 },
+  };
   return (
-    <div style={{ ...styles.orn, ...style }}>
-      <svg viewBox="0 0 20 20" width="20" height="20">
-        <path d="M0 20 L0 0 L20 0" fill="none" stroke="#c9952a" strokeWidth="1.2" />
-        <circle cx="0" cy="0" r="2" fill="#c9952a" />
+    <div style={{ position: "absolute", width: 20, height: 20, ...positions[pos] }}>
+      <svg
+        viewBox="0 0 20 20"
+        width="20"
+        height="20"
+        style={{ transform: transforms[pos] }}
+      >
+        <path d="M0 20 L0 0 L20 0" fill="none" stroke="#f5d78e" strokeWidth="1.5" />
+        <circle cx="0" cy="0" r="2" fill="#f5d78e" />
       </svg>
     </div>
   );
@@ -205,12 +395,12 @@ export default function LoginPage() {
   const router = useRouter();
 
   useEffect(() => {
-    // Card appears after curtain exits (~3.6s)
-    const t = setTimeout(() => setShowCard(true), 3600);
+    // Card appears after curtain exits (~3.8s)
+    const t = setTimeout(() => setShowCard(true), 3800);
     return () => clearTimeout(t);
   }, []);
 
-  // ── Original logic unchanged ──────────────────────────────────────────────
+  // ── Original logic — UNCHANGED ─────────────────────────────────────────────
   const onFinish = async (values) => {
     setLoading(true);
     try {
@@ -246,30 +436,41 @@ export default function LoginPage() {
       setLoading(false);
     }
   };
-  // ─────────────────────────────────────────────────────────────────────────
+  // ──────────────────────────────────────────────────────────────────────────
 
   return (
     <div style={styles.root}>
       {/* Radial dark-gold background */}
       <div style={styles.bg} />
 
-      {/* Animated golden curves */}
+      {/* Bright golden overlay glow */}
+      <div style={styles.bgOverlay} />
+
+      {/* Animated golden curves canvas */}
       <GoldenCanvas />
 
-      {/* Curtain intro */}
+      {/* Floating particles + sparkles */}
+      <FloatingParticles />
+
+      {/* Curtain intro (includes flash) */}
       <Curtain />
 
-      {/* Login card */}
+      {/* ── Login card ── */}
       <div
         style={{
           ...styles.cardWrap,
           opacity: showCard ? 1 : 0,
-          transform: showCard ? "translateY(0) scale(1)" : "translateY(40px) scale(0.96)",
-          transition: "opacity 0.9s cubic-bezier(.34,1.2,.64,1), transform 0.9s cubic-bezier(.34,1.2,.64,1)",
+          transform: showCard
+            ? "translateY(0) scale(1)"
+            : "translateY(40px) scale(0.96)",
+          transition:
+            "opacity 0.9s cubic-bezier(.34,1.2,.64,1), transform 0.9s cubic-bezier(.34,1.2,.64,1)",
         }}
       >
         {/* Aura glow behind card */}
         <div style={styles.aura} />
+        {/* Beam below card */}
+        <div style={styles.beam} />
 
         <div style={styles.card}>
           {/* Top line accent */}
@@ -278,28 +479,33 @@ export default function LoginPage() {
           <div style={styles.cardInnerGlow} />
 
           {/* Corner ornaments */}
-          <Orn style={{ top: 10, left: 10 }} />
-          <Orn style={{ top: 10, right: 10, transform: "scaleX(-1)" }} />
-          <Orn style={{ bottom: 10, left: 10, transform: "scaleY(-1)" }} />
-          <Orn style={{ bottom: 10, right: 10, transform: "scale(-1,-1)" }} />
+          <Orn pos="tl" />
+          <Orn pos="tr" />
+          <Orn pos="bl" />
+          <Orn pos="br" />
 
           {/* Header: logo + brand */}
           <div style={styles.hdr}>
             <div style={styles.logoOuter}>
-              <div style={styles.logoSpinRing} />
-              <img src={COMPANY_LOGO_URL} alt={COMPANY_DISPLAY_NAME} style={styles.logoImg} />
+              {/* Spinning decorative ring */}
+              <div className="logo-spin-ring" />
+              <img
+                src={COMPANY_LOGO_URL}
+                alt={COMPANY_DISPLAY_NAME}
+                style={styles.logoImg}
+              />
             </div>
             <div style={styles.brand}>{COMPANY_DISPLAY_NAME}</div>
           </div>
 
           {/* Divider */}
           <div style={styles.divider}>
-            <div style={styles.dividerLine} />
+            <div style={styles.dividerLineL} />
             <span style={styles.dividerIcon}>◆ ✦ ◆</span>
-            <div style={{ ...styles.dividerLine, background: "linear-gradient(to left, transparent, #c9952a55)" }} />
+            <div style={styles.dividerLineR} />
           </div>
 
-          {/* Form — Ant Design components keep original field names & validation */}
+          {/* Form — Ant Design, keeps original field names & validation */}
           <Form layout="vertical" onFinish={onFinish}>
             <Form.Item
               name="username"
@@ -307,11 +513,15 @@ export default function LoginPage() {
             >
               <div>
                 <label style={styles.flabel}>Tài Khoản</label>
-                <Form.Item name="username" noStyle rules={[{ required: true, message: "Vui lòng nhập tài khoản" }]}>
+                <Form.Item
+                  name="username"
+                  noStyle
+                  rules={[{ required: true, message: "Vui lòng nhập tài khoản" }]}
+                >
                   <Input
                     placeholder="Nhập tài khoản"
-                    style={styles.finput}
                     className="gold-input"
+                    style={styles.finput}
                   />
                 </Form.Item>
               </div>
@@ -324,11 +534,15 @@ export default function LoginPage() {
             >
               <div>
                 <label style={styles.flabel}>Mật Khẩu</label>
-                <Form.Item name="password" noStyle rules={[{ required: true, message: "Vui lòng nhập mật khẩu" }]}>
+                <Form.Item
+                  name="password"
+                  noStyle
+                  rules={[{ required: true, message: "Vui lòng nhập mật khẩu" }]}
+                >
                   <Input.Password
                     placeholder="Nhập mật khẩu"
-                    style={{ ...styles.finput, paddingRight: 42 }}
                     className="gold-input"
+                    style={{ ...styles.finput, paddingRight: 42 }}
                   />
                 </Form.Item>
               </div>
@@ -350,14 +564,14 @@ export default function LoginPage() {
         </div>
       </div>
 
-      {/* Global styles for Ant Design overrides */}
+      {/* All keyframes + overrides */}
       <style>{globalCSS}</style>
     </div>
   );
 }
 
 // ──────────────────────────────────────────────────────────────────────────────
-// Styles
+// Styles (inline)
 // ──────────────────────────────────────────────────────────────────────────────
 const styles = {
   root: {
@@ -374,129 +588,76 @@ const styles = {
   bg: {
     position: "absolute",
     inset: 0,
-    background: "radial-gradient(ellipse at 50% 0%, #1a0e00 0%, #0a0500 40%, #000 100%)",
+    background: "radial-gradient(ellipse at 50% 0%,#2a1a00 0%,#140d00 40%,#000 100%)",
     zIndex: 0,
   },
-  // ── Curtain ──
-  curtain: {
+  bgOverlay: {
     position: "absolute",
     inset: 0,
-    zIndex: 50,
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    background: "#000",
-    animation: "curtainFade 0.6s ease-out 3s forwards",
-  },
-  curtainLeft: {
-    position: "absolute",
-    top: 0, bottom: 0, left: 0,
-    width: "50%",
-    background: "linear-gradient(to bottom, #0d0700, #1a0e00, #0d0700)",
-    borderRight: "1px solid #c9952a44",
-    animation: "slideLeft 1.2s cubic-bezier(.77,0,.175,1) 1.6s forwards",
-  },
-  curtainRight: {
-    position: "absolute",
-    top: 0, bottom: 0, right: 0,
-    width: "50%",
-    background: "linear-gradient(to bottom, #0d0700, #1a0e00, #0d0700)",
-    borderLeft: "1px solid #c9952a44",
-    animation: "slideRight 1.2s cubic-bezier(.77,0,.175,1) 1.6s forwards",
-  },
-  curtainSeam: {
-    position: "absolute",
-    top: 0, bottom: 0, left: "50%",
-    width: 2,
-    background: "linear-gradient(to bottom, transparent, #fff9e6, #c9952a, #fff9e6, transparent)",
-    transform: "translateX(-50%)",
-    animation: "seamGlow 1.5s ease-out 1s forwards",
-    opacity: 0,
-  },
-  curtainLogo: {
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "center",
-    gap: 14,
-    animation: "logoZoom 0.9s cubic-bezier(.34,1.56,.64,1) 0.3s both",
     zIndex: 1,
+    background:
+      "radial-gradient(ellipse at 50% 50%,rgba(255,215,0,0.35) 0%,rgba(255,215,0,0.08) 50%,transparent 70%)",
+    pointerEvents: "none",
   },
-  curtainLogoRing: {
-    width: 130,
-    height: 130,
-    borderRadius: "50%",
-    border: "2px solid #c9952a",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    position: "relative",
-    animation: "ringPulse 1.5s ease-in-out infinite",
-    overflow: "hidden",
-    background: "#0a0600",
-  },
-  curtainLogoImg: {
-    width: "100%",
-    height: "100%",
-    borderRadius: "50%",
-    objectFit: "cover",
-    display: "block",
-  },
-  curtainWordmark: {
-    color: "#c9952a",
-    fontSize: 28,
-    letterSpacing: 10,
-    fontWeight: "bold",
-    textShadow: "0 0 30px #c9952a, 0 0 60px #c9952a55",
-    animation: "wordmarkFlicker 0.1s linear 0.8s 3",
-  },
-  curtainTagline: {
-    color: "#c9952a77",
-    fontSize: 10,
-    letterSpacing: 5,
-    fontFamily: "sans-serif",
-    textTransform: "uppercase",
-  },
-  // ── Card ──
+  // ── Card wrapper ──
   cardWrap: {
     position: "relative",
     zIndex: 10,
     width: 400,
+    maxWidth: "92%",
   },
   aura: {
     position: "absolute",
-    inset: -40,
-    borderRadius: 60,
-    background: "radial-gradient(ellipse, #c9952a18 0%, transparent 70%)",
-    animation: "auraPulse 4s ease-in-out infinite",
+    inset: -80,
+    borderRadius: 100,
+    background: "radial-gradient(ellipse,rgba(255,215,0,0.6) 0%,transparent 60%)",
+    filter: "blur(50px)",
+    animation: "auraPulse 5s ease-in-out infinite",
     pointerEvents: "none",
+    zIndex: -1,
   },
+  beam: {
+    position: "absolute",
+    bottom: "-120%",
+    left: "10%",
+    width: "80%",
+    height: "80%",
+    background: "radial-gradient(ellipse at center,rgba(255,215,0,0.6) 0%,transparent 70%)",
+    filter: "blur(70px)",
+    pointerEvents: "none",
+    animation: "beamPulse 6s ease-in-out infinite",
+    zIndex: -2,
+  },
+  // ── Card ──
   card: {
-    background: "linear-gradient(160deg, #2a1a00 0%, #1a0f00 50%, #2a1a00 100%)",
+    background: "linear-gradient(160deg,#3a2000 0%,#201300 50%,#3a2000 100%)",
     borderRadius: 20,
-    border: "1px solid #c9952a66",
+    border: "1px solid rgba(245,215,142,0.8)",
     padding: "40px 36px 36px",
     position: "relative",
     overflow: "hidden",
-    boxShadow: "0 0 40px #c9952a18, 0 8px 32px #00000088",
+    boxShadow:
+      "0 0 80px rgba(255,215,0,0.5), 0 0 200px rgba(255,215,0,0.25), 0 0 300px rgba(255,215,0,0.12), inset 0 0 40px rgba(255,215,0,0.05)",
+    backdropFilter: "blur(4px)",
   },
   cardTopLine: {
     position: "absolute",
-    top: 0, left: "15%", right: "15%",
+    top: 0,
+    left: "15%",
+    right: "15%",
     height: 1,
-    background: "linear-gradient(to right, transparent, #c9952a, #fff9e6, #c9952a, transparent)",
+    background:
+      "linear-gradient(to right,transparent,#fff9e6,#c9952a,#fff9e6,transparent)",
   },
   cardInnerGlow: {
     position: "absolute",
     inset: 0,
     borderRadius: 20,
-    background: "radial-gradient(ellipse at 50% -5%, #c9952a1a 0%, transparent 55%)",
+    background:
+      "radial-gradient(ellipse at 50% -5%,#c9952a1a 0%,transparent 55%)",
     pointerEvents: "none",
   },
-  orn: {
-    position: "absolute",
-    width: 20,
-    height: 20,
-  },
+  // ── Header ──
   hdr: {
     display: "flex",
     flexDirection: "column",
@@ -507,7 +668,7 @@ const styles = {
     width: 82,
     height: 82,
     borderRadius: "50%",
-    border: "2px solid #c9952a88",
+    border: "1.5px solid rgba(245,215,142,0.8)",
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
@@ -515,48 +676,46 @@ const styles = {
     marginBottom: 14,
     animation: "logoGlow 4s ease-in-out infinite",
     overflow: "hidden",
-    background: "#0a0600",
-  },
-  logoSpinRing: {
-    position: "absolute",
-    inset: -6,
-    borderRadius: "50%",
-    border: "1px solid #c9952a22",
-    animation: "spinRing 10s linear infinite",
-    zIndex: 2,
-    pointerEvents: "none",
+    background: "#000",
   },
   logoImg: {
     width: "100%",
     height: "100%",
-    borderRadius: "50%",
     objectFit: "cover",
     display: "block",
+    background: "#000",
   },
   brand: {
-    color: "#c9952a",
+    color: "#f5d78e",
     fontSize: 17,
     letterSpacing: 7,
     fontWeight: "bold",
   },
+  // ── Divider ──
   divider: {
     display: "flex",
     alignItems: "center",
     gap: 8,
     margin: "20px 0 24px",
   },
-  dividerLine: {
+  dividerLineL: {
     flex: 1,
     height: 1,
-    background: "linear-gradient(to right, transparent, #c9952a55)",
+    background: "linear-gradient(to right,transparent,#c9952a55)",
+  },
+  dividerLineR: {
+    flex: 1,
+    height: 1,
+    background: "linear-gradient(to left,transparent,#c9952a55)",
   },
   dividerIcon: {
     color: "#c9952a",
     fontSize: 12,
   },
+  // ── Form ──
   flabel: {
     display: "block",
-    color: "#c9952a99",
+    color: "#f5d78ecc",
     fontSize: 9,
     letterSpacing: 3,
     textTransform: "uppercase",
@@ -566,11 +725,11 @@ const styles = {
   },
   finput: {
     width: "100%",
-    background: "#120900",
-    border: "1px solid #c9952a44",
+    background: "#1a0f00",
+    border: "1px solid rgba(245,215,142,0.5)",
     borderRadius: 8,
     padding: "12px 16px",
-    color: "#f0d890",
+    color: "#fff9e6",
     fontSize: 14,
     fontFamily: "sans-serif",
     outline: "none",
@@ -581,7 +740,8 @@ const styles = {
     marginTop: 22,
     padding: 14,
     height: "auto",
-    background: "linear-gradient(90deg, #8b5e0a, #c9952a, #f0c84a, #c9952a, #8b5e0a)",
+    background:
+      "linear-gradient(90deg,#c9952a,#f5d78e,#c9952a,#f5d78e,#c9952a)",
     backgroundSize: "300% 100%",
     border: "none",
     borderRadius: 8,
@@ -592,12 +752,13 @@ const styles = {
     textTransform: "uppercase",
     fontFamily: "sans-serif",
     cursor: "pointer",
+    boxShadow: "0 0 40px rgba(255,215,0,0.6)",
     animation: "btnShimmer 3s linear infinite",
   },
   seal: {
     textAlign: "center",
     marginTop: 22,
-    color: "#c9952a33",
+    color: "#c9952a55",
     fontSize: 9,
     letterSpacing: 3,
     fontFamily: "sans-serif",
@@ -606,111 +767,177 @@ const styles = {
 };
 
 // ──────────────────────────────────────────────────────────────────────────────
-// Curtain keyframes (injected as a <style> tag inside the curtain)
+// All CSS keyframes + class helpers (injected once)
 // ──────────────────────────────────────────────────────────────────────────────
-const curtainKeyframes = `
-  @keyframes curtainFade { to { opacity: 0; pointer-events: none; } }
-  @keyframes slideLeft   { to { transform: translateX(-100%); } }
-  @keyframes slideRight  { to { transform: translateX(100%); } }
+const curtainCSS = `
+  @keyframes curtainFade   { to { opacity:0; pointer-events:none; } }
+  @keyframes flash {
+    0%   { opacity:1; filter:blur(10px); box-shadow:inset 0 0 400px #fff; }
+    100% { opacity:0; filter:blur(30px); }
+  }
+  @keyframes slideLeft  { to { transform:translateX(-100%); } }
+  @keyframes slideRight { to { transform:translateX(100%);  } }
   @keyframes seamGlow {
-    0%   { opacity: 0; }
-    30%  { opacity: 1; box-shadow: 0 0 20px 4px #c9952a; }
-    70%  { opacity: 1; box-shadow: 0 0 30px 8px #fff9e6; }
-    100% { opacity: 0; }
+    0%   { opacity:0; }
+    30%  { opacity:1; box-shadow:0 0 20px 4px #c9952a; }
+    70%  { opacity:1; box-shadow:0 0 30px 8px #fff9e6; }
+    100% { opacity:0; }
   }
-  @keyframes logoZoom { from { opacity: 0; transform: scale(0.5); } to { opacity: 1; transform: scale(1); } }
+  @keyframes logoZoom {
+    from { opacity:0; transform:scale(0.5); }
+    to   { opacity:1; transform:scale(1);   }
+  }
   @keyframes ringPulse {
-    0%,100% { box-shadow: 0 0 0 0 #c9952a00, 0 0 20px #c9952a55; }
-    50%     { box-shadow: 0 0 0 10px #c9952a22, 0 0 50px #c9952a99; }
+    0%,100% { box-shadow:0 0 0 0 #c9952a00, 0 0 20px #c9952a55; }
+    50%     { box-shadow:0 0 0 10px #c9952a22, 0 0 50px #c9952a99; }
   }
-  @keyframes spinRing   { to { transform: rotate(360deg); } }
-  @keyframes wordmarkFlicker { 50% { opacity: 0.6; } }
+  @keyframes spinRing      { to { transform:rotate(360deg); } }
+  @keyframes wordmarkFlicker { 50% { opacity:0.6; } }
+
+  /* Spinning rings inside curtain logo */
+  .curtain-spin-ring-1 {
+    content:'';
+    position:absolute;
+    inset:-10px;
+    border-radius:50%;
+    border:1px solid #c9952a44;
+    animation:spinRing 7s linear infinite;
+    z-index:10;
+    pointer-events:none;
+  }
+  .curtain-spin-ring-2 {
+    content:'';
+    position:absolute;
+    inset:-20px;
+    border-radius:50%;
+    border:1px dashed #c9952a22;
+    animation:spinRing 13s linear infinite reverse;
+    z-index:10;
+    pointer-events:none;
+  }
 `;
 
-// ──────────────────────────────────────────────────────────────────────────────
-// Global CSS — Ant Design overrides + card animations
-// ──────────────────────────────────────────────────────────────────────────────
 const globalCSS = `
+  /* ── Keyframes ── */
   @keyframes auraPulse {
-    0%,100% { opacity: 0.5; transform: scale(1); }
-    50%     { opacity: 1;   transform: scale(1.05); }
+    0%,100% { opacity:0.8; transform:scale(1);   }
+    50%     { opacity:1;   transform:scale(1.1); }
+  }
+  @keyframes beamPulse {
+    0%,100% { opacity:0.6; transform:scale(1) translateY(0);    }
+    50%     { opacity:1;   transform:scale(1.15) translateY(15%); }
   }
   @keyframes logoGlow {
-    0%,100% { box-shadow: 0 0 12px #c9952a55; }
-    50%     { box-shadow: 0 0 28px #c9952aaa, 0 0 50px #c9952a44; }
+    0%,100% { box-shadow:0 0 15px #c9952a55; }
+    50%     { box-shadow:0 0 35px #c9952a99, 0 0 60px #c9952a44; }
   }
   @keyframes btnShimmer {
-    0%   { background-position: 200% 0; }
-    100% { background-position: -200% 0; }
+    0%   { background-position:200% 0;  }
+    100% { background-position:-200% 0; }
   }
 
-  /* Ant Design input overrides */
+  /* Spinning ring inside card logo */
+  .logo-spin-ring {
+    position:absolute;
+    inset:-6px;
+    border-radius:50%;
+    border:1px solid #c9952a44;
+    animation:spinRing 10s linear infinite;
+    z-index:2;
+    pointer-events:none;
+  }
+  @keyframes spinRing { to { transform:rotate(360deg); } }
+
+  /* ── Floating particles ── */
+  .fp {
+    position:absolute;
+    border-radius:50%;
+    background:#fff9e6;
+    pointer-events:none;
+    box-shadow:0 0 8px #c9952a;
+    animation:floatUp var(--d) ease-in infinite var(--delay);
+    opacity:0;
+  }
+  @keyframes floatUp {
+    0%   { opacity:0; transform:translateY(0) scale(0.5); }
+    10%  { opacity:1; transform:scale(1.2); }
+    80%  { opacity:0.8; }
+    100% { opacity:0; transform:translateY(-120vh) scale(0.3); }
+  }
+  @keyframes sparkFade {
+    0%   { opacity:1; transform:scale(1); }
+    100% { opacity:0; transform:scale(2); }
+  }
+
+  /* ── Ant Design overrides ── */
   .gold-input .ant-input,
   .gold-input {
-    background: #120900 !important;
-    border: 1px solid #c9952a44 !important;
-    border-radius: 8px !important;
-    color: #f0d890 !important;
-    caret-color: #c9952a !important;
+    background:#120900 !important;
+    border:1px solid #c9952a44 !important;
+    border-radius:8px !important;
+    color:#f0d890 !important;
+    caret-color:#c9952a !important;
   }
   .gold-input .ant-input:focus,
   .gold-input:focus {
-    border-color: #c9952aaa !important;
-    box-shadow: 0 0 0 1px #c9952a33, 0 0 18px #c9952a22, inset 0 0 8px #c9952a0f !important;
-    background: #180d00 !important;
+    border-color:#f5d78e !important;
+    box-shadow:0 0 25px rgba(255,215,0,0.3), inset 0 0 15px rgba(255,215,0,0.1) !important;
+    background:#2a1800 !important;
   }
   .gold-input .ant-input::placeholder,
-  .gold-input::placeholder { color: #c9952a44 !important; }
+  .gold-input::placeholder { color:#c9952a55 !important; }
 
-  /* Password wrapper */
   .ant-input-affix-wrapper.gold-input {
-    background: #120900 !important;
-    border: 1px solid #c9952a44 !important;
-    border-radius: 8px !important;
-    padding: 0 !important;
+    background:#120900 !important;
+    border:1px solid #c9952a44 !important;
+    border-radius:8px !important;
+    padding:0 !important;
   }
   .ant-input-affix-wrapper.gold-input input.ant-input {
-    border: none !important;
-    box-shadow: none !important;
-    background: transparent !important;
-    padding: 12px 16px !important;
+    border:none !important;
+    box-shadow:none !important;
+    background:transparent !important;
+    padding:12px 16px !important;
   }
   .ant-input-affix-wrapper.gold-input:focus-within {
-    border-color: #c9952aaa !important;
-    box-shadow: 0 0 0 1px #c9952a33, 0 0 18px #c9952a22 !important;
+    border-color:#f5d78e !important;
+    box-shadow:0 0 25px rgba(255,215,0,0.3) !important;
   }
   .ant-input-affix-wrapper.gold-input .ant-input-suffix svg,
   .ant-input-affix-wrapper.gold-input .ant-input-password-icon {
-    color: #c9952a66 !important;
+    color:#c9952a66 !important;
   }
   .ant-input-affix-wrapper.gold-input .ant-input-password-icon:hover {
-    color: #c9952a !important;
+    color:#c9952a !important;
   }
+  .ant-form-item-label label { color:#c9952a99 !important; }
+  .ant-form-item-explain-error { color:#e08840 !important; font-size:11px; }
 
-  /* Form labels */
-  .ant-form-item-label label { color: #c9952a99 !important; }
-
-  /* Error messages */
-  .ant-form-item-explain-error { color: #e08840 !important; font-size: 11px; }
-
-  /* Button */
   .gold-btn.ant-btn,
   .gold-btn.ant-btn:not(:disabled) {
-    background: linear-gradient(90deg, #8b5e0a, #c9952a, #f0c84a, #c9952a, #8b5e0a) !important;
-    background-size: 300% 100% !important;
-    border: none !important;
-    color: #0a0500 !important;
-    animation: btnShimmer 3s linear infinite !important;
-    box-shadow: 0 0 18px #c9952a44 !important;
+    background:linear-gradient(90deg,#c9952a,#f5d78e,#c9952a,#f5d78e,#c9952a) !important;
+    background-size:300% 100% !important;
+    border:none !important;
+    color:#0a0500 !important;
+    animation:btnShimmer 3s linear infinite !important;
+    box-shadow:0 0 40px rgba(255,215,0,0.6) !important;
+  }
+  .gold-btn.ant-btn::after {
+    content:'';
+    position:absolute;
+    inset:0;
+    background:linear-gradient(to bottom,rgba(255,255,255,0.3) 0%,transparent 60%);
+    border-radius:8px;
+    pointer-events:none;
   }
   .gold-btn.ant-btn:hover:not(:disabled) {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 28px #c9952a55 !important;
-    opacity: 1 !important;
+    transform:translateY(-2px);
+    box-shadow:0 0 60px rgba(255,215,0,0.8) !important;
+    opacity:1 !important;
   }
-  .gold-btn.ant-btn:active { transform: scale(0.98); }
+  .gold-btn.ant-btn:active { transform:scale(0.98); }
 
-  @media (max-width: 480px) {
-    div[style*="width: 400px"] { width: calc(100% - 32px) !important; max-width: 400px !important; }
+  @media (max-width:480px) {
+    div[style*="width: 400px"] { width:calc(100% - 32px) !important; max-width:400px !important; }
   }
 `;
