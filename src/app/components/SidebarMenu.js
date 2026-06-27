@@ -4,15 +4,13 @@ import { Menu } from "antd";
 import { useSelector } from "react-redux";
 import {
   ShoppingCartOutlined,
-  BarChartOutlined,
-  PrinterOutlined,
-  ScanOutlined,
-  InboxOutlined,
+  MoneyCollectOutlined,
+  ShopOutlined,
+  FileTextOutlined,
   UserOutlined,
-  SettingOutlined,
-  CheckCircleOutlined,
-  CarOutlined,
-  ClockCircleOutlined,
+  BellOutlined,
+  CalendarOutlined,
+  HistoryOutlined,
 } from "@ant-design/icons";
 import Link from "next/link";
 
