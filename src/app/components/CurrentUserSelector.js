@@ -74,7 +74,7 @@ useEffect(() => {
     ))}
   </Select>
 ) : (
-  <Select
+  <Select showSearch
     placeholder="Chọn nhân viên"
     style={{ width: 500 }}
     onChange={handleChange}

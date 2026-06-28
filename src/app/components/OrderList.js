@@ -88,7 +88,7 @@ const [products2, setProducts] = useState([]);
   const [filterType, setFilterType] = useState('failed'); // default: chưa thành công
   const [modalCustomerOrders, setModalCustomerOrders] = useState([]);
   const [modalVisible, setModalVisible] = useState(false);
-  
+  const [selectedKhoDong, setSelectedKhoDong] = useState();
   const handleSearchCustomerModal = async (name) => {
     try {
       const res = await axios.get(`/api/orders/search-by-customer?name=${encodeURIComponent(name)}`);
@@ -165,7 +165,12 @@ const [products2, setProducts] = useState([]);
   const saleOptions = employees
     .filter((emp) => emp.position_team === "sale")
     .map((emp) => emp.name);
-
+const kho2Options = employees
+  .filter(emp => emp.position === "kho2")
+  .map(emp => ({
+    label: emp.name,
+    value: emp.name,
+  }));
     const salexulyOptions = useMemo(() => {
       return employees
         .filter(emp => emp.position === "salexuly")
@@ -420,7 +425,7 @@ const resetPagename =()=>{
 
   if (currentUser.position === "kho2") {
     roleFilteredOrders = roleFilteredOrders.filter(
-      (order) => order.isShipping === true
+      (order) => order.isShippingName === currentUser.name
     );
   }
   
@@ -1000,15 +1005,19 @@ const getCustomerColor = (name) => {
     }
   };
   
-  const handleSelectAllIstick2 = (value) => {
-    setOrders((prevOrders) =>
-      prevOrders.map((order) =>
-        filteredOrders.some((fOrder) => fOrder.id === order.id)
-          ? { ...order, isShipping: value }
-          : order
-      )
-    );
-  };
+const handleSelectAllIstick2 = (checked) => {
+  setOrders(prev =>
+    prev.map(order =>
+      filteredOrders.some(f => f.id === order.id)
+        ? {
+            ...order,
+            isShipping: checked,
+            isShippingName: checked ? selectedKhoDong : null,
+          }
+        : order
+    )
+  );
+};
   // Các cột cho bảng (cho các vai trò khác nhau)
  
  
@@ -1055,21 +1064,34 @@ const getCustomerColor = (name) => {
     });
   }, 0);
 
-  const handleIstickChange2 = useCallback((orderId, value) => {
-    debouncedChangeShipping(orderId, value);
-  }, []);
-  const debouncedChangeShipping = useDebouncedUpdate((changes) => {
-    setOrders(prev => {
-      const copy = [...prev];
-      Object.entries(changes).forEach(([id, value]) => {
-        const index = copy.findIndex(o => o.id === id);
-        if (index !== -1) {
-          copy[index] = { ...copy[index], isShipping: value };
-        }
-      });
-      return copy;
+const handleIstickChange2 = useCallback((orderId, checked) => {
+  debouncedChangeShipping(orderId, {
+    isShipping: checked,
+    isShippingName: checked ? selectedKhoDong : null,
+  });
+}, [selectedKhoDong]);
+
+ const debouncedChangeShipping = useDebouncedUpdate((changes) => {
+  setOrders(prev => {
+    const copy = [...prev];
+
+    Object.entries(changes).forEach(([id, value]) => {
+      const index = copy.findIndex(o => o.id === id);
+
+      if (index !== -1) {
+        copy[index] = {
+          ...copy[index],
+          isShipping: value.isShipping,
+          isShippingName: value.isShipping
+            ? value.isShippingName
+            : null, // hoặc "" nếu bạn muốn
+        };
+      }
     });
-  }, 0);
+
+    return copy;
+  });
+}, 0);
 
   const handleIstickChangeDONE = useCallback((orderId, value) => {
     debouncedChangeDONE(orderId, value);
@@ -1194,7 +1216,13 @@ const getCustomerColor = (name) => {
     try {
       // Gửi chỉ các trường cần cập nhật (id và istick)
       const response = await axios.post("/api/orders/updateIstick2", {
-        orders: ordersToUpdate.map(({ id, isShipping }) => ({ id, isShipping })),
+       orders: ordersToUpdate.map(
+  ({ id, isShipping, isShippingName }) => ({
+    id,
+    isShipping,
+    isShippingName,
+  })
+),
       },
       {
         headers: { "x-current-user": encodeURIComponent(currentUser.name) },
@@ -1409,28 +1437,27 @@ onChange={(e) => handleColumnSelect("istick", e.target.checked)}
           {
             title: (<>
             <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-             <Checkbox
-  checked={selectedColumns.includes("isShipping")}
-  onChange={(e) => handleColumnSelect("isShipping", e.target.checked)}
->
-  
-</Checkbox>
+            
 
-<Checkbox.Group
-  options={[
-    { label: "KHO HQ đóng hàng", value: "istick2" }
-  ]}
-  value={allRowsSelected2 ? ["istick2"] : []}
-  onChange={(checkedValues) => handleSelectAllIstick2(checkedValues.length > 0)}
-  style={{
-    border: "1px solid #1890ff",
-    padding: "5px 10px",
-    borderRadius: "5px",
-    background: allRowsSelected2 ? "#1890ff" : "#f5f5f5",
-    color: allRowsSelected2 ? "white" : "black",
-    fontWeight: "bold"
-  }}
-/></div>
+<div style={{ display: "flex", gap: 10, alignItems: "center" }}>
+  <Checkbox.Group
+    options={[
+      { label: "CHỌN KHO ĐÓNG HÀNG", value: "istick2" }
+    ]}
+    value={allRowsSelected2 ? ["istick2"] : []}
+    onChange={(checkedValues) =>
+      handleSelectAllIstick2(checkedValues.length > 0)
+    }
+  />
+
+  <Select
+    placeholder="Chọn kho đóng"
+    style={{ width: 180 }}
+    value={selectedKhoDong}
+    onChange={setSelectedKhoDong}
+    options={kho2Options}
+  />
+</div></div>
               <Button  type="primary" onClick={handleSaveIstick2}>
               Lưu 
             </Button></>
@@ -1447,7 +1474,23 @@ onChange={(e) => handleColumnSelect("istick", e.target.checked)}
           },
         ]
       : []),
-    
+    ...((currentUser.position === "kho1"
+    ) ? [
+         {
+           title: 
+
+
+             
+            " Kho Đóng Hàng"
+          
+           ,
+           
+           key: "isShippingName",
+           dataIndex: "isShippingName",
+         
+         },
+       ]
+     : []),
     {
       title: (
         <Checkbox
@@ -1855,23 +1898,7 @@ onChange={(e) => handleColumnSelect("istick", e.target.checked)}
       dataIndex: "processStatus",
       key: "processStatus",
     },
-    ...((currentUser.name === "Tung99"
-    ) ? [
-         {
-           title: 
-
-
-             
-            " CTY ĐÓNG NAME"
-          
-           ,
-           
-           key: "isShippingname",
-           dataIndex: "isShippingname",
-         
-         },
-       ]
-     : []),
+    
   ];
 // Lọc ra các cột đã được tick để hiển thị ở bảng phụ
 const selectedTableColumns = columns.filter((col) =>
@@ -2247,28 +2274,27 @@ onChange={(e) => handleColumnSelect("istick", e.target.checked)}
           {
             title: (<>
             <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-             <Checkbox
-  checked={selectedColumns.includes("isShipping")}
-  onChange={(e) => handleColumnSelect("isShipping", e.target.checked)}
->
-  
-</Checkbox>
+         
 
-<Checkbox.Group
-  options={[
-    { label: "KHO HQ đóng hàng", value: "istick2" }
-  ]}
-  value={allRowsSelected2 ? ["istick2"] : []}
-  onChange={(checkedValues) => handleSelectAllIstick2(checkedValues.length > 0)}
-  style={{
-    border: "1px solid #1890ff",
-    padding: "5px 10px",
-    borderRadius: "5px",
-    background: allRowsSelected2 ? "#1890ff" : "#f5f5f5",
-    color: allRowsSelected2 ? "white" : "black",
-    fontWeight: "bold"
-  }}
-/></div>
+<div style={{ display: "flex", gap: 10, alignItems: "center" }}>
+  <Checkbox.Group
+    options={[
+      { label: "CHỌN KHO ĐÓNG HÀNG", value: "istick2" }
+    ]}
+    value={allRowsSelected2 ? ["istick2"] : []}
+    onChange={(checkedValues) =>
+      handleSelectAllIstick2(checkedValues.length > 0)
+    }
+  />
+
+  <Select
+    placeholder="Chọn kho đóng"
+    style={{ width: 180 }}
+    value={selectedKhoDong}
+    onChange={setSelectedKhoDong}
+    options={kho2Options}
+  />
+</div></div>
               <Button  type="primary" onClick={handleSaveIstick2}>
               Lưu 
             </Button></>
@@ -2285,6 +2311,23 @@ onChange={(e) => handleColumnSelect("istick", e.target.checked)}
           },
         ]
       : []),
+      ...((currentUser.position === "kho1"
+    ) ? [
+         {
+           title: 
+
+
+             
+            " Kho Đóng Hàng"
+          
+           ,
+           
+           key: "isShippingName",
+           dataIndex: "isShippingName",
+         
+         },
+       ]
+     : []),
     {
       title: (
         <Checkbox

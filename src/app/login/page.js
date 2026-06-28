@@ -423,6 +423,10 @@ export default function LoginPage() {
         router.push("/ordersjp");
         return;
       }
+      if (position === "kho2") {
+        router.push("/orderkho");
+        return;
+      }
       if (quocgia === "tw") {
         router.push("/orderstw");
         return;

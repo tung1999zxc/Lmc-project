@@ -15,6 +15,7 @@ import CurrentUserSelector from "./components/CurrentUserSelector";
 import { motion, useAnimation } from "framer-motion";
 import GlobalNotification from "./components/GlobalNotification";
 import Head from "next/head";
+import { current } from "@reduxjs/toolkit";
 
 const { Content, Sider } = Layout;
 const MotionHeader = motion(Layout.Header);
@@ -26,7 +27,9 @@ function InnerDashboardLayout({ children }: { children: ReactNode }) {
 
   // Lấy thông tin người dùng từ Redux store
   const currentUser = useSelector((state: any) => state.user.currentUser);
-
+  if (currentUser?.position === "kho2") {
+    return <>{children}</>;
+  }
   // Kiểm tra nếu chưa đăng nhập, chuyển hướng về trang login
   useEffect(() => {
     if (!currentUser || !currentUser.username) {
@@ -133,7 +136,7 @@ function InnerDashboardLayout({ children }: { children: ReactNode }) {
             >
               {currentUser.name}
             </div>
-            {(currentUser.name === 'Tung99' || currentUser.name === 'Trần Mỹ Hạnh'||currentUser.name === 'KHO') && <CurrentUserSelector />}
+            {(currentUser.name === 'Tung99' || currentUser.name === 'Trần Mỹ Hạnh' || currentUser.name === 'KHO') && <CurrentUserSelector />}
             {/* <PraiseBanner2 /> */}
             <Button
               type="primary"

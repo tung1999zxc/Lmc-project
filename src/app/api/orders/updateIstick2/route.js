@@ -9,7 +9,7 @@ export async function POST(req) {
     const updates = orders.map(order => ({
       updateOne: {
         filter: { id: order.id },
-        update: { $set: { isShipping: order.isShipping , isShippingname: currentUserName } },
+        update: { $set: { isShipping: order.isShipping ,  isShippingName: order.isShippingName} },
       }
     }));
 
