@@ -831,7 +831,7 @@ const productOptions = products.map((p) => p.name);
               <Button style={{ marginRight: 8 }} onClick={onCancel}>
                 Hủy
               </Button>
-              {(currentUser.position_team === "sale" || initialValues) && (
+              {(currentUser.position_team === "sale" || initialValues||currentUser.name ==="Phi Navy") && (
                 <Button type="primary" htmlType="submit">
                   {initialValues ? "Cập nhật" : "Thêm mới"}
                 </Button>

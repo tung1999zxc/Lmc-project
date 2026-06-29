@@ -2787,7 +2787,7 @@ const handleResetAllSTT = async () => {
           type="primary"
           onClick={handleAddNew}
           disabled={
-            currentUser.position_team === "mkt" ||
+            currentUser.position_team === "mk" ||(currentUser.position_team === "mkt" && currentUser.name !== "Phi Navy" )||
             currentUser.position_team === "kho" ||
             // currentUser.position === "salexuly" ||
             currentUser.position === "salexacnhan"
