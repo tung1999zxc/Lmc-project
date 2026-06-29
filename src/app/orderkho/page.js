@@ -848,58 +848,68 @@ async function bulkDeliver() {
     return;
   }
 
-  const rows = filteredList.map((o) => ({
-    STT: o.stt,
-    "Tên khách": o.cust,
-    "SĐT": o.sdt,
-    "Địa chỉ": o.addr || "",
-    "Sản phẩm": o.prods ? o.prods.join("\n") : "",
-    "Số lượng": o.qty ? o.qty.join("\n") : "",
-    "Quà": o.qua || "",
-    "Ngày đặt": o.ngayDat || "",
-    "Ngày gửi": o.ngayGui || "",
-    "Ngày nhận": o.ngayNhan || "",
-    "Mã vận đơn": o.track || "",
-    "Tình trạng": o.reconciled
-      ? "Đối soát"
-      : o.delivered
-      ? "Giao TC"
-      : o.ngayGui
-      ? "Đang giao"
-      : "Chưa gửi",
-  }));
+  const rows = filteredList.map((o) => {
+    const productNames = o.products
+      ? o.products.map((item) => item.product).join("\n")
+      : o.prods
+      ? o.prods.join("\n")
+      : "";
+
+    const quantities = o.products
+      ? o.products.map((item) => item.quantity).join("\n")
+      : o.qty
+      ? o.qty.join("\n")
+      : "";
+
+    return {
+      STT: o.stt,
+      "Tên khách": o.cust || o.customerName || "",
+      "SĐT": o.sdt || o.phone || "",
+      "Địa chỉ": o.addr || o.address || "",
+      "Sản phẩm": productNames,
+      "Số lượng": quantities,
+      "Quà": o.qua || o.category || "",
+      "Ngày đặt": o.ngayDat || o.orderDate || "",
+      "Ngày gửi": o.ngayGui || o.shippingDate1 || "",
+      "Ngày nhận": o.ngayNhan || o.shippingDate2 || "",
+      "Mã vận đơn": o.track || o.trackingCode || "",
+      "Tình trạng": o.reconciled
+        ? "Đối soát"
+        : o.delivered
+        ? "Giao TC"
+        : o.ngayGui || o.shippingDate1
+        ? "Đang giao"
+        : "Chưa gửi",
+    };
+  });
 
   const worksheet = XLSX.utils.json_to_sheet(rows);
 
-  // Bật xuống dòng trong ô
+  // Bật xuống dòng + căn trên cho toàn bộ ô
   for (const cell in worksheet) {
     if (cell[0] === "!") continue;
 
-    const cellValue = worksheet[cell].v;
-
-    if (typeof cellValue === "string" && cellValue.includes("\n")) {
-      worksheet[cell].s = {
-        alignment: {
-          wrapText: true,
-          vertical: "top",
-        },
-      };
-    }
+    worksheet[cell].s = {
+      alignment: {
+        wrapText: true,
+        vertical: "top",
+      },
+    };
   }
 
   worksheet["!cols"] = [
-    { wch: 8 },  // STT
-    { wch: 25 }, // Tên khách
-    { wch: 15 }, // SĐT
-    { wch: 45 }, // Địa chỉ
-    { wch: 35 }, // Sản phẩm
-    { wch: 12 }, // Số lượng
-    { wch: 15 }, // Quà
-    { wch: 15 }, // Ngày đặt
-    { wch: 15 }, // Ngày gửi
-    { wch: 15 }, // Ngày nhận
-    { wch: 20 }, // Mã vận đơn
-    { wch: 15 }, // Tình trạng
+    { wch: 8 },
+    { wch: 25 },
+    { wch: 15 },
+    { wch: 45 },
+    { wch: 35 },
+    { wch: 12 },
+    { wch: 15 },
+    { wch: 15 },
+    { wch: 15 },
+    { wch: 15 },
+    { wch: 20 },
+    { wch: 15 },
   ];
 
   const workbook = {
@@ -932,37 +942,45 @@ async function bulkDeliver() {
     return;
   }
 
-  const rows = toExport.map((o) => ({
-    STT: o.stt,
-    "Tên khách": o.cust,
-    "SĐT": o.sdt,
-    "Địa chỉ": o.addr || "",
-    "Sản phẩm": o.prods ? o.prods.join("\n") : "",
-    "Số lượng": o.qty ? o.qty.join("\n") : "",
-    "Quà": o.qua || "",
-    "Ngày đặt": o.ngayDat || "",
-    "Mã vận đơn": o.track || "",
-  }));
+  const rows = toExport.map((o) => {
+    const productNames = o.products
+      ? o.products.map((item) => item.product).join("\n")
+      : o.prods
+      ? o.prods.join("\n")
+      : "";
+
+    const quantities = o.products
+      ? o.products.map((item) => item.quantity).join("\n")
+      : o.qty
+      ? o.qty.join("\n")
+      : "";
+
+    return {
+      STT: o.stt,
+      "Tên khách": o.cust || o.customerName || "",
+      "SĐT": o.sdt || o.phone || "",
+      "Địa chỉ": o.addr || o.address || "",
+      "Sản phẩm": productNames,
+      "Số lượng": quantities,
+      "Quà": o.qua || o.category || "",
+      "Ngày đặt": o.ngayDat || o.orderDate || "",
+      "Mã vận đơn": o.track || o.trackingCode || "",
+    };
+  });
 
   const worksheet = XLSX.utils.json_to_sheet(rows);
 
-  // Bật xuống dòng trong ô
   for (const cell in worksheet) {
     if (cell[0] === "!") continue;
 
-    const cellValue = worksheet[cell].v;
-
-    if (typeof cellValue === "string" && cellValue.includes("\n")) {
-      worksheet[cell].s = {
-        alignment: {
-          wrapText: true,
-          vertical: "top",
-        },
-      };
-    }
+    worksheet[cell].s = {
+      alignment: {
+        wrapText: true,
+        vertical: "top",
+      },
+    };
   }
 
-  // Set độ rộng cột
   worksheet["!cols"] = [
     { wch: 8 },
     { wch: 25 },
@@ -990,7 +1008,6 @@ async function bulkDeliver() {
 
   XLSX.writeFile(workbook, `Don_kho_chua_gui_${d}.xlsx`);
 
-  // Cập nhật ngày gửi
   const todayISO = dayjs().format("YYYY-MM-DD");
   const ordersToMarkSent = toExport.filter((o) => !o.ngayGui);
 
