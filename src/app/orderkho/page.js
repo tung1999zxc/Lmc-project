@@ -11,7 +11,7 @@ import dayjs from "dayjs";
 import isBetween from "dayjs/plugin/isBetween";
 import { useDispatch, useSelector } from "react-redux";
 import { useRouter } from "next/navigation";
-
+import * as XLSX from "xlsx";
 dayjs.extend(isBetween);
 
 /* ─────────────────────────────────────────────
@@ -842,72 +842,183 @@ async function bulkDeliver() {
   }
 
   // ── Export Excel (CSV) ──
-  function exportExcel() {
-    if (!filteredList.length) { showToast("Không có đơn nào để xuất"); return; }
-    const headers = ["STT","Tên khách","SĐT","Địa chỉ","Sản phẩm","Số lượng","Quà","Ngày đặt","Ngày gửi","Ngày nhận","Mã vận đơn","Tình trạng"];
-    const rows = filteredList.map((o) => [
-      o.stt, o.cust, o.sdt,
-      o.addr.startsWith("http") ?  o.addr : o.addr,
-      o.prods.join(" | "), o.qty.join(" | "), o.qua || "",
-      o.ngayDat || "", o.ngayGui || "", o.ngayNhan || "", o.track || "",
-      o.reconciled ? "Đối soát" : o.delivered ? "Giao TC" : o.ngayGui ? "Đang giao" : "Chưa gửi",
-    ]);
-    const csv = [headers, ...rows].map((r) => r.map((c) => '"' + String(c).replace(/"/g, '""') + '"').join(",")).join("\n");
-    const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    const d = new Date().toLocaleDateString("vi-VN", { day: "2-digit", month: "2-digit", year: "numeric" }).replace(/\//g, "-");
-    a.href = url; a.download = `Don_kho_${VIEW_CFG[currentView].title.replace(/ /g, "_")}_${d}.csv`;
-    document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
-    showToast(`✓ Đã xuất ${filteredList.length} đơn ra file CSV`);
+ function exportExcel() {
+  if (!filteredList.length) {
+    showToast("Không có đơn nào để xuất");
+    return;
   }
+
+  const rows = filteredList.map((o) => ({
+    STT: o.stt,
+    "Tên khách": o.cust,
+    "SĐT": o.sdt,
+    "Địa chỉ": o.addr || "",
+    "Sản phẩm": o.prods ? o.prods.join("\n") : "",
+    "Số lượng": o.qty ? o.qty.join("\n") : "",
+    "Quà": o.qua || "",
+    "Ngày đặt": o.ngayDat || "",
+    "Ngày gửi": o.ngayGui || "",
+    "Ngày nhận": o.ngayNhan || "",
+    "Mã vận đơn": o.track || "",
+    "Tình trạng": o.reconciled
+      ? "Đối soát"
+      : o.delivered
+      ? "Giao TC"
+      : o.ngayGui
+      ? "Đang giao"
+      : "Chưa gửi",
+  }));
+
+  const worksheet = XLSX.utils.json_to_sheet(rows);
+
+  // Bật xuống dòng trong ô
+  for (const cell in worksheet) {
+    if (cell[0] === "!") continue;
+
+    const cellValue = worksheet[cell].v;
+
+    if (typeof cellValue === "string" && cellValue.includes("\n")) {
+      worksheet[cell].s = {
+        alignment: {
+          wrapText: true,
+          vertical: "top",
+        },
+      };
+    }
+  }
+
+  worksheet["!cols"] = [
+    { wch: 8 },  // STT
+    { wch: 25 }, // Tên khách
+    { wch: 15 }, // SĐT
+    { wch: 45 }, // Địa chỉ
+    { wch: 35 }, // Sản phẩm
+    { wch: 12 }, // Số lượng
+    { wch: 15 }, // Quà
+    { wch: 15 }, // Ngày đặt
+    { wch: 15 }, // Ngày gửi
+    { wch: 15 }, // Ngày nhận
+    { wch: 20 }, // Mã vận đơn
+    { wch: 15 }, // Tình trạng
+  ];
+
+  const workbook = {
+    Sheets: { Orders: worksheet },
+    SheetNames: ["Orders"],
+  };
+
+  const d = new Date()
+    .toLocaleDateString("vi-VN", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+    })
+    .replace(/\//g, "-");
+
+  XLSX.writeFile(
+    workbook,
+    `Don_kho_${VIEW_CFG[currentView].title.replace(/ /g, "_")}_${d}.xlsx`
+  );
+
+  showToast(`✓ Đã xuất ${filteredList.length} đơn ra file Excel`);
+}
 
   async function exportExcelUnsent() {
-    const sel = filteredList.filter((o) => selectedIds.has(o.id));
-    const toExport = sel.length > 0 ? sel : filteredList;
-    if (!toExport.length) { showToast("Không có đơn nào để xuất"); return; }
+  const sel = filteredList.filter((o) => selectedIds.has(o.id));
+  const toExport = sel.length > 0 ? sel : filteredList;
 
-    // ── 1. Xuất file CSV ──
-    const headers = ["STT","Tên khách","SĐT","Địa chỉ","Sản phẩm","Số lượng","Quà","Ngày đặt","Mã vận đơn"];
-    const rows = toExport.map((o) => [
-      o.stt, o.cust, o.sdt,
-      o.addr.startsWith("http") ?  o.addr : o.addr,
-      o.prods.join(" | "), o.qty.join(" | "), o.qua || "", o.ngayDat || "", o.track || "",
-    ]);
-    const csv = [headers, ...rows].map((r) => r.map((c) => '"' + String(c).replace(/"/g, '""') + '"').join(",")).join("\n");
-    const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    const d = new Date().toLocaleDateString("vi-VN", { day: "2-digit", month: "2-digit", year: "numeric" }).replace(/\//g, "-");
-    a.href = url; a.download = `Don_kho_chua_gui_${d}.csv`;
-    document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
+  if (!toExport.length) {
+    showToast("Không có đơn nào để xuất");
+    return;
+  }
 
-    // ── 2. Gọi API cập nhật shippingDate1 (ngày gửi) cho các đơn chưa có ngày gửi ──
-    const todayISO = dayjs().format("YYYY-MM-DD");
-    const ordersToMarkSent = toExport.filter((o) => !o.ngayGui); // chỉ cập nhật đơn chưa có ngày gửi
-    if (ordersToMarkSent.length > 0) {
-      try {
-        await axios.post("/api/orders/updateIstickkhohq", {
-          orders: ordersToMarkSent.map((o) => ({
-            
-            stt: o.stt,
-            shippingDate1: todayISO,
-          })),
-        });
-        showToast(`✓ Đã xuất ${toExport.length} đơn & chuyển ${ordersToMarkSent.length} đơn sang Đã gửi hàng`);
-      } catch (err) {
-        console.error("Lỗi khi cập nhật ngày gửi:", err);
-        showToast(`✓ Đã xuất file nhưng lỗi khi cập nhật ngày gửi`);
-      }
-      // Fetch lại để UI đồng bộ với backend
-      fetchOrders();
-    } else {
-      showToast(`✓ Đã xuất ${toExport.length} đơn`);
+  const rows = toExport.map((o) => ({
+    STT: o.stt,
+    "Tên khách": o.cust,
+    "SĐT": o.sdt,
+    "Địa chỉ": o.addr || "",
+    "Sản phẩm": o.prods ? o.prods.join("\n") : "",
+    "Số lượng": o.qty ? o.qty.join("\n") : "",
+    "Quà": o.qua || "",
+    "Ngày đặt": o.ngayDat || "",
+    "Mã vận đơn": o.track || "",
+  }));
+
+  const worksheet = XLSX.utils.json_to_sheet(rows);
+
+  // Bật xuống dòng trong ô
+  for (const cell in worksheet) {
+    if (cell[0] === "!") continue;
+
+    const cellValue = worksheet[cell].v;
+
+    if (typeof cellValue === "string" && cellValue.includes("\n")) {
+      worksheet[cell].s = {
+        alignment: {
+          wrapText: true,
+          vertical: "top",
+        },
+      };
+    }
+  }
+
+  // Set độ rộng cột
+  worksheet["!cols"] = [
+    { wch: 8 },
+    { wch: 25 },
+    { wch: 15 },
+    { wch: 45 },
+    { wch: 35 },
+    { wch: 12 },
+    { wch: 15 },
+    { wch: 15 },
+    { wch: 20 },
+  ];
+
+  const workbook = {
+    Sheets: { Orders: worksheet },
+    SheetNames: ["Orders"],
+  };
+
+  const d = new Date()
+    .toLocaleDateString("vi-VN", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+    })
+    .replace(/\//g, "-");
+
+  XLSX.writeFile(workbook, `Don_kho_chua_gui_${d}.xlsx`);
+
+  // Cập nhật ngày gửi
+  const todayISO = dayjs().format("YYYY-MM-DD");
+  const ordersToMarkSent = toExport.filter((o) => !o.ngayGui);
+
+  if (ordersToMarkSent.length > 0) {
+    try {
+      await axios.post("/api/orders/updateIstickkhohq", {
+        orders: ordersToMarkSent.map((o) => ({
+          stt: o.stt,
+          shippingDate1: todayISO,
+        })),
+      });
+
+      showToast(
+        `✓ Đã xuất ${toExport.length} đơn & chuyển ${ordersToMarkSent.length} đơn sang Đã gửi hàng`
+      );
+    } catch (err) {
+      console.error("Lỗi khi cập nhật ngày gửi:", err);
+      showToast("✓ Đã xuất file nhưng lỗi khi cập nhật ngày gửi");
     }
 
-    clearSelection();
-    setTimeout(() => setCurrentView("sent"), 700);
+    fetchOrders();
+  } else {
+    showToast(`✓ Đã xuất ${toExport.length} đơn`);
   }
+
+  clearSelection();
+  setTimeout(() => setCurrentView("sent"), 700);
+}
 
   // ── Calc stats cho selected ──
   const selStats = useMemo(() => {
