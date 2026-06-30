@@ -1638,7 +1638,7 @@ async function bulkDeliver() {
             </div>
           )}
           <div className="bulk-actions">
-            {(currentView === "all" || currentView === "sent" || currentView === "late") && (
+            {( currentView === "sent" || currentView === "late") && (
               <button className="bb bb-green" onClick={bulkDeliver}>
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M20 6 9 17l-5-5" /></svg>
                 Tích Giao TC ({selectedCount})
