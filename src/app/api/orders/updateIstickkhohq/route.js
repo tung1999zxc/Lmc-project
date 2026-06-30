@@ -6,21 +6,35 @@ export async function POST(req) {
     const { db } = await connectToDatabase();
 
     if (!Array.isArray(orders) || orders.length === 0) {
-      return new Response(JSON.stringify({ error: "Không có đơn để cập nhật" }), {
-        status: 400,
-      });
+      return new Response(
+        JSON.stringify({ error: "Không có đơn để cập nhật" }),
+        { status: 400 }
+      );
     }
 
     const bulkOps = orders.map((order) => ({
       updateOne: {
         filter: { stt: Number(order.stt) },
-        update: {
-          $set: {
-            shippingDate1: order.shippingDate1,
-            deliveryStatus: "ĐÃ GỬI HÀNG",
-            // istick: true,
+        update: [
+          {
+            $set: {
+              deliveryStatus: {
+                $cond: [
+                  { $eq: ["$deliveryStatus", "ĐÃ GỬI HÀNG"] },
+                  "",
+                  "ĐÃ GỬI HÀNG",
+                ],
+              },
+              shippingDate1: {
+                $cond: [
+                  { $eq: ["$deliveryStatus", "ĐÃ GỬI HÀNG"] },
+                  "",
+                  order.shippingDate1,
+                ],
+              },
+            },
           },
-        },
+        ],
       },
     }));
 
@@ -28,7 +42,7 @@ export async function POST(req) {
 
     return new Response(
       JSON.stringify({
-        message: "Đã cập nhật ngày gửi",
+        message: "Đã cập nhật trạng thái gửi hàng",
         matched: result.matchedCount,
         modified: result.modifiedCount,
       }),
@@ -36,8 +50,10 @@ export async function POST(req) {
     );
   } catch (error) {
     console.error("Lỗi POST /api/orders/updateIstick:", error);
-    return new Response(JSON.stringify({ error: "Lỗi server nội bộ" }), {
-      status: 500,
-    });
+
+    return new Response(
+      JSON.stringify({ error: "Lỗi server nội bộ" }),
+      { status: 500 }
+    );
   }
 }

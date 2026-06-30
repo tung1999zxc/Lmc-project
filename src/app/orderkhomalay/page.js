@@ -546,7 +546,41 @@ export default function KhoOrderList() {
       return next;
     });
   }
+async function unmarkSentSelectedOrders() {
+  const sel = filteredList.filter((o) => selectedIds.has(o.id));
 
+  if (!sel.length) {
+    showToast("Vui lòng chọn đơn cần bỏ trạng thái đã gửi");
+    return;
+  }
+
+  const ordersToUnmarkSent = sel.filter((o) => o.deliveryStatus === "ĐÃ GỬI HÀNG");
+
+  if (!ordersToUnmarkSent.length) {
+    showToast("Không có đơn nào đang ở trạng thái ĐÃ GỬI HÀNG");
+    return;
+  }
+
+  try {
+    await axios.post("/api/jp/orders/updateIstickkhohq", {
+      orders: ordersToUnmarkSent.map((o) => ({
+        stt: o.stt,
+        shippingDate1: "",
+      })),
+    });
+
+    showToast(
+      `✓ Đã bỏ trạng thái gửi hàng cho ${ordersToUnmarkSent.length} đơn`
+    );
+
+    fetchOrders();
+    clearSelection();
+    setTimeout(() => setCurrentView("unsent"), 700);
+  } catch (err) {
+    console.error("Lỗi khi bỏ trạng thái gửi hàng:", err);
+    showToast("Lỗi khi bỏ trạng thái gửi hàng");
+  }
+}
   // ── Save Giao TC (gọi API cập nhật deliveryStatus) ──
   async function saveDelivered() {
   const toUpdate = filteredList.filter(
@@ -1042,6 +1076,7 @@ async function bulkDeliver() {
   setTimeout(() => setCurrentView("sent"), 700);
 }
 
+
   // ── Calc stats cho selected ──
   const selStats = useMemo(() => {
     const sel = filteredList.filter((o) => selectedIds.has(o.id));
@@ -1373,10 +1408,10 @@ async function bulkDeliver() {
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" /></svg>
                         Xem giao lâu ({pillCounts.late})
                       </button>
-                      {/* <button className="btn btn-green btn-sm" onClick={tickAllDelivered}>
+                      <button className="btn btn-green btn-sm" onClick={unmarkSentSelectedOrders}>
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" /><path d="M22 4 12 14.01l-3-3" /></svg>
-                        Tích tất cả Giao TC
-                      </button> */}
+                        Bỏ Tích Đã gửi hàng
+                      </button>
                       <button className="btn btn-pri btn-sm" onClick={exportExcel}>
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><path d="M14 2v6h6" /></svg>
                         Xuất Excel
