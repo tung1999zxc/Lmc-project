@@ -321,6 +321,7 @@ function mapOrder(o) {
     // UI fields
     prods,
     qty,
+    revenue: o.revenue || "",
     cust: o.customerName || "",
     sdt: o.phone || "",
     addr: o.address || "",
@@ -402,10 +403,10 @@ export default function KhoOrderList() {
   const fetchOrders = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await axios.get("/api/orders/orderkhohq", {
+      const res = await axios.get("/api/jp/orders/orderkhohq", {
   params: {
     filter: "failed",
-    isShippingName: currentUser.name,
+    // isShippingName: currentUser.name,
   },
 });
       const raw = res.data.data || [];
@@ -558,7 +559,7 @@ export default function KhoOrderList() {
   }
 
   try {
-    await axios.post("/api/orders/updateIstickDONE", {
+    await axios.post("/api/jp/orders/updateIstickDONE", {
       orders: toUpdate.map((o) => ({
         id: o.id,
         istickDONE: true,
@@ -579,7 +580,7 @@ export default function KhoOrderList() {
     const toUpdate = filteredList.filter((o) => reconciledIds.has(o.id) && !o.reconciled);
     if (!toUpdate.length) { showToast("Không có đơn nào để lưu"); return; }
     try {
-      await axios.post("/api/orders/updateReconciled", {
+      await axios.post("/api/jp/orders/updateReconciled", {
         orders: toUpdate.map(({ id }) => ({ id, reconciled: true })),
       });
       showToast(`Đã chuyển ${toUpdate.length} đơn sang Đối soát ✓`);
@@ -599,7 +600,7 @@ async function tickAllDelivered() {
   }
 
   try {
-    await axios.post("/api/orders/updateIstickDONE", {
+    await axios.post("/api/jp/orders/updateIstickDONE", {
       orders: filteredList.map((o) => ({
         id: o.id,
         istickDONE: true,
@@ -628,7 +629,7 @@ async function tickAllReconcile() {
   }
 
   try {
-    await axios.post("/api/orders/updateReconciled", {
+    await axios.post("/api/jp/orders/updateReconciled", {
       orders: filteredList.map((o) => ({
         id: o.id,
         reconciled: true,
@@ -659,7 +660,7 @@ async function bulkDeliver() {
   }
 
   try {
-    await axios.post("/api/orders/updateIstickDONE", {
+    await axios.post("/api/jp/orders/updateIstickDONE", {
       orders: sel.map((o) => ({
         id: o.id,
         istickDONE: true,
@@ -688,7 +689,7 @@ async function bulkDeliver() {
   }
 
   try {
-    await axios.post("/api/orders/updateReconciled", {
+    await axios.post("/api/jp/orders/updateReconciled", {
       orders: sel.map((o) => ({
         id: o.id,
         reconciled: true,
@@ -721,7 +722,7 @@ async function bulkDeliver() {
   }
 
   try {
-    await axios.post("/api/orders/updateReconciled", {
+    await axios.post("/api/jp/orders/updateReconciled", {
       orders: sel.map((o) => ({
         id: o.id,
         reconciled: false,
@@ -792,7 +793,7 @@ async function bulkDeliver() {
       });
       // Gọi API batch update tracking
       try {
-        await axios.post("/api/orders/batch-update-tracking", { updates });
+        await axios.post("/api/jp/orders/batch-update-tracking", { updates });
         setTrackNote(`✓ Ghép ${matched} mã${notFound ? ` · ${notFound} STT không tìm thấy` : ""}`);
         showToast(`Ghép ${matched} mã thành công`);
         fetchOrders();
@@ -808,7 +809,7 @@ async function bulkDeliver() {
         .map((code, i) => ({ stt: noTrack[i].stt, trackingCode: code }));
       matched = updates.length;
       try {
-        await axios.post("/api/orders/batch-update-tracking", { updates });
+        await axios.post("/api/jp/orders/batch-update-tracking", { updates });
         setTrackNote(`✓ Ghép ${matched} mã vào đơn chưa có mã`);
         showToast(`Ghép ${matched} mã thành công`);
         fetchOrders();
@@ -831,7 +832,7 @@ async function bulkDeliver() {
     const o = orders.find((x) => x.id === id);
     if (!o) return;
     try {
-      await axios.post("/api/orders/batch-update-tracking", {
+      await axios.post("/api/jp/orders/batch-update-tracking", {
         updates: [{ stt: o.stt, trackingCode: val }],
       });
       showToast("Đã lưu mã: " + val);
@@ -869,6 +870,7 @@ async function bulkDeliver() {
       "Sản phẩm": productNames,
       "Số lượng": quantities,
       "Quà": o.qua || o.category || "",
+      "Thu Cod":  o.revenue || "",
       "Ngày đặt": o.ngayDat || o.orderDate || "",
       "Ngày gửi": o.ngayGui || o.shippingDate1 || "",
       "Ngày nhận": o.ngayNhan || o.shippingDate2 || "",
@@ -963,7 +965,10 @@ async function bulkDeliver() {
       "Sản phẩm": productNames,
       "Số lượng": quantities,
       "Quà": o.qua || o.category || "",
-      "Ngày đặt": o.ngayDat || o.orderDate || "",
+      "Thu Cod":  o.revenue || "",
+      "Mã bưu chính":  o.pcode || "",
+      "Giờ nhận":  o.processStatus || "",
+      "Ghi chú":  o.note || "",
       "Mã vận đơn": o.track || o.trackingCode || "",
     };
   });
@@ -1013,7 +1018,7 @@ async function bulkDeliver() {
 
   if (ordersToMarkSent.length > 0) {
     try {
-      await axios.post("/api/orders/updateIstickkhohq", {
+      await axios.post("/api/jp/orders/updateIstickkhohq", {
         orders: ordersToMarkSent.map((o) => ({
           stt: o.stt,
           shippingDate1: todayISO,
@@ -1436,6 +1441,7 @@ async function bulkDeliver() {
                       <th>Mã vận đơn</th>
                       <th>Tình trạng</th>
                       <th>Sản phẩm</th>
+                      <th>Doanh số</th>
                       <th>STT</th>
                       <th>Tên khách</th>
                       <th>SĐT</th>
@@ -1539,6 +1545,7 @@ async function bulkDeliver() {
                               ))}
                             </div>
                           </td>
+                          <td><span className="phone">{o.revenue}</span></td>
                           <td><span className="stt-n">{o.stt}</span></td>
                           <td><span className="cust">{o.cust}</span></td>
                           <td><span className="phone">{o.sdt}</span></td>

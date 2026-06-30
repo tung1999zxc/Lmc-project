@@ -427,6 +427,10 @@ export default function LoginPage() {
         router.push("/orderkho");
         return;
       }
+      if (position === "khomalay2") {
+        router.push("/orderkhomalay");
+        return;
+      }
       if (quocgia === "tw") {
         router.push("/orderstw");
         return;

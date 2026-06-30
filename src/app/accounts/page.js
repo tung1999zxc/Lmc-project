@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from "react";
 import {
   Form,
+  Switch,
   Input,
   Button,
   Select,
@@ -51,6 +52,7 @@ export default function EmployeeManagement() {
     { label: "Nhân viên Sale Online", value: "salefull" },
     { label: "Nhân viên kho", value: "kho1" },
     { label: "Nhân viên kho2", value: "kho2" },
+    { label: "Nhân viên kho malay2", value: "khomalay2" },
   ];
   const position_team = [
     { label: "ADMIN", value: "admin" },
@@ -195,6 +197,34 @@ const handleMassUpdateKhuvuc = async () => {
       title: "Ngân Hàng",
       dataIndex: "nh",
      
+    },
+    {
+      title: "Trạng thái",
+      key: "status2",
+      width: 100,
+      render: (_, record) => (
+        <Switch
+          checked={record.status2}
+          checkedChildren="Bật"
+          unCheckedChildren="Tắt"
+          onChange={async (checked) => {
+            try {
+              await axios.post("/api/employees/update-status2", {
+                key: record.key,
+                status2: checked,
+              });
+              message.success(`Đã ${checked ? "bật" : "tắt"} Nhân viên`);
+              fetchEmployees(); // reload
+            } catch (error) {
+              message.error("Lỗi khi cập nhật trạng thái");
+            }
+          }}
+          disabled={
+            currentUser.name !== "Tung99" 
+            
+          }
+        />
+      ),
     },
     {
       title: "Thao tác",

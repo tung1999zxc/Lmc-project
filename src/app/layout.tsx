@@ -30,6 +30,9 @@ function InnerDashboardLayout({ children }: { children: ReactNode }) {
   if (currentUser?.position === "kho2") {
     return <>{children}</>;
   }
+  if (currentUser?.position === "khomalay2") {
+    return <>{children}</>;
+  }
   // Kiểm tra nếu chưa đăng nhập, chuyển hướng về trang login
   useEffect(() => {
     if (!currentUser || !currentUser.username) {
