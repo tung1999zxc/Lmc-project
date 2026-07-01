@@ -176,6 +176,13 @@ useEffect(() => {
         .filter((employee) => employee.team_id === "ANH")
         .map((employee) => employee.employee_code),
     },
+    {
+      id: 11,
+      name: `TEAM TÙNG`,
+      members: safeEmployees
+        .filter((employee) => employee.team_id === "TUNG")
+        .map((employee) => employee.employee_code),
+    },
   ];
 
   const filterSampleOrdersByPeriod = (order) => {

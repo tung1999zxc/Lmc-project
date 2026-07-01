@@ -92,6 +92,7 @@ export default function EmployeeManagement() {
     { label: "TEAM HIẾU", value: "HIEU" },
     { label: "TEAM PHÚ THÀNH", value: "PHUTHANH" },
     { label: "TEAM ÁNH ", value: "ANH" },
+    { label: "TEAM TÙNG ", value: "TUNG" },
   ];
 
   const fetchEmployees = async () => {
