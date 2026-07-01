@@ -818,7 +818,7 @@ const isMatchTeam = (userId) =>
       minusAmount = 26000000;
     }
     if (month === 6 && year === 2026 && selectedTeam === "all" ) {
-      minusAmount = 30000000;
+      minusAmount = 50000000;
     }
 
     // không có rule → trả luôn
