@@ -32,6 +32,13 @@ export async function POST(req) {
                   order.shippingDate1,
                 ],
               },
+              isShippingName: {
+            $cond: [
+              { $eq: ["$deliveryStatus", "ĐÃ GỬI HÀNG"] },
+              "",
+              order.isShippingName,
+            ],
+          },
             },
           },
         ],
