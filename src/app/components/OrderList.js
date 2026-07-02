@@ -99,6 +99,19 @@ const [products2, setProducts] = useState([]);
       messageApi.error('Không thể tìm đơn khách hàng');
     }
   };
+  const handleSearchCustomerModalLS = async (name) => {
+    try {
+      const res = await axios.get(`/api/orders/search-by-customerLS?name=${encodeURIComponent(name)}`);
+      setModalCustomerOrders(res.data.data || []);
+      setModalVisible(true);
+    } catch (err) {
+      console.error(err);
+      messageApi.error('Không thể tìm đơn khách hàng');
+    }
+  };
+
+
+
   const handleFilterChange = (value) => {
     setFilterType(value);
     // Gọi lại API hoặc filter lại danh sách nếu cần
@@ -3554,12 +3567,20 @@ const handleResetAllSTT = async () => {
         
   </Select>
   <Input.Search
-  placeholder="CHECK KHÁCH"
-  enterButton="CHECK"
+  placeholder="TÊN , STT"
+  enterButton="CHECK KHÁCH "
   allowClear
-  style={{ width: 300, marginBottom: 10 }}
+  style={{ width: 300 }}
   onSearch={handleSearchCustomerModal}
 />
+{(currentUser.position === "leadSALE" || currentUser.position === "managerSALE" || currentUser.position === "admin"|| currentUser.name === "Uyển Nhi")&&(<Input.Search
+  placeholder="STT"
+  enterButton="CHECK LỊCH SỬ"
+  allowClear
+  style={{ width: 300, marginBottom: 10 }}
+  onSearch={handleSearchCustomerModalLS}
+/>)}
+  
   </Col> ) }
   
  
@@ -3933,7 +3954,10 @@ const handleResetAllSTT = async () => {
         <Tag color={text === "ĐÃ THANH TOÁN" ? "green" : "red"}>{text}</Tag>
       )
     },
-    {
+    
+             ...((currentUser.name === "nhii" || currentUser.name === "Uyển Nhi" )
+      ? [
+       {
           title: (
             <Checkbox
               checked={selectedColumns.includes("note")}
@@ -3942,6 +3966,8 @@ const handleResetAllSTT = async () => {
               FB
             </Checkbox>
           ),
+       
+      
           dataIndex: "fb",
           key: "fb",
           width: 100,
@@ -3951,6 +3977,68 @@ const handleResetAllSTT = async () => {
             return <div ><h4>{ text}</h4></div>;
           },
         },
+        ]
+      : []),
+           ...((currentUser.position === "leadSALE" || currentUser.position === "managerSALE" || currentUser.position === "admin")
+      ? [
+       {
+          title: (
+            <Checkbox
+              checked={selectedColumns.includes("backupBy")}
+              onChange={(e) => handleColumnSelect("backupBy", e.target.checked)}
+            >
+              NGƯỜI SỬA
+            </Checkbox>
+          ),
+       
+      
+          dataIndex: "backupBy",
+          key: "backupBy",
+          width: 100,
+          render: (text) => {
+            if (!text) return ""; // Tránh lỗi nếu note rỗng hoặc null
+            
+            return <div ><h4>{text ? decodeURIComponent(text) : ""}</h4></div>;
+          },
+        
+        },
+        ]
+      : []),
+           ...((currentUser.position === "leadSALE" || currentUser.position === "managerSALE" || currentUser.position === "admin"|| currentUser.name === "Uyển Nhi")
+      ? [
+       {
+          title: (
+            <Checkbox
+              checked={selectedColumns.includes("backupAt")}
+              onChange={(e) => handleColumnSelect("backupAt", e.target.checked)}
+            >
+              TIME
+            </Checkbox>
+          ),
+       
+      
+          dataIndex: "backupAt",
+          key: "backupAt",
+          width: 100,
+          render: (text) => {
+    if (!text) return "";
+
+    const vnTime = new Date(text).toLocaleString("vi-VN", {
+      timeZone: "Asia/Ho_Chi_Minh",
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+    });
+
+    return <h4>{vnTime}</h4>;
+          },
+        
+        },
+        ]
+      : []),
     ]}
     rowKey="id"
 />
