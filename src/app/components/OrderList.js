@@ -1682,7 +1682,7 @@ onChange={(e) => handleColumnSelect("istick", e.target.checked)}
     }
      ]
       : []),
-      ...( currentUser.position !== "salenhapdon" &&currentUser.position !== "salefull"
+      ...( currentUser.position !== "salefull"
       ? [
     {
       title: (
@@ -3239,7 +3239,7 @@ const handleResetAllSTT = async () => {
           type="primary"
           onClick={handleAddNew}
           disabled={
-            currentUser.position_team === "mkt" ||
+            currentUser.position_team === "mkt" ||(currentUser.position_team === "mkt" && currentUser.name !== "Phi Navy" )||
             currentUser.position_team === "kho" ||
             // currentUser.position === "salexuly" ||
             currentUser.position === "salexacnhan"
@@ -3550,6 +3550,8 @@ const handleResetAllSTT = async () => {
         <Option value="DIENON">TEAM DIỆN ON</Option>
         <Option value="ANH">TEAM ÁNH</Option>
         <Option value="PHUTHANH">TEAM Phú Thành</Option>
+        <Option value="TUNG">TEAM TÙNG</Option>
+        
   </Select>
   <Input.Search
   placeholder="CHECK KHÁCH"
@@ -3781,7 +3783,7 @@ const handleResetAllSTT = async () => {
   visible={modalVisible}
   onCancel={() => setModalVisible(false)}
   footer={null}
-  width={1500}
+  width={2700}
 >
   <Table
     dataSource={modalCustomerOrders}
@@ -3867,10 +3869,11 @@ const handleResetAllSTT = async () => {
         );
       }, },
       { title: 'STT', dataIndex: 'stt', key: 'stt' },
-       ...((currentUser.position === "leadSALE" || currentUser.position === "managerSALE" )
+       ...((currentUser.position === "leadSALE" || currentUser.position === "managerSALE" || currentUser.position === "admin")
       ? [
         { title: 'SALE', dataIndex: 'sale', key: 'sale' },
       { title: 'MKT', dataIndex: 'mkt', key: 'mkt' },
+      { title: 'VĐ', dataIndex: 'salexuly', key: 'salexuly' },
         ]
       : []),
      
@@ -3891,7 +3894,9 @@ const handleResetAllSTT = async () => {
             const parts = text.split(":");
             return <div style={{ width: 200 }}><h3>{parts.length > 1 ? parts.slice(1).join(":").trim() : text}</h3></div>;
           },
-        },{
+        },
+         
+        {
       title:
           "TT XỬ LÍ",
        
@@ -3928,6 +3933,24 @@ const handleResetAllSTT = async () => {
         <Tag color={text === "ĐÃ THANH TOÁN" ? "green" : "red"}>{text}</Tag>
       )
     },
+    {
+          title: (
+            <Checkbox
+              checked={selectedColumns.includes("note")}
+              onChange={(e) => handleColumnSelect("note", e.target.checked)}
+            >
+              FB
+            </Checkbox>
+          ),
+          dataIndex: "fb",
+          key: "fb",
+          width: 100,
+          render: (text) => {
+            if (!text) return ""; // Tránh lỗi nếu note rỗng hoặc null
+            
+            return <div ><h4>{ text}</h4></div>;
+          },
+        },
     ]}
     rowKey="id"
 />

@@ -13,6 +13,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { useRouter } from "next/navigation";
 import * as XLSX from "xlsx";
 dayjs.extend(isBetween);
+import { Row, Col } from "antd";
 
 /* ─────────────────────────────────────────────
    CSS – toàn bộ style từ file HTML giao diện mới
@@ -388,6 +389,7 @@ export default function KhoOrderList() {
   const [bulkTrack, setBulkTrack] = useState("");
   const [matchPreview, setMatchPreview] = useState(null); // null | array
   const [trackNote, setTrackNote] = useState("");
+  const [sttDoneInput, setSttDoneInput] = useState("");
 
   // Panel collapse
   const [p1collapsed, setP1collapsed] = useState(false);
@@ -820,6 +822,23 @@ async function bulkDeliver() {
     setMatchPreview(null);
   }
 
+   const handleUpdateDeliveredStatus = async () => {
+      const sttList = sttDoneInput.trim().split(/\s+/).map(Number);
+      if (!sttList.length) {
+        showToast("Vui lòng nhập STT đơn hàng");
+        return;
+      }
+  
+      try {
+        await axios.post("/api/orders/mark-done", { sttList });
+        showToast("Cập nhật thành công");
+        fetchOrders();
+      } catch (error) {
+        console.error(error);
+        showToast("Lỗi khi cập nhật trạng thái");
+      }
+    };
+
   function clearBulkInputs() {
     setBulkStt(""); setBulkTrack(""); setTrackNote(""); setMatchPreview(null);
   }
@@ -1051,6 +1070,7 @@ async function unmarkSentSelectedOrders() {
         orders: ordersToMarkSent.map((o) => ({
           stt: o.stt,
           shippingDate1: todayISO,
+          isShippingName: o.isShippingName,
         })),
       });
 
@@ -1302,70 +1322,125 @@ async function unmarkSentSelectedOrders() {
               </div>
 
               {/* Panel 2: Ghép mã VĐ */}
-              <div className="tool-panel">
-                <div className={`tp-head${p2collapsed ? " collapsed" : ""}`} onClick={() => setP2collapsed((v) => !v)}>
-                  <div className="tph-ico tph-purple">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="1" y="3" width="15" height="13" /><path d="M16 8h4l3 3v5h-7V8zM5 19a2 2 0 1 0 4 0 2 2 0 0 0-4 0zM17 19a2 2 0 1 0 4 0 2 2 0 0 0-4 0z" /></svg>
-                  </div>
-                  <div>
-                    <h3>Ghép mã vận đơn hàng loạt</h3>
-                    <p>Dán STT trái · Mã phải → tự đối chiếu</p>
-                  </div>
-                  <div className="chevron">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M6 9l6 6 6-6" /></svg>
-                  </div>
-                </div>
-                <div className={`tp-body${p2collapsed ? " hidden" : ""}`}>
-                  <div className="dual-paste">
-                    <div className="dp-col">
-                      <label>STT đơn hàng</label>
-                      <textarea
-                        placeholder={"28792\n28742\n28499"}
-                        value={bulkStt}
-                        onChange={(e) => setBulkStt(e.target.value)}
-                      />
-                    </div>
-                    <div className="dp-col">
-                      <label>Mã vận đơn</label>
-                      <textarea
-                        placeholder={"44413913703\n44413913714\n44413913725"}
-                        value={bulkTrack}
-                        onChange={(e) => setBulkTrack(e.target.value)}
-                      />
-                    </div>
-                  </div>
+              <div className={`tp-body${p2collapsed ? " hidden" : ""}`}>
+  <Row gutter={16} align="top">
+    <Col flex="1">
+      <div className="dp-col">
+        <label>STT đơn hàng</label>
+        <textarea
+          placeholder={"28792\n28742\n28499"}
+          value={bulkStt}
+          onChange={(e) => setBulkStt(e.target.value)}
+        />
+      </div>
+    </Col>
 
-                  {matchPreview && (
-                    <div className="match-preview">
-                      <div className="mp-head">Kết quả đối chiếu</div>
-                      <div className="mp-list">
-                        {matchPreview.map((p, i) => (
-                          <div key={i} className="mp-row">
-                            <span className={p.found ? "match-ok" : "match-err"}>{p.found ? "✓" : "✗"}</span>
-                            <span style={{ fontFamily: "monospace", fontWeight: 700, color: "var(--ink2)", minWidth: 52 }}>{p.stt}</span>
-                            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" style={{ color: "var(--muted)" }}><path d="M5 12h14M12 5l7 7-7 7" /></svg>
-                            <span style={{ fontFamily: "monospace", color: "var(--accent)", fontWeight: 700 }}>{p.track}</span>
-                            <span style={{ color: "var(--muted)", fontSize: 10.5 }}>{p.found ? "— " + p.cust : "— Không tìm thấy"}</span>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
+    <Col flex="1">
+      <div className="dp-col">
+        <label>Mã vận đơn</label>
+        <textarea
+          placeholder={"44413913703\n44413913714\n44413913725"}
+          value={bulkTrack}
+          onChange={(e) => setBulkTrack(e.target.value)}
+        />
+      </div>
+    </Col>
 
-                  <div className="panel-actions">
-                    <button className="btn btn-ghost btn-sm" onClick={previewMatch}>
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="11" cy="11" r="8" /><path d="m21 21-4.3-4.3" /></svg>
-                      Xem trước
-                    </button>
-                    <button className="btn btn-pri btn-sm" onClick={applyBulkTrack}>
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M5 12h14M12 5l7 7-7 7" /></svg>
-                      Ghép vào đơn
-                    </button>
-                    <button className="btn btn-ghost btn-sm" onClick={clearBulkInputs}>Xóa</button>
-                  </div>
-                  {trackNote && <div className="track-note">{trackNote}</div>}
-                </div>
-              </div>
+    <Col flex="230px">
+      <div className="dp-col">
+        <label>STT</label>
+        <textarea
+          placeholder={"1\n2\n3"}
+          value={sttDoneInput}
+          onChange={(e) => setSttDoneInput(e.target.value)}
+        />
+      </div>
+       <button className="btn btn-pri btn-sm" onClick={handleUpdateDeliveredStatus}>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+        <path d="M5 12h14M12 5l7 7-7 7" />
+      </svg>
+      Đánh dấu GIAO THÀNH CÔNG
+    </button>
+    </Col>
+  </Row>
+
+  <div className="panel-actions">
+    <button className="btn btn-ghost btn-sm" onClick={previewMatch}>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+        <circle cx="11" cy="11" r="8" />
+        <path d="m21 21-4.3-4.3" />
+      </svg>
+      Xem trước
+    </button>
+
+    <button className="btn btn-pri btn-sm" onClick={applyBulkTrack}>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+        <path d="M5 12h14M12 5l7 7-7 7" />
+      </svg>
+      Ghép vào đơn
+    </button>
+
+    <button className="btn btn-ghost btn-sm" onClick={clearBulkInputs}>
+      Xóa
+    </button>
+
+   
+  </div>
+
+  {matchPreview && (
+    <div className="match-preview">
+      <div className="mp-head">Kết quả đối chiếu</div>
+
+      <div className="mp-list">
+        {matchPreview.map((p, i) => (
+          <div key={i} className="mp-row">
+            <span className={p.found ? "match-ok" : "match-err"}>
+              {p.found ? "✓" : "✗"}
+            </span>
+
+            <span
+              style={{
+                fontFamily: "monospace",
+                fontWeight: 700,
+                color: "var(--ink2)",
+                minWidth: 52,
+              }}
+            >
+              {p.stt}
+            </span>
+
+            <svg
+              width="11"
+              height="11"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              style={{ color: "var(--muted)" }}
+            >
+              <path d="M5 12h14M12 5l7 7-7 7" />
+            </svg>
+
+            <span
+              style={{
+                fontFamily: "monospace",
+                color: "var(--accent)",
+                fontWeight: 700,
+              }}
+            >
+              {p.track}
+            </span>
+
+            <span style={{ color: "var(--muted)", fontSize: 10.5 }}>
+              {p.found ? "— " + p.cust : "— Không tìm thấy"}
+            </span>
+          </div>
+        ))}
+      </div>
+    </div>
+  )}
+
+  {/* {trackNote && <div className="track-note">{trackNote}</div>} */}
+</div>
 
             </div>
 
@@ -1696,7 +1771,56 @@ async function unmarkSentSelectedOrders() {
 
         {/* ═══ TOAST ═══ */}
         <div className={`kho-toast${toast.show ? " show" : ""}`}>{toast.msg}</div>
+ <style>{`
+      .dual-paste {
+        margin-bottom: 16px;
+      }
 
+      .dp-col {
+        background: #fff;
+        border: 1px solid #e8edf5;
+        border-radius: 14px;
+        overflow: hidden;
+        box-shadow: 0 4px 14px rgba(15, 23, 42, .05);
+        transition: all .25s ease;
+      }
+
+      .dp-col:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 24px rgba(15, 23, 42, .08);
+        border-color: #91caff;
+      }
+
+      .dp-col label {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin: 0;
+        padding: 10px 14px;
+        background: linear-gradient(90deg, #1677ff, #69b1ff);
+        color: #fff;
+        font-size: 12px;
+        font-weight: 700;
+      }
+
+      .dp-col textarea {
+        width: 100%;
+        height: 120px;
+        border: none;
+        outline: none;
+        resize: vertical;
+        padding: 14px;
+        background: #fafcff;
+        font-size: 13px;
+        font-family: monospace;
+        transition: .25s;
+      }
+
+      .dp-col textarea:focus {
+        background: #fff;
+        box-shadow: inset 0 0 0 2px #1677ff;
+      }
+    `}</style>
       </div>
     </>
   );
