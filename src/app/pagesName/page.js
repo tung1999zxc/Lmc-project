@@ -30,7 +30,7 @@ const EmployeePageTable = () => {
       router.push("/orders");
     }
   }, []);
- const [messageApi, contextHolder] = message.useMessage();
+  const [messageApi, contextHolder] = message.useMessage();
   const [pageName, setPageName] = useState("");
   const [selectedEmployee, setSelectedEmployee] = useState(null);
   const [data, setData] = useState([]);
@@ -43,9 +43,52 @@ const EmployeePageTable = () => {
   const [selectedTeam, setSelectedTeam] = useState(null);
   const [pageListInput, setPageListInput] = useState("");
   const [filteredPages, setFilteredPages] = useState([]);
-const [viaData, setViaData] = useState([]);
-const [editingViaId, setEditingViaId] = useState(null);
-const [tempViaLink, setTempViaLink] = useState("");
+  const [viaData, setViaData] = useState([]);
+  const [editingViaId, setEditingViaId] = useState(null);
+  const [tempViaLink, setTempViaLink] = useState("");
+  const [checkPageName, setCheckPageName] = useState("");
+const [checkingPage, setCheckingPage] = useState(false);
+const [checkResult, setCheckResult] = useState(null);
+const [checkEffect, setCheckEffect] = useState(null);
+
+const showCheckEffect = (isDuplicate) => {
+  setCheckEffect(isDuplicate ? "dup" : "ok");
+
+  setTimeout(() => {
+    setCheckEffect(null);
+  }, 1400);
+};
+
+const handleCheckPageCompany = async () => {
+  const name = checkPageName.trim();
+
+  if (!name) {
+    message.warning("Vui lòng nhập tên page cần check");
+    return;
+  }
+
+  try {
+    setCheckingPage(true);
+
+    const res = await axios.get("/api/pageName/check", {
+      params: { pageName: name },
+    });
+
+    setCheckResult(res.data);
+    showCheckEffect(res.data.isDuplicate);
+
+    if (res.data.isDuplicate) {
+      message.error(res.data.message);
+    } else {
+      message.success(res.data.message);
+    }
+  } catch (error) {
+    console.error(error);
+    message.error(error.response?.data?.error || "Lỗi khi check page");
+  } finally {
+    setCheckingPage(false);
+  }
+};
   // Danh sách options
   useEffect(() => {
     fetchNamePage();
@@ -54,46 +97,48 @@ const [tempViaLink, setTempViaLink] = useState("");
   }, []);
 
   const fetchViaLinks = async () => {
-  try {
-    const res = await axios.get("/api/viaLinks");
-    let list = res.data.data;
-    // Đảm bảo luôn có ít nhất 8 hàng (hàng trống nếu chưa đủ)
-    const filler = Array.from({ length: Math.max(0, 8 - list.length) }).map((_, i) => ({
-      _id: `empty-${i}`,
-      link: "",
-      isEmpty: true
-    }));
-    setViaData([...list, ...filler]);
-  } catch (err) {
-    message.error("Không thể tải danh sách Via");
-  }
-};
-
-const saveVia = async (record) => {
-  if (!tempViaLink) return message.warning("Vui lòng nhập link");
-  try {
-    if (record.isEmpty) {
-      await axios.post("/api/viaLinks", { link: tempViaLink });
-    } else {
-      await axios.put("/api/viaLinks", { id: record._id, link: tempViaLink });
+    try {
+      const res = await axios.get("/api/viaLinks");
+      let list = res.data.data;
+      // Đảm bảo luôn có ít nhất 8 hàng (hàng trống nếu chưa đủ)
+      const filler = Array.from({ length: Math.max(0, 8 - list.length) }).map(
+        (_, i) => ({
+          _id: `empty-${i}`,
+          link: "",
+          isEmpty: true,
+        }),
+      );
+      setViaData([...list, ...filler]);
+    } catch (err) {
+      message.error("Không thể tải danh sách Via");
     }
-    message.success("Thành công");
-    setEditingViaId(null);
-    fetchViaLinks();
-  } catch (err) {
-    message.error("Có lỗi xảy ra");
-  }
-};
+  };
 
-const deleteVia = async (id) => {
-  try {
-    await axios.delete(`/api/viaLinks?id=${id}`);
-    message.success("Đã xóa");
-    fetchViaLinks();
-  } catch (err) {
-    message.error("Lỗi khi xóa");
-  }
-};
+  const saveVia = async (record) => {
+    if (!tempViaLink) return message.warning("Vui lòng nhập link");
+    try {
+      if (record.isEmpty) {
+        await axios.post("/api/viaLinks", { link: tempViaLink });
+      } else {
+        await axios.put("/api/viaLinks", { id: record._id, link: tempViaLink });
+      }
+      message.success("Thành công");
+      setEditingViaId(null);
+      fetchViaLinks();
+    } catch (err) {
+      message.error("Có lỗi xảy ra");
+    }
+  };
+
+  const deleteVia = async (id) => {
+    try {
+      await axios.delete(`/api/viaLinks?id=${id}`);
+      message.success("Đã xóa");
+      fetchViaLinks();
+    } catch (err) {
+      message.error("Lỗi khi xóa");
+    }
+  };
 
   const fetchEmployees = async () => {
     try {
@@ -195,7 +240,7 @@ const deleteVia = async (id) => {
       tempData = data;
     } else if (currentUser.position === "lead") {
       tempData = data.filter((record) =>
-        leadTeamMembers.includes(record.employee)
+        leadTeamMembers.includes(record.employee),
       );
     } else {
       tempData = data.filter((record) => record.employee === currentUser.name);
@@ -209,7 +254,7 @@ const deleteVia = async (id) => {
             .includes(appliedSearchText.toLowerCase()) ||
           record.employee
             .toLowerCase()
-            .includes(appliedSearchText.toLowerCase())
+            .includes(appliedSearchText.toLowerCase()),
       );
     }
 
@@ -230,7 +275,7 @@ const deleteVia = async (id) => {
         .filter((emp) => emp.team_id === selectedTeam)
         .map((emp) => emp.name);
       tempData = tempData.filter((record) =>
-        teamMembers.includes(record.employee)
+        teamMembers.includes(record.employee),
       );
     }
 
@@ -298,7 +343,7 @@ const deleteVia = async (id) => {
       };
       const response = await axios.put(
         `/api/pageName/${editingRecord.key}`,
-        updateData
+        updateData,
       );
       message.success(response.data.message);
       // Làm mới danh sách đơn hàng sau khi cập nhật
@@ -315,92 +360,134 @@ const deleteVia = async (id) => {
   };
 
   const handleCopy = (text) => {
-  navigator.clipboard.writeText(text);
-  messageApi.success(`  Đã copy: ${text}`);
-};
-const viaColumns = [
-  {
-    title: "STT",
-    render: (_, __, index) => index + 1,
-    width: 80,
-  },
-  {
-    title: "Link Via",
-    dataIndex: "link",
-    render: (text, record) => {
-      if (editingViaId === record._id) {
-        return <Input value={tempViaLink} onChange={(e) => setTempViaLink(e.target.value)} />;
-      }
-      return<Space><strong>{text}</strong><Button
-          type="primary"
-          size="middle"
-          icon={<CopyOutlined style={{ fontSize: 18 }} />}
-          onClick={() => handleCopy(text)}
-          style={{
-            borderRadius: 8,
-            fontSize: 16,
-            padding: "4px 12px",
-            background: "#1677ff",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-        >
-          Copy
-        </Button></Space> ;
+    navigator.clipboard.writeText(text);
+    messageApi.success(`  Đã copy: ${text}`);
+  };
+  const viaColumns = [
+    {
+      title: "STT",
+      render: (_, __, index) => index + 1,
+      width: 80,
     },
-  },
-  {
-    title: "Hành động",
-    render: (_, record) => (
-      <Space>
-        {editingViaId === record._id ? (
-          <Button disabled={currentUser.position !== "leadSALE" && currentUser.position !== "managerSALE" && currentUser.name !== "Tung99" } type="link" onClick={() => saveVia(record)}>Lưu</Button>
-        ) : (
-          <Button disabled={currentUser.position !== "leadSALE" && currentUser.position !== "managerSALE" && currentUser.name !== "Tung99" } type="link" onClick={() => {
-            setEditingViaId(record._id);
-            setTempViaLink(record.link);
-          }}>Sửa</Button>
-        )}
-        {!record.isEmpty && (
-          <Popconfirm title="Xóa link này?" onConfirm={() => deleteVia(record._id)}>
-            <Button disabled={currentUser.position !== "leadSALE" && currentUser.position !== "managerSALE" && currentUser.name !== "Tung99" } type="link" danger>Xóa</Button>
-          </Popconfirm>
-        )}
-      </Space>
-    ),
-  },
-];
+    {
+      title: "Link Via",
+      dataIndex: "link",
+      render: (text, record) => {
+        if (editingViaId === record._id) {
+          return (
+            <Input
+              value={tempViaLink}
+              onChange={(e) => setTempViaLink(e.target.value)}
+            />
+          );
+        }
+        return (
+          <Space>
+            <strong>{text}</strong>
+            <Button
+              type="primary"
+              size="middle"
+              icon={<CopyOutlined style={{ fontSize: 18 }} />}
+              onClick={() => handleCopy(text)}
+              style={{
+                borderRadius: 8,
+                fontSize: 16,
+                padding: "4px 12px",
+                background: "#1677ff",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              Copy
+            </Button>
+          </Space>
+        );
+      },
+    },
+    {
+      title: "Hành động",
+      render: (_, record) => (
+        <Space>
+          {editingViaId === record._id ? (
+            <Button
+              disabled={
+                currentUser.position !== "leadSALE" &&
+                currentUser.position !== "managerSALE" &&
+                currentUser.name !== "Tung99"
+              }
+              type="link"
+              onClick={() => saveVia(record)}
+            >
+              Lưu
+            </Button>
+          ) : (
+            <Button
+              disabled={
+                currentUser.position !== "leadSALE" &&
+                currentUser.position !== "managerSALE" &&
+                currentUser.name !== "Tung99"
+              }
+              type="link"
+              onClick={() => {
+                setEditingViaId(record._id);
+                setTempViaLink(record.link);
+              }}
+            >
+              Sửa
+            </Button>
+          )}
+          {!record.isEmpty && (
+            <Popconfirm
+              title="Xóa link này?"
+              onConfirm={() => deleteVia(record._id)}
+            >
+              <Button
+                disabled={
+                  currentUser.position !== "leadSALE" &&
+                  currentUser.position !== "managerSALE" &&
+                  currentUser.name !== "Tung99"
+                }
+                type="link"
+                danger
+              >
+                Xóa
+              </Button>
+            </Popconfirm>
+          )}
+        </Space>
+      ),
+    },
+  ];
   const columns = [
-      {
-    title: "Tên Page",
-    dataIndex: "pageName",
-    key: "pageName",
-    render: (text) => (
-      <Space>
-        <span style={{ fontWeight: 500 }}>{text}</span>
-        <Button
-          type="primary"
-          size="middle"
-          icon={<CopyOutlined style={{ fontSize: 18 }} />}
-          onClick={() => handleCopy(text)}
-          style={{
-            borderRadius: 8,
-            fontSize: 16,
-            padding: "4px 12px",
-            background: "#1677ff",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-        >
-          Copy
-        </Button>
-      </Space>
-    ),
-  },
+    {
+      title: "Tên Page",
+      dataIndex: "pageName",
+      key: "pageName",
+      render: (text) => (
+        <Space>
+          <span style={{ fontWeight: 500 }}>{text}</span>
+          <Button
+            type="primary"
+            size="middle"
+            icon={<CopyOutlined style={{ fontSize: 18 }} />}
+            onClick={() => handleCopy(text)}
+            style={{
+              borderRadius: 8,
+              fontSize: 16,
+              padding: "4px 12px",
+              background: "#1677ff",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            Copy
+          </Button>
+        </Space>
+      ),
+    },
 
-  
     { title: "Tên Nhân Viên", dataIndex: "employee", key: "employee" },
     {
       title: "Thời gian",
@@ -470,13 +557,131 @@ const viaColumns = [
   ];
 
   const normalizeText = (text) =>
-    text.toLowerCase().trim().replace(/\s+/g, " "); 
-  
+    text.toLowerCase().trim().replace(/\s+/g, " ");
+
+  const checkPageStyle = `
+.check-page-box{
+  margin:24px 0;
+  padding:22px;
+  background:#fff;
+  border-radius:14px;
+  box-shadow:0 4px 24px rgba(0,0,0,0.08);
+  border:1px solid #eef1f5;
+}
+
+.check-page-box h2{
+  font-size:18px;
+  margin-bottom:14px;
+  color:#1a1e2e;
+}
+
+.check-page-result{
+  margin-top:14px;
+  padding:12px 14px;
+  border-radius:10px;
+  font-size:15px;
+  font-weight:600;
+}
+
+.check-page-result.danger{
+  background:#fff1f0;
+  color:#cf1322;
+  border:1px solid #ffa39e;
+}
+
+.check-page-result.success{
+  background:#f6ffed;
+  color:#389e0d;
+  border:1px solid #b7eb8f;
+}
+
+.check-overlay{
+  position:fixed;
+  inset:0;
+  z-index:9999;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  pointer-events:none;
+  opacity:0;
+  transition:opacity .3s;
+}
+
+.check-overlay.show{
+  opacity:1;
+}
+
+.danger-bg{
+  background:rgba(255,40,40,.12);
+}
+
+.success-bg{
+  background:rgba(34,197,94,.1);
+}
+
+.check-text{
+  font-size:72px;
+  font-weight:900;
+  letter-spacing:6px;
+  text-shadow:0 4px 30px rgba(0,0,0,.5);
+  animation-duration:1.2s;
+  animation-fill-mode:forwards;
+}
+
+.check-text.ne{
+  color:#ff4444;
+  animation-name:neRa;
+}
+
+.check-text.vut{
+  color:#22c55e;
+  animation-name:vutDi;
+}
+
+@keyframes neRa{
+  0%{transform:scale(.3) rotate(-10deg);opacity:0}
+  20%{transform:scale(1.3) rotate(5deg);opacity:1}
+  30%{transform:scale(1) rotate(-3deg)}
+  40%{transform:scale(1.05) rotate(2deg)}
+  50%{transform:scale(1) rotate(0)}
+  70%{transform:scale(1);opacity:1}
+  100%{transform:scale(1.5) rotate(-5deg);opacity:0}
+}
+
+@keyframes vutDi{
+  0%{transform:scale(.3) translateY(60px);opacity:0}
+  25%{transform:scale(1.2) translateY(0);opacity:1}
+  50%{transform:scale(1) translateY(0);opacity:1}
+  100%{transform:scale(.5) translateY(-300px) translateX(200px) rotate(25deg);opacity:0}
+}
+
+.check-particle{
+  position:absolute;
+  width:10px;
+  height:10px;
+  border-radius:50%;
+  animation:particleFly 1s ease-out forwards;
+}
+
+.particle-danger{
+  background:#ff4444;
+}
+
+.particle-success{
+  background:#22c55e;
+}
+
+@keyframes particleFly{
+  0%{opacity:1;transform:translate(0,0) scale(1)}
+  100%{opacity:0;transform:translate(var(--dx),var(--dy)) scale(0)}
+}
+`;
   // Giữ lại khoảng trắng giữa từ, nhưng loại bỏ thừa
   return (
     <div style={{ padding: 20 }}>
-       {contextHolder}
-       {/* <div style={{ marginTop: 40, marginBottom: 40 }}>
+      {contextHolder}
+      <style>{checkPageStyle}</style>
+      {/* <div style={{ marginTop: 40, marginBottom: 40 }}>
       <h2>Bảng Quản Lí  Via Share Page</h2>
       <Table 
         dataSource={viaData} 
@@ -514,70 +719,73 @@ const viaColumns = [
           {isEditing ? "Lưu" : "Thêm"}
         </Button>
       </Space>
-   {currentUser.name === "Tung99" && (
-  <Space style={{ marginTop: 20 }}>
-   <Select
-  mode="tags"
-  placeholder="Nhập tên hoặc chọn nhân viên MKT"
-  value={selectedEmployee ? [selectedEmployee] : []}
-  onChange={(values) => setSelectedEmployee(values[0])}
-  style={{ width: 350 }}
-  tokenSeparators={[","]} // cho phép nhập nhanh
->
-  {mktOptions.map((emp) => (
-    <Option key={emp} value={emp}>
-      {emp}
-    </Option>
-  ))}
-</Select>
+      {currentUser.name === "Tung99" && (
+        <Space style={{ marginTop: 20 }}>
+          <Select
+            mode="tags"
+            placeholder="Nhập tên hoặc chọn nhân viên MKT"
+            value={selectedEmployee ? [selectedEmployee] : []}
+            onChange={(values) => setSelectedEmployee(values[0])}
+            style={{ width: 350 }}
+            tokenSeparators={[","]} // cho phép nhập nhanh
+          >
+            {mktOptions.map((emp) => (
+              <Option key={emp} value={emp}>
+                {emp}
+              </Option>
+            ))}
+          </Select>
 
-    <Popconfirm
-      title="Bạn có chắc muốn XOÁ TẤT CẢ page của nhân viên này?"
-      okText="Xoá hết"
-      cancelText="Hủy"
-      onConfirm={async () => {
-        try {
-          const response = await axios.delete(
-            `/api/pageName/deleteByEmployee?employee=${selectedEmployee}`
-          );
-          message.success(response.data.message);
-          fetchNamePage(); // load lại danh sách
-        } catch (error) {
-          console.error(error);
-          message.error("Lỗi khi xoá toàn bộ page");
-        }
-      }}
-    >
-      <Button danger type="primary" style={{ width: 200 }}>
-        Xoá toàn bộ page
-      </Button>
-    </Popconfirm>
-     <Space style={{ marginTop: 20 }}>
-    
-    {/* ================== NÚT CHUYỂN PAGE SANG DIỆN ================== */}
-    <Popconfirm
-      title="Bạn có chắc muốn chuyển toàn bộ page sang Trần Ngọc Diện?"
-      okText="Chuyển"
-      cancelText="Hủy"
-      onConfirm={async () => {
-        try {
-          const response = await axios.put("/api/pageName/transferPages");
-          message.success(response.data.message);
-          fetchNamePage(); // load lại danh sách
-        } catch (error) {
-          console.error(error);
-          message.error("Lỗi khi chuyển page");
-        }
-      }}
-    >
-      <Button type="primary" style={{ background: "#722ed1", width: 250 }}>
-        Chuyển page sang Diện
-      </Button>
-    </Popconfirm>
-  </Space>
-  </Space>
-  
-)}
+          <Popconfirm
+            title="Bạn có chắc muốn XOÁ TẤT CẢ page của nhân viên này?"
+            okText="Xoá hết"
+            cancelText="Hủy"
+            onConfirm={async () => {
+              try {
+                const response = await axios.delete(
+                  `/api/pageName/deleteByEmployee?employee=${selectedEmployee}`,
+                );
+                message.success(response.data.message);
+                fetchNamePage(); // load lại danh sách
+              } catch (error) {
+                console.error(error);
+                message.error("Lỗi khi xoá toàn bộ page");
+              }
+            }}
+          >
+            <Button danger type="primary" style={{ width: 200 }}>
+              Xoá toàn bộ page
+            </Button>
+          </Popconfirm>
+          <Space style={{ marginTop: 20 }}>
+            {/* ================== NÚT CHUYỂN PAGE SANG DIỆN ================== */}
+            <Popconfirm
+              title="Bạn có chắc muốn chuyển toàn bộ page sang Trần Ngọc Diện?"
+              okText="Chuyển"
+              cancelText="Hủy"
+              onConfirm={async () => {
+                try {
+                  const response = await axios.put(
+                    "/api/pageName/transferPages",
+                  );
+                  message.success(response.data.message);
+                  fetchNamePage(); // load lại danh sách
+                } catch (error) {
+                  console.error(error);
+                  message.error("Lỗi khi chuyển page");
+                }
+              }}
+            >
+              <Button
+                type="primary"
+                style={{ background: "#722ed1", width: 250 }}
+              >
+                Chuyển page sang Diện
+              </Button>
+            </Popconfirm>
+          </Space>
+        </Space>
+      )}
       <br></br>
       <Input.Search
         style={{ width: 300 }}
@@ -616,8 +824,78 @@ const viaColumns = [
         <Option value="HIEU">TEAM HIẾU</Option>
         <Option value="DIEU">TEAM DIỆU</Option>
       </Select>
+      <div className="check-page-box">
+  <h2>🔍 Check Page trùng trong công ty</h2>
+
+  <Space>
+    <Input
+      style={{ width: 360 }}
+      placeholder="Nhập tên page để check..."
+      value={checkPageName}
+      onChange={(e) => setCheckPageName(e.target.value)}
+      onPressEnter={handleCheckPageCompany}
+    />
+
+    <Button
+      type="primary"
+      loading={checkingPage}
+      onClick={handleCheckPageCompany}
+    >
+      🔍 Check
+    </Button>
+  </Space>
+
+  {checkResult && (
+    <div
+      className={
+        checkResult.isDuplicate
+          ? "check-page-result danger"
+          : "check-page-result success"
+      }
+    >
+      {checkResult.isDuplicate ? (
+        <>
+          🚫 Page đã có: <b>{checkResult.data?.pageName}</b>
+          <br />
+          Người đang giữ: <b>{checkResult.data?.employee}</b>
+        </>
+      ) : (
+        <>✅ Page chưa trùng, có thể chạy</>
+      )}
+    </div>
+  )}
+</div>
+
+{checkEffect && (
+  <div
+    className={`check-overlay show ${
+      checkEffect === "dup" ? "danger-bg" : "success-bg"
+    }`}
+  >
+    <div className={`check-text ${checkEffect === "dup" ? "ne" : "vut"}`}>
+      {checkEffect === "dup" ? "🚫 NÉ RA" : "✅ VỤT ĐI"}
+    </div>
+
+    {Array.from({ length: 18 }).map((_, i) => (
+      <span
+        key={i}
+        className={`check-particle ${
+          checkEffect === "dup" ? "particle-danger" : "particle-success"
+        }`}
+        style={{
+          left: `${45 + Math.random() * 20}%`,
+          top: `${45 + Math.random() * 20}%`,
+          "--dx": `${Math.random() * 400 - 200}px`,
+          "--dy": `${Math.random() * 400 - 200}px`,
+          animationDelay: `${Math.random() * 0.3}s`,
+        }}
+      />
+    ))}
+  </div>
+)}
       <br></br>
-      {currentUser.name === "Trần Mỹ Hạnh" && (
+      {(currentUser.name === "Trần Mỹ Hạnh" ||
+        currentUser.name === "Tung99") && (
         <Space style={{ marginTop: 20, flexDirection: "column" }}>
           <h3>Trần Mỹ Hạnh search đi cho nhanh !</h3>
           <Input.TextArea
@@ -637,14 +915,14 @@ const viaColumns = [
                 .filter((name) => name); // loại bỏ dòng trống
 
               const matchedPages = data.filter((record) =>
-                searchPages.includes(normalizeText(record.pageName))
+                searchPages.includes(normalizeText(record.pageName)),
               );
 
               setFilteredPages(matchedPages);
 
               // Gợi ý log các tên không tìm thấy (gỡ lỗi)
               const notFound = searchPages.filter(
-                (p) => !data.find((d) => normalizeText(d.pageName) === p)
+                (p) => !data.find((d) => normalizeText(d.pageName) === p),
               );
               if (notFound.length > 0) {
                 console.log("❌ Không tìm thấy các page sau:", notFound);
@@ -681,7 +959,7 @@ const viaColumns = [
       <Table
         columns={columns}
         dataSource={filteredData.sort(
-          (a, b) => a.employee?.localeCompare(b.employee) || 0
+          (a, b) => a.employee?.localeCompare(b.employee) || 0,
         )}
         pagination={{ pageSize: 10 }}
       />
