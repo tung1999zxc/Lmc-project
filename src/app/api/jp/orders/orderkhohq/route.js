@@ -1,4 +1,4 @@
-import { connectToDatabase } from '../../../../../app/lib/mongodb2.js';
+import { connectToDatabase } from "../../../../../app/lib/mongodb2.js";
 
 export async function GET() {
   try {
@@ -6,6 +6,7 @@ export async function GET() {
 
     const query = {
       saleReport: "DONE",
+      isShipping: true,
       orderDate: {
         $gte: "2026-06-01",
       },
@@ -18,13 +19,12 @@ export async function GET() {
         message: "Lấy danh sách đơn hàng thành công",
         data: orders,
       }),
-      { status: 200 }
+      { status: 200 },
     );
   } catch (error) {
     console.error("Lỗi GET /api/orders:", error);
-    return new Response(
-      JSON.stringify({ error: "Lỗi server nội bộ" }),
-      { status: 500 }
-    );
+    return new Response(JSON.stringify({ error: "Lỗi server nội bộ" }), {
+      status: 500,
+    });
   }
 }
