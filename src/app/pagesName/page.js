@@ -47,48 +47,48 @@ const EmployeePageTable = () => {
   const [editingViaId, setEditingViaId] = useState(null);
   const [tempViaLink, setTempViaLink] = useState("");
   const [checkPageName, setCheckPageName] = useState("");
-const [checkingPage, setCheckingPage] = useState(false);
-const [checkResult, setCheckResult] = useState(null);
-const [checkEffect, setCheckEffect] = useState(null);
+  const [checkingPage, setCheckingPage] = useState(false);
+  const [checkResult, setCheckResult] = useState(null);
+  const [checkEffect, setCheckEffect] = useState(null);
 
-const showCheckEffect = (isDuplicate) => {
-  setCheckEffect(isDuplicate ? "dup" : "ok");
+  const showCheckEffect = (isDuplicate) => {
+    setCheckEffect(isDuplicate ? "dup" : "ok");
 
-  setTimeout(() => {
-    setCheckEffect(null);
-  }, 1400);
-};
+    setTimeout(() => {
+      setCheckEffect(null);
+    }, 1400);
+  };
 
-const handleCheckPageCompany = async () => {
-  const name = checkPageName.trim();
+  const handleCheckPageCompany = async () => {
+    const name = checkPageName.trim();
 
-  if (!name) {
-    message.warning("Vui lòng nhập tên page cần check");
-    return;
-  }
-
-  try {
-    setCheckingPage(true);
-
-    const res = await axios.get("/api/pageName/check", {
-      params: { pageName: name },
-    });
-
-    setCheckResult(res.data);
-    showCheckEffect(res.data.isDuplicate);
-
-    if (res.data.isDuplicate) {
-      message.error(res.data.message);
-    } else {
-      message.success(res.data.message);
+    if (!name) {
+      message.warning("Vui lòng nhập tên page cần check");
+      return;
     }
-  } catch (error) {
-    console.error(error);
-    message.error(error.response?.data?.error || "Lỗi khi check page");
-  } finally {
-    setCheckingPage(false);
-  }
-};
+
+    try {
+      setCheckingPage(true);
+
+      const res = await axios.get("/api/pageName/check", {
+        params: { pageName: name },
+      });
+
+      setCheckResult(res.data);
+      showCheckEffect(res.data.isDuplicate);
+
+      if (res.data.isDuplicate) {
+        message.error(res.data.message);
+      } else {
+        message.success(res.data.message);
+      }
+    } catch (error) {
+      console.error(error);
+      message.error(error.response?.data?.error || "Lỗi khi check page");
+    } finally {
+      setCheckingPage(false);
+    }
+  };
   // Danh sách options
   useEffect(() => {
     fetchNamePage();
@@ -825,74 +825,74 @@ const handleCheckPageCompany = async () => {
         <Option value="DIEU">TEAM DIỆU</Option>
       </Select>
       <div className="check-page-box">
-  <h2>🔍 Check Page trùng trong công ty</h2>
+        <h2>🔍 Check Page trùng trong công ty</h2>
 
-  <Space>
-    <Input
-      style={{ width: 360 }}
-      placeholder="Nhập tên page để check..."
-      value={checkPageName}
-      onChange={(e) => setCheckPageName(e.target.value)}
-      onPressEnter={handleCheckPageCompany}
-    />
+        <Space>
+          <Input
+            style={{ width: 360 }}
+            placeholder="Nhập tên page để check..."
+            value={checkPageName}
+            onChange={(e) => setCheckPageName(e.target.value)}
+            onPressEnter={handleCheckPageCompany}
+          />
 
-    <Button
-      type="primary"
-      loading={checkingPage}
-      onClick={handleCheckPageCompany}
-    >
-      🔍 Check
-    </Button>
-  </Space>
+          <Button
+            type="primary"
+            loading={checkingPage}
+            onClick={handleCheckPageCompany}
+          >
+            🔍 Check
+          </Button>
+        </Space>
 
-  {checkResult && (
-    <div
-      className={
-        checkResult.isDuplicate
-          ? "check-page-result danger"
-          : "check-page-result success"
-      }
-    >
-      {checkResult.isDuplicate ? (
-        <>
-          🚫 Page đã có: <b>{checkResult.data?.pageName}</b>
-          <br />
-          Người đang giữ: <b>{checkResult.data?.employee}</b>
-        </>
-      ) : (
-        <>✅ Page chưa trùng, có thể chạy</>
+        {checkResult && (
+          <div
+            className={
+              checkResult.isDuplicate
+                ? "check-page-result danger"
+                : "check-page-result success"
+            }
+          >
+            {checkResult.isDuplicate ? (
+              <>
+                🚫 Page đã có: <b>{checkResult.data?.pageName}</b>
+                <br />
+                {/* Người đang giữ: <b>{checkResult.data?.employee}</b> */}
+              </>
+            ) : (
+              <>✅ Page chưa trùng, có thể chạy</>
+            )}
+          </div>
+        )}
+      </div>
+
+      {checkEffect && (
+        <div
+          className={`check-overlay show ${
+            checkEffect === "dup" ? "danger-bg" : "success-bg"
+          }`}
+        >
+          <div className={`check-text ${checkEffect === "dup" ? "ne" : "vut"}`}>
+            {checkEffect === "dup" ? "🚫 NÉ RA" : "✅ VỤT ĐI"}
+          </div>
+
+          {Array.from({ length: 18 }).map((_, i) => (
+            <span
+              key={i}
+              className={`check-particle ${
+                checkEffect === "dup" ? "particle-danger" : "particle-success"
+              }`}
+              style={{
+                left: `${45 + Math.random() * 20}%`,
+                top: `${45 + Math.random() * 20}%`,
+                "--dx": `${Math.random() * 400 - 200}px`,
+                "--dy": `${Math.random() * 400 - 200}px`,
+                animationDelay: `${Math.random() * 0.3}s`,
+              }}
+            />
+          ))}
+        </div>
       )}
-    </div>
-  )}
-</div>
-
-{checkEffect && (
-  <div
-    className={`check-overlay show ${
-      checkEffect === "dup" ? "danger-bg" : "success-bg"
-    }`}
-  >
-    <div className={`check-text ${checkEffect === "dup" ? "ne" : "vut"}`}>
-      {checkEffect === "dup" ? "🚫 NÉ RA" : "✅ VỤT ĐI"}
-    </div>
-
-    {Array.from({ length: 18 }).map((_, i) => (
-      <span
-        key={i}
-        className={`check-particle ${
-          checkEffect === "dup" ? "particle-danger" : "particle-success"
-        }`}
-        style={{
-          left: `${45 + Math.random() * 20}%`,
-          top: `${45 + Math.random() * 20}%`,
-          "--dx": `${Math.random() * 400 - 200}px`,
-          "--dy": `${Math.random() * 400 - 200}px`,
-          animationDelay: `${Math.random() * 0.3}s`,
-        }}
-      />
-    ))}
-  </div>
-)}
       <br></br>
       {(currentUser.name === "Trần Mỹ Hạnh" ||
         currentUser.name === "Tung99") && (
