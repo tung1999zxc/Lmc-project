@@ -1,4 +1,4 @@
-import { connectToDatabase } from '../../../../../app/lib/mongodb2.js';
+import { connectToDatabase } from '../../../../lib/mongodb2.js';
 
 
 export async function POST(req) {
@@ -15,33 +15,14 @@ export async function POST(req) {
     const bulkOps = orders.map((order) => ({
       updateOne: {
         filter: { stt: Number(order.stt) },
-        update: [
-          {
-            $set: {
-              deliveryStatus: {
-                $cond: [
-                  { $eq: ["$deliveryStatus", "ĐÃ GỬI HÀNG"] },
-                  "",
-                  "ĐÃ GỬI HÀNG",
-                ],
-              },
-              shippingDate1: {
-                $cond: [
-                  { $eq: ["$deliveryStatus", "ĐÃ GỬI HÀNG"] },
-                  "",
-                  order.shippingDate1,
-                ],
-              },
-              isShippingName: {
-            $cond: [
-              { $eq: ["$deliveryStatus", "ĐÃ GỬI HÀNG"] },
-              "",
-              order.isShippingName,
-            ],
+        update: {
+          $set: {
+            shippingDate1: "",
+            deliveryStatus: "HOÀN",
+            saleReport: "HOÀN",
+            // istick: true,
           },
-            },
-          },
-        ],
+        },
       },
     }));
 

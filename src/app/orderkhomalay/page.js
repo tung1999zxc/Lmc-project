@@ -339,13 +339,14 @@ function mapOrder(o) {
 /* ─── View config ─── */
 const VIEW_CFG = {
   all:       { title: "Tất cả đơn hàng",       sub: "Tất cả",              badgeCls: "vb-all",       badge: "Tất cả" },
+  unsent2:    { title: "Hoàn hàng",            sub: "Hoàn hàng",   badgeCls: "vb-unsent2",    badge: "Hoàn hàng" },
   unsent:    { title: "Chưa gửi hàng",          sub: "Chưa có ngày gửi",   badgeCls: "vb-unsent",    badge: "Chưa gửi" },
   sent:      { title: "Đã gửi hàng",            sub: "Đang giao",          badgeCls: "vb-sent",      badge: "Đã gửi" },
   late:      { title: "Giao lâu – Cần check",   sub: `Giao quá ${LATE_DAYS} ngày chưa về`, badgeCls: "vb-late", badge: "Cần check" },
   done:      { title: "Giao thành công",         sub: "Đã về tay khách",    badgeCls: "vb-done",      badge: "Giao TC" },
   reconcile: { title: "Đối soát",               sub: "Đã đối soát",        badgeCls: "vb-reconcile", badge: "Đối soát" },
 };
-const VIEWS = ["all", "unsent", "sent", "late", "done", "reconcile"];
+const VIEWS = ["all", "unsent2", "unsent", "sent", "late", "done", "reconcile"];
 
 function isLate(o) {
   return o.ngayGui && !o.delivered && o.daysShipping > LATE_DAYS;
@@ -354,7 +355,9 @@ function isLate(o) {
 function getViewList(orders, view) {
   switch (view) {
     case "all":       return orders.slice();
-    case "unsent":    return orders.filter((o) => !o.ngayGui);
+    case "unsent2":
+  return orders.filter((o) => o.deliveryStatus === "HOÀN" || o.deliveryStatus === "HOÀN HÀNG");
+    case "unsent":    return orders.filter((o) => !o.ngayGui && o.deliveryStatus !=="HOÀN");
     case "sent":      return orders.filter((o) => o.ngayGui && !o.delivered && !o.reconciled);
     case "late":      return orders.filter((o) => isLate(o));
     case "done":      return orders.filter((o) => o.delivered && !o.reconciled);
@@ -475,7 +478,8 @@ const [sttDoneInput, setSttDoneInput] = useState("");
   // ── Pill counts ──
   const pillCounts = useMemo(() => ({
     all:       ordersWithState.length,
-    unsent:    ordersWithState.filter((o) => !o.ngayGui).length,
+    unsent2:    ordersWithState.filter((o) => (o.saleReport==="HOÀN")).length,
+    unsent:    ordersWithState.filter((o) => !o.ngayGui && o.saleReport !=="HOÀN").length,
     sent:      ordersWithState.filter((o) => o.ngayGui && !o.delivered && !o.reconciled).length,
     late:      ordersWithState.filter((o) => isLate(o)).length,
     done:      ordersWithState.filter((o) => o.delivered && !o.reconciled).length,
@@ -563,6 +567,41 @@ async function unmarkSentSelectedOrders() {
 
   try {
     await axios.post("/api/jp/orders/updateIstickkhohq", {
+      orders: ordersToUnmarkSent.map((o) => ({
+        stt: o.stt,
+        shippingDate1: "",
+      })),
+    });
+
+    showToast(
+      `✓ Đã bỏ trạng thái gửi hàng cho ${ordersToUnmarkSent.length} đơn`
+    );
+
+    fetchOrders();
+    clearSelection();
+    setTimeout(() => setCurrentView("unsent"), 700);
+  } catch (err) {
+    console.error("Lỗi khi bỏ trạng thái gửi hàng:", err);
+    showToast("Lỗi khi bỏ trạng thái gửi hàng");
+  }
+}
+async function unmarkSentSelectedOrdersHOAN() {
+  const sel = filteredList.filter((o) => selectedIds.has(o.id));
+
+  if (!sel.length) {
+    showToast("Vui lòng chọn đơn cần HOÀN");
+    return;
+  }
+
+  const ordersToUnmarkSent = sel.filter((o) => o.deliveryStatus === "ĐÃ GỬI HÀNG");
+
+  if (!ordersToUnmarkSent.length) {
+    showToast("Không có đơn nào đang ở trạng thái ĐÃ GỬI HÀNG");
+    return;
+  }
+
+  try {
+    await axios.post("/api/jp/orders/updateIstickkhohqHOAN", {
       orders: ordersToUnmarkSent.map((o) => ({
         stt: o.stt,
         shippingDate1: "",
@@ -1475,13 +1514,13 @@ async function bulkDeliver() {
                   )}
                   {currentView === "sent" && (
                     <>
-                      <button className="btn btn-red btn-sm" onClick={() => setCurrentView("late")}>
+                      <button className="btn btn-red btn-sm" onClick={unmarkSentSelectedOrdersHOAN}>
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" /></svg>
-                        Xem giao lâu ({pillCounts.late})
+                        TÍCH HOÀN HÀNG (Giao không thành công )
                       </button>
                       <button className="btn btn-green btn-sm" onClick={unmarkSentSelectedOrders}>
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" /><path d="M22 4 12 14.01l-3-3" /></svg>
-                        Bỏ Tích Đã gửi hàng
+                        Bỏ Tích Đã gửi hàng (Chưa đi hàng)
                       </button>
                       <button className="btn btn-pri btn-sm" onClick={exportExcel}>
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><path d="M14 2v6h6" /></svg>
@@ -1580,6 +1619,7 @@ async function bulkDeliver() {
                       else if (isDelivered)   dispSt = { cls: "done-c",   label: "GIAO TC" };
                       else if (late)          dispSt = { cls: "late-c",   label: `GIAO LÂU ${o.daysShipping}N` };
                       else if (o.ngayGui)     dispSt = { cls: "ship-c",   label: "ĐANG GIAO" };
+                      else if (o.saleReport==="HOÀN")     dispSt = { cls: "ship-c",   label: "HOÀN" };
                       else                    dispSt = { cls: "unsent-c", label: "CHƯA GỬI" };
 
                       return (
@@ -1835,7 +1875,14 @@ function ViewIcon({ view }) {
   switch (view) {
     case "all":
       return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg>;
-    case "unsent":
+      case "unsent2":
+        return (
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <path d="M3 7h13a5 5 0 0 1 0 10H8" />
+            <path d="M8 12l-5-5 5-5" />
+          </svg>
+        );
+      case "unsent":
       return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 10H3M21 6H3M21 14H3M21 18H3"/></svg>;
     case "sent":
       return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>;
