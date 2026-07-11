@@ -17,12 +17,14 @@ export async function POST(req) {
             // shippingDate1 được định dạng bao gồm giờ, phút, giây.
             ...(order.istick 
               ? { 
+                  // shippingDate1: dayjs().format("YYYY-MM-DD"), 
+                  deliveryStatus: "ĐÃ Gửi Hàng", 
                   shippingDate1: dayjs().format("YYYY-MM-DD"), 
-                  deliveryStatus: "ĐÃ GỬI HÀNG", 
-                  
                 }
-              : {shippingDate1: "", 
+              : {
+                // shippingDate1: "", 
                 deliveryStatus: "",
+                shippingDate1: "",
                 
               istick4:false })
           }

@@ -4,13 +4,15 @@ export async function GET() {
   try {
     const { db } = await connectToDatabase();
 
-    const query = {
-      saleReport: "DONE",
-      isShipping: true,
-      orderDate: {
-        $gte: "2026-06-01",
-      },
-    };
+  const query = {
+  saleReport: {
+    $in: ["DONE", "HOÀN"],
+  },
+  isShipping: true,
+  orderDate: {
+    $gte: "2026-06-01",
+  },
+};
 
     const orders = await db.collection("orders").find(query).toArray();
 

@@ -3,9 +3,9 @@ import React, { useState, useEffect, useMemo, useCallback } from "react";
 import {
   Table,
   Form,
-  Switch ,
+  Switch,
   Input,
-  Tag ,
+  Tag,
   InputNumber,
   Button,
   Modal,
@@ -58,11 +58,11 @@ const InventoryPage = () => {
     // redirect if not logged in or restrictions
     if (!currentUser?.name) {
       router.push("/login");
-    } 
-    // else if (currentUser.position_team === "mkt"&& currentUser.name !== "Đỗ Ngọc Ánh") {
+    }
+    // else if (currentUser.position_team === "mkt"&& currentUser.name !== "") {
     //   router.push("/orders");
-    // } 
-    // else if (currentUser.name === "Đỗ Ngọc Ánh" ) {
+    // }
+    // else if (currentUser.name === "" ) {
     //    router.push("/products");
     // }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -71,7 +71,7 @@ const InventoryPage = () => {
   // Data
   const [orders2, setOrders] = useState([]);
   const [products, setProducts] = useState([]);
-const [lastFilterType, setLastFilterType] = useState(null);
+  const [lastFilterType, setLastFilterType] = useState(null);
   // Forms
   const [form] = Form.useForm();
   const [editForm] = Form.useForm();
@@ -79,28 +79,28 @@ const [lastFilterType, setLastFilterType] = useState(null);
   const [testDayRange, setTestDayRange] = useState(null);
   const [testDayPreset, setTestDayPreset] = useState(null);
 
-const [selectedRowKeys, setSelectedRowKeys] = useState([]);
-const [bulkMkt, setBulkMkt] = useState(null);
-const [bulkDate, setBulkDate] = useState(null);
+  const [selectedRowKeys, setSelectedRowKeys] = useState([]);
+  const [bulkMkt, setBulkMkt] = useState(null);
+  const [bulkDate, setBulkDate] = useState(null);
   // UI state
   const [searchText, setSearchText] = useState("");
   const [selectedPreset, setSelectedPreset] = useState("all");
-const [showStatTable, setShowStatTable] = useState(false);
-const [productStats2Days, setProductStats2Days] = useState([]);
+  const [showStatTable, setShowStatTable] = useState(false);
+  const [productStats2Days, setProductStats2Days] = useState([]);
   const [editModalVisible, setEditModalVisible] = useState(false);
   const [editingProduct, setEditingProduct] = useState(null);
-const [createdAtRange, setCreatedAtRange] = useState(null);
+  const [createdAtRange, setCreatedAtRange] = useState(null);
   const [addImportModalVisible, setAddImportModalVisible] = useState(false);
   const [addingImportProduct, setAddingImportProduct] = useState(null);
 
   const [loading, setLoading] = useState(false);
-const [employees, setEmployees] = useState([]);
+  const [employees, setEmployees] = useState([]);
   const [previewVisible, setPreviewVisible] = useState(false);
   const [previewImage, setPreviewImage] = useState(null);
 
   const [editFileList, setEditFileList] = useState([]);
-const [filterMktTest, setFilterMktTest] = useState(false);
-const [selectedMktFilter, setSelectedMktFilter] = useState(null);
+  const [filterMktTest, setFilterMktTest] = useState(false);
+  const [selectedMktFilter, setSelectedMktFilter] = useState(null);
   // Fetch functions
   const fetchOrders = useCallback(async () => {
     try {
@@ -124,30 +124,27 @@ const [selectedMktFilter, setSelectedMktFilter] = useState(null);
       setLoading(false);
     }
   }, []);
-const fetchEmployees = async () => {
-      
-      try {
-        const response = await axios.get('/api/employees');
-        // response.data.data chứa danh sách nhân viên theo API đã viết
-        setEmployees(response.data.data);
-      } catch (error) {
-        console.error('Lỗi khi lấy danh sách nhân viên:', error);
-      } finally {
-       
-      }
-    };
+  const fetchEmployees = async () => {
+    try {
+      const response = await axios.get("/api/employees");
+      // response.data.data chứa danh sách nhân viên theo API đã viết
+      setEmployees(response.data.data);
+    } catch (error) {
+      console.error("Lỗi khi lấy danh sách nhân viên:", error);
+    } finally {
+    }
+  };
   useEffect(() => {
     fetchOrders();
-    fetchEmployees(),
-    fetchProducts();
+    (fetchEmployees(), fetchProducts());
   }, [fetchOrders, fetchProducts]);
 
-const mktOptions = [
-  "SP CHUNG",
-  ...employees
-    .filter((emp) => emp.position_team === "mkt")
-    .map((emp) => emp.name)
-];
+  const mktOptions = [
+    "SP CHUNG",
+    ...employees
+      .filter((emp) => emp.position_team === "mkt")
+      .map((emp) => emp.name),
+  ];
   /** ===========
    * Date filter helpers (same behavior as original)
    * =========== */
@@ -164,7 +161,7 @@ const mktOptions = [
           23,
           59,
           59,
-          999
+          999,
         );
         break;
       case "yesterday":
@@ -176,7 +173,7 @@ const mktOptions = [
           23,
           59,
           59,
-          999
+          999,
         );
         break;
       case "week":
@@ -188,7 +185,7 @@ const mktOptions = [
           23,
           59,
           59,
-          999
+          999,
         );
         break;
       case "currentMonth":
@@ -200,7 +197,7 @@ const mktOptions = [
           23,
           59,
           59,
-          999
+          999,
         );
         break;
       case "2currentMonth":
@@ -212,7 +209,7 @@ const mktOptions = [
           23,
           59,
           59,
-          999
+          999,
         );
         break;
       case "3currentMonth":
@@ -224,7 +221,7 @@ const mktOptions = [
           23,
           59,
           59,
-          999
+          999,
         );
         break;
       case "lastMonth":
@@ -240,7 +237,7 @@ const mktOptions = [
           23,
           59,
           59,
-          999
+          999,
         );
         break;
       case "threeMonthsAgo":
@@ -252,7 +249,7 @@ const mktOptions = [
           23,
           59,
           59,
-          999
+          999,
         );
         break;
       default:
@@ -265,12 +262,12 @@ const mktOptions = [
       return itemDate >= start && itemDate <= end;
     });
   }
-const rowSelection = {
-  selectedRowKeys,
-  onChange: (keys) => {
-    setSelectedRowKeys(keys);
-  },
-};
+  const rowSelection = {
+    selectedRowKeys,
+    onChange: (keys) => {
+      setSelectedRowKeys(keys);
+    },
+  };
   /** ===========
    * Precompute aggregations from orders to avoid per-row heavy computations
    * - ordersAggMap: {
@@ -291,7 +288,9 @@ const rowSelection = {
       const profitNum = Number(order.profit || 0);
       const deliveryStatus = order.deliveryStatus || "";
       const saleReport = order.saleReport || "";
-      const productsInOrder = Array.isArray(order.products) ? order.products : [];
+      const productsInOrder = Array.isArray(order.products)
+        ? order.products
+        : [];
 
       for (const item of productsInOrder) {
         const pname = item.product;
@@ -320,7 +319,10 @@ const rowSelection = {
         }
 
         // Count ordersDone where saleReport === DONE && deliveryStatus === ""
-        if (saleReport === "DONE" && (!deliveryStatus || deliveryStatus === "")) {
+        if (
+          saleReport === "DONE" &&
+          (!deliveryStatus || deliveryStatus === "")
+        ) {
           map[pname].ordersDone += qty;
         }
 
@@ -337,77 +339,82 @@ const rowSelection = {
    * filteredProducts: search by name.
    * This is memoized so Table sees stable reference when inputs unchanged.
    * =========== */
-const filteredProducts = useMemo(() => {
-  let data = products || [];
+  const filteredProducts = useMemo(() => {
+    let data = products || [];
 
-  // 🔍 Filter theo search
-  const q = (searchText || "").trim().toLowerCase();
-  if (q) {
-    data = data.filter((p) =>
-      String(p.name || "").toLowerCase().includes(q)
-    );
-  }
+    // 🔍 Filter theo search
+    const q = (searchText || "").trim().toLowerCase();
+    if (q) {
+      data = data.filter((p) =>
+        String(p.name || "")
+          .toLowerCase()
+          .includes(q),
+      );
+    }
 
-  // ✅ Filter có mkttest
-  if (filterMktTest) {
-    data = data.filter((p) =>!p.mkttest );
-  }
+    // ✅ Filter có mkttest
+    if (filterMktTest) {
+      data = data.filter((p) => !p.mkttest);
+    }
 
-  // ✅ Filter theo MKT được chọn
-  if (selectedMktFilter) {
-   data = data.filter(
-  (p) => (p.mkttest || "").trim() === selectedMktFilter.trim()
-);
-  }
-if (lastFilterType === "preset" && testDayPreset) {
-  const today = moment().startOf("day");
+    // ✅ Filter theo MKT được chọn
+    if (selectedMktFilter) {
+      data = data.filter(
+        (p) => (p.mkttest || "").trim() === selectedMktFilter.trim(),
+      );
+    }
+    if (lastFilterType === "preset" && testDayPreset) {
+      const today = moment().startOf("day");
 
-  data = data.filter((p) => {
-    if (!p.testday) return false;
+      data = data.filter((p) => {
+        if (!p.testday) return false;
 
-    const testDate = moment(p.testday).startOf("day");
-    const diffDays = today.diff(testDate, "days");
+        const testDate = moment(p.testday).startOf("day");
+        const diffDays = today.diff(testDate, "days");
 
-    return diffDays === testDayPreset;
-  });
+        return diffDays === testDayPreset;
+      });
+    } else if (lastFilterType === "range" && testDayRange?.length === 2) {
+      const start = testDayRange[0].format("YYYY-MM-DD");
+      const end = testDayRange[1].format("YYYY-MM-DD");
 
-} else if (lastFilterType === "range" && testDayRange?.length === 2) {
-  const start = testDayRange[0].format("YYYY-MM-DD");
-  const end = testDayRange[1].format("YYYY-MM-DD");
+      data = data.filter((p) => {
+        if (!p.testday) return false;
 
-  data = data.filter((p) => {
-    if (!p.testday) return false;
+        const d = new Date(p.testday);
+        const localDate = new Date(d.getTime() - d.getTimezoneOffset() * 60000)
+          .toISOString()
+          .split("T")[0];
 
-    const d = new Date(p.testday);
-    const localDate = new Date(
-      d.getTime() - d.getTimezoneOffset() * 60000
-    )
-      .toISOString()
-      .split("T")[0];
+        return localDate >= start && localDate <= end;
+      });
+    } else if (lastFilterType === "createdAt" && createdAtRange?.length === 2) {
+      const start = createdAtRange[0].format("YYYY-MM-DD");
+      const end = createdAtRange[1].format("YYYY-MM-DD");
 
-    return localDate >= start && localDate <= end;
-  });
-}
-else if (lastFilterType === "createdAt" && createdAtRange?.length === 2) {
-  const start = createdAtRange[0].format("YYYY-MM-DD");
-  const end = createdAtRange[1].format("YYYY-MM-DD");
+      data = data.filter((p) => {
+        if (!p.createdAt) return false;
 
-  data = data.filter((p) => {
-    if (!p.createdAt) return false;
+        const d = new Date(p.createdAt);
+        const localDate = new Date(d.getTime() - d.getTimezoneOffset() * 60000)
+          .toISOString()
+          .split("T")[0];
 
-    const d = new Date(p.createdAt);
-    const localDate = new Date(
-      d.getTime() - d.getTimezoneOffset() * 60000
-    )
-      .toISOString()
-      .split("T")[0];
+        return localDate >= start && localDate <= end;
+      });
+    }
 
-    return localDate >= start && localDate <= end;
-  });
-}
-
-  return data;
-}, [products, searchText, filterMktTest,lastFilterType, selectedMktFilter,testDayPreset,testDayRange,createdAtRange]);
+    return data;
+  }, [
+    products,
+    searchText,
+    filterMktTest,
+    lastFilterType,
+    selectedMktFilter,
+    testDayPreset,
+    testDayRange,
+    createdAtRange,
+  ]);
 
   /** Compute derived "orders" list filtered by preset to match original behavior */
   const ordersByPreset = useMemo(() => {
@@ -420,7 +427,9 @@ else if (lastFilterType === "createdAt" && createdAtRange?.length === 2) {
     if (!searchText || searchText.trim() === "") return 0;
     const q = (searchText || "").trim().toLowerCase();
     const targetProducts = (products || []).filter((p) =>
-      String(p.name || "").toLowerCase().includes(q)
+      String(p.name || "")
+        .toLowerCase()
+        .includes(q),
     );
     if (targetProducts.length === 0) return 0;
 
@@ -430,7 +439,9 @@ else if (lastFilterType === "createdAt" && createdAtRange?.length === 2) {
     const productNames = new Set(targetProducts.map((p) => p.name));
     for (const order of orders2) {
       if (!order.products || !Array.isArray(order.products)) continue;
-      const includes = order.products.some((it) => productNames.has(it.product));
+      const includes = order.products.some((it) =>
+        productNames.has(it.product),
+      );
       if (includes) total += Number(order.profit || 0);
     }
     return total;
@@ -442,14 +453,16 @@ else if (lastFilterType === "createdAt" && createdAtRange?.length === 2) {
    */
   const getAggregatesFor = useCallback(
     (productName) => {
-      return ordersAggMap[productName] || {
-        ordersDone: 0,
-        deliveredQty: 0,
-        ordersNotDone: 0,
-        totalProfit: 0,
-      };
+      return (
+        ordersAggMap[productName] || {
+          ordersDone: 0,
+          deliveredQty: 0,
+          ordersNotDone: 0,
+          totalProfit: 0,
+        }
+      );
     },
-    [ordersAggMap]
+    [ordersAggMap],
   );
 
   // Name-specific manual adjustments from original file
@@ -464,12 +477,12 @@ else if (lastFilterType === "createdAt" && createdAtRange?.length === 2) {
       "ĐỒNG HỒ CẢM ỨNG MẶT VUÔNG - ĐEN": { slAmAdd: 2 },
       "ĐỒNG HỒ CẢM ỨNG MẶT VUÔNG - CAM": { slAmAdd: 1 },
       "ĐỒNG HỒ CẢM ỨNG MẶT VUÔNG - VÀNG": { slAmAdd: 1 },
-     
+
       // "THỎI NÉN NHUỘM TÓC - NÂU": { slAmAdd: 10 },
-      
+
       "VIÊN TINH CHẤT HÀU": { slAmAdd: 6 },
     }),
-    []
+    [],
   );
 
   /** ===========
@@ -482,9 +495,10 @@ else if (lastFilterType === "createdAt" && createdAtRange?.length === 2) {
         name: record.name,
         slvn: record.slvn,
         sltq: record.sltq,
-        mkttest:record.mkttest,
+        mkttest: record.mkttest,
         // testday:record.testday,
         description: record.description,
+        weight: record.weight,
         image: record.image
           ? [
               {
@@ -506,11 +520,11 @@ else if (lastFilterType === "createdAt" && createdAtRange?.length === 2) {
                 url: record.image,
               },
             ]
-          : []
+          : [],
       );
       setEditModalVisible(true);
     },
-    [editForm]
+    [editForm],
   );
 
   const handleEditProductFinish = useCallback(
@@ -536,6 +550,7 @@ else if (lastFilterType === "createdAt" && createdAtRange?.length === 2) {
           testday: values.testday,
           slvn: values.slvn,
           sltq: values.sltq,
+          weight: values.weight,
         };
         await axios.put(`/api/products/${editingProduct.key}`, updatedProduct);
         message.success("Cập nhật sản phẩm thành công");
@@ -548,7 +563,7 @@ else if (lastFilterType === "createdAt" && createdAtRange?.length === 2) {
         setLoading(false);
       }
     },
-    [editingProduct, fetchProducts]
+    [editingProduct, fetchProducts],
   );
 
   const handleAddImport = useCallback((record) => {
@@ -571,7 +586,7 @@ else if (lastFilterType === "createdAt" && createdAtRange?.length === 2) {
       try {
         // find product
         const productToUpdate = products.find(
-          (product) => product.key === addingImportProduct.key
+          (product) => product.key === addingImportProduct.key,
         );
         if (!productToUpdate) {
           message.error("Sản phẩm không tồn tại");
@@ -580,9 +595,11 @@ else if (lastFilterType === "createdAt" && createdAtRange?.length === 2) {
         const updatedImports = [...(productToUpdate.imports || []), newImport];
         const response = await axios.put(
           `/api/products/${productToUpdate.key}`,
-          { imports: updatedImports }
+          { imports: updatedImports },
         );
-        message.success(response.data.message || "Cập nhật số lượng nhập thành công");
+        message.success(
+          response.data.message || "Cập nhật số lượng nhập thành công",
+        );
         setAddImportModalVisible(false);
         setAddingImportProduct(null);
         await fetchProducts();
@@ -593,13 +610,15 @@ else if (lastFilterType === "createdAt" && createdAtRange?.length === 2) {
         setAddingImportProduct(null);
       }
     },
-    [addingImportProduct, products, fetchProducts]
+    [addingImportProduct, products, fetchProducts],
   );
 
   const handleDeleteProduct = useCallback(
     async (productRecord) => {
       try {
-        const response = await axios.delete(`/api/products/${productRecord.key}`);
+        const response = await axios.delete(
+          `/api/products/${productRecord.key}`,
+        );
         message.success(response.data.message);
         await fetchProducts();
       } catch (error) {
@@ -607,7 +626,7 @@ else if (lastFilterType === "createdAt" && createdAtRange?.length === 2) {
         message.error("Lỗi khi xóa sản phẩm");
       }
     },
-    [fetchProducts]
+    [fetchProducts],
   );
 
   /** Paste handler to capture pasted images into upload */
@@ -661,22 +680,22 @@ else if (lastFilterType === "createdAt" && createdAtRange?.length === 2) {
         title: "SL nhập hàng Tổng",
         key: "importedQty",
         render: (_, record) => {
-          const totalImported =
-            (record.imports || []).reduce((acc, cur) => {
-              return (
-                acc +
-                (Number(cur.importedQty) || 0) +
-                (Number(cur.importVN) || 0) +
-                (Number(cur.importKR) || 0)
-              );
-            }, 0) ;
+          const totalImported = (record.imports || []).reduce((acc, cur) => {
+            return (
+              acc +
+              (Number(cur.importedQty) || 0) +
+              (Number(cur.importVN) || 0) +
+              (Number(cur.importKR) || 0)
+            );
+          }, 0);
 
           const historyContent =
             record.imports && record.imports.length > 0 ? (
               <ul style={{ padding: 0, margin: 0, listStyle: "none" }}>
                 {record.imports.map((imp, index) => (
                   <li key={index}>
-                    <strong>Ngày:</strong> {imp.importDate} - <strong>SL tổng:</strong>{" "}
+                    <strong>Ngày:</strong> {imp.importDate} -{" "}
+                    <strong>SL tổng:</strong>{" "}
                     {Number(imp.importedQty || 0) +
                       Number(imp.importVN || 0) +
                       Number(imp.importKR || 0)}{" "}
@@ -689,7 +708,11 @@ else if (lastFilterType === "createdAt" && createdAtRange?.length === 2) {
             );
 
           return (
-            <Popover content={historyContent} title="Lịch sử nhập hàng" trigger="hover">
+            <Popover
+              content={historyContent}
+              title="Lịch sử nhập hàng"
+              trigger="hover"
+            >
               <span>{totalImported}</span>
             </Popover>
           );
@@ -701,14 +724,15 @@ else if (lastFilterType === "createdAt" && createdAtRange?.length === 2) {
         render: (_, record) => {
           const totalImported = (record.imports || []).reduce(
             (acc, cur) => acc + (Number(cur.importVN) || 0),
-            0
+            0,
           );
           const historyContent =
             record.imports && record.imports.length > 0 ? (
               <ul style={{ padding: 0, margin: 0, listStyle: "none" }}>
                 {record.imports.map((imp, index) => (
                   <li key={index}>
-                    <strong>Ngày:</strong> {imp.importDate} - VN: {imp.importVN || 0}
+                    <strong>Ngày:</strong> {imp.importDate} - VN:{" "}
+                    {imp.importVN || 0}
                   </li>
                 ))}
               </ul>
@@ -716,7 +740,11 @@ else if (lastFilterType === "createdAt" && createdAtRange?.length === 2) {
               "Chưa có lịch sử nhập"
             );
           return (
-            <Popover content={historyContent} title="Lịch sử nhập hàng" trigger="hover">
+            <Popover
+              content={historyContent}
+              title="Lịch sử nhập hàng"
+              trigger="hover"
+            >
               <span>{totalImported}</span>
             </Popover>
           );
@@ -728,14 +756,15 @@ else if (lastFilterType === "createdAt" && createdAtRange?.length === 2) {
         render: (_, record) => {
           const totalImported = (record.imports || []).reduce(
             (acc, cur) => acc + (Number(cur.importKR) || 0),
-            0
+            0,
           );
           const historyContent =
             record.imports && record.imports.length > 0 ? (
               <ul style={{ padding: 0, margin: 0, listStyle: "none" }}>
                 {record.imports.map((imp, index) => (
                   <li key={index}>
-                    <strong>Ngày:</strong> {imp.importDate} - Hàn: {imp.importKR || 0}
+                    <strong>Ngày:</strong> {imp.importDate} - Hàn:{" "}
+                    {imp.importKR || 0}
                   </li>
                 ))}
               </ul>
@@ -743,7 +772,11 @@ else if (lastFilterType === "createdAt" && createdAtRange?.length === 2) {
               "Chưa có lịch sử nhập"
             );
           return (
-            <Popover content={historyContent} title="Lịch sử nhập hàng" trigger="hover">
+            <Popover
+              content={historyContent}
+              title="Lịch sử nhập hàng"
+              trigger="hover"
+            >
               <span>{totalImported}</span>
             </Popover>
           );
@@ -764,15 +797,17 @@ else if (lastFilterType === "createdAt" && createdAtRange?.length === 2) {
           let value = agg.ordersDone;
           if (record.name === "KEM NỀN THỎI") value = value - 2;
           if (record.name === "MẶT NẠ BONG BÓNG") value = value - 28;
-          if (record.name === "ĐỒNG HỒ CẢM ỨNG MẶT VUÔNG - ĐEN") value = value - 2;
-          if (record.name === "ĐỒNG HỒ CẢM ỨNG MẶT VUÔNG - CAM") value = value - 1;
-          if (record.name === "ĐỒNG HỒ CẢM ỨNG MẶT VUÔNG - VÀNG") value = value - 1;
+          if (record.name === "ĐỒNG HỒ CẢM ỨNG MẶT VUÔNG - ĐEN")
+            value = value - 2;
+          if (record.name === "ĐỒNG HỒ CẢM ỨNG MẶT VUÔNG - CAM")
+            value = value - 1;
+          if (record.name === "ĐỒNG HỒ CẢM ỨNG MẶT VUÔNG - VÀNG")
+            value = value - 1;
           if (record.name === "KÍNH NỮ") value = value - 1;
           if (record.name === "TAI NGHE AI - TRẮNG") value = value - 2;
           if (record.name === "TAI NGHE AI - TÍM") value = value - 2;
           if (record.name === "GÓI NHUỘM TÓC - ĐEN") value = value - 2;
-         
-         
+
           // if (record.name === "THỎI NÉN NHUỘM TÓC - NÂU") value = value - 10;
           if (record.name === "VIÊN TINH CHẤT HÀU") value = value - 6;
           return value;
@@ -803,7 +838,9 @@ else if (lastFilterType === "createdAt" && createdAtRange?.length === 2) {
                 (Number(cur.importVN) || 0) +
                 (Number(cur.importKR) || 0)
               );
-            }, 0) + (Number(a.slvn) || 0) + (Number(a.sltq) || 0);
+            }, 0) +
+            (Number(a.slvn) || 0) +
+            (Number(a.sltq) || 0);
 
           const bImported =
             (b.imports || []).reduce((acc, cur) => {
@@ -813,7 +850,9 @@ else if (lastFilterType === "createdAt" && createdAtRange?.length === 2) {
                 (Number(cur.importVN) || 0) +
                 (Number(cur.importKR) || 0)
               );
-            }, 0) + (Number(b.slvn) || 0) + (Number(b.sltq) || 0);
+            }, 0) +
+            (Number(b.slvn) || 0) +
+            (Number(b.sltq) || 0);
 
           const aSlAm = aImported - aAgg.ordersDone - aAgg.deliveredQty;
           const bSlAm = bImported - bAgg.ordersDone - bAgg.deliveredQty;
@@ -829,9 +868,12 @@ else if (lastFilterType === "createdAt" && createdAtRange?.length === 2) {
                 (Number(cur.importVN) || 0) +
                 (Number(cur.importKR) || 0)
               );
-            }, 0) + (Number(record.slvn) || 0) + (Number(record.sltq) || 0);
+            }, 0) +
+            (Number(record.slvn) || 0) +
+            (Number(record.sltq) || 0);
 
-          const slAm = totalImported - (agg.ordersDone || 0) - (agg.deliveredQty || 0);
+          const slAm =
+            totalImported - (agg.ordersDone || 0) - (agg.deliveredQty || 0);
 
           const adjust = nameAdjustments[record.name]?.slAmAdd || 0;
           const finalSlAm = slAm + adjust;
@@ -856,235 +898,282 @@ else if (lastFilterType === "createdAt" && createdAtRange?.length === 2) {
           );
         },
       },
-      ...((currentUser.position_team !== "mkt"  )
-      ? [
+      ...(currentUser.position_team !== "mkt"
+        ? [
+            {
+              title: "Nhập VN",
+              dataIndex: "slvn",
+              key: "slvn",
+              width: 80,
+              render: (_, record) => {
+                const historyContent =
+                  record.slvnHistory && record.slvnHistory.length > 0 ? (
+                    <ul style={{ padding: 0, margin: 0, listStyle: "none" }}>
+                      {record.slvnHistory.map((item, index) => (
+                        <li key={index}>
+                          <strong>Ngày:</strong> {item.date} -{" "}
+                          <strong>SL:</strong> {item.qty}
+                        </li>
+                      ))}
+                    </ul>
+                  ) : (
+                    "Chưa có lịch sử nhập VN"
+                  );
+
+                const value =
+                  record.slvn !== undefined && record.slvn !== null
+                    ? Number(record.slvn)
+                    : 0;
+
+                // ✅ Nếu có giá trị khác 0 thì bôi đậm
+                const style = {
+                  fontWeight: value !== 0 ? "bold" : "normal",
+                  color: value !== 0 ? "#000" : "#999",
+                  backgroundColor: value !== 0 ? "#e6f7ff" : "transparent",
+                  padding: "2px 6px",
+                  borderRadius: "4px",
+                };
+
+                return (
+                  <Popover
+                    content={historyContent}
+                    title="Lịch sử nhập VN"
+                    trigger="hover"
+                  >
+                    <span style={style}>{value}</span>
+                  </Popover>
+                );
+              },
+            },
+            {
+              title: "Nhập HQ",
+              key: "sltq",
+              width: 80,
+              render: (_, record) => {
+                const historyContent =
+                  record.sltqHistory && record.sltqHistory.length > 0 ? (
+                    <ul style={{ padding: 0, margin: 0, listStyle: "none" }}>
+                      {record.sltqHistory.map((item, index) => (
+                        <li key={index}>
+                          <strong>Ngày:</strong> {item.date} -{" "}
+                          <strong>SL:</strong> {item.qty}
+                        </li>
+                      ))}
+                    </ul>
+                  ) : (
+                    "Chưa có lịch sử nhập HQ"
+                  );
+
+                const value =
+                  record.sltq !== undefined && record.sltq !== null
+                    ? Number(record.sltq)
+                    : 0;
+
+                const style = {
+                  fontWeight: value !== 0 ? "bold" : "normal",
+                  color: value !== 0 ? "#000" : "#999",
+                  backgroundColor: value !== 0 ? "#e6f7ff" : "transparent",
+                  padding: "2px 6px",
+                  borderRadius: "4px",
+                };
+
+                return (
+                  <Popover
+                    content={historyContent}
+                    title="Lịch sử nhập HQ"
+                    trigger="hover"
+                  >
+                    <span style={style}>{value}</span>
+                  </Popover>
+                );
+              },
+            },
+          ]
+        : []),
+
+      ...(currentUser.name !== "nhi"
+        ? [
+            {
+              title: "MKT Test",
+              dataIndex: "mkttest", // phải có nếu muốn lấy đúng field
+              key: "mkttest",
+              width: 200,
+              render: (text, record, index) => {
+                // Tránh lỗi nếu text null hoặc undefined
+                if (!text) return "";
+
+                return (
+                  <div style={{ width: 200 }}>
+                    <h3>{text}</h3>
+                  </div>
+                );
+              },
+            },
+          ]
+        : []),
+      ...(currentUser.name !== "nhii"
+        ? [
+            {
+              title: "Ngày Khóa / %",
+              dataIndex: "testday",
+              key: "testday",
+              width: 180,
+              render: (text, record) => {
+                if (!text) return "+100%";
+
+                const today = new Date();
+                const testDate = new Date(text);
+
+                today.setHours(0, 0, 0, 0);
+                testDate.setHours(0, 0, 0, 0);
+
+                const diffDays = Math.floor(
+                  (today - testDate) / (1000 * 60 * 60 * 24),
+                );
+
+                let tagColor = "red";
+                let extraText = "";
+
+                if (diffDays <= 4 && record.mkttest !== "SP MỚI") {
+                  tagColor = "red";
+                  extraText = "- SP KHÓA";
+                } else if (
+                  diffDays > 4 &&
+                  diffDays <= 9 &&
+                  record.mkttest !== "SP MỚI"
+                ) {
+                  tagColor = "orange";
+                  extraText = "+90%";
+                } else if (diffDays > 9 || record.mkttest === "SP MỚI") {
+                  tagColor = "green";
+                  extraText = "+100%";
+                }
+
+                return (
+                  <div style={{ display: "flex", gap: 8 }}>
+                    <h2>
+                      {" "}
+                      <Tag color="blue">{diffDays} ngày</Tag>
+                      {extraText && <Tag color={tagColor}>{extraText}</Tag>}
+                    </h2>
+                  </div>
+                );
+              },
+            },
+          ]
+        : []),
+      ...(currentUser.name !== "nhii"
+        ? [
+            {
+              title: "Ngày lên Data",
+              dataIndex: "createdAt",
+              key: "createdAt",
+              width: 120,
+            },
+          ]
+        : []),
       {
-  title: "Nhập VN",
-  dataIndex: "slvn",
-  key: "slvn",
-  width: 80,
-  render: (_, record) => {
-    const historyContent =
-      record.slvnHistory && record.slvnHistory.length > 0 ? (
-        <ul style={{ padding: 0, margin: 0, listStyle: "none" }}>
-          {record.slvnHistory.map((item, index) => (
-            <li key={index}>
-              <strong>Ngày:</strong> {item.date} - <strong>SL:</strong> {item.qty}
-            </li>
-          ))}
-        </ul>
-      ) : (
-        "Chưa có lịch sử nhập VN"
-      );
-
-    const value =
-      record.slvn !== undefined && record.slvn !== null ? Number(record.slvn) : 0;
-
-    // ✅ Nếu có giá trị khác 0 thì bôi đậm
-     const style = {
-      fontWeight: value !== 0 ? "bold" : "normal",
-      color: value !== 0 ? "#000" : "#999",
-      backgroundColor: value !== 0 ? "#e6f7ff" : "transparent",
-      padding: "2px 6px",
-      borderRadius: "4px",
-    };
-
-    return (
-      <Popover content={historyContent} title="Lịch sử nhập VN" trigger="hover">
-        <span style={style}>{value}</span>
-      </Popover>
-    );
-  },
-},
-   {
-  title: "Nhập HQ",
-  key: "sltq",
-  width: 80,
-  render: (_, record) => {
-    const historyContent =
-      record.sltqHistory && record.sltqHistory.length > 0 ? (
-        <ul style={{ padding: 0, margin: 0, listStyle: "none" }}>
-          {record.sltqHistory.map((item, index) => (
-            <li key={index}>
-              <strong>Ngày:</strong> {item.date} - <strong>SL:</strong> {item.qty}
-            </li>
-          ))}
-        </ul>
-      ) : (
-        "Chưa có lịch sử nhập HQ"
-      );
-
-    const value =
-      record.sltq !== undefined && record.sltq !== null ? Number(record.sltq) : 0;
-
-    const style = {
-      fontWeight: value !== 0 ? "bold" : "normal",
-      color: value !== 0 ? "#000" : "#999",
-      backgroundColor: value !== 0 ? "#e6f7ff" : "transparent",
-      padding: "2px 6px",
-      borderRadius: "4px",
-    };
-
-    return (
-      <Popover content={historyContent} title="Lịch sử nhập HQ" trigger="hover">
-        <span style={style}>{value}</span>
-      </Popover>
-    );
-  },
-},
-        ]
-      : []),
-     
- 
-...((currentUser.name !== "nhi"  )
-      ? [
-     {
-  title: "MKT Test",
-  dataIndex: "mkttest", // phải có nếu muốn lấy đúng field
-  key: "mkttest",
-  width: 200,
-  render: (text, record, index) => {
-    // Tránh lỗi nếu text null hoặc undefined
-    if (!text) return "";
-
-    return (
-      <div style={{ width: 200 }}>
-        <h3>{text}</h3>
-      </div>
-    );
-  },
-},
-        ]
-      : []),
- ...((currentUser.name !== "nhii"  )
-      ? [
-      {
-  title: "Ngày Khóa / %",
-  dataIndex: "testday",
-  key: "testday",
-  width: 180,
-  render: (text, record) => {
-    if (!text) return "+100%";
-
-    const today = new Date();
-    const testDate = new Date(text);
-
-    today.setHours(0, 0, 0, 0);
-    testDate.setHours(0, 0, 0, 0);
-
-    const diffDays = Math.floor(
-      (today - testDate) / (1000 * 60 * 60 * 24)
-    );
-
-    let tagColor = "red";
-    let extraText = "";
-
-    if (diffDays <= 4 && record.mkttest !== "SP MỚI") {
-      tagColor = "red";
-      extraText = "- SP KHÓA";
-    } 
-    else if (diffDays > 4 && diffDays <= 9 && record.mkttest !== "SP MỚI") {
-      tagColor = "orange";
-      extraText = "+90%";
-    } 
-    
-    else if (diffDays > 9|| record.mkttest === "SP MỚI") {
-      tagColor = "green";
-      extraText = "+100%";
-    }
-
-    return (
-      <div style={{ display: "flex", gap: 8 }}>
-       <h2> <Tag color="blue">{diffDays} ngày</Tag>
-        {extraText && <Tag color={tagColor}>{extraText}</Tag>}
-      </h2>
-      </div>
-    );
-  },
-},
-        ]
-      : []),
- ...((currentUser.name !== "nhii"  )
-      ? [
-      {
-  title: "Ngày lên Data",
-  dataIndex: "createdAt",
-  key: "createdAt",
-  width: 120,
- 
-  
-},
-        ]
-      : []),
- ...((currentUser.position_team !== "mkt"  )
-      ? [
-     {
-        title: "Hành động",
-        key: "actions",
-        width: 120,
-        fixed: "left",
-        render: (_, record) => {
-          if (
-            currentUser?.position === "admin" ||
-            currentUser?.position === "managerSALE" ||
-            currentUser?.name === "Đỗ Uyển Nhi" || currentUser?.name === "Diệp Anh"
-          ) {
-            return (
-              <Space>
-                <Button disabled={currentUser?.name === "Diệp Anh"} icon={<PlusOutlined />} onClick={() => handleAddImport(record)} />
-                <Button icon={<EditOutlined />} onClick={() => handleEditProduct(record)} />
-                <Popconfirm title="Xóa bản ghi?" onConfirm={() => handleDeleteProduct(record)}>
-                  <Button danger icon={<DeleteOutlined />} />
-                </Popconfirm>
-              </Space>
-            );
-          } else return <span>Chỉ xem</span>;
+        title: "Cân nặng (g)",
+        dataIndex: "weight",
+        key: "weight",
+        width: 110,
+        sorter: (a, b) => (Number(a.weight) || 0) - (Number(b.weight) || 0),
+        render: (text) => {
+          const value =
+            text !== undefined && text !== null && text !== ""
+              ? Number(text)
+              : 0;
+          const style = {
+            fontWeight: value !== 0 ? "bold" : "normal",
+            color: value !== 0 ? "#000" : "#999",
+            backgroundColor: value !== 0 ? "#fff7e6" : "transparent",
+            padding: "2px 6px",
+            borderRadius: "4px",
+            display: "inline-block",
+            minWidth: 50,
+            textAlign: "center",
+          };
+          return <span style={style}>{value} g</span>;
         },
       },
-      {
-  title: "Trạng thái",
-  key: "status",
-  width: 100,
-  render: (_, record) => (
-    <Switch
-      checked={record.status}
-      checkedChildren="Bật"
-      unCheckedChildren="Tắt"
-      onChange={async (checked) => {
-        try {
-          await axios.post("/api/products/update-status", {
-            key: record.key,
-            status: checked,
-          });
-          message.success(`Đã ${checked ? "bật" : "tắt"} sản phẩm`);
-          fetchProducts(); // reload
-        } catch (error) {
-          message.error("Lỗi khi cập nhật trạng thái");
-        }
-      }}
-      disabled={
-        currentUser.position !== "admin" &&
-        currentUser.position !== "managerSALE" &&
-        currentUser.position !== "leadSALE"
-      }
-    />
-  ),
-},
-        ]
-      : []),
-     
+      ...(currentUser.position_team !== "mkt"
+        ? [
+            {
+              title: "Hành động",
+              key: "actions",
+              width: 120,
+              fixed: "left",
+              render: (_, record) => {
+                if (
+                  currentUser?.position === "admin" ||
+                  currentUser?.position === "managerSALE" ||
+                  currentUser?.name === "Đỗ Uyển Nhi" ||
+                  currentUser?.name === "Diệp Anh"
+                ) {
+                  return (
+                    <Space>
+                      <Button
+                        disabled={currentUser?.name === "Diệp Anh"}
+                        icon={<PlusOutlined />}
+                        onClick={() => handleAddImport(record)}
+                      />
+                      <Button
+                        icon={<EditOutlined />}
+                        onClick={() => handleEditProduct(record)}
+                      />
+                      <Popconfirm
+                        title="Xóa bản ghi?"
+                        onConfirm={() => handleDeleteProduct(record)}
+                      >
+                        <Button danger icon={<DeleteOutlined />} />
+                      </Popconfirm>
+                    </Space>
+                  );
+                } else return <span>Chỉ xem</span>;
+              },
+            },
+            {
+              title: "Trạng thái",
+              key: "status",
+              width: 100,
+              render: (_, record) => (
+                <Switch
+                  checked={record.status}
+                  checkedChildren="Bật"
+                  unCheckedChildren="Tắt"
+                  onChange={async (checked) => {
+                    try {
+                      await axios.post("/api/products/update-status", {
+                        key: record.key,
+                        status: checked,
+                      });
+                      message.success(`Đã ${checked ? "bật" : "tắt"} sản phẩm`);
+                      fetchProducts(); // reload
+                    } catch (error) {
+                      message.error("Lỗi khi cập nhật trạng thái");
+                    }
+                  }}
+                  disabled={
+                    currentUser.position !== "admin" &&
+                    currentUser.position !== "managerSALE" &&
+                    currentUser.position !== "leadSALE"
+                  }
+                />
+              ),
+            },
+          ]
+        : []),
     ];
 
     // Conditionally add "Tổng doanh số" column if currentUser.name !== "nhii"
     if ((currentUser?.name || "").toLowerCase() !== "nhii") {
-      baseCols.push(
-        {
+      baseCols.push({
         title: "Tổng doanh số",
         key: "totalProfit",
-        width:150,
+        width: 150,
         render: (_, record) => {
           const agg = getAggregatesFor(record.name);
-          const totalProfit = agg.totalProfit  || 0;
+          const totalProfit = agg.totalProfit || 0;
           let bgColor = "";
           if (totalProfit >= 100000000) bgColor = "blue";
           else if (totalProfit >= 50000000) bgColor = "yellow";
@@ -1112,7 +1201,7 @@ else if (lastFilterType === "createdAt" && createdAtRange?.length === 2) {
 
     // Conditionally add image column for some user positions
     if (
-      currentUser?.position === "managerSALEeeee" 
+      currentUser?.position === "managerSALEeeee"
       // ||
       // currentUser?.position === "leadSALE" ||
       // currentUser?.name === "Tung99" ||
@@ -1122,13 +1211,24 @@ else if (lastFilterType === "createdAt" && createdAtRange?.length === 2) {
         title: "Hình ảnh",
         key: "image",
         render: (_, record) =>
-          record.image ? <img src={record.image} alt="product" style={{ width: 80 }} /> : "Không có ảnh",
+          record.image ? (
+            <img src={record.image} alt="product" style={{ width: 80 }} />
+          ) : (
+            "Không có ảnh"
+          ),
       });
     }
 
     return baseCols;
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [getAggregatesFor, handleAddImport, handleEditProduct, handleDeleteProduct, currentUser, ordersAggMap]);
+  }, [
+    getAggregatesFor,
+    handleAddImport,
+    handleEditProduct,
+    handleDeleteProduct,
+    currentUser,
+    ordersAggMap,
+  ]);
 
   /** ===========
    * Form submit: create new product (preserve original behavior)
@@ -1147,6 +1247,7 @@ else if (lastFilterType === "createdAt" && createdAtRange?.length === 2) {
         status: true,
         slvn: 0,
         sltq: 0,
+        weight: values.weight || 0,
         imports: [
           {
             importedQty: values.importedQty || 0,
@@ -1165,120 +1266,116 @@ else if (lastFilterType === "createdAt" && createdAtRange?.length === 2) {
         message.error("Lỗi khi thêm sản phẩm");
       }
     },
-    [form, fetchProducts]
+    [form, fetchProducts],
   );
-// ======== BẢNG LIST SẢN PHẨM ĐANG CHẠY 2 HÔM GẦN ĐÂY ========= //
-const calculateStats2Days = useCallback(() => {
-  const now = new Date();
-  const twoDaysAgo = new Date();
-  twoDaysAgo.setDate(now.getDate() - 3);
+  // ======== BẢNG LIST SẢN PHẨM ĐANG CHẠY 2 HÔM GẦN ĐÂY ========= //
+  const calculateStats2Days = useCallback(() => {
+    const now = new Date();
+    const twoDaysAgo = new Date();
+    twoDaysAgo.setDate(now.getDate() - 3);
 
-  const stats = {};
+    const stats = {};
 
-  orders2.forEach((order) => {
-    if (!order.orderDate) return;
+    orders2.forEach((order) => {
+      if (!order.orderDate) return;
 
-    const orderDate = new Date(order.orderDate);
-    if (orderDate < twoDaysAgo || orderDate > now) return;
+      const orderDate = new Date(order.orderDate);
+      if (orderDate < twoDaysAgo || orderDate > now) return;
 
-    if (!Array.isArray(order.products)) return;
+      if (!Array.isArray(order.products)) return;
 
-    order.products.forEach((item) => {
-      const name = item.product?.trim();
-      const qty = Number(item.quantity) || 0;
-      const mkt = order.mkt?.trim() || "Không rõ";
+      order.products.forEach((item) => {
+        const name = item.product?.trim();
+        const qty = Number(item.quantity) || 0;
+        const mkt = order.mkt?.trim() || "Không rõ";
 
-      if (!name) return;
+        if (!name) return;
 
-      if (!stats[name]) {
-        stats[name] = {
-          product: name,
-          quantity: 0,
-          mkts: new Set(),
-        };
-      }
+        if (!stats[name]) {
+          stats[name] = {
+            product: name,
+            quantity: 0,
+            mkts: new Set(),
+          };
+        }
 
-      stats[name].quantity += qty;
-      stats[name].mkts.add(mkt);
+        stats[name].quantity += qty;
+        stats[name].mkts.add(mkt);
+      });
     });
-  });
 
-  const result = Object.values(stats)
-    .map((item) => ({
-      product: item.product,
-      quantity: item.quantity,
-      mkts: Array.from(item.mkts).join(", "),
-    }))
-    .sort((a, b) => b.quantity - a.quantity); // ⬅ SORT từ nhiều → ít
+    const result = Object.values(stats)
+      .map((item) => ({
+        product: item.product,
+        quantity: item.quantity,
+        mkts: Array.from(item.mkts).join(", "),
+      }))
+      .sort((a, b) => b.quantity - a.quantity); // ⬅ SORT từ nhiều → ít
 
-  setProductStats2Days(result);
-  setShowStatTable(true);
-}, [orders2]);
+    setProductStats2Days(result);
+    setShowStatTable(true);
+  }, [orders2]);
   /** ===========
    * UI render
    * =========== */
   const handleBulkUpdate = async () => {
-  if (selectedRowKeys.length === 0) {
-    message.warning("Chưa chọn sản phẩm");
-    return;
-  }
+    if (selectedRowKeys.length === 0) {
+      message.warning("Chưa chọn sản phẩm");
+      return;
+    }
 
-  try {
-    setLoading(true);
+    try {
+      setLoading(true);
 
-    await axios.put("/api/products/bulk-update", {
-      keys: selectedRowKeys,
-      mkttest: bulkMkt,
-      testday: bulkDate
-        ? bulkDate.format("YYYY-MM-DD")
-        : null,
-    });
+      await axios.put("/api/products/bulk-update", {
+        keys: selectedRowKeys,
+        mkttest: bulkMkt,
+        testday: bulkDate ? bulkDate.format("YYYY-MM-DD") : null,
+      });
 
-    message.success("Cập nhật hàng loạt thành công");
+      message.success("Cập nhật hàng loạt thành công");
 
-    setSelectedRowKeys([]);
-    setBulkMkt(null);
-    setBulkDate(null);
+      setSelectedRowKeys([]);
+      setBulkMkt(null);
+      setBulkDate(null);
 
-    fetchProducts();
-  } catch (err) {
-    console.error(err);
-    message.error("Lỗi cập nhật");
-  } finally {
-    setLoading(false);
-  }
-};
+      fetchProducts();
+    } catch (err) {
+      console.error(err);
+      message.error("Lỗi cập nhật");
+    } finally {
+      setLoading(false);
+    }
+  };
   const handleBulkUpdate2 = async () => {
-  if (selectedRowKeys.length === 0) {
-    message.warning("Chưa chọn sản phẩm");
-    return;
-  }
+    if (selectedRowKeys.length === 0) {
+      message.warning("Chưa chọn sản phẩm");
+      return;
+    }
 
-  try {
-    setLoading(true);
+    try {
+      setLoading(true);
 
-    await axios.put("/api/products/bulk-update2", {
-      keys: selectedRowKeys,
-      mkttest: bulkMkt,
-      testday: bulkDate
-        ? bulkDate.format("YYYY-MM-DD")
-        : null,
-    });
+      await axios.put("/api/products/bulk-update2", {
+        keys: selectedRowKeys,
+        mkttest: bulkMkt,
+        testday: bulkDate ? bulkDate.format("YYYY-MM-DD") : null,
+      });
 
-    message.success("Cập nhật hàng loạt thành công");
+      message.success("Cập nhật hàng loạt thành công");
 
-    setSelectedRowKeys([]);
-    setBulkMkt(null);
-    setBulkDate(null);
+      setSelectedRowKeys([]);
+      setBulkMkt(null);
+      setBulkDate(null);
 
-    fetchProducts();
-  } catch (err) {
-    console.error(err);
-    message.error("Lỗi cập nhật");
-  } finally {
-    setLoading(false);
-  }
-};
+      fetchProducts();
+    } catch (err) {
+      console.error(err);
+      message.error("Lỗi cập nhật");
+    } finally {
+      setLoading(false);
+    }
+  };
   return (
     <div
       style={{
@@ -1287,141 +1384,163 @@ const calculateStats2Days = useCallback(() => {
         width: "115%", // Để bù lại không gian khi scale
       }}
     >
-    <div style={{ padding: 24 }}>
-      
-      <FullScreenLoading loading={loading} tip="Đang tải dữ liệu..." />
-     <div style={{ marginBottom: 20, display: "flex", gap: 10 }}>
-  <Button type="primary" disabled={currentUser.position_team ==="mkt"} onClick={calculateStats2Days}>
-    📊 Tính thống kê 3 hôm gần đây
-  </Button>
-
-  {showStatTable && (
-    <Button danger onClick={() => setShowStatTable(false)}>
-      ❌ Tắt bảng
-    </Button>
-  )}
-</div>
-{showStatTable && (
-  <Table
-    title={() => "📌 BẢNG LIST SẢN PHẨM ĐANG CHẠY 3 HÔM GẦN ĐÂY"}
-    columns={[
-      { title: "Tên sản phẩm", dataIndex: "product", key: "product" },
-      { title: "Số lượng (3 hôm)", dataIndex: "quantity", key: "quantity", sorter: (a, b) => b.quantity - a.quantity },
-      { title: "MKT đang chạy", dataIndex: "mkts", key: "mkts" },
-    ]}
-    dataSource={productStats2Days.map((item, index) => ({
-      key: index,
-      ...item,
-    }))}
-    pagination={false}
-    style={{ marginBottom: 24 }}
-  />
-)}
-
-
-      <Form form={form} layout="inline" onFinish={onFinish} style={{ marginBottom: 16 }}>
-        <Form.Item name="name" rules={[{ required: true, message: "Vui lòng nhập tên sản phẩm" }]}>
-          <Input placeholder="Tên sản phẩm" />
-        </Form.Item>
-        <Form.Item name="importedQty" hidden>
-          <InputNumber placeholder="SL nhập hàng" min={0} />
-        </Form.Item>
-        <Form.Item name="description" hidden>
-          <Input.TextArea rows={1} placeholder="Kịch bản sản phẩm" />
-        </Form.Item>
-        <Form.Item
-          name="image"
-          valuePropName="fileList"
-          getValueFromEvent={(e) => (e?.fileList && e.fileList.length > 0 ? [e.fileList[0]] : [])}
-        >
-          <Upload
-            listType="picture"
-            maxCount={1}
-            fileList={editFileList}
-            onChange={({ fileList }) => {
-              setEditFileList(fileList);
-              editForm.setFieldsValue({ image: fileList });
-            }}
-            beforeUpload={() => false}
-          >
-            {/* intentionally empty button previously commented */}
-          </Upload>
-        </Form.Item>
-        <Form.Item>
+      <div style={{ padding: 24 }}>
+        <FullScreenLoading loading={loading} tip="Đang tải dữ liệu..." />
+        <div style={{ marginBottom: 20, display: "flex", gap: 10 }}>
           <Button
-            disabled={
-              currentUser?.position !== "admin" &&
-              currentUser?.position !== "leadSALE" &&
-              currentUser?.position !== "managerSALE"
-            }
             type="primary"
-            htmlType="submit"
+            disabled={currentUser.position_team === "mkt"}
+            onClick={calculateStats2Days}
           >
-            Thêm sản phẩm
+            📊 Tính thống kê 3 hôm gần đây
           </Button>
-        </Form.Item>
-      </Form>
 
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          marginBottom: 16,
-        }}
-      >
-        <Input
-          placeholder="Tìm tên sản phẩm"
-          onPressEnter={(e) => setSearchText(e.target.value.trim())}
-          style={{ width: 300 }}
-          suffix={<SearchOutlined style={{ fontSize: "16px", color: "#1890ff" }} />}
-        />
-  <Switch
-    checked={filterMktTest}
-    onChange={(checked) => setFilterMktTest(checked)}
-    checkedChildren="Xét Thưởng"
-    unCheckedChildren="Tất cả"
-  />
-  <Select
-  allowClear
-  showSearch
-  placeholder="Lọc theo MKT Test"
-  style={{ width: 200 }}
-  value={selectedMktFilter}
-  onChange={(value) => setSelectedMktFilter(value)}
->
-  {mktOptions.map((report) => (
-    <Option key={report} value={report}>
-      {report}
-    </Option>
-  ))}
-</Select>
-<DatePicker.RangePicker
-  style={{ width: 260 }}
-  onChange={(dates) => {
-    setTestDayRange(dates);
-    setLastFilterType("range");
-  }}
-  format="YYYY-MM-DD"
-  placeholder={["Từ ngày khóa", "Đến ngày khóa"]}
-/>
+          {showStatTable && (
+            <Button danger onClick={() => setShowStatTable(false)}>
+              ❌ Tắt bảng
+            </Button>
+          )}
+        </div>
+        {showStatTable && (
+          <Table
+            title={() => "📌 BẢNG LIST SẢN PHẨM ĐANG CHẠY 3 HÔM GẦN ĐÂY"}
+            columns={[
+              { title: "Tên sản phẩm", dataIndex: "product", key: "product" },
+              {
+                title: "Số lượng (3 hôm)",
+                dataIndex: "quantity",
+                key: "quantity",
+                sorter: (a, b) => b.quantity - a.quantity,
+              },
+              { title: "MKT đang chạy", dataIndex: "mkts", key: "mkts" },
+            ]}
+            dataSource={productStats2Days.map((item, index) => ({
+              key: index,
+              ...item,
+            }))}
+            pagination={false}
+            style={{ marginBottom: 24 }}
+          />
+        )}
 
-<Select
-  style={{ width: 160 }}
-  placeholder="Lọc ngày khóa"
-  allowClear
-  onChange={(value) => {
-    setTestDayPreset(value);
-    setLastFilterType("preset");
-  }}
->
-  {Array.from({ length: 30 }, (_, i) => (
-    <Option key={i + 1} value={i + 1}>
-      {i + 1} ngày
-    </Option>
-  ))}
-</Select>
-        {/* <Select value={selectedPreset} onChange={(value) => setSelectedPreset(value)} style={{ width: 200 }}>
+        <Form
+          form={form}
+          layout="inline"
+          onFinish={onFinish}
+          style={{ marginBottom: 16 }}
+        >
+          <Form.Item
+            name="name"
+            rules={[{ required: true, message: "Vui lòng nhập tên sản phẩm" }]}
+          >
+            <Input placeholder="Tên sản phẩm" />
+          </Form.Item>
+          <Form.Item name="importedQty" hidden>
+            <InputNumber placeholder="SL nhập hàng" min={0} />
+          </Form.Item>
+          <Form.Item name="description" hidden>
+            <Input.TextArea rows={1} placeholder="Kịch bản sản phẩm" />
+          </Form.Item>
+          <Form.Item name="weight">
+            <InputNumber placeholder="Cân nặng (g)" min={0} step={1} />
+          </Form.Item>
+          <Form.Item
+            name="image"
+            valuePropName="fileList"
+            getValueFromEvent={(e) =>
+              e?.fileList && e.fileList.length > 0 ? [e.fileList[0]] : []
+            }
+          >
+            <Upload
+              listType="picture"
+              maxCount={1}
+              fileList={editFileList}
+              onChange={({ fileList }) => {
+                setEditFileList(fileList);
+                editForm.setFieldsValue({ image: fileList });
+              }}
+              beforeUpload={() => false}
+            >
+              {/* intentionally empty button previously commented */}
+            </Upload>
+          </Form.Item>
+          <Form.Item>
+            <Button
+              disabled={
+                currentUser?.position !== "admin" &&
+                currentUser?.position !== "leadSALE" &&
+                currentUser?.position !== "managerSALE"
+              }
+              type="primary"
+              htmlType="submit"
+            >
+              Thêm sản phẩm
+            </Button>
+          </Form.Item>
+        </Form>
+
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            marginBottom: 16,
+          }}
+        >
+          <Input
+            placeholder="Tìm tên sản phẩm"
+            onPressEnter={(e) => setSearchText(e.target.value.trim())}
+            style={{ width: 300 }}
+            suffix={
+              <SearchOutlined style={{ fontSize: "16px", color: "#1890ff" }} />
+            }
+          />
+          <Switch
+            checked={filterMktTest}
+            onChange={(checked) => setFilterMktTest(checked)}
+            checkedChildren="Xét Thưởng"
+            unCheckedChildren="Tất cả"
+          />
+          <Select
+            allowClear
+            showSearch
+            placeholder="Lọc theo MKT Test"
+            style={{ width: 200 }}
+            value={selectedMktFilter}
+            onChange={(value) => setSelectedMktFilter(value)}
+          >
+            {mktOptions.map((report) => (
+              <Option key={report} value={report}>
+                {report}
+              </Option>
+            ))}
+          </Select>
+          <DatePicker.RangePicker
+            style={{ width: 260 }}
+            onChange={(dates) => {
+              setTestDayRange(dates);
+              setLastFilterType("range");
+            }}
+            format="YYYY-MM-DD"
+            placeholder={["Từ ngày khóa", "Đến ngày khóa"]}
+          />
+
+          <Select
+            style={{ width: 160 }}
+            placeholder="Lọc ngày khóa"
+            allowClear
+            onChange={(value) => {
+              setTestDayPreset(value);
+              setLastFilterType("preset");
+            }}
+          >
+            {Array.from({ length: 30 }, (_, i) => (
+              <Option key={i + 1} value={i + 1}>
+                {i + 1} ngày
+              </Option>
+            ))}
+          </Select>
+          {/* <Select value={selectedPreset} onChange={(value) => setSelectedPreset(value)} style={{ width: 200 }}>
           <Option value="all">Tất cả</Option>
           <Option value="today">Hôm Nay</Option>
           <Option value="yesterday">Hôm Qua</Option>
@@ -1434,160 +1553,211 @@ const calculateStats2Days = useCallback(() => {
           <Option value="threeMonthsAgo">3 Tháng trước</Option>
         </Select> */}
 
-        <div style={{ fontWeight: "bold", fontSize: "16px" }}>
-          Tổng:{" "}
-          <span style={{ color: "blue" }}>{(totalRevenue * 17000).toLocaleString()} VND</span>
+          <div style={{ fontWeight: "bold", fontSize: "16px" }}>
+            Tổng:{" "}
+            <span style={{ color: "blue" }}>
+              {(totalRevenue * 17000).toLocaleString()} VND
+            </span>
+          </div>
         </div>
-      </div>
-<div style={{ display: "flex", gap: 10, marginBottom: 16 }}>
-  
-  <Select
-  showSearch
-    allowClear
-    placeholder="Chọn MKT"
-    style={{ width: 200 }}
-    value={bulkMkt}
-    onChange={(value) => setBulkMkt(value)}
-  >
-    {mktOptions.map((mkt) => (
-      <Option key={mkt} value={mkt}>
-        {mkt}
-      </Option>
-    ))}
-  </Select>
+        <div style={{ display: "flex", gap: 10, marginBottom: 16 }}>
+          <Select
+            showSearch
+            allowClear
+            placeholder="Chọn MKT"
+            style={{ width: 200 }}
+            value={bulkMkt}
+            onChange={(value) => setBulkMkt(value)}
+          >
+            {mktOptions.map((mkt) => (
+              <Option key={mkt} value={mkt}>
+                {mkt}
+              </Option>
+            ))}
+          </Select>
 
-  <DatePicker
-    style={{ width: 200 }}
-    value={bulkDate}
-    onChange={(date) => setBulkDate(date)}
-  />
+          <DatePicker
+            style={{ width: 200 }}
+            value={bulkDate}
+            onChange={(date) => setBulkDate(date)}
+          />
 
-  <Button disabled={currentUser.position==="mkt"||currentUser.position==="lead"} type="primary" onClick={handleBulkUpdate}>
-    ĐÁNH DẤU CHỦ QUYỀN ( HOẶC SP CHUNG)
-  </Button>
-  {/* <Button disabled={currentUser.position==="mkt"||currentUser.position==="lead"} type="primary" onClick={handleBulkUpdate2}>
+          <Button
+            disabled={
+              currentUser.position === "mkt" || currentUser.position === "lead"
+            }
+            type="primary"
+            onClick={handleBulkUpdate}
+          >
+            ĐÁNH DẤU CHỦ QUYỀN ( HOẶC SP CHUNG)
+          </Button>
+          {/* <Button disabled={currentUser.position==="mkt"||currentUser.position==="lead"} type="primary" onClick={handleBulkUpdate2}>
     ĐÁNH DẤU SP MỚI( XÉT THƯỞNG )
   </Button> */}
-<DatePicker.RangePicker
-  style={{marginLeft: 150, width: 300 }}
-  onChange={(dates) => {
-    setCreatedAtRange(dates);
-    setLastFilterType("createdAt"); // phân biệt với testday
-  }}
-  format="YYYY-MM-DD"
-  placeholder={["Từ ngày lên data", "Đến ngày lên data"]}
-/>
+          <DatePicker.RangePicker
+            style={{ marginLeft: 150, width: 300 }}
+            onChange={(dates) => {
+              setCreatedAtRange(dates);
+              setLastFilterType("createdAt"); // phân biệt với testday
+            }}
+            format="YYYY-MM-DD"
+            placeholder={["Từ ngày lên data", "Đến ngày lên data"]}
+          />
+        </div>
+        <Table
+          rowSelection={rowSelection}
+          sticky
+          dataSource={filteredProducts}
+          columns={columns}
+          rowKey="key"
+          pagination={{ pageSize: 100 }}
+        />
 
-</div>
-      <Table
-      rowSelection={rowSelection}
-        sticky
-        dataSource={filteredProducts}
-        columns={columns}
-        rowKey="key"
-        pagination={{ pageSize: 100 }}
-      />
-
-      {/* Edit Modal */}
-      <Modal title="Chỉnh sửa sản phẩm" visible={editModalVisible} onCancel={() => setEditModalVisible(false)} footer={null}>
-        <Form form={editForm} onFinish={handleEditProductFinish} layout="vertical">
-          <Form.Item name="name" label="Tên sản phẩm" rules={[{ required: true, message: "Vui lòng nhập tên sản phẩm" }]}>
-            <Input />
-          </Form.Item>
-          <Form.Item label="Kịch bản sản phẩm" name="description" hidden>
-            <Input.TextArea rows={2} placeholder="Kịch bản sản phẩm" />
-          </Form.Item>
-          <Form.Item label="MKT TEST" name="mkttest" >
-             <Select allowClear showSearch >
-                                {mktOptions.map((report) => (
-                                  <Option key={report} value={report}>
-                                    {report}
-                                  </Option>
-                                ))}
-                              </Select>
-          </Form.Item>
-           <Form.Item name="testday" label="Ngày khóa" >
-            <DatePicker initialValue={moment()} style={{ width: "100%" }} />
-          </Form.Item>
-          <Form.Item hidden
-            name="image"
-            valuePropName="fileList"
-            getValueFromEvent={(e) => (e?.fileList && e.fileList.length > 0 ? [e.fileList[0]] : [])}
+        {/* Edit Modal */}
+        <Modal
+          title="Chỉnh sửa sản phẩm"
+          visible={editModalVisible}
+          onCancel={() => setEditModalVisible(false)}
+          footer={null}
+        >
+          <Form
+            form={editForm}
+            onFinish={handleEditProductFinish}
+            layout="vertical"
           >
-            <Upload
-              listType="picture"
-              maxCount={1}
-              fileList={editFileList}
-              onChange={({ fileList }) => {
-                setEditFileList(fileList);
-                editForm.setFieldsValue({ image: fileList });
-              }}
-              beforeUpload={() => false}
+            <Form.Item
+              name="name"
+              label="Tên sản phẩm"
+              rules={[
+                { required: true, message: "Vui lòng nhập tên sản phẩm" },
+              ]}
             >
-              <Button icon={<UploadOutlined />}>Chọn ảnh hoặc dán ảnh</Button>
-            </Upload>
-          </Form.Item>
+              <Input />
+            </Form.Item>
+            <Form.Item label="Kịch bản sản phẩm" name="description" hidden>
+              <Input.TextArea rows={2} placeholder="Kịch bản sản phẩm" />
+            </Form.Item>
+            <Form.Item label="MKT TEST" name="mkttest">
+              <Select allowClear showSearch>
+                {mktOptions.map((report) => (
+                  <Option key={report} value={report}>
+                    {report}
+                  </Option>
+                ))}
+              </Select>
+            </Form.Item>
+            <Form.Item name="testday" label="Ngày khóa">
+              <DatePicker initialValue={moment()} style={{ width: "100%" }} />
+            </Form.Item>
+            <Form.Item
+              hidden
+              name="image"
+              valuePropName="fileList"
+              getValueFromEvent={(e) =>
+                e?.fileList && e.fileList.length > 0 ? [e.fileList[0]] : []
+              }
+            >
+              <Upload
+                listType="picture"
+                maxCount={1}
+                fileList={editFileList}
+                onChange={({ fileList }) => {
+                  setEditFileList(fileList);
+                  editForm.setFieldsValue({ image: fileList });
+                }}
+                beforeUpload={() => false}
+              >
+                <Button icon={<UploadOutlined />}>Chọn ảnh hoặc dán ảnh</Button>
+              </Upload>
+            </Form.Item>
 
-          <Form.Item label="Nhập VN" name="slvn">
-            <InputNumber placeholder="nhập sl" />
-          </Form.Item>
-          <Form.Item label="Nhập HQ" name="sltq">
-            <InputNumber placeholder="nhập sl" />
-          </Form.Item>
+            <Form.Item label="Nhập VN" name="slvn">
+              <InputNumber placeholder="nhập sl" />
+            </Form.Item>
+            <Form.Item label="Nhập HQ" name="sltq">
+              <InputNumber placeholder="nhập sl" />
+            </Form.Item>
 
-          <Form.Item>
-            <Button type="primary" htmlType="submit">
-              {loading ? <Spin /> : "Lưu"}
-            </Button>
-          </Form.Item>
-        </Form>
-      </Modal>
+            <Form.Item label="Cân nặng (g)" name="weight">
+              <InputNumber
+                placeholder="nhập cân nặng"
+                min={0}
+                step={1}
+                style={{ width: "100%" }}
+              />
+            </Form.Item>
 
-      {/* Add Import Modal */}
-      <Modal
-        title={`Thêm số lượng nhập cho: ${addingImportProduct ? addingImportProduct.name : ""}`}
-        visible={addImportModalVisible}
-        onCancel={() => setAddImportModalVisible(false)}
-        footer={null}
-      >
-        <Form form={addImportForm} onFinish={handleAddImportFinish} layout="vertical">
-          <Form.Item name="importedQty" label="Số lượng nhập">
-            <InputNumber style={{ width: "100%" }} />
-          </Form.Item>
+            <Form.Item>
+              <Button type="primary" htmlType="submit">
+                {loading ? <Spin /> : "Lưu"}
+              </Button>
+            </Form.Item>
+          </Form>
+        </Modal>
 
-          <Form.Item name="importVN" label="Nhập về Việt Nam">
-            <InputNumber style={{ width: "100%" }} />
-          </Form.Item>
+        {/* Add Import Modal */}
+        <Modal
+          title={`Thêm số lượng nhập cho: ${addingImportProduct ? addingImportProduct.name : ""}`}
+          visible={addImportModalVisible}
+          onCancel={() => setAddImportModalVisible(false)}
+          footer={null}
+        >
+          <Form
+            form={addImportForm}
+            onFinish={handleAddImportFinish}
+            layout="vertical"
+          >
+            <Form.Item name="importedQty" label="Số lượng nhập">
+              <InputNumber style={{ width: "100%" }} />
+            </Form.Item>
 
-          <Form.Item name="importKR" label="Nhập về Hàn Quốc">
-            <InputNumber style={{ width: "100%" }} />
-          </Form.Item>
+            <Form.Item name="importVN" label="Nhập về Việt Nam">
+              <InputNumber style={{ width: "100%" }} />
+            </Form.Item>
 
-          <Form.Item name="importDate" label="Ngày nhập" rules={[{ required: true, message: "Vui lòng chọn ngày nhập" }]}>
-            <DatePicker initialValue={moment()} style={{ width: "100%" }} />
-          </Form.Item>
+            <Form.Item name="importKR" label="Nhập về Hàn Quốc">
+              <InputNumber style={{ width: "100%" }} />
+            </Form.Item>
 
-          <Form.Item>
-            <Button type="primary" htmlType="submit">
-              Lưu
-            </Button>
-          </Form.Item>
-        </Form>
-      </Modal>
+            <Form.Item
+              name="importDate"
+              label="Ngày nhập"
+              rules={[{ required: true, message: "Vui lòng chọn ngày nhập" }]}
+            >
+              <DatePicker initialValue={moment()} style={{ width: "100%" }} />
+            </Form.Item>
 
-      {/* Preview Modal */}
-      <Modal visible={previewVisible} footer={null} onCancel={() => setPreviewVisible(false)}>
-        {Array.isArray(previewImage) ? (
-          <div style={{ display: "flex", flexWrap: "wrap", gap: "10px" }}>
-            {previewImage.map((img, idx) => (
-              <img key={idx} src={img} alt={`preview-${idx}`} style={{ width: "100px", height: "auto" }} />
-            ))}
-          </div>
-        ) : (
-          <img src={previewImage} alt="Preview" style={{ width: "100%" }} />
-        )}
-      </Modal>
-    </div></div>
+            <Form.Item>
+              <Button type="primary" htmlType="submit">
+                Lưu
+              </Button>
+            </Form.Item>
+          </Form>
+        </Modal>
+
+        {/* Preview Modal */}
+        <Modal
+          visible={previewVisible}
+          footer={null}
+          onCancel={() => setPreviewVisible(false)}
+        >
+          {Array.isArray(previewImage) ? (
+            <div style={{ display: "flex", flexWrap: "wrap", gap: "10px" }}>
+              {previewImage.map((img, idx) => (
+                <img
+                  key={idx}
+                  src={img}
+                  alt={`preview-${idx}`}
+                  style={{ width: "100px", height: "auto" }}
+                />
+              ))}
+            </div>
+          ) : (
+            <img src={previewImage} alt="Preview" style={{ width: "100%" }} />
+          )}
+        </Modal>
+      </div>
+    </div>
   );
 };
 

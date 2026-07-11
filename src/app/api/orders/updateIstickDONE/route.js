@@ -13,6 +13,7 @@ export async function POST(req) {
         update: { 
           $set: { 
             istickDONE: order.istickDONE,
+            istick5: false,
             // Nếu đơn hàng được tích (istick === true) thì cập nhật shippingDate1 và deliveryStatus.
             // shippingDate1 được định dạng bao gồm giờ, phút, giây.
             ...(order.istickDONE 

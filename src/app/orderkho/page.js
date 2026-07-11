@@ -87,6 +87,9 @@ input,textarea,select{font-family:inherit}
 .vb-done{background:#e0faf0;color:#0d8a5a}
 .vb-late{background:var(--red-s);color:var(--red)}
 .vb-reconcile{background:var(--purple-s);color:var(--purple)}
+.vb-needprocess{background:var(--orange-s);color:var(--orange)}
+.ni.v-needprocess:not(.on) .pill{background:#3a1d05;color:#fb923c}
+.needproc-c{background:var(--orange-s);color:var(--orange)}.needproc-c .dot{background:var(--orange)}
 .srch{flex:1;max-width:320px;position:relative}
 .srch svg{position:absolute;left:10px;top:50%;transform:translateY(-50%);width:14px;height:14px;color:var(--muted);stroke-width:2}
 .srch input{width:100%;background:var(--bg);border:1px solid var(--line);border-radius:8px;
@@ -210,7 +213,7 @@ td.ctr{text-align:center}
 
 .track-txt{font-family:ui-monospace,monospace;font-size:11.5px;color:var(--ink2);font-weight:600}
 .cust{font-weight:600;font-size:12.5px}
-.phone{color:var(--ink2);font-size:11.5px;white-space:nowrap}
+.phone{color:var(--ink2);font-size:11.5px;white-space:nowrap;max-width:90px;display:inline-block;overflow:hidden;text-overflow:ellipsis}
 .stt-n{color:var(--muted);font-weight:700;font-size:11.5px}
 .prods{display:flex;flex-direction:column;gap:2px}
 .ptag{display:inline-flex;align-items:center;gap:4px;font-size:11px;background:var(--line2);
@@ -294,13 +297,16 @@ function mapOrder(o) {
   // Backend fields: stt, customerName, phone, address, products[], trackingCode,
   // deliveryStatus, shippingDate1, shippingDate2, orderDate, category, reconciled, istick, istick4
   const ngayGui = o.shippingDate1 ? dayjs(o.shippingDate1).format("DD/MM") : "";
-  const ngayNhan = o.shippingDate2 ? dayjs(o.shippingDate2).format("DD/MM") : "";
-  const ngayDat = o.orderDate4 || o.orderDate
-    ? dayjs(o.orderDate4 || o.orderDate).format("DD/MM")
+  const ngayNhan = o.shippingDate2
+    ? dayjs(o.shippingDate2).format("DD/MM")
     : "";
+  const ngayDat =
+    o.orderDate4 || o.orderDate
+      ? dayjs(o.orderDate4 || o.orderDate).format("DD/MM")
+      : "";
 
   const delivered =
-    o.deliveryStatus === "GIAO THÀNH CÔNG" ;
+    o.deliveryStatus === "GIAO THÀNH CÔNG" && o.istick5 !== true;
   const reconciled = o.reconciled === true;
 
   // Tính số ngày đang giao
@@ -333,19 +339,68 @@ function mapOrder(o) {
     delivered,
     reconciled,
     track: o.trackingCode || "",
+    istick5: o.istick5 || false,
+    istickDate: o.istickDate || null,
+    istickLyDo: o.istickLyDo || "",
+    istickHistory: Array.isArray(o.istickHistory) ? o.istickHistory : [],
+    savedLyDo: o.istickLyDo || "",
   };
 }
 
 /* ─── View config ─── */
 const VIEW_CFG = {
-  all:       { title: "Tất cả đơn hàng",       sub: "Tất cả",              badgeCls: "vb-all",       badge: "Tất cả" },
-  unsent:    { title: "Chưa gửi hàng",          sub: "Chưa có ngày gửi",   badgeCls: "vb-unsent",    badge: "Chưa gửi" },
-  sent:      { title: "Đã gửi hàng",            sub: "Đang giao",          badgeCls: "vb-sent",      badge: "Đã gửi" },
-  late:      { title: "Giao lâu – Cần check",   sub: `Giao quá ${LATE_DAYS} ngày chưa về`, badgeCls: "vb-late", badge: "Cần check" },
-  done:      { title: "Giao thành công",         sub: "Đã về tay khách",    badgeCls: "vb-done",      badge: "Giao TC" },
-  reconcile: { title: "Đối soát",               sub: "Đã đối soát",        badgeCls: "vb-reconcile", badge: "Đối soát" },
+  all: {
+    title: "Tất cả đơn hàng",
+    sub: "Tất cả",
+    badgeCls: "vb-all",
+    badge: "Tất cả",
+  },
+  unsent: {
+    title: "Chưa gửi hàng",
+    sub: "Chưa có ngày gửi",
+    badgeCls: "vb-unsent",
+    badge: "Chưa gửi",
+  },
+  sent: {
+    title: "Đã gửi hàng",
+    sub: "Đang giao",
+    badgeCls: "vb-sent",
+    badge: "Đã gửi",
+  },
+  late: {
+    title: "Giao lâu – Cần check",
+    sub: `Giao quá ${LATE_DAYS} ngày chưa về`,
+    badgeCls: "vb-late",
+    badge: "Cần check",
+  },
+  needprocess: {
+    title: "Đơn cần xử lý",
+    sub: "istick5 = true",
+    badgeCls: "vb-needprocess",
+    badge: "Cần xử lý",
+  },
+  done: {
+    title: "Giao thành công",
+    sub: "Đã về tay khách",
+    badgeCls: "vb-done",
+    badge: "Giao TC",
+  },
+  reconcile: {
+    title: "Đối soát",
+    sub: "Đã đối soát",
+    badgeCls: "vb-reconcile",
+    badge: "Đối soát",
+  },
 };
-const VIEWS = ["all", "unsent", "sent", "late", "done", "reconcile"];
+const VIEWS = [
+  "all",
+  "unsent",
+  "sent",
+  "late",
+  "needprocess",
+  "done",
+  "reconcile",
+];
 
 function isLate(o) {
   return o.ngayGui && !o.delivered && o.daysShipping > LATE_DAYS;
@@ -353,13 +408,25 @@ function isLate(o) {
 
 function getViewList(orders, view) {
   switch (view) {
-    case "all":       return orders.slice();
-    case "unsent":    return orders.filter((o) => !o.ngayGui);
-    case "sent":      return orders.filter((o) => o.ngayGui && !o.delivered && !o.reconciled);
-    case "late":      return orders.filter((o) => isLate(o));
-    case "done":      return orders.filter((o) => o.delivered && !o.reconciled);
-    case "reconcile": return orders.filter((o) => o.reconciled);
-    default:          return [];
+    case "all":
+      return orders.slice();
+    case "unsent":
+      return orders.filter((o) => !o.ngayGui);
+    case "sent":
+      return orders.filter(
+        (o) =>
+          o.ngayGui && !o.delivered && !o.reconciled && !o.istick5 === true,
+      );
+    case "late":
+      return orders.filter((o) => isLate(o));
+    case "needprocess":
+      return orders.filter((o) => o.istick5 === true);
+    case "done":
+      return orders.filter((o) => o.delivered && !o.reconciled);
+    case "reconcile":
+      return orders.filter((o) => o.reconciled);
+    default:
+      return [];
   }
 }
 
@@ -391,6 +458,9 @@ export default function KhoOrderList() {
   const [trackNote, setTrackNote] = useState("");
   const [sttDoneInput, setSttDoneInput] = useState("");
 
+  // Đơn cần xử lý form
+  const [needProcessForm, setNeedProcessForm] = useState({});
+
   // Panel collapse
   const [p1collapsed, setP1collapsed] = useState(false);
   const [p2collapsed, setP2collapsed] = useState(false);
@@ -405,18 +475,22 @@ export default function KhoOrderList() {
     setLoading(true);
     try {
       const res = await axios.get("/api/orders/orderkhohq", {
-  params: {
-    filter: "failed",
-    isShippingName: currentUser.name,
-  },
-});
+        params: {
+          filter: "failed",
+          isShippingName: currentUser.name,
+        },
+      });
       const raw = res.data.data || [];
       const mapped = raw.map(mapOrder);
       setOrders(mapped);
       setInitialOrders(mapped);
       // Khởi tạo trạng thái delivered / reconciled từ dữ liệu
-      setDeliveredIds(new Set(mapped.filter((o) => o.delivered).map((o) => o.id)));
-      setReconciledIds(new Set(mapped.filter((o) => o.reconciled).map((o) => o.id)));
+      setDeliveredIds(
+        new Set(mapped.filter((o) => o.delivered).map((o) => o.id)),
+      );
+      setReconciledIds(
+        new Set(mapped.filter((o) => o.reconciled).map((o) => o.id)),
+      );
     } catch (err) {
       console.error("Lỗi khi lấy đơn hàng kho:", err);
       showToast("Lỗi khi lấy đơn hàng");
@@ -433,8 +507,90 @@ export default function KhoOrderList() {
   function showToast(msg) {
     setToast({ msg, show: true });
     clearTimeout(toastTimer.current);
-    toastTimer.current = setTimeout(() => setToast((t) => ({ ...t, show: false })), 2500);
+    toastTimer.current = setTimeout(
+      () => setToast((t) => ({ ...t, show: false })),
+      2500,
+    );
   }
+
+  const formatTime = (value) => {
+    if (!value) return "-";
+    const d = dayjs(value);
+    return d.isValid() ? d.format("DD/MM/YYYY HH:mm") : "-";
+  };
+
+  const handleNeedProcessNoteFocus = (orderId, e) => {
+    const target = e?.target;
+    if (!target) return;
+    const current = needProcessForm[orderId]?.lyDo || "";
+    const timestamp = `[${dayjs().format("DD/MM/YYYY HH:mm")}] `;
+    if (current.trimStart().startsWith("[")) return;
+    const newValue = timestamp + current;
+    setNeedProcessForm((prev) => ({
+      ...prev,
+      [orderId]: {
+        ...(prev[orderId] || {}),
+        lyDo: newValue,
+        checked: true,
+      },
+    }));
+    requestAnimationFrame(() => {
+      try {
+        target.setSelectionRange(timestamp.length, timestamp.length);
+      } catch (_) {}
+    });
+  };
+
+  const handleNeedProcessNoteChange = (orderId, value) => {
+    setNeedProcessForm((prev) => ({
+      ...prev,
+      [orderId]: {
+        ...(prev[orderId] || {}),
+        lyDo: value,
+        checked: true,
+      },
+    }));
+  };
+
+  const handleNeedProcessToggle = (orderId, checked) => {
+    setNeedProcessForm((prev) => ({
+      ...prev,
+      [orderId]: {
+        ...(prev[orderId] || {}),
+        checked,
+        lyDo: checked
+          ? prev[orderId]?.lyDo || `[${dayjs().format("DD/MM/YYYY HH:mm")}] `
+          : prev[orderId]?.lyDo || "",
+      },
+    }));
+  };
+
+  const saveNeedProcessForm = async () => {
+    const payload = Object.entries(needProcessForm)
+      .filter(([, v]) => {
+        const lyDo = (v?.lyDo || "").toString();
+        if (!lyDo.trim()) return false;
+        return lyDo !== (v?.savedLyDo || "");
+      })
+      .map(([id, v]) => ({
+        id,
+        istickLyDo: v.lyDo.toString().trim(),
+      }));
+    if (!payload.length) {
+      showToast("Chưa có đơn cần lưu");
+      return;
+    }
+    try {
+      const { data } = await axios.post("/api/orders/updateIstickHistory", {
+        orders: payload,
+      });
+      showToast(data.message || "Đã lưu đơn cần xử lý");
+      fetchOrders();
+    } catch (err) {
+      console.error(err);
+      showToast(err?.response?.data?.error || "Lỗi khi lưu");
+    }
+  };
 
   // ── Danh sách theo view (áp dụng delivered/reconciled từ state) ──
   const ordersWithState = useMemo(() => {
@@ -454,7 +610,7 @@ export default function KhoOrderList() {
     if (!searchQ.trim()) return viewList;
     const q = searchQ.trim().toLowerCase();
     return viewList.filter((o) =>
-      (o.cust + o.sdt + o.track + String(o.stt)).toLowerCase().includes(q)
+      (o.cust + o.sdt + o.track + String(o.stt)).toLowerCase().includes(q),
     );
   }, [viewList, searchQ]);
 
@@ -462,7 +618,7 @@ export default function KhoOrderList() {
   const filteredList = useMemo(() => {
     if (activeProds.size === 0) return searchedList;
     const matched = searchedList.filter((o) =>
-      o.prods.some((p) => activeProds.has(p))
+      o.prods.some((p) => activeProds.has(p)),
     );
     // sort: nhóm theo SP được chọn đầu tiên
     const prodOrder = [...activeProds];
@@ -474,14 +630,21 @@ export default function KhoOrderList() {
   }, [searchedList, activeProds]);
 
   // ── Pill counts ──
-  const pillCounts = useMemo(() => ({
-    all:       ordersWithState.length,
-    unsent:    ordersWithState.filter((o) => !o.ngayGui).length,
-    sent:      ordersWithState.filter((o) => o.ngayGui && !o.delivered && !o.reconciled).length,
-    late:      ordersWithState.filter((o) => isLate(o)).length,
-    done:      ordersWithState.filter((o) => o.delivered && !o.reconciled).length,
-    reconcile: ordersWithState.filter((o) => o.reconciled).length,
-  }), [ordersWithState]);
+  const pillCounts = useMemo(
+    () => ({
+      all: ordersWithState.length,
+      unsent: ordersWithState.filter((o) => !o.ngayGui).length,
+      sent: ordersWithState.filter(
+        (o) =>
+          o.ngayGui && !o.delivered && !o.reconciled && !o.istick5 === true,
+      ).length,
+      late: ordersWithState.filter((o) => isLate(o)).length,
+      needprocess: ordersWithState.filter((o) => o.istick5 === true).length,
+      done: ordersWithState.filter((o) => o.delivered && !o.reconciled).length,
+      reconcile: ordersWithState.filter((o) => o.reconciled).length,
+    }),
+    [ordersWithState],
+  );
 
   // ── Prod chips ──
   const allProds = useMemo(() => {
@@ -493,7 +656,7 @@ export default function KhoOrderList() {
   const filteredProdChips = useMemo(() => {
     if (!prodSearch.trim()) return allProds;
     return allProds.filter((p) =>
-      p.toLowerCase().includes(prodSearch.toLowerCase())
+      p.toLowerCase().includes(prodSearch.toLowerCase()),
     );
   }, [allProds, prodSearch]);
 
@@ -550,36 +713,46 @@ export default function KhoOrderList() {
 
   // ── Save Giao TC (gọi API cập nhật deliveryStatus) ──
   async function saveDelivered() {
-  const toUpdate = filteredList.filter(
-    (o) => deliveredIds.has(o.id) && !o.delivered
-  );
+    const toUpdate = filteredList.filter(
+      (o) => deliveredIds.has(o.id) && !o.delivered,
+    );
 
-  if (!toUpdate.length) {
-    showToast("Không có đơn nào để lưu");
-    return;
+    if (!toUpdate.length) {
+      showToast("Không có đơn nào để lưu");
+      return;
+    }
+
+    try {
+      await axios.post("/api/orders/updateIstickDONE", {
+        orders: toUpdate.map((o) => ({
+          id: o.id,
+          istickDONE: true,
+        })),
+      });
+
+      showToast(`Đã lưu Giao TC cho ${toUpdate.length} đơn ✓`);
+      fetchOrders();
+      // Nếu đang ở mục Đơn cần xử lý thì ở lại mục đó (vì các đơn đã tick Giao TC sẽ tự động biến mất khỏi đây do istick5 về false)
+      if (currentView === "needprocess") {
+        setTimeout(() => setCurrentView("needprocess"), 700);
+      } else {
+        setTimeout(() => setCurrentView("done"), 700);
+      }
+    } catch (err) {
+      console.error(err);
+      showToast("Lỗi khi lưu Giao TC");
+    }
   }
-
-  try {
-    await axios.post("/api/orders/updateIstickDONE", {
-      orders: toUpdate.map((o) => ({
-        id: o.id,
-        istickDONE: true,
-      })),
-    });
-
-    showToast(`Đã lưu Giao TC cho ${toUpdate.length} đơn ✓`);
-    fetchOrders();
-    setTimeout(() => setCurrentView("done"), 700);
-  } catch (err) {
-    console.error(err);
-    showToast("Lỗi khi lưu Giao TC");
-  }
-}
 
   // ── Save Đối soát ──
   async function saveReconcile() {
-    const toUpdate = filteredList.filter((o) => reconciledIds.has(o.id) && !o.reconciled);
-    if (!toUpdate.length) { showToast("Không có đơn nào để lưu"); return; }
+    const toUpdate = filteredList.filter(
+      (o) => reconciledIds.has(o.id) && !o.reconciled,
+    );
+    if (!toUpdate.length) {
+      showToast("Không có đơn nào để lưu");
+      return;
+    }
     try {
       await axios.post("/api/orders/updateReconciled", {
         orders: toUpdate.map(({ id }) => ({ id, reconciled: true })),
@@ -594,157 +767,158 @@ export default function KhoOrderList() {
   }
 
   // ── Tick tất cả Giao TC ──
-async function tickAllDelivered() {
-  if (!filteredList.length) {
-    showToast("Không có đơn nào");
-    return;
+  async function tickAllDelivered() {
+    if (!filteredList.length) {
+      showToast("Không có đơn nào");
+      return;
+    }
+
+    try {
+      await axios.post("/api/orders/updateIstickDONE", {
+        orders: filteredList.map((o) => ({
+          id: o.id,
+          istickDONE: true,
+        })),
+      });
+
+      showToast(`Đã chuyển ${filteredList.length} đơn sang Giao thành công ✓`);
+
+      fetchOrders();
+
+      // Nếu đang ở mục Đơn cần xử lý thì các đơn vừa tick sẽ tự động biến mất (istick5 = false)
+      // → quay lại "done" để xem kết quả
+      setTimeout(() => {
+        setCurrentView(currentView === "needprocess" ? "done" : "done");
+      }, 700);
+    } catch (err) {
+      console.error(err);
+      showToast("Lỗi khi cập nhật Giao thành công");
+    }
   }
-
-  try {
-    await axios.post("/api/orders/updateIstickDONE", {
-      orders: filteredList.map((o) => ({
-        id: o.id,
-        istickDONE: true,
-      })),
-    });
-
-    showToast(`Đã chuyển ${filteredList.length} đơn sang Giao thành công ✓`);
-
-    fetchOrders();
-
-    setTimeout(() => {
-      setCurrentView("done");
-    }, 700);
-
-  } catch (err) {
-    console.error(err);
-    showToast("Lỗi khi cập nhật Giao thành công");
-  }
-}
 
   // ── Tick tất cả Đối soát ──
-async function tickAllReconcile() {
-  if (!filteredList.length) {
-    showToast("Không có đơn nào");
-    return;
+  async function tickAllReconcile() {
+    if (!filteredList.length) {
+      showToast("Không có đơn nào");
+      return;
+    }
+
+    try {
+      await axios.post("/api/orders/updateReconciled", {
+        orders: filteredList.map((o) => ({
+          id: o.id,
+          reconciled: true,
+        })),
+      });
+
+      showToast(`Đã chuyển ${filteredList.length} đơn sang Đối soát ✓`);
+
+      fetchOrders();
+
+      setTimeout(() => {
+        setCurrentView("reconcile");
+      }, 700);
+    } catch (err) {
+      console.error(err);
+      showToast("Lỗi khi cập nhật Đối soát");
+    }
   }
-
-  try {
-    await axios.post("/api/orders/updateReconciled", {
-      orders: filteredList.map((o) => ({
-        id: o.id,
-        reconciled: true,
-      })),
-    });
-
-    showToast(`Đã chuyển ${filteredList.length} đơn sang Đối soát ✓`);
-
-    fetchOrders();
-
-    setTimeout(() => {
-      setCurrentView("reconcile");
-    }, 700);
-
-  } catch (err) {
-    console.error(err);
-    showToast("Lỗi khi cập nhật Đối soát");
-  }
-}
 
   // ── Bulk deliver ──
-async function bulkDeliver() {
-  const sel = filteredList.filter((o) => selectedIds.has(o.id));
+  async function bulkDeliver() {
+    const sel = filteredList.filter((o) => selectedIds.has(o.id));
 
-  if (!sel.length) {
-    showToast("Chưa chọn đơn nào");
-    return;
+    if (!sel.length) {
+      showToast("Chưa chọn đơn nào");
+      return;
+    }
+
+    try {
+      await axios.post("/api/orders/updateIstickDONE", {
+        orders: sel.map((o) => ({
+          id: o.id,
+          istickDONE: true,
+        })),
+      });
+
+      showToast(`Đã chuyển ${sel.length} đơn sang Giao thành công ✓`);
+
+      clearSelection();
+      fetchOrders();
+
+      // Nếu ở mục Đơn cần xử lý, các đơn đã tick sẽ tự biến mất → giữ nguyên view
+      if (currentView !== "needprocess") {
+        setTimeout(() => setCurrentView("done"), 700);
+      }
+    } catch (err) {
+      console.error(err);
+      showToast("Lỗi khi cập nhật Giao thành công");
+    }
   }
-
-  try {
-    await axios.post("/api/orders/updateIstickDONE", {
-      orders: sel.map((o) => ({
-        id: o.id,
-        istickDONE: true,
-      })),
-    });
-
-    showToast(`Đã chuyển ${sel.length} đơn sang Giao thành công ✓`);
-
-    clearSelection();
-    fetchOrders();
-
-    setTimeout(() => setCurrentView("done"), 700);
-  } catch (err) {
-    console.error(err);
-    showToast("Lỗi khi cập nhật Giao thành công");
-  }
-}
 
   // ── Bulk reconcile ──
   async function bulkReconcile() {
-  const sel = filteredList.filter((o) => selectedIds.has(o.id));
+    const sel = filteredList.filter((o) => selectedIds.has(o.id));
 
-  if (!sel.length) {
-    showToast("Chưa chọn đơn nào");
-    return;
+    if (!sel.length) {
+      showToast("Chưa chọn đơn nào");
+      return;
+    }
+
+    try {
+      await axios.post("/api/orders/updateReconciled", {
+        orders: sel.map((o) => ({
+          id: o.id,
+          reconciled: true,
+        })),
+      });
+
+      showToast(`Đã chuyển ${sel.length} đơn sang Đối soát ✓`);
+
+      clearSelection();
+
+      await fetchOrders();
+
+      setTimeout(() => {
+        setCurrentView("reconcile");
+      }, 700);
+    } catch (err) {
+      console.error("Lỗi updateReconciled:", err);
+      showToast("Lỗi khi cập nhật Đối soát");
+    }
   }
-
-  try {
-    await axios.post("/api/orders/updateReconciled", {
-      orders: sel.map((o) => ({
-        id: o.id,
-        reconciled: true,
-      })),
-    });
-
-    showToast(`Đã chuyển ${sel.length} đơn sang Đối soát ✓`);
-
-    clearSelection();
-
-    await fetchOrders();
-
-    setTimeout(() => {
-      setCurrentView("reconcile");
-    }, 700);
-
-  } catch (err) {
-    console.error("Lỗi updateReconciled:", err);
-    showToast("Lỗi khi cập nhật Đối soát");
-  }
-}
 
   // ── Bulk unreconcile ──
   async function bulkUnreconcile() {
-  const sel = filteredList.filter((o) => selectedIds.has(o.id));
+    const sel = filteredList.filter((o) => selectedIds.has(o.id));
 
-  if (!sel.length) {
-    showToast("Chưa chọn đơn nào");
-    return;
+    if (!sel.length) {
+      showToast("Chưa chọn đơn nào");
+      return;
+    }
+
+    try {
+      await axios.post("/api/orders/updateReconciled", {
+        orders: sel.map((o) => ({
+          id: o.id,
+          reconciled: false,
+        })),
+      });
+
+      showToast(`Đã bỏ đối soát ${sel.length} đơn ✓`);
+
+      clearSelection();
+
+      await fetchOrders();
+
+      setTimeout(() => {
+        setCurrentView("done");
+      }, 700);
+    } catch (err) {
+      console.error("Lỗi updateReconciled:", err);
+      showToast("Lỗi khi bỏ đối soát");
+    }
   }
-
-  try {
-    await axios.post("/api/orders/updateReconciled", {
-      orders: sel.map((o) => ({
-        id: o.id,
-        reconciled: false,
-      })),
-    });
-
-    showToast(`Đã bỏ đối soát ${sel.length} đơn ✓`);
-
-    clearSelection();
-
-    await fetchOrders();
-
-    setTimeout(() => {
-      setCurrentView("done");
-    }, 700);
-
-  } catch (err) {
-    console.error("Lỗi updateReconciled:", err);
-    showToast("Lỗi khi bỏ đối soát");
-  }
-}
   // ── Prod filter ──
   function toggleProd(prod) {
     setActiveProds((prev) => {
@@ -761,8 +935,16 @@ async function bulkDeliver() {
 
   // ── Ghép mã VĐ (parse) ──
   function parsePairs() {
-    const stts = bulkStt.trim().split("\n").map((s) => s.trim()).filter(Boolean);
-    const tracks = bulkTrack.trim().split("\n").map((s) => s.trim()).filter(Boolean);
+    const stts = bulkStt
+      .trim()
+      .split("\n")
+      .map((s) => s.trim())
+      .filter(Boolean);
+    const tracks = bulkTrack
+      .trim()
+      .split("\n")
+      .map((s) => s.trim())
+      .filter(Boolean);
     if (!stts.length && tracks.length) return { mode: "order", tracks };
     const pairs = [];
     for (let i = 0; i < Math.min(stts.length, tracks.length); i++) {
@@ -773,29 +955,39 @@ async function bulkDeliver() {
 
   function previewMatch() {
     const r = parsePairs();
-    if (r.mode === "order") { setMatchPreview(null); return; }
-    setMatchPreview(r.pairs.map((p) => {
-      const o = orders.find((x) => x.stt === p.stt);
-      return { stt: p.stt, track: p.track, found: !!o, cust: o?.cust || "" };
-    }));
+    if (r.mode === "order") {
+      setMatchPreview(null);
+      return;
+    }
+    setMatchPreview(
+      r.pairs.map((p) => {
+        const o = orders.find((x) => x.stt === p.stt);
+        return { stt: p.stt, track: p.track, found: !!o, cust: o?.cust || "" };
+      }),
+    );
   }
 
   async function applyBulkTrack() {
     const r = parsePairs();
-    let matched = 0, notFound = 0;
+    let matched = 0,
+      notFound = 0;
 
     if (r.mode === "pair") {
       // Cập nhật local state
       const updates = [];
       r.pairs.forEach((p) => {
         const o = orders.find((x) => x.stt === p.stt);
-        if (o) { matched++; updates.push({ stt: p.stt, trackingCode: p.track }); }
-        else notFound++;
+        if (o) {
+          matched++;
+          updates.push({ stt: p.stt, trackingCode: p.track });
+        } else notFound++;
       });
       // Gọi API batch update tracking
       try {
         await axios.post("/api/orders/batch-update-tracking", { updates });
-        setTrackNote(`✓ Ghép ${matched} mã${notFound ? ` · ${notFound} STT không tìm thấy` : ""}`);
+        setTrackNote(
+          `✓ Ghép ${matched} mã${notFound ? ` · ${notFound} STT không tìm thấy` : ""}`,
+        );
         showToast(`Ghép ${matched} mã thành công`);
         fetchOrders();
       } catch (err) {
@@ -822,25 +1014,28 @@ async function bulkDeliver() {
     setMatchPreview(null);
   }
 
-   const handleUpdateDeliveredStatus = async () => {
-      const sttList = sttDoneInput.trim().split(/\s+/).map(Number);
-      if (!sttList.length) {
-        showToast("Vui lòng nhập STT đơn hàng");
-        return;
-      }
-  
-      try {
-        await axios.post("/api/orders/mark-done", { sttList });
-        showToast("Cập nhật thành công");
-        fetchOrders();
-      } catch (error) {
-        console.error(error);
-        showToast("Lỗi khi cập nhật trạng thái");
-      }
-    };
+  const handleUpdateDeliveredStatus = async () => {
+    const sttList = sttDoneInput.trim().split(/\s+/).map(Number);
+    if (!sttList.length) {
+      showToast("Vui lòng nhập STT đơn hàng");
+      return;
+    }
+
+    try {
+      await axios.post("/api/orders/mark-done", { sttList });
+      showToast("Cập nhật thành công");
+      fetchOrders();
+    } catch (error) {
+      console.error(error);
+      showToast("Lỗi khi cập nhật trạng thái");
+    }
+  };
 
   function clearBulkInputs() {
-    setBulkStt(""); setBulkTrack(""); setTrackNote(""); setMatchPreview(null);
+    setBulkStt("");
+    setBulkTrack("");
+    setTrackNote("");
+    setMatchPreview(null);
   }
 
   // ── Inline set track (single) ──
@@ -859,237 +1054,239 @@ async function bulkDeliver() {
       showToast("Lỗi khi lưu mã");
     }
   }
-async function unmarkSentSelectedOrders() {
-  const sel = filteredList.filter((o) => selectedIds.has(o.id));
+  async function unmarkSentSelectedOrders() {
+    const sel = filteredList.filter((o) => selectedIds.has(o.id));
 
-  if (!sel.length) {
-    showToast("Vui lòng chọn đơn cần bỏ trạng thái đã gửi");
-    return;
-  }
+    if (!sel.length) {
+      showToast("Vui lòng chọn đơn cần bỏ trạng thái đã gửi");
+      return;
+    }
 
-  const ordersToUnmarkSent = sel.filter((o) => o.deliveryStatus === "ĐÃ GỬI HÀNG");
-
-  if (!ordersToUnmarkSent.length) {
-    showToast("Không có đơn nào đang ở trạng thái ĐÃ GỬI HÀNG");
-    return;
-  }
-
-  try {
-    await axios.post("/api/orders/updateIstickkhohq", {
-      orders: ordersToUnmarkSent.map((o) => ({
-        stt: o.stt,
-        shippingDate1: "",
-      })),
-    });
-
-    showToast(
-      `✓ Đã bỏ trạng thái gửi hàng cho ${ordersToUnmarkSent.length} đơn`
+    const ordersToUnmarkSent = sel.filter(
+      (o) => o.deliveryStatus === "ĐÃ GỬI HÀNG",
     );
 
-    fetchOrders();
-    clearSelection();
-    setTimeout(() => setCurrentView("unsent"), 700);
-  } catch (err) {
-    console.error("Lỗi khi bỏ trạng thái gửi hàng:", err);
-    showToast("Lỗi khi bỏ trạng thái gửi hàng");
-  }
-}
-  // ── Export Excel (CSV) ──
- function exportExcel() {
-  if (!filteredList.length) {
-    showToast("Không có đơn nào để xuất");
-    return;
-  }
+    if (!ordersToUnmarkSent.length) {
+      showToast("Không có đơn nào đang ở trạng thái ĐÃ GỬI HÀNG");
+      return;
+    }
 
-  const rows = filteredList.map((o) => {
-    const productNames = o.products
-      ? o.products.map((item) => item.product).join("\n")
-      : o.prods
-      ? o.prods.join("\n")
-      : "";
-
-    const quantities = o.products
-      ? o.products.map((item) => item.quantity).join("\n")
-      : o.qty
-      ? o.qty.join("\n")
-      : "";
-
-    return {
-      STT: o.stt,
-      "Tên khách": o.cust || o.customerName || "",
-      "SĐT": o.sdt || o.phone || "",
-      "Địa chỉ": o.addr || o.address || "",
-      "Sản phẩm": productNames,
-      "Số lượng": quantities,
-      "Quà": o.qua || o.category || "",
-      "Ngày đặt": o.ngayDat || o.orderDate || "",
-      "Ngày gửi": o.ngayGui || o.shippingDate1 || "",
-      "Ngày nhận": o.ngayNhan || o.shippingDate2 || "",
-      "Mã vận đơn": o.track || o.trackingCode || "",
-      "Tình trạng": o.reconciled
-        ? "Đối soát"
-        : o.delivered
-        ? "Giao TC"
-        : o.ngayGui || o.shippingDate1
-        ? "Đang giao"
-        : "Chưa gửi",
-    };
-  });
-
-  const worksheet = XLSX.utils.json_to_sheet(rows);
-
-  // Bật xuống dòng + căn trên cho toàn bộ ô
-  for (const cell in worksheet) {
-    if (cell[0] === "!") continue;
-
-    worksheet[cell].s = {
-      alignment: {
-        wrapText: true,
-        vertical: "top",
-      },
-    };
-  }
-
-  worksheet["!cols"] = [
-    { wch: 8 },
-    { wch: 25 },
-    { wch: 15 },
-    { wch: 45 },
-    { wch: 35 },
-    { wch: 12 },
-    { wch: 15 },
-    { wch: 15 },
-    { wch: 15 },
-    { wch: 15 },
-    { wch: 20 },
-    { wch: 15 },
-  ];
-
-  const workbook = {
-    Sheets: { Orders: worksheet },
-    SheetNames: ["Orders"],
-  };
-
-  const d = new Date()
-    .toLocaleDateString("vi-VN", {
-      day: "2-digit",
-      month: "2-digit",
-      year: "numeric",
-    })
-    .replace(/\//g, "-");
-
-  XLSX.writeFile(
-    workbook,
-    `Don_kho_${VIEW_CFG[currentView].title.replace(/ /g, "_")}_${d}.xlsx`
-  );
-
-  showToast(`✓ Đã xuất ${filteredList.length} đơn ra file Excel`);
-}
-
-  async function exportExcelUnsent() {
-  const sel = filteredList.filter((o) => selectedIds.has(o.id));
-  const toExport = sel.length > 0 ? sel : filteredList;
-
-  if (!toExport.length) {
-    showToast("Không có đơn nào để xuất");
-    return;
-  }
-
-  const rows = toExport.map((o) => {
-    const productNames = o.products
-      ? o.products.map((item) => item.product).join("\n")
-      : o.prods
-      ? o.prods.join("\n")
-      : "";
-
-    const quantities = o.products
-      ? o.products.map((item) => item.quantity).join("\n")
-      : o.qty
-      ? o.qty.join("\n")
-      : "";
-
-    return {
-      STT: o.stt,
-      "Tên khách": o.cust || o.customerName || "",
-      "SĐT": o.sdt || o.phone || "",
-      "Địa chỉ": o.addr || o.address || "",
-      "Sản phẩm": productNames,
-      "Số lượng": quantities,
-      "Quà": o.qua || o.category || "",
-      "Ngày đặt": o.ngayDat || o.orderDate || "",
-      "Mã vận đơn": o.track || o.trackingCode || "",
-    };
-  });
-
-  const worksheet = XLSX.utils.json_to_sheet(rows);
-
-  for (const cell in worksheet) {
-    if (cell[0] === "!") continue;
-
-    worksheet[cell].s = {
-      alignment: {
-        wrapText: true,
-        vertical: "top",
-      },
-    };
-  }
-
-  worksheet["!cols"] = [
-    { wch: 8 },
-    { wch: 25 },
-    { wch: 15 },
-    { wch: 45 },
-    { wch: 35 },
-    { wch: 12 },
-    { wch: 15 },
-    { wch: 15 },
-    { wch: 20 },
-  ];
-
-  const workbook = {
-    Sheets: { Orders: worksheet },
-    SheetNames: ["Orders"],
-  };
-
-  const d = new Date()
-    .toLocaleDateString("vi-VN", {
-      day: "2-digit",
-      month: "2-digit",
-      year: "numeric",
-    })
-    .replace(/\//g, "-");
-
-  XLSX.writeFile(workbook, `Don_kho_chua_gui_${d}.xlsx`);
-
-  const todayISO = dayjs().format("YYYY-MM-DD");
-  const ordersToMarkSent = toExport.filter((o) => !o.ngayGui);
-
-  if (ordersToMarkSent.length > 0) {
     try {
       await axios.post("/api/orders/updateIstickkhohq", {
-        orders: ordersToMarkSent.map((o) => ({
+        orders: ordersToUnmarkSent.map((o) => ({
           stt: o.stt,
-          shippingDate1: todayISO,
-          isShippingName: o.isShippingName,
+          shippingDate1: "",
         })),
       });
 
       showToast(
-        `✓ Đã xuất ${toExport.length} đơn & chuyển ${ordersToMarkSent.length} đơn sang Đã gửi hàng`
+        `✓ Đã bỏ trạng thái gửi hàng cho ${ordersToUnmarkSent.length} đơn`,
       );
+
+      fetchOrders();
+      clearSelection();
+      setTimeout(() => setCurrentView("unsent"), 700);
     } catch (err) {
-      console.error("Lỗi khi cập nhật ngày gửi:", err);
-      showToast("✓ Đã xuất file nhưng lỗi khi cập nhật ngày gửi");
+      console.error("Lỗi khi bỏ trạng thái gửi hàng:", err);
+      showToast("Lỗi khi bỏ trạng thái gửi hàng");
+    }
+  }
+  // ── Export Excel (CSV) ──
+  function exportExcel() {
+    if (!filteredList.length) {
+      showToast("Không có đơn nào để xuất");
+      return;
     }
 
-    fetchOrders();
-  } else {
-    showToast(`✓ Đã xuất ${toExport.length} đơn`);
+    const rows = filteredList.map((o) => {
+      const productNames = o.products
+        ? o.products.map((item) => item.product).join("\n")
+        : o.prods
+          ? o.prods.join("\n")
+          : "";
+
+      const quantities = o.products
+        ? o.products.map((item) => item.quantity).join("\n")
+        : o.qty
+          ? o.qty.join("\n")
+          : "";
+
+      return {
+        STT: o.stt,
+        "Tên khách": o.cust || o.customerName || "",
+        SĐT: o.sdt || o.phone || "",
+        "Địa chỉ": o.addr || o.address || "",
+        "Sản phẩm": productNames,
+        "Số lượng": quantities,
+        Quà: o.qua || o.category || "",
+        "Ngày đặt": o.ngayDat || o.orderDate || "",
+        "Ngày gửi": o.ngayGui || o.shippingDate1 || "",
+        "Ngày nhận": o.ngayNhan || o.shippingDate2 || "",
+        "Mã vận đơn": o.track || o.trackingCode || "",
+        "Tình trạng": o.reconciled
+          ? "Đối soát"
+          : o.delivered
+            ? "Giao TC"
+            : o.ngayGui || o.shippingDate1
+              ? "Đang giao"
+              : "Chưa gửi",
+      };
+    });
+
+    const worksheet = XLSX.utils.json_to_sheet(rows);
+
+    // Bật xuống dòng + căn trên cho toàn bộ ô
+    for (const cell in worksheet) {
+      if (cell[0] === "!") continue;
+
+      worksheet[cell].s = {
+        alignment: {
+          wrapText: true,
+          vertical: "top",
+        },
+      };
+    }
+
+    worksheet["!cols"] = [
+      { wch: 8 },
+      { wch: 25 },
+      { wch: 15 },
+      { wch: 45 },
+      { wch: 35 },
+      { wch: 12 },
+      { wch: 15 },
+      { wch: 15 },
+      { wch: 15 },
+      { wch: 15 },
+      { wch: 20 },
+      { wch: 15 },
+    ];
+
+    const workbook = {
+      Sheets: { Orders: worksheet },
+      SheetNames: ["Orders"],
+    };
+
+    const d = new Date()
+      .toLocaleDateString("vi-VN", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+      })
+      .replace(/\//g, "-");
+
+    XLSX.writeFile(
+      workbook,
+      `Don_kho_${VIEW_CFG[currentView].title.replace(/ /g, "_")}_${d}.xlsx`,
+    );
+
+    showToast(`✓ Đã xuất ${filteredList.length} đơn ra file Excel`);
   }
 
-  clearSelection();
-  setTimeout(() => setCurrentView("sent"), 700);
-}
+  async function exportExcelUnsent() {
+    const sel = filteredList.filter((o) => selectedIds.has(o.id));
+    const toExport = sel.length > 0 ? sel : filteredList;
+
+    if (!toExport.length) {
+      showToast("Không có đơn nào để xuất");
+      return;
+    }
+
+    const rows = toExport.map((o) => {
+      const productNames = o.products
+        ? o.products.map((item) => item.product).join("\n")
+        : o.prods
+          ? o.prods.join("\n")
+          : "";
+
+      const quantities = o.products
+        ? o.products.map((item) => item.quantity).join("\n")
+        : o.qty
+          ? o.qty.join("\n")
+          : "";
+
+      return {
+        STT: o.stt,
+        "Tên khách": o.cust || o.customerName || "",
+        SĐT: o.sdt || o.phone || "",
+        "Địa chỉ": o.addr || o.address || "",
+        "Sản phẩm": productNames,
+        "Số lượng": quantities,
+        Quà: o.qua || o.category || "",
+        "Ngày đặt": o.ngayDat || o.orderDate || "",
+        "Mã vận đơn": o.track || o.trackingCode || "",
+      };
+    });
+
+    const worksheet = XLSX.utils.json_to_sheet(rows);
+
+    for (const cell in worksheet) {
+      if (cell[0] === "!") continue;
+
+      worksheet[cell].s = {
+        alignment: {
+          wrapText: true,
+          vertical: "top",
+        },
+      };
+    }
+
+    worksheet["!cols"] = [
+      { wch: 8 },
+      { wch: 25 },
+      { wch: 15 },
+      { wch: 45 },
+      { wch: 35 },
+      { wch: 12 },
+      { wch: 15 },
+      { wch: 15 },
+      { wch: 20 },
+    ];
+
+    const workbook = {
+      Sheets: { Orders: worksheet },
+      SheetNames: ["Orders"],
+    };
+
+    const d = new Date()
+      .toLocaleDateString("vi-VN", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+      })
+      .replace(/\//g, "-");
+
+    XLSX.writeFile(workbook, `Don_kho_chua_gui_${d}.xlsx`);
+
+    const todayISO = dayjs().format("YYYY-MM-DD");
+    const ordersToMarkSent = toExport.filter((o) => !o.ngayGui);
+
+    if (ordersToMarkSent.length > 0) {
+      try {
+        await axios.post("/api/orders/updateIstickkhohq", {
+          orders: ordersToMarkSent.map((o) => ({
+            stt: o.stt,
+            shippingDate1: todayISO,
+            isShippingName: o.isShippingName,
+          })),
+        });
+
+        showToast(
+          `✓ Đã xuất ${toExport.length} đơn & chuyển ${ordersToMarkSent.length} đơn sang Đã gửi hàng`,
+        );
+      } catch (err) {
+        console.error("Lỗi khi cập nhật ngày gửi:", err);
+        showToast("✓ Đã xuất file nhưng lỗi khi cập nhật ngày gửi");
+      }
+
+      fetchOrders();
+    } else {
+      showToast(`✓ Đã xuất ${toExport.length} đơn`);
+    }
+
+    clearSelection();
+    setTimeout(() => setCurrentView("sent"), 700);
+  }
 
   // ── Calc stats cho selected ──
   const selStats = useMemo(() => {
@@ -1097,21 +1294,34 @@ async function unmarkSentSelectedOrders() {
     const spMap = {};
     let totalQua = 0;
     sel.forEach((o) => {
-      o.prods.forEach((p, i) => { spMap[p] = (spMap[p] || 0) + (o.qty[i] || 1); });
+      o.prods.forEach((p, i) => {
+        spMap[p] = (spMap[p] || 0) + (o.qty[i] || 1);
+      });
       totalQua += Number(o.qua) || 0;
     });
     return { spMap, totalQua };
   }, [filteredList, selectedIds]);
 
   // ── Flow hint step ──
-  const flowActiveIdx = { unsent: 0, all: -1, sent: 2, late: 3, done: 3, reconcile: 4 }[currentView] ?? -1;
+  const flowActiveIdx =
+    {
+      unsent: 0,
+      all: -1,
+      sent: 2,
+      late: 3,
+      needprocess: 3,
+      done: 4,
+      reconcile: 5,
+    }[currentView] ?? -1;
 
   // ── Master checkbox state ──
   const allIds = filteredList.map((o) => o.id);
-  const allSelected = allIds.length > 0 && allIds.every((id) => selectedIds.has(id));
+  const allSelected =
+    allIds.length > 0 && allIds.every((id) => selectedIds.has(id));
   const someSelected = allIds.some((id) => selectedIds.has(id));
 
-  const isImg = (s) => s && (s.startsWith("http://") || s.startsWith("https://"));
+  const isImg = (s) =>
+    s && (s.startsWith("http://") || s.startsWith("https://"));
   const showRec = currentView === "done" || currentView === "reconcile";
 
   /* ─────────────────────────────────────────────
@@ -1121,7 +1331,6 @@ async function unmarkSentSelectedOrders() {
     <>
       <style>{CSS}</style>
       <div className="kho-root">
-
         {/* ── Loading overlay ── */}
         {loading && (
           <div className="kho-loading">
@@ -1146,9 +1355,17 @@ async function unmarkSentSelectedOrders() {
               const cfg = VIEW_CFG[v];
               const vcls = `ni v-${v}${currentView === v ? " on" : ""}`;
               return (
-                <button key={v} className={vcls} onClick={() => { setCurrentView(v); clearSelection(); }}>
+                <button
+                  key={v}
+                  className={vcls}
+                  onClick={() => {
+                    setCurrentView(v);
+                    clearSelection();
+                  }}
+                >
                   <ViewIcon view={v} />
-                  {cfg.title.split("–")[0].trim()} {v === "late" && "– Cần check"}
+                  {cfg.title.split("–")[0].trim()}{" "}
+                  {v === "late" && "– Cần check"}
                   <span className="pill">{pillCounts[v]}</span>
                 </button>
               );
@@ -1156,33 +1373,77 @@ async function unmarkSentSelectedOrders() {
 
             <div className="nl">Thao tác nhanh</div>
             <div className="sb-qa">
-              <button className="qa-btn" onClick={() => { fetchOrders(); showToast("Đã tải lại"); }}>
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 12a9 9 0 1 1-3-6.7L21 8" /><path d="M21 4v4h-4" /></svg>
+              <button
+                className="qa-btn"
+                onClick={() => {
+                  fetchOrders();
+                  showToast("Đã tải lại");
+                }}
+              >
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                  <path d="M21 12a9 9 0 1 1-3-6.7L21 8" />
+                  <path d="M21 4v4h-4" />
+                </svg>
                 Tải lại đơn hàng
               </button>
-              <button className="qa-btn" onClick={() => { setCurrentView("unsent"); clearSelection(); }}>
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 10H3M21 6H3M21 14H3M21 18H3" /></svg>
+              <button
+                className="qa-btn"
+                onClick={() => {
+                  setCurrentView("unsent");
+                  clearSelection();
+                }}
+              >
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                  <path d="M21 10H3M21 6H3M21 14H3M21 18H3" />
+                </svg>
                 Đến Chưa gửi hàng
               </button>
-              <button className="qa-btn" onClick={() => { setCurrentView("sent"); clearSelection(); }}>
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="22" y1="2" x2="11" y2="13" /><polygon points="22 2 15 22 11 13 2 9 22 2" /></svg>
+              <button
+                className="qa-btn"
+                onClick={() => {
+                  setCurrentView("sent");
+                  clearSelection();
+                }}
+              >
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                  <line x1="22" y1="2" x2="11" y2="13" />
+                  <polygon points="22 2 15 22 11 13 2 9 22 2" />
+                </svg>
                 Đến Đã gửi hàng
               </button>
-              <button className="qa-btn" onClick={() => { setCurrentView("late"); clearSelection(); }}>
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" /></svg>
+              <button
+                className="qa-btn"
+                onClick={() => {
+                  setCurrentView("late");
+                  clearSelection();
+                }}
+              >
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                  <circle cx="12" cy="12" r="10" />
+                  <line x1="12" y1="8" x2="12" y2="12" />
+                  <line x1="12" y1="16" x2="12.01" y2="16" />
+                </svg>
                 Xem đơn giao lâu
               </button>
               <button className="qa-btn" onClick={clearSelection}>
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M18 6 6 18M6 6l12 12" /></svg>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                  <path d="M18 6 6 18M6 6l12 12" />
+                </svg>
                 Bỏ chọn tất cả
               </button>
             </div>
           </nav>
 
           <div className="sbf">
-            <button className="qa-btn danger" style={{ width: "100%", padding: "8px 10px", borderRadius: 8 }}
-              onClick={() => router.push("/login")}>
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" /><path d="m16 17 5-5-5-5M21 12H9" /></svg>
+            <button
+              className="qa-btn danger"
+              style={{ width: "100%", padding: "8px 10px", borderRadius: 8 }}
+              onClick={() => router.push("/login")}
+            >
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                <path d="m16 17 5-5-5-5M21 12H9" />
+              </svg>
               Đăng xuất
             </button>
             <div className="ver">v5.0 · KHOH</div>
@@ -1195,13 +1456,18 @@ async function unmarkSentSelectedOrders() {
           <header className="topbar">
             <div className="pt">
               <span>{VIEW_CFG[currentView].title}</span>
-              <small>{VIEW_CFG[currentView].sub} · {dayjs().format("DD/MM/YYYY")}</small>
+              <small>
+                {VIEW_CFG[currentView].sub} · {dayjs().format("DD/MM/YYYY")}
+              </small>
             </div>
             <div className={`view-badge ${VIEW_CFG[currentView].badgeCls}`}>
               {VIEW_CFG[currentView].badge}
             </div>
             <div className="srch">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="11" cy="11" r="8" /><path d="m21 21-4.3-4.3" /></svg>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <circle cx="11" cy="11" r="8" />
+                <path d="m21 21-4.3-4.3" />
+              </svg>
               <input
                 type="text"
                 placeholder="Tìm tên khách, SĐT, mã vận đơn…"
@@ -1210,11 +1476,15 @@ async function unmarkSentSelectedOrders() {
               />
             </div>
             <div className="tbr">
-              <div className="cnt">SL ĐƠN: <b>{filteredList.length}</b></div>
+              <div className="cnt">
+                SL ĐƠN: <b>{filteredList.length}</b>
+              </div>
               <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                 <div className="av">{currentUser?.name?.[0] || "K"}</div>
                 <div>
-                  <div className="uname">{currentUser?.name || "Nhân viên kho"}</div>
+                  <div className="uname">
+                    {currentUser?.name || "Nhân viên kho"}
+                  </div>
                   <div className="urole">Nhân viên kho</div>
                 </div>
               </div>
@@ -1223,7 +1493,6 @@ async function unmarkSentSelectedOrders() {
 
           {/* Content */}
           <main className="content">
-
             {/* Step flow */}
             {/* <div className="flow-hint">
               {[
@@ -1243,13 +1512,23 @@ async function unmarkSentSelectedOrders() {
             </div> */}
 
             {/* Tool panels */}
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
-
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "1fr 1fr",
+                gap: 12,
+              }}
+            >
               {/* Panel 1: Lọc SP */}
               <div className="tool-panel">
-                <div className={`tp-head${p1collapsed ? " collapsed" : ""}`} onClick={() => setP1collapsed((v) => !v)}>
+                <div
+                  className={`tp-head${p1collapsed ? " collapsed" : ""}`}
+                  onClick={() => setP1collapsed((v) => !v)}
+                >
                   <div className="tph-ico tph-blue">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M22 3H2l8 9.46V19l4 2v-8.54L22 3z" /></svg>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                      <path d="M22 3H2l8 9.46V19l4 2v-8.54L22 3z" />
+                    </svg>
                   </div>
                   <div>
                     <h3>Lọc sản phẩm</h3>
@@ -1260,12 +1539,17 @@ async function unmarkSentSelectedOrders() {
                     </p>
                   </div>
                   <div className="chevron">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M6 9l6 6 6-6" /></svg>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                      <path d="M6 9l6 6 6-6" />
+                    </svg>
                   </div>
                 </div>
                 <div className={`tp-body${p1collapsed ? " hidden" : ""}`}>
                   <div className="prod-search-wrap">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="11" cy="11" r="8" /><path d="m21 21-4.3-4.3" /></svg>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                      <circle cx="11" cy="11" r="8" />
+                      <path d="m21 21-4.3-4.3" />
+                    </svg>
                     <input
                       type="text"
                       placeholder="Tìm sản phẩm…"
@@ -1276,7 +1560,9 @@ async function unmarkSentSelectedOrders() {
 
                   <div className="prod-chips">
                     {filteredProdChips.map((p) => {
-                      const cnt = viewList.filter((o) => o.prods.includes(p)).length;
+                      const cnt = viewList.filter((o) =>
+                        o.prods.includes(p),
+                      ).length;
                       return (
                         <button
                           key={p}
@@ -1284,33 +1570,88 @@ async function unmarkSentSelectedOrders() {
                           onClick={() => toggleProd(p)}
                         >
                           {p}
-                          <span style={{ opacity: 0.6, fontSize: 10 }}>({cnt})</span>
+                          <span style={{ opacity: 0.6, fontSize: 10 }}>
+                            ({cnt})
+                          </span>
                         </button>
                       );
                     })}
                     {filteredProdChips.length === 0 && (
-                      <span style={{ fontSize: 11.5, color: "var(--muted)" }}>Không có sản phẩm</span>
+                      <span style={{ fontSize: 11.5, color: "var(--muted)" }}>
+                        Không có sản phẩm
+                      </span>
                     )}
                   </div>
 
                   {activeProds.size > 0 && (
                     <div className="sp-summary show">
-                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" style={{ color: "var(--accent)", strokeWidth: 2, flexShrink: 0 }}><path d="M22 3H2l8 9.46V19l4 2v-8.54L22 3z" /></svg>
-                      <span style={{ flex: 1, display: "flex", gap: 4, flexWrap: "wrap" }}>
-                        {[...activeProds].map((p) => <span key={p} className="sp-tag">{p}</span>)}
+                      <svg
+                        width="13"
+                        height="13"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        style={{
+                          color: "var(--accent)",
+                          strokeWidth: 2,
+                          flexShrink: 0,
+                        }}
+                      >
+                        <path d="M22 3H2l8 9.46V19l4 2v-8.54L22 3z" />
+                      </svg>
+                      <span
+                        style={{
+                          flex: 1,
+                          display: "flex",
+                          gap: 4,
+                          flexWrap: "wrap",
+                        }}
+                      >
+                        {[...activeProds].map((p) => (
+                          <span key={p} className="sp-tag">
+                            {p}
+                          </span>
+                        ))}
                       </span>
-                      <span style={{ color: "var(--muted)", fontSize: 11 }}>{filteredList.length} đơn</span>
-                      <button onClick={clearProdFilter} style={{ color: "var(--muted)", fontSize: 11, fontWeight: 600 }}>✕</button>
+                      <span style={{ color: "var(--muted)", fontSize: 11 }}>
+                        {filteredList.length} đơn
+                      </span>
+                      <button
+                        onClick={clearProdFilter}
+                        style={{
+                          color: "var(--muted)",
+                          fontSize: 11,
+                          fontWeight: 600,
+                        }}
+                      >
+                        ✕
+                      </button>
                     </div>
                   )}
 
                   <div className="panel-actions">
-                    <button className="btn btn-ghost btn-sm" onClick={clearProdFilter}>Bỏ lọc</button>
-                    <button className="btn btn-sec btn-sm" onClick={() => {
-                      filteredList.forEach((o) => setSelectedIds((prev) => new Set([...prev, o.id])));
-                      showToast(`Đã chọn ${filteredList.length} đơn`);
-                    }}>
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M20 6 9 17l-5-5" /></svg>
+                    <button
+                      className="btn btn-ghost btn-sm"
+                      onClick={clearProdFilter}
+                    >
+                      Bỏ lọc
+                    </button>
+                    <button
+                      className="btn btn-sec btn-sm"
+                      onClick={() => {
+                        filteredList.forEach((o) =>
+                          setSelectedIds((prev) => new Set([...prev, o.id])),
+                        );
+                        showToast(`Đã chọn ${filteredList.length} đơn`);
+                      }}
+                    >
+                      <svg
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                      >
+                        <path d="M20 6 9 17l-5-5" />
+                      </svg>
                       Chọn tất cả
                     </button>
                     {/* <button className="btn btn-pri btn-sm" onClick={exportExcelUnsent}>
@@ -1323,125 +1664,140 @@ async function unmarkSentSelectedOrders() {
 
               {/* Panel 2: Ghép mã VĐ */}
               <div className={`tp-body${p2collapsed ? " hidden" : ""}`}>
-  <Row gutter={16} align="top">
-    <Col flex="1">
-      <div className="dp-col">
-        <label>STT đơn hàng</label>
-        <textarea
-          placeholder={"28792\n28742\n28499"}
-          value={bulkStt}
-          onChange={(e) => setBulkStt(e.target.value)}
-        />
-      </div>
-    </Col>
+                <Row gutter={16} align="top">
+                  <Col flex="1">
+                    <div className="dp-col">
+                      <label>STT đơn hàng</label>
+                      <textarea
+                        placeholder={"28792\n28742\n28499"}
+                        value={bulkStt}
+                        onChange={(e) => setBulkStt(e.target.value)}
+                      />
+                    </div>
+                  </Col>
 
-    <Col flex="1">
-      <div className="dp-col">
-        <label>Mã vận đơn</label>
-        <textarea
-          placeholder={"44413913703\n44413913714\n44413913725"}
-          value={bulkTrack}
-          onChange={(e) => setBulkTrack(e.target.value)}
-        />
-      </div>
-    </Col>
+                  <Col flex="1">
+                    <div className="dp-col">
+                      <label>Mã vận đơn</label>
+                      <textarea
+                        placeholder={"44413913703\n44413913714\n44413913725"}
+                        value={bulkTrack}
+                        onChange={(e) => setBulkTrack(e.target.value)}
+                      />
+                    </div>
+                  </Col>
 
-    <Col flex="230px">
-      <div className="dp-col">
-        <label>STT</label>
-        <textarea
-          placeholder={"1\n2\n3"}
-          value={sttDoneInput}
-          onChange={(e) => setSttDoneInput(e.target.value)}
-        />
-      </div>
-       <button className="btn btn-pri btn-sm" onClick={handleUpdateDeliveredStatus}>
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-        <path d="M5 12h14M12 5l7 7-7 7" />
-      </svg>
-      Đánh dấu GIAO THÀNH CÔNG
-    </button>
-    </Col>
-  </Row>
+                  <Col flex="230px">
+                    <div className="dp-col">
+                      <label>STT</label>
+                      <textarea
+                        placeholder={"1\n2\n3"}
+                        value={sttDoneInput}
+                        onChange={(e) => setSttDoneInput(e.target.value)}
+                      />
+                    </div>
+                    <button
+                      className="btn btn-pri btn-sm"
+                      onClick={handleUpdateDeliveredStatus}
+                    >
+                      <svg
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                      >
+                        <path d="M5 12h14M12 5l7 7-7 7" />
+                      </svg>
+                      Đánh dấu GIAO THÀNH CÔNG
+                    </button>
+                  </Col>
+                </Row>
 
-  <div className="panel-actions">
-    <button className="btn btn-ghost btn-sm" onClick={previewMatch}>
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-        <circle cx="11" cy="11" r="8" />
-        <path d="m21 21-4.3-4.3" />
-      </svg>
-      Xem trước
-    </button>
+                <div className="panel-actions">
+                  <button
+                    className="btn btn-ghost btn-sm"
+                    onClick={previewMatch}
+                  >
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                      <circle cx="11" cy="11" r="8" />
+                      <path d="m21 21-4.3-4.3" />
+                    </svg>
+                    Xem trước
+                  </button>
 
-    <button className="btn btn-pri btn-sm" onClick={applyBulkTrack}>
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-        <path d="M5 12h14M12 5l7 7-7 7" />
-      </svg>
-      Ghép vào đơn
-    </button>
+                  <button
+                    className="btn btn-pri btn-sm"
+                    onClick={applyBulkTrack}
+                  >
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                      <path d="M5 12h14M12 5l7 7-7 7" />
+                    </svg>
+                    Ghép vào đơn
+                  </button>
 
-    <button className="btn btn-ghost btn-sm" onClick={clearBulkInputs}>
-      Xóa
-    </button>
+                  <button
+                    className="btn btn-ghost btn-sm"
+                    onClick={clearBulkInputs}
+                  >
+                    Xóa
+                  </button>
+                </div>
 
-   
-  </div>
+                {matchPreview && (
+                  <div className="match-preview">
+                    <div className="mp-head">Kết quả đối chiếu</div>
 
-  {matchPreview && (
-    <div className="match-preview">
-      <div className="mp-head">Kết quả đối chiếu</div>
+                    <div className="mp-list">
+                      {matchPreview.map((p, i) => (
+                        <div key={i} className="mp-row">
+                          <span className={p.found ? "match-ok" : "match-err"}>
+                            {p.found ? "✓" : "✗"}
+                          </span>
 
-      <div className="mp-list">
-        {matchPreview.map((p, i) => (
-          <div key={i} className="mp-row">
-            <span className={p.found ? "match-ok" : "match-err"}>
-              {p.found ? "✓" : "✗"}
-            </span>
+                          <span
+                            style={{
+                              fontFamily: "monospace",
+                              fontWeight: 700,
+                              color: "var(--ink2)",
+                              minWidth: 52,
+                            }}
+                          >
+                            {p.stt}
+                          </span>
 
-            <span
-              style={{
-                fontFamily: "monospace",
-                fontWeight: 700,
-                color: "var(--ink2)",
-                minWidth: 52,
-              }}
-            >
-              {p.stt}
-            </span>
+                          <svg
+                            width="11"
+                            height="11"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            style={{ color: "var(--muted)" }}
+                          >
+                            <path d="M5 12h14M12 5l7 7-7 7" />
+                          </svg>
 
-            <svg
-              width="11"
-              height="11"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              style={{ color: "var(--muted)" }}
-            >
-              <path d="M5 12h14M12 5l7 7-7 7" />
-            </svg>
+                          <span
+                            style={{
+                              fontFamily: "monospace",
+                              color: "var(--accent)",
+                              fontWeight: 700,
+                            }}
+                          >
+                            {p.track}
+                          </span>
 
-            <span
-              style={{
-                fontFamily: "monospace",
-                color: "var(--accent)",
-                fontWeight: 700,
-              }}
-            >
-              {p.track}
-            </span>
+                          <span
+                            style={{ color: "var(--muted)", fontSize: 10.5 }}
+                          >
+                            {p.found ? "— " + p.cust : "— Không tìm thấy"}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
 
-            <span style={{ color: "var(--muted)", fontSize: 10.5 }}>
-              {p.found ? "— " + p.cust : "— Không tìm thấy"}
-            </span>
-          </div>
-        ))}
-      </div>
-    </div>
-  )}
-
-  {/* {trackNote && <div className="track-note">{trackNote}</div>} */}
-</div>
-
+                {/* {trackNote && <div className="track-note">{trackNote}</div>} */}
+              </div>
             </div>
 
             {/* TABLE CARD */}
@@ -1449,53 +1805,182 @@ async function unmarkSentSelectedOrders() {
               <div className="ch">
                 <div>
                   <h2>{VIEW_CFG[currentView].title}</h2>
-                  <small>Hiển thị <span>{filteredList.length}</span> đơn</small>
+                  <small>
+                    Hiển thị <span>{filteredList.length}</span> đơn
+                  </small>
                 </div>
                 {/* Action buttons theo view */}
                 <div className="btn-row">
                   {currentView === "all" && (
-                    <button className="btn btn-ghost btn-sm" onClick={() => { fetchOrders(); showToast("Đã tải lại"); }}>
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 12a9 9 0 1 1-3-6.7L21 8" /><path d="M21 4v4h-4" /></svg>
+                    <button
+                      className="btn btn-ghost btn-sm"
+                      onClick={() => {
+                        fetchOrders();
+                        showToast("Đã tải lại");
+                      }}
+                    >
+                      <svg
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                      >
+                        <path d="M21 12a9 9 0 1 1-3-6.7L21 8" />
+                        <path d="M21 4v4h-4" />
+                      </svg>
                       Tải lại
                     </button>
                   )}
                   {currentView === "unsent" && (
                     <>
-                      <button className="btn btn-amber btn-sm" onClick={() => setCurrentView("sent")}>
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="22" y1="2" x2="11" y2="13" /><polygon points="22 2 15 22 11 13 2 9 22 2" /></svg>
+                      <button
+                        className="btn btn-amber btn-sm"
+                        onClick={() => setCurrentView("sent")}
+                      >
+                        <svg
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                        >
+                          <line x1="22" y1="2" x2="11" y2="13" />
+                          <polygon points="22 2 15 22 11 13 2 9 22 2" />
+                        </svg>
                         Xem Đã gửi
                       </button>
-                      <button className="btn btn-pri btn-sm" onClick={exportExcelUnsent}>
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><path d="M14 2v6h6" /></svg>
+                      <button
+                        className="btn btn-pri btn-sm"
+                        onClick={exportExcelUnsent}
+                      >
+                        <svg
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                        >
+                          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                          <path d="M14 2v6h6" />
+                        </svg>
                         Xuất Excel
                       </button>
                     </>
                   )}
                   {currentView === "sent" && (
                     <>
-                      <button className="btn btn-red btn-sm" onClick={() => setCurrentView("late")}>
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" /></svg>
+                      <button
+                        className="btn btn-red btn-sm"
+                        onClick={() => setCurrentView("late")}
+                      >
+                        <svg
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                        >
+                          <circle cx="12" cy="12" r="10" />
+                          <line x1="12" y1="8" x2="12" y2="12" />
+                          <line x1="12" y1="16" x2="12.01" y2="16" />
+                        </svg>
                         Xem giao lâu ({pillCounts.late})
                       </button>
-                      <button className="btn btn-green btn-sm" onClick={unmarkSentSelectedOrders}>
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" /><path d="M22 4 12 14.01l-3-3" /></svg>
+                      <button
+                        className="btn btn-green btn-sm"
+                        onClick={unmarkSentSelectedOrders}
+                      >
+                        <svg
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                        >
+                          <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+                          <path d="M22 4 12 14.01l-3-3" />
+                        </svg>
                         Bỏ Tích Đã gửi hàng
                       </button>
-                      <button className="btn btn-pri btn-sm" onClick={exportExcel}>
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><path d="M14 2v6h6" /></svg>
+                      <button
+                        className="btn btn-pri btn-sm"
+                        onClick={exportExcel}
+                      >
+                        <svg
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                        >
+                          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                          <path d="M14 2v6h6" />
+                        </svg>
                         Xuất Excel
                       </button>
                     </>
                   )}
                   {currentView === "late" && (
                     <>
-                      <button className="btn btn-ghost btn-sm" onClick={() => setCurrentView("sent")}>
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M19 12H5M12 19l-7-7 7-7" /></svg>
+                      <button
+                        className="btn btn-ghost btn-sm"
+                        onClick={() => setCurrentView("sent")}
+                      >
+                        <svg
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                        >
+                          <path d="M19 12H5M12 19l-7-7 7-7" />
+                        </svg>
                         Quay lại Đã gửi
                       </button>
-                      <button className="btn btn-pri btn-sm" onClick={exportExcel}>
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><path d="M14 2v6h6" /></svg>
+                      <button
+                        className="btn btn-pri btn-sm"
+                        onClick={exportExcel}
+                      >
+                        <svg
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                        >
+                          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                          <path d="M14 2v6h6" />
+                        </svg>
                         Xuất danh sách cần check
+                      </button>
+                    </>
+                  )}
+                  {currentView === "needprocess" && (
+                    <>
+                      <button
+                        className="btn btn-ghost btn-sm"
+                        onClick={() => setCurrentView("late")}
+                      >
+                        <svg
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                        >
+                          <path d="M19 12H5M12 19l-7-7 7-7" />
+                        </svg>
+                        Quay lại Giao lâu
+                      </button>
+                      <button
+                        className="btn btn-green btn-sm"
+                        onClick={tickAllDelivered}
+                      >
+                        <svg
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                        >
+                          <path d="M20 6 9 17l-5-5" />
+                        </svg>
+                        Tích tất cả Giao TC
+                      </button>
+                      <button
+                        className="btn btn-pri btn-sm"
+                        onClick={exportExcel}
+                      >
+                        <svg
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                        >
+                          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                          <path d="M14 2v6h6" />
+                        </svg>
+                        Xuất Excel
                       </button>
                     </>
                   )}
@@ -1505,20 +1990,49 @@ async function unmarkSentSelectedOrders() {
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M9 11l3 3L22 4" /></svg>
                         Tích tất cả Đối soát
                       </button> */}
-                      <button className="btn btn-pri btn-sm" onClick={exportExcel}>
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><path d="M14 2v6h6" /></svg>
+                      <button
+                        className="btn btn-pri btn-sm"
+                        onClick={exportExcel}
+                      >
+                        <svg
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                        >
+                          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                          <path d="M14 2v6h6" />
+                        </svg>
                         Xuất Excel
                       </button>
                     </>
                   )}
                   {currentView === "reconcile" && (
                     <>
-                      <button className="btn btn-ghost btn-sm" onClick={bulkUnreconcile}>
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M19 12H5M12 19l-7-7 7-7" /></svg>
+                      <button
+                        className="btn btn-ghost btn-sm"
+                        onClick={bulkUnreconcile}
+                      >
+                        <svg
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                        >
+                          <path d="M19 12H5M12 19l-7-7 7-7" />
+                        </svg>
                         Bỏ đối soát đã chọn
                       </button>
-                      <button className="btn btn-pri btn-sm" onClick={exportExcel}>
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><path d="M14 2v6h6" /></svg>
+                      <button
+                        className="btn btn-pri btn-sm"
+                        onClick={exportExcel}
+                      >
+                        <svg
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                        >
+                          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                          <path d="M14 2v6h6" />
+                        </svg>
                         Xuất đối soát Excel
                       </button>
                     </>
@@ -1539,11 +2053,19 @@ async function unmarkSentSelectedOrders() {
                         </button>
                       </th>
                       <th style={{ width: 32 }}></th>
-                      
+
                       {/* {showRec && <th style={{ textAlign: "center" }}>Giao TC</th>} */}
                       {/* {showRec && <th style={{ textAlign: "center" }}>Đối soát</th>} */}
+                      {currentView === "needprocess" && (
+                        <th style={{ textAlign: "center", width: 70 }}>
+                          Giao TC
+                        </th>
+                      )}
                       <th>Mã vận đơn</th>
                       <th>Tình trạng</th>
+                      {currentView === "needprocess" && (
+                        <th>Lý do cần xử lý</th>
+                      )}
                       <th>Sản phẩm</th>
                       <th>STT</th>
                       <th>Tên khách</th>
@@ -1553,51 +2075,81 @@ async function unmarkSentSelectedOrders() {
                       <th>Ngày đặt</th>
                       <th>Ngày gửi</th>
                       <th>Ngày nhận</th>
+                      {currentView === "needprocess" && (
+                        <th>Ngày tích xử lý</th>
+                      )}
                     </tr>
                   </thead>
                   <tbody>
                     {filteredList.length === 0 ? (
                       <tr>
-                        <td colSpan={showRec ? 16 : 15}>
+                        <td
+                          colSpan={
+                            currentView === "needprocess"
+                              ? 17
+                              : showRec
+                                ? 17
+                                : 16
+                          }
+                        >
                           <div className="empty-state">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                            <svg
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              stroke="currentColor"
+                            >
                               <path d="M21 8v13H3V8M1 3h22v5H1zM10 12h4" />
                             </svg>
                             <p>Không có đơn hàng nào.</p>
                           </div>
                         </td>
                       </tr>
-                    ) : filteredList.map((o) => {
-                      const late = isLate(o);
-                      const isDelivered = deliveredIds.has(o.id) || o.delivered;
-                      const isReconciled = reconciledIds.has(o.id) || o.reconciled;
+                    ) : (
+                      filteredList.map((o) => {
+                        const late = isLate(o);
+                        const isDelivered =
+                          deliveredIds.has(o.id) || o.delivered;
+                        const isReconciled =
+                          reconciledIds.has(o.id) || o.reconciled;
 
-                      let dispSt;
-                      if (isReconciled)       dispSt = { cls: "rec-c",    label: "ĐỐI SOÁT" };
-                      else if (isDelivered)   dispSt = { cls: "done-c",   label: "GIAO TC" };
-                      else if (late)          dispSt = { cls: "late-c",   label: `GIAO LÂU ${o.daysShipping}N` };
-                      else if (o.ngayGui)     dispSt = { cls: "ship-c",   label: "ĐANG GIAO" };
-                      else                    dispSt = { cls: "unsent-c", label: "CHƯA GỬI" };
+                        let dispSt;
+                        if (isReconciled)
+                          dispSt = { cls: "rec-c", label: "ĐỐI SOÁT" };
+                        else if (isDelivered)
+                          dispSt = { cls: "done-c", label: "GIAO TC" };
+                        else if (o.istick5 === true)
+                          dispSt = { cls: "needproc-c", label: "CẦN XỬ LÝ" };
+                        else if (late)
+                          dispSt = {
+                            cls: "late-c",
+                            label: `GIAO LÂU ${o.daysShipping}N`,
+                          };
+                        else if (o.ngayGui)
+                          dispSt = { cls: "ship-c", label: "ĐANG GIAO" };
+                        else dispSt = { cls: "unsent-c", label: "CHƯA GỬI" };
 
-                      return (
-                        <tr key={o.id} className={late && !isDelivered ? "late-row" : ""}>
-                          {/* Checkbox chọn */}
-                          <td className="ctr">
-                            <button
-                              className={`cbx${selectedIds.has(o.id) ? " on" : ""}`}
-                              onClick={() => toggleSelect(o.id)}
-                            >
-                              {CHK}
-                            </button>
-                          </td>
-                          {/* Edit */}
-                          <td>
-                            {/* <button className="edit-btn" title="Sửa đơn">
+                        return (
+                          <tr
+                            key={o.id}
+                            className={late && !isDelivered ? "late-row" : ""}
+                          >
+                            {/* Checkbox chọn */}
+                            <td className="ctr">
+                              <button
+                                className={`cbx${selectedIds.has(o.id) ? " on" : ""}`}
+                                onClick={() => toggleSelect(o.id)}
+                              >
+                                {CHK}
+                              </button>
+                            </td>
+                            {/* Edit */}
+                            <td>
+                              {/* <button className="edit-btn" title="Sửa đơn">
                               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" /><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" /></svg>
                             </button> */}
-                          </td>
-                          {/* Giao TC */}
-                         {/* {showRec && ( <td className="ctr">
+                            </td>
+                            {/* Giao TC */}
+                            {/* {showRec && ( <td className="ctr">
                             <button
                               className={`cbx${isDelivered ? " on-g" : ""}`}
                               onClick={() => toggleDelivered(o.id)}
@@ -1605,8 +2157,8 @@ async function unmarkSentSelectedOrders() {
                               {CHK}
                             </button>
                           </td>)} */}
-                          {/* Đối soát */}
-                          {/* {showRec && (
+                            {/* Đối soát */}
+                            {/* {showRec && (
                             <td className="ctr">
                               <button
                                 className={`cbx${isReconciled ? " on-p" : ""}`}
@@ -1616,67 +2168,243 @@ async function unmarkSentSelectedOrders() {
                               </button>
                             </td>
                           )} */}
-                          {/* Mã VĐ */}
-                          <td>
-                            {o.track
-                              ? <span className="track-txt">{o.track}</span>
-                              : <input
+                            {/* Giao TC (chỉ hiển thị ở mục Đơn cần xử lý) */}
+                            {currentView === "needprocess" && (
+                              <td className="ctr">
+                                <button
+                                  className={`cbx${isDelivered ? " on-g" : ""}`}
+                                  title="Tick Giao TC → istick5 sẽ về false"
+                                  onClick={() => toggleDelivered(o.id)}
+                                >
+                                  {CHK}
+                                </button>
+                              </td>
+                            )}
+                            {/* Mã VĐ */}
+                            <td>
+                              {o.track ? (
+                                <span className="track-txt">{o.track}</span>
+                              ) : (
+                                <input
                                   className="tinput"
                                   placeholder="Nhập mã…"
                                   onBlur={(e) => setTrack(o.id, e.target.value)}
-                                  onKeyDown={(e) => e.key === "Enter" && setTrack(o.id, e.target.value)}
+                                  onKeyDown={(e) =>
+                                    e.key === "Enter" &&
+                                    setTrack(o.id, e.target.value)
+                                  }
                                 />
-                            }
-                            {late && !isDelivered && (
-                              <span className="late-badge" style={{ marginLeft: 6 }}>⚠ {o.daysShipping}N</span>
-                            )}
-                          </td>
-                          {/* Tình trạng */}
-                          <td>
-                            <span className={`chip ${dispSt.cls}`}>
-                              <span className="dot" />
-                              {dispSt.label}
-                            </span>
-                          </td>
-                          {/* Sản phẩm */}
-                          <td>
-                            <div className="prods">
-                              {o.prods.map((p, i) => (
-                                <div key={i} className={`ptag${activeProds.has(p) ? " hi" : ""}`}>
-                                  {p} <span className="sl">×{o.qty[i] || 1}</span>
+                              )}
+                              {late && !isDelivered && (
+                                <span
+                                  className="late-badge"
+                                  style={{ marginLeft: 6 }}
+                                >
+                                  ⚠ {o.daysShipping}N
+                                </span>
+                              )}
+                            </td>
+                            {/* Tình trạng */}
+                            <td>
+                              <span className={`chip ${dispSt.cls}`}>
+                                <span className="dot" />
+                                {dispSt.label}
+                              </span>
+                            </td>
+                            {/* Lý do xử lý */}
+                            {currentView === "needprocess" && (
+                              <td>
+                                <div
+                                  style={{
+                                    display: "flex",
+                                    flexDirection: "column",
+                                    gap: 4,
+                                    minWidth: 180,
+                                  }}
+                                >
+                                  <div
+                                    style={{
+                                      display: "flex",
+                                      alignItems: "center",
+                                      gap: 6,
+                                    }}
+                                  >
+                                    <textarea
+                                      className="tinput"
+                                      placeholder="Lý do..."
+                                      rows={1}
+                                      value={
+                                        needProcessForm[o.id]?.lyDo ??
+                                        o.istickLyDo ??
+                                        ""
+                                      }
+                                      onChange={(e) =>
+                                        handleNeedProcessNoteChange(
+                                          o.id,
+                                          e.target.value,
+                                        )
+                                      }
+                                      // onFocus={(e) => handleNeedProcessNoteFocus(o.id, e)}
+                                      style={{
+                                        flex: 1,
+                                        minWidth: 120,
+                                        resize: "vertical",
+                                      }}
+                                    />
+                                  </div>
+                                  {Array.isArray(o.istickHistory) &&
+                                    o.istickHistory.length > 0 && (
+                                      <div
+                                        style={{
+                                          fontSize: 10.5,
+                                          color: "#555",
+                                          background: "#fafafa",
+                                          border: "1px solid #f0f0f0",
+                                          borderRadius: 4,
+                                          padding: "3px 5px",
+                                          maxHeight: 90,
+                                          overflowY: "auto",
+                                          whiteSpace: "pre-wrap",
+                                          lineHeight: 1.35,
+                                        }}
+                                      >
+                                        <div
+                                          style={{
+                                            fontWeight: 600,
+                                            color: "#888",
+                                            marginBottom: 1,
+                                          }}
+                                        >
+                                          Lịch sử ({o.istickHistory.length}):
+                                        </div>
+                                        {o.istickHistory.map((h, idx) => (
+                                          <div
+                                            key={idx}
+                                            style={{ marginBottom: 1 }}
+                                          >
+                                            <span style={{ color: "#1677ff" }}>
+                                              [{formatTime(h.at)}]
+                                            </span>{" "}
+                                            {h.lyDo}
+                                          </div>
+                                        ))}
+                                      </div>
+                                    )}
                                 </div>
-                              ))}
-                            </div>
-                          </td>
-                          <td><span className="stt-n">{o.stt}</span></td>
-                          <td><span className="cust">{o.cust}</span></td>
-                          <td><span className="phone">{o.sdt}</span></td>
-                          <td>
-                            {isImg(o.addr)
-                              ? <img className="addr-thumb" src={o.addr} alt="" loading="lazy"
-                                  onError={(e) => e.target.style.display = "none"} />
-                              : <span style={{ fontSize: 11, color: "var(--ink2)", maxWidth: 110, display: "block", lineHeight: 1.5 }}>{o.addr}</span>
-                            }
-                          </td>
-                          <td>
-                            {o.qua
-                              ? <span style={{ display: "inline-flex", alignItems: "center", gap: 3, background: "#fff3e0", color: "#e67e00", fontSize: 11, fontWeight: 700, padding: "2px 7px", borderRadius: 5 }}>🎁 {o.qua}</span>
-                              : "-"}
-                          </td>
-                          <td style={{ fontSize: 11.5, whiteSpace: "nowrap" }}>{o.ngayDat || "-"}</td>
-                          <td style={{ fontSize: 11.5, whiteSpace: "nowrap" }}>{o.ngayGui || "-"}</td>
-                          <td style={{ fontSize: 11.5, whiteSpace: "nowrap" }}>{o.ngayNhan || "-"}</td>
-                        </tr>
-                      );
-                    })}
+                              </td>
+                            )}
+                            {/* Sản phẩm */}
+                            <td>
+                              <div className="prods">
+                                {o.prods.map((p, i) => (
+                                  <div
+                                    key={i}
+                                    className={`ptag${activeProds.has(p) ? " hi" : ""}`}
+                                  >
+                                    {p}{" "}
+                                    <span className="sl">×{o.qty[i] || 1}</span>
+                                  </div>
+                                ))}
+                              </div>
+                            </td>
+                            <td>
+                              <span className="stt-n">{o.stt}</span>
+                            </td>
+                            <td>
+                              <span className="cust">{o.cust}</span>
+                            </td>
+                            <td>
+                              <span className="phone">{o.sdt}</span>
+                            </td>
+                            <td>
+                              {isImg(o.addr) ? (
+                                <img
+                                  className="addr-thumb"
+                                  src={o.addr}
+                                  alt=""
+                                  loading="lazy"
+                                  onError={(e) =>
+                                    (e.target.style.display = "none")
+                                  }
+                                />
+                              ) : (
+                                <span
+                                  style={{
+                                    fontSize: 11,
+                                    color: "var(--ink2)",
+                                    maxWidth: 110,
+                                    display: "block",
+                                    lineHeight: 1.5,
+                                  }}
+                                >
+                                  {o.addr}
+                                </span>
+                              )}
+                            </td>
+                            <td>
+                              {o.qua ? (
+                                <span
+                                  style={{
+                                    display: "inline-flex",
+                                    alignItems: "center",
+                                    gap: 3,
+                                    background: "#fff3e0",
+                                    color: "#e67e00",
+                                    fontSize: 11,
+                                    fontWeight: 700,
+                                    padding: "2px 7px",
+                                    borderRadius: 5,
+                                  }}
+                                >
+                                  🎁 {o.qua}
+                                </span>
+                              ) : (
+                                "-"
+                              )}
+                            </td>
+                            <td
+                              style={{ fontSize: 11.5, whiteSpace: "nowrap" }}
+                            >
+                              {o.ngayDat || "-"}
+                            </td>
+                            <td
+                              style={{ fontSize: 11.5, whiteSpace: "nowrap" }}
+                            >
+                              {o.ngayGui || "-"}
+                            </td>
+                            <td
+                              style={{ fontSize: 11.5, whiteSpace: "nowrap" }}
+                            >
+                              {o.ngayNhan || "-"}
+                            </td>
+                            {currentView === "needprocess" && (
+                              <td
+                                style={{ fontSize: 11.5, whiteSpace: "nowrap" }}
+                              >
+                                {formatTime(o.istickDate)}
+                              </td>
+                            )}
+                          </tr>
+                        );
+                      })
+                    )}
                   </tbody>
                 </table>
               </div>
 
               {/* Save bar */}
               <div className="sb-bar">
-                <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
-                  <span className="sel">Đã chọn: <b>{selectedCount}</b> đơn</span>
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 8,
+                    flexWrap: "wrap",
+                  }}
+                >
+                  <span className="sel">
+                    Đã chọn: <b>{selectedCount}</b> đơn
+                  </span>
                   {/* Stat pills cho selected */}
                   {selectedCount > 0 && (
                     <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
@@ -1686,7 +2414,9 @@ async function unmarkSentSelectedOrders() {
                         </span>
                       ))}
                       {selStats.totalQua > 0 && (
-                        <span className="stat-pill sp-amber">🎁 Quà: <b>{selStats.totalQua}</b></span>
+                        <span className="stat-pill sp-amber">
+                          🎁 Quà: <b>{selStats.totalQua}</b>
+                        </span>
                       )}
                     </div>
                   )}
@@ -1699,11 +2429,54 @@ async function unmarkSentSelectedOrders() {
                     </button>
                   )} */}
                   {currentView === "unsent" && (
-                    <button className="btn btn-pri btn-sm" onClick={exportExcelUnsent}>
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><path d="M14 2v6h6" /></svg>
+                    <button
+                      className="btn btn-pri btn-sm"
+                      onClick={exportExcelUnsent}
+                    >
+                      <svg
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                      >
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                        <path d="M14 2v6h6" />
+                      </svg>
                       Xuất Excel
                     </button>
                   )}
+
+                  {currentView === "needprocess" &&
+                    (() => {
+                      const dirtyCount = Object.values(needProcessForm).filter(
+                        (v) => {
+                          const lyDo = (v?.lyDo || "").toString();
+                          return lyDo.trim() && lyDo !== (v?.savedLyDo || "");
+                        },
+                      ).length;
+                      return (
+                        <button
+                          className="btn btn-amber btn-sm"
+                          onClick={saveNeedProcessForm}
+                        >
+                          Lưu Đơn cần xử lý
+                        </button>
+                      );
+                    })()}
+                  {/* {currentView === "needprocess" && (
+                    <button
+                      className="btn btn-green btn-sm"
+                      onClick={saveDelivered}
+                    >
+                      <svg
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                      >
+                        <path d="M20 6 9 17l-5-5" />
+                      </svg>
+                      Lưu Giao TC (istick5 → false)
+                    </button>
+                  )} */}
                   {/* {currentView === "done" && (
                     <button className="btn btn-purple btn-sm" onClick={saveReconcile}>
                       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M9 11l3 3L22 4" /></svg>
@@ -1728,33 +2501,57 @@ async function unmarkSentSelectedOrders() {
           </div>
           {/* Bulk stats */}
           {selectedCount > 0 && (
-            <div style={{ display: "flex", gap: 6, paddingRight: 8, borderRight: "1px solid #2a3a5a", marginRight: 2 }}>
+            <div
+              style={{
+                display: "flex",
+                gap: 6,
+                paddingRight: 8,
+                borderRight: "1px solid #2a3a5a",
+                marginRight: 2,
+              }}
+            >
               {Object.entries(selStats.spMap).map(([p, n]) => (
-                <span key={p} className="stat-pill sp-blue" style={{ fontSize: 11 }}>
+                <span
+                  key={p}
+                  className="stat-pill sp-blue"
+                  style={{ fontSize: 11 }}
+                >
                   {p.replace("DD VỆ SINH NỮ - ", "")}: <b>{n}</b>
                 </span>
               ))}
               {selStats.totalQua > 0 && (
-                <span className="stat-pill sp-amber" style={{ fontSize: 11 }}>🎁 <b>{selStats.totalQua}</b></span>
+                <span className="stat-pill sp-amber" style={{ fontSize: 11 }}>
+                  🎁 <b>{selStats.totalQua}</b>
+                </span>
               )}
             </div>
           )}
           <div className="bulk-actions">
-            {(currentView === "all" || currentView === "sent" || currentView === "late") && (
+            {(currentView === "all" ||
+              currentView === "sent" ||
+              currentView === "late" ||
+              currentView === "needprocess") && (
               <button className="bb bb-green" onClick={bulkDeliver}>
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M20 6 9 17l-5-5" /></svg>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                  <path d="M20 6 9 17l-5-5" />
+                </svg>
                 Tích Giao TC ({selectedCount})
               </button>
             )}
             {currentView === "unsent" && (
               <button className="bb bb-blue" onClick={exportExcelUnsent}>
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><path d="M14 2v6h6" /></svg>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                  <path d="M14 2v6h6" />
+                </svg>
                 Xuất Excel ({selectedCount})
               </button>
             )}
             {currentView === "done" && (
               <button className="bb bb-purple" onClick={bulkReconcile}>
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M9 11l3 3L22 4" /></svg>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                  <path d="M9 11l3 3L22 4" />
+                </svg>
                 Đối soát ({selectedCount})
               </button>
             )}
@@ -1765,13 +2562,17 @@ async function unmarkSentSelectedOrders() {
             )}
           </div>
           <button className="bulk-close" onClick={clearSelection}>
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M18 6 6 18M6 6l12 12" /></svg>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <path d="M18 6 6 18M6 6l12 12" />
+            </svg>
           </button>
         </div>
 
         {/* ═══ TOAST ═══ */}
-        <div className={`kho-toast${toast.show ? " show" : ""}`}>{toast.msg}</div>
- <style>{`
+        <div className={`kho-toast${toast.show ? " show" : ""}`}>
+          {toast.msg}
+        </div>
+        <style>{`
       .dual-paste {
         margin-bottom: 16px;
       }
@@ -1830,17 +2631,55 @@ async function unmarkSentSelectedOrders() {
 function ViewIcon({ view }) {
   switch (view) {
     case "all":
-      return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg>;
+      return (
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+          <rect x="3" y="3" width="7" height="9" rx="1" />
+          <rect x="14" y="3" width="7" height="5" rx="1" />
+          <rect x="14" y="12" width="7" height="9" rx="1" />
+          <rect x="3" y="16" width="7" height="5" rx="1" />
+        </svg>
+      );
     case "unsent":
-      return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 10H3M21 6H3M21 14H3M21 18H3"/></svg>;
+      return (
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+          <path d="M21 10H3M21 6H3M21 14H3M21 18H3" />
+        </svg>
+      );
     case "sent":
-      return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>;
+      return (
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+          <line x1="22" y1="2" x2="11" y2="13" />
+          <polygon points="22 2 15 22 11 13 2 9 22 2" />
+        </svg>
+      );
     case "late":
-      return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>;
+      return (
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+          <circle cx="12" cy="12" r="10" />
+          <line x1="12" y1="8" x2="12" y2="12" />
+          <line x1="12" y1="16" x2="12.01" y2="16" />
+        </svg>
+      );
+    case "needprocess":
+      return (
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+          <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z" />
+        </svg>
+      );
     case "done":
-      return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="M22 4 12 14.01l-3-3"/></svg>;
+      return (
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+          <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+          <path d="M22 4 12 14.01l-3-3" />
+        </svg>
+      );
     case "reconcile":
-      return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>;
+      return (
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+          <path d="M9 11l3 3L22 4" />
+          <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" />
+        </svg>
+      );
     default:
       return null;
   }

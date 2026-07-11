@@ -37,6 +37,7 @@ export async function POST(req) {
       slvn = 0,
       status,
       sltq = 0,
+      weight = 0,
     } = await req.json();
 
     // Kiểm tra tên sản phẩm
@@ -54,6 +55,7 @@ export async function POST(req) {
       description,
       slvn,
       sltq,
+      weight: Number(weight) || 0,
       status,
       imports: [
         {
