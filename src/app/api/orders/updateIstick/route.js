@@ -18,7 +18,7 @@ export async function POST(req) {
             ...(order.istick 
               ? { 
                   // shippingDate1: dayjs().format("YYYY-MM-DD"), 
-                  deliveryStatus: "ĐÃ Gửi Hàng", 
+                  deliveryStatus: "ĐÃ GỬI HÀNG", 
                   shippingDate1: dayjs().format("YYYY-MM-DD"), 
                 }
               : {
