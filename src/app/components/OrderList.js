@@ -1930,7 +1930,7 @@ const OrderList = () => {
           },
         ]
       : []),
-    ...(currentUser.position === "kho1"
+    ...((currentUser.position === "kho1" || currentUser.position === "salexuly")
       ? [
           {
             title: " Kho Đóng Hàng",
