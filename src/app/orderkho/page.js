@@ -88,7 +88,10 @@ input,textarea,select{font-family:inherit}
 .vb-late{background:var(--red-s);color:var(--red)}
 .vb-reconcile{background:var(--purple-s);color:var(--purple)}
 .vb-needprocess{background:var(--orange-s);color:var(--orange)}
+.vb-processed{background:#dbeafe;color:#1d4ed8}
 .ni.v-needprocess:not(.on) .pill{background:#3a1d05;color:#fb923c}
+.ni.v-processed:not(.on) .pill{background:#1e3a5f;color:#60a5fa}
+.processed-c{background:#dbeafe;color:#1d4ed8}.processed-c .dot{background:#1d4ed8}
 .needproc-c{background:var(--orange-s);color:var(--orange)}.needproc-c .dot{background:var(--orange)}
 .srch{flex:1;max-width:320px;position:relative}
 .srch svg{position:absolute;left:10px;top:50%;transform:translateY(-50%);width:14px;height:14px;color:var(--muted);stroke-width:2}
@@ -344,6 +347,8 @@ function mapOrder(o) {
     istickLyDo: o.istickLyDo || "",
     istickHistory: Array.isArray(o.istickHistory) ? o.istickHistory : [],
     savedLyDo: o.istickLyDo || "",
+    daXuLy: o.daXuLy || false,
+    daXuLyDate: o.daXuLyDate || null,
   };
 }
 
@@ -391,6 +396,12 @@ const VIEW_CFG = {
     badgeCls: "vb-reconcile",
     badge: "Đối soát",
   },
+  processed: {
+    title: "Đơn đã xử lý",
+    sub: "Đã tích đã xử lý",
+    badgeCls: "vb-processed",
+    badge: "Đã xử lý",
+  },
 };
 const VIEWS = [
   "all",
@@ -398,6 +409,7 @@ const VIEWS = [
   "sent",
   "late",
   "needprocess",
+  "processed",
   "done",
   "reconcile",
 ];
@@ -420,7 +432,9 @@ function getViewList(orders, view) {
     case "late":
       return orders.filter((o) => isLate(o));
     case "needprocess":
-      return orders.filter((o) => o.istick5 === true);
+      return orders.filter((o) => o.istick5 === true && o.daXuLy === false);
+    case "processed":
+      return orders.filter((o) => o.daXuLy === true);
     case "done":
       return orders.filter((o) => o.delivered && !o.reconciled);
     case "reconcile":
@@ -448,6 +462,7 @@ export default function KhoOrderList() {
   const [selectedIds, setSelectedIds] = useState(new Set()); // id đơn đang chọn (bulk)
   const [deliveredIds, setDeliveredIds] = useState(new Set()); // id đã tích Giao TC
   const [reconciledIds, setReconciledIds] = useState(new Set()); // id đã tích Đối soát
+  const [processedIds, setProcessedIds] = useState(new Set()); // id đã tích Đã xử lý
   const [toast, setToast] = useState({ msg: "", show: false });
   const toastTimer = useRef(null);
 
@@ -484,12 +499,15 @@ export default function KhoOrderList() {
       const mapped = raw.map(mapOrder);
       setOrders(mapped);
       setInitialOrders(mapped);
-      // Khởi tạo trạng thái delivered / reconciled từ dữ liệu
+      // Khởi tạo trạng thái delivered / reconciled / processed từ dữ liệu
       setDeliveredIds(
         new Set(mapped.filter((o) => o.delivered).map((o) => o.id)),
       );
       setReconciledIds(
         new Set(mapped.filter((o) => o.reconciled).map((o) => o.id)),
+      );
+      setProcessedIds(
+        new Set(mapped.filter((o) => o.daXuLy).map((o) => o.id)),
       );
     } catch (err) {
       console.error("Lỗi khi lấy đơn hàng kho:", err);
@@ -592,14 +610,15 @@ export default function KhoOrderList() {
     }
   };
 
-  // ── Danh sách theo view (áp dụng delivered/reconciled từ state) ──
+  // ── Danh sách theo view (áp dụng delivered/reconciled/processed từ state) ──
   const ordersWithState = useMemo(() => {
     return orders.map((o) => ({
       ...o,
       delivered: deliveredIds.has(o.id) ? true : o.delivered,
       reconciled: reconciledIds.has(o.id) ? true : o.reconciled,
+      daXuLy: processedIds.has(o.id) ? true : o.daXuLy,
     }));
-  }, [orders, deliveredIds, reconciledIds]);
+  }, [orders, deliveredIds, reconciledIds, processedIds]);
 
   const viewList = useMemo(() => {
     return getViewList(ordersWithState, currentView);
@@ -639,7 +658,8 @@ export default function KhoOrderList() {
           o.ngayGui && !o.delivered && !o.reconciled && !o.istick5 === true,
       ).length,
       late: ordersWithState.filter((o) => isLate(o)).length,
-      needprocess: ordersWithState.filter((o) => o.istick5 === true).length,
+      needprocess: ordersWithState.filter((o) => o.istick5 === true && o.daXuLy === false).length,
+      processed: ordersWithState.filter((o) => o.daXuLy === true).length,
       done: ordersWithState.filter((o) => o.delivered && !o.reconciled).length,
       reconcile: ordersWithState.filter((o) => o.reconciled).length,
     }),
@@ -711,6 +731,53 @@ export default function KhoOrderList() {
     });
   }
 
+  // ── Đã xử lý toggle (per-row) ──
+  function toggleProcessed(id) {
+    setProcessedIds((prev) => {
+      const next = new Set(prev);
+      const isCurrentlyProcessed = next.has(id) || orders.find(o => o.id === id)?.daXuLy;
+
+      if (isCurrentlyProcessed) {
+        // Bỏ tick → chuyển về mục cần xử lý
+        next.delete(id);
+        if (currentView === "processed") {
+          (async () => {
+            try {
+              await axios.post("/api/orders/mark-da-xu-ly", {
+                orders: [{ id, daXuLy: false }],
+              });
+              showToast("Đã chuyển đơn về Cần xử lý ✓");
+              fetchOrders();
+              setTimeout(() => setCurrentView("needprocess"), 500);
+            } catch (err) {
+              console.error(err);
+              showToast("Lỗi khi cập nhật");
+            }
+          })();
+        }
+      } else {
+        // Tick → chuyển sang mục đã xử lý
+        next.add(id);
+        if (currentView === "needprocess") {
+          (async () => {
+            try {
+              await axios.post("/api/orders/mark-da-xu-ly", {
+                orders: [{ id, daXuLy: true }],
+              });
+              showToast("Đã chuyển đơn sang Đã xử lý ✓");
+              fetchOrders();
+              setTimeout(() => setCurrentView("processed"), 500);
+            } catch (err) {
+              console.error(err);
+              showToast("Lỗi khi cập nhật");
+            }
+          })();
+        }
+      }
+      return next;
+    });
+  }
+
   // ── Save Giao TC (gọi API cập nhật deliveryStatus) ──
   async function saveDelivered() {
     const toUpdate = filteredList.filter(
@@ -763,6 +830,93 @@ export default function KhoOrderList() {
     } catch (err) {
       console.error(err);
       showToast("Lỗi khi lưu Đối soát");
+    }
+  }
+
+  // ── Save Đã xử lý ──
+  async function saveProcessed() {
+    const toUpdate = filteredList.filter(
+      (o) => processedIds.has(o.id) && !o.daXuLy,
+    );
+
+    if (!toUpdate.length) {
+      showToast("Không có đơn nào để lưu");
+      return;
+    }
+
+    try {
+      await axios.post("/api/orders/mark-da-xu-ly", {
+        orders: toUpdate.map((o) => ({
+          id: o.id,
+          daXuLy: true,
+        })),
+      });
+
+      showToast(`Đã lưu Đã xử lý cho ${toUpdate.length} đơn ✓`);
+      fetchOrders();
+      setTimeout(() => setCurrentView("processed"), 700);
+    } catch (err) {
+      console.error(err);
+      showToast("Lỗi khi lưu Đã xử lý");
+    }
+  }
+
+  // ── Tick tất cả Đã xử lý ──
+  async function tickAllProcessed() {
+    if (!filteredList.length) {
+      showToast("Không có đơn nào");
+      return;
+    }
+
+    try {
+      await axios.post("/api/orders/mark-da-xu-ly", {
+        orders: filteredList.map((o) => ({
+          id: o.id,
+          daXuLy: true,
+        })),
+      });
+
+      showToast(`Đã chuyển ${filteredList.length} đơn sang Đã xử lý ✓`);
+
+      fetchOrders();
+
+      setTimeout(() => {
+        setCurrentView("processed");
+      }, 700);
+    } catch (err) {
+      console.error(err);
+      showToast("Lỗi khi cập nhật Đã xử lý");
+    }
+  }
+
+  // ── Bulk Đã xử lý ──
+  async function bulkProcessed() {
+    const sel = filteredList.filter((o) => selectedIds.has(o.id));
+
+    if (!sel.length) {
+      showToast("Chưa chọn đơn nào");
+      return;
+    }
+
+    try {
+      await axios.post("/api/orders/mark-da-xu-ly", {
+        orders: sel.map((o) => ({
+          id: o.id,
+          daXuLy: true,
+        })),
+      });
+
+      showToast(`Đã chuyển ${sel.length} đơn sang Đã xử lý ✓`);
+
+      clearSelection();
+      fetchOrders();
+
+      setTimeout(() => {
+        setCurrentView("processed");
+      }, 700);
+    } catch (err) {
+      console.error(err);
+      showToast("Lỗi khi cập nhật Đã xử lý");
     }
   }
 
@@ -1310,6 +1464,7 @@ export default function KhoOrderList() {
       sent: 2,
       late: 3,
       needprocess: 3,
+      processed: 3,
       done: 4,
       reconcile: 5,
     }[currentView] ?? -1;
@@ -1955,7 +2110,7 @@ export default function KhoOrderList() {
                         </svg>
                         Quay lại Giao lâu
                       </button>
-                      <button
+                      {/* <button
                         className="btn btn-green btn-sm"
                         onClick={tickAllDelivered}
                       >
@@ -1968,6 +2123,63 @@ export default function KhoOrderList() {
                         </svg>
                         Tích tất cả Giao TC
                       </button>
+                      <button
+                        className="btn btn-pri btn-sm"
+                        onClick={tickAllProcessed}
+                      >
+                        <svg
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                        >
+                          <path d="M20 6 9 17l-5-5" />
+                        </svg>
+                        Tích tất cả Đã xử lý
+                      </button> */}
+                      <button
+                        className="btn btn-pri btn-sm"
+                        onClick={exportExcel}
+                      >
+                        <svg
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                        >
+                          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                          <path d="M14 2v6h6" />
+                        </svg>
+                        Xuất Excel
+                      </button>
+                    </>
+                  )}
+                  {currentView === "processed" && (
+                    <>
+                      <button
+                        className="btn btn-ghost btn-sm"
+                        onClick={() => setCurrentView("needprocess")}
+                      >
+                        <svg
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                        >
+                          <path d="M19 12H5M12 19l-7-7 7-7" />
+                        </svg>
+                        Quay lại Đơn cần xử lý
+                      </button>
+                      {/* <button
+                        className="btn btn-amber btn-sm"
+                        onClick={saveProcessed}
+                      >
+                        <svg
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                        >
+                          <path d="M20 6 9 17l-5-5" />
+                        </svg>
+                        Lưu Đã xử lý
+                      </button> */}
                       <button
                         className="btn btn-pri btn-sm"
                         onClick={exportExcel}
@@ -2056,14 +2268,19 @@ export default function KhoOrderList() {
 
                       {/* {showRec && <th style={{ textAlign: "center" }}>Giao TC</th>} */}
                       {/* {showRec && <th style={{ textAlign: "center" }}>Đối soát</th>} */}
-                      {currentView === "needprocess" && (
+                      {/* {currentView === "needprocess" && (
                         <th style={{ textAlign: "center", width: 70 }}>
                           Giao TC
+                        </th>
+                      )} */}
+                      {currentView === "needprocess" && (
+                        <th style={{ textAlign: "center", width: 70 }}>
+                          Đã xử lý
                         </th>
                       )}
                       <th>Mã vận đơn</th>
                       <th>Tình trạng</th>
-                      {currentView === "needprocess" && (
+                      {(currentView === "needprocess" || currentView === "processed") && (
                         <th>Lý do cần xử lý</th>
                       )}
                       <th>Sản phẩm</th>
@@ -2077,6 +2294,14 @@ export default function KhoOrderList() {
                       <th>Ngày nhận</th>
                       {currentView === "needprocess" && (
                         <th>Ngày tích xử lý</th>
+                      )}
+                      {currentView === "processed" && (
+                        <th style={{ textAlign: "center", width: 70 }}>
+                          Đã xử lý
+                        </th>
+                      )}
+                      {currentView === "processed" && (
+                        <th>Ngày xử lý</th>
                       )}
                     </tr>
                   </thead>
@@ -2169,12 +2394,26 @@ export default function KhoOrderList() {
                             </td>
                           )} */}
                             {/* Giao TC (chỉ hiển thị ở mục Đơn cần xử lý) */}
-                            {currentView === "needprocess" && (
+                            {/* {currentView === "needprocess" && (
                               <td className="ctr">
                                 <button
                                   className={`cbx${isDelivered ? " on-g" : ""}`}
                                   title="Tick Giao TC → istick5 sẽ về false"
                                   onClick={() => toggleDelivered(o.id)}
+                                >
+                                  {CHK}
+                                </button>
+                              </td>
+                            )} */}
+                            {/* Đã xử lý (chỉ hiển thị ở mục Đơn cần xử lý) */}
+                            {currentView === "needprocess" && (
+                              <td className="ctr">
+                                <button
+                                  className={`cbx${processedIds.has(o.id) || o.daXuLy ? " on" : ""}`}
+                                  title="Tick Đã xử lý → chuyển sang mục Đơn đã xử lý"
+                                  onClick={() => {
+                                    toggleProcessed(o.id);
+                                  }}
                                 >
                                   {CHK}
                                 </button>
@@ -2212,7 +2451,7 @@ export default function KhoOrderList() {
                               </span>
                             </td>
                             {/* Lý do xử lý */}
-                            {currentView === "needprocess" && (
+                            {(currentView === "needprocess"|| currentView === "processed") && (
                               <td>
                                 <div
                                   style={{
@@ -2384,6 +2623,26 @@ export default function KhoOrderList() {
                                 {formatTime(o.istickDate)}
                               </td>
                             )}
+                            {/* Checkbox Đã xử lý cho mục Đơn đã xử lý */}
+                            {currentView === "processed" && (
+                              <td className="ctr">
+                                <button
+                                  className={`cbx${processedIds.has(o.id) || o.daXuLy ? " on" : ""}`}
+                                  title="Đã xử lý"
+                                  onClick={() => toggleProcessed(o.id)}
+                                >
+                                  {CHK}
+                                </button>
+                              </td>
+                            )}
+                            {/* Ngày xử lý cho mục Đơn đã xử lý */}
+                            {currentView === "processed" && (
+                              <td
+                                style={{ fontSize: 11.5, whiteSpace: "nowrap" }}
+                              >
+                                {formatTime(o.daXuLyDate)}
+                              </td>
+                            )}
                           </tr>
                         );
                       })
@@ -2462,6 +2721,14 @@ export default function KhoOrderList() {
                         </button>
                       );
                     })()}
+                  {currentView === "processed" && (
+                    <button
+                      className="btn btn-amber btn-sm"
+                      onClick={saveProcessed}
+                    >
+                      Lưu Đã xử lý
+                    </button>
+                  )}
                   {/* {currentView === "needprocess" && (
                     <button
                       className="btn btn-green btn-sm"
@@ -2529,8 +2796,8 @@ export default function KhoOrderList() {
           <div className="bulk-actions">
             {(currentView === "all" ||
               currentView === "sent" ||
-              currentView === "late" ||
-              currentView === "needprocess") && (
+              currentView === "late" 
+        ) && (
               <button className="bb bb-green" onClick={bulkDeliver}>
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
                   <path d="M20 6 9 17l-5-5" />
@@ -2553,6 +2820,15 @@ export default function KhoOrderList() {
                   <path d="M9 11l3 3L22 4" />
                 </svg>
                 Đối soát ({selectedCount})
+              </button>
+            )}
+            {(
+              currentView === "needprocess" ) && (
+              <button className="bb bb-blue" onClick={bulkProcessed}>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                  <path d="M20 6 9 17l-5-5" />
+                </svg>
+                Tích Đã xử lý ({selectedCount})
               </button>
             )}
             {currentView === "reconcile" && (
@@ -2678,6 +2954,13 @@ function ViewIcon({ view }) {
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
           <path d="M9 11l3 3L22 4" />
           <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" />
+        </svg>
+      );
+    case "processed":
+      return (
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+          <path d="M20 6 9 17l-5-5" />
+          <circle cx="12" cy="12" r="10" />
         </svg>
       );
     default:
