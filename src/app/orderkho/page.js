@@ -284,6 +284,209 @@ td.ctr{text-align:center}
   border-top-color:#fff;border-radius:50%;animation:spin .8s linear infinite}
 .kho-loading p{color:#fff;font-size:13px;font-weight:600}
 @keyframes spin{to{transform:rotate(360deg)}}
+
+/* ── RESPONSIVE ── */
+@media (max-width: 1024px) {
+  .kho-root { height: auto; min-height: 100vh; }
+  .sb {
+    position: fixed;
+    top: 0; left: 0;
+    height: 100vh;
+    z-index: 500;
+    transform: translateX(-100%);
+    transition: transform .25s ease;
+    width: 260px;
+  }
+  .sb.open { transform: translateX(0); }
+  .sb-overlay {
+    display: block;
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,.45);
+    z-index: 490;
+    backdrop-filter: blur(2px);
+  }
+  .main { width: 100%; }
+  .topbar { padding: 0 12px; height: 54px; gap: 8px; }
+  .pt { font-size: 13px; }
+  .pt small { display: none; }
+  .view-badge { display: none; }
+  .srch { max-width: 200px; }
+  .tbr { gap: 6px; }
+  .av { width: 28px; height: 28px; font-size: 11px; }
+  .uname, .urole { display: none; }
+  .content { padding: 10px 10px 80px; }
+  /* Tool panels: 1 column on tablet */
+  .tool-panels-grid { grid-template-columns: 1fr !important; }
+  /* Table: horizontal scroll */
+  table { min-width: 800px; }
+  /* Bulk bar: full width */
+  .bulk-bar { left: 10px; right: 10px; transform: translateX(0) translateY(16px); min-width: unset; border-radius: 10px; padding: 8px 12px; }
+  .bulk-bar.show { transform: translateX(0) translateY(0); }
+  .bulk-count { padding-right: 8px; font-size: 12px; }
+  .bb { padding: 6px 10px; font-size: 11.5px; }
+}
+
+@media (max-width: 768px) {
+  .kho-root { overflow-x: hidden; }
+  .topbar { height: 52px; padding: 0 10px; }
+  .srch { max-width: 140px; }
+  .srch input { font-size: 12px; padding: 6px 8px 6px 28px; }
+  .cnt { font-size: 11px; padding: 4px 9px; }
+  .cnt b { font-size: 12px; }
+  .content { padding: 8px 8px 80px; gap: 8px; }
+  /* Table card */
+  .tcard { border-radius: 10px; }
+  .ch { padding: 9px 11px; }
+  .ch h2 { font-size: 12.5px; }
+  .btn-row { gap: 5px; }
+  .btn { padding: 5px 10px; font-size: 11.5px; }
+  /* Tool panels: full width */
+  .tp-head { padding: 9px 11px; }
+  .tp-head h3 { font-size: 11.5px; }
+  .tp-head p { font-size: 10px; }
+  .tp-body { padding: 10px 11px; }
+  /* Bulk bar */
+  .bulk-bar { bottom: 16px; padding: 8px 10px; gap: 8px; }
+  .bulk-actions { gap: 5px; flex-wrap: wrap; }
+  .bb { padding: 6px 9px; font-size: 11px; }
+  /* Toast */
+  .kho-toast { bottom: 70px; right: 10px; left: 10px; font-size: 12px; }
+}
+
+/* Tablet (641px - 1024px): show fewer columns in table */
+@media (min-width: 641px) and (max-width: 1024px) {
+  table { min-width: 700px; }
+  tbody td[data-label="Địa chỉ"] span,
+  tbody td[data-label="Địa chỉ"] img {
+    max-width: 150px;
+  }
+}
+
+@media (max-width: 640px) {
+  /* Mobile: table → card list */
+  .tw { overflow-x: visible; }
+  table { min-width: unset; display: block; }
+  thead { display: none; }
+  tbody { display: flex; flex-direction: column; gap: 8px; }
+  tbody tr {
+    display: flex;
+    flex-direction: column;
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 10px 12px;
+    gap: 6px;
+    break-inside: avoid;
+  }
+  tbody tr:hover td { background: transparent; }
+  tbody tr.late-row { background: #fff8f8; border-color: #fecaca; }
+  tbody tr.late-row:hover td { background: transparent; }
+  tbody td {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    padding: 2px 0;
+    border: none !important;
+    font-size: 12.5px;
+  }
+  tbody td::before {
+    content: attr(data-label);
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: .4px;
+    min-width: 90px;
+    padding-top: 2px;
+    flex-shrink: 0;
+  }
+  tbody td.ctr { justify-content: center; }
+  tbody td.ctr::before { display: none; }
+  /* Inline track input on mobile */
+  .tinput { width: 100%; font-size: 12px; }
+  /* Products display on mobile */
+  .prods { width: 100%; }
+  .ptag { font-size: 11px; }
+  /* Address on mobile - full width */
+  tbody td[data-label="Địa chỉ"] {
+    flex-direction: column;
+    gap: 4px;
+  }
+  tbody td[data-label="Địa chỉ"]::before {
+    min-width: unset;
+  }
+  tbody td[data-label="Địa chỉ"] span,
+  tbody td[data-label="Địa chỉ"] img {
+    width: 100%;
+    max-width: 100%;
+  }
+  /* Save bar */
+  .sb-bar { padding: 8px 11px; }
+  .sb-bar .sel { font-size: 11.5px; }
+  .stat-pill { font-size: 10.5px; padding: 3px 8px; }
+  /* Topbar compact */
+  .srch { max-width: 110px; }
+  .srch input::placeholder { font-size: 11px; }
+  /* Panel chip scroll on mobile */
+  .prod-chips { max-height: 56px; overflow-x: auto; overflow-y: hidden; flex-wrap: nowrap; -webkit-overflow-scrolling: touch; }
+  .pchip { font-size: 11px; padding: 3px 9px; white-space: nowrap; }
+  /* Filter panel on mobile */
+  .tool-panel { border-radius: 10px; }
+  /* Status chips wrap */
+  .chip { font-size: 10px; }
+}
+
+/* Mobile sidebar toggle button */
+.mobile-menu-btn {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  background: var(--accent-s);
+  color: var(--accent);
+  border: none;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: .12s;
+}
+.mobile-menu-btn:hover { background: var(--accent); color: #fff; }
+.mobile-menu-btn svg { width: 18px; height: 18px; stroke-width: 2.5; }
+
+@media (max-width: 1024px) {
+  .mobile-menu-btn { display: flex; }
+}
+
+/* Touch-friendly improvements */
+@media (hover: none) and (pointer: coarse) {
+  .btn, .ni, .qa-btn, .cbx, .pchip, .bulk-close {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  .cbx {
+    width: 32px;
+    height: 32px;
+  }
+  .edit-btn {
+    width: 36px;
+    height: 36px;
+  }
+  .master-cbx {
+    width: 24px;
+    height: 24px;
+  }
+}
+
+/* Safe area insets for notched devices */
+@supports (padding-bottom: env(safe-area-inset-bottom)) {
+  .bulk-bar {
+    padding-bottom: calc(10px + env(safe-area-inset-bottom));
+  }
+  .content {
+    padding-bottom: calc(80px + env(safe-area-inset-bottom));
+  }
+}
 `;
 
 /* ─── SVG helpers ─── */
@@ -479,6 +682,7 @@ export default function KhoOrderList() {
   // Panel collapse
   const [p1collapsed, setP1collapsed] = useState(false);
   const [p2collapsed, setP2collapsed] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   // ── Auth guard ──
   useEffect(() => {
@@ -506,9 +710,7 @@ export default function KhoOrderList() {
       setReconciledIds(
         new Set(mapped.filter((o) => o.reconciled).map((o) => o.id)),
       );
-      setProcessedIds(
-        new Set(mapped.filter((o) => o.daXuLy).map((o) => o.id)),
-      );
+      setProcessedIds(new Set(mapped.filter((o) => o.daXuLy).map((o) => o.id)));
     } catch (err) {
       console.error("Lỗi khi lấy đơn hàng kho:", err);
       showToast("Lỗi khi lấy đơn hàng");
@@ -658,7 +860,9 @@ export default function KhoOrderList() {
           o.ngayGui && !o.delivered && !o.reconciled && !o.istick5 === true,
       ).length,
       late: ordersWithState.filter((o) => isLate(o)).length,
-      needprocess: ordersWithState.filter((o) => o.istick5 === true && o.daXuLy === false).length,
+      needprocess: ordersWithState.filter(
+        (o) => o.istick5 === true && o.daXuLy === false,
+      ).length,
       processed: ordersWithState.filter((o) => o.daXuLy === true).length,
       done: ordersWithState.filter((o) => o.delivered && !o.reconciled).length,
       reconcile: ordersWithState.filter((o) => o.reconciled).length,
@@ -735,7 +939,8 @@ export default function KhoOrderList() {
   function toggleProcessed(id) {
     setProcessedIds((prev) => {
       const next = new Set(prev);
-      const isCurrentlyProcessed = next.has(id) || orders.find(o => o.id === id)?.daXuLy;
+      const isCurrentlyProcessed =
+        next.has(id) || orders.find((o) => o.id === id)?.daXuLy;
 
       if (isCurrentlyProcessed) {
         // Bỏ tick → chuyển về mục cần xử lý
@@ -1495,7 +1700,10 @@ export default function KhoOrderList() {
         )}
 
         {/* ═══ SIDEBAR ═══ */}
-        <aside className="sb">
+        {sidebarOpen && (
+          <div className="sb-overlay" onClick={() => setSidebarOpen(false)} />
+        )}
+        <aside className={`sb${sidebarOpen ? " open" : ""}`}>
           <div className="brand">
             <div className="ico">LMC</div>
             <div>
@@ -1516,6 +1724,7 @@ export default function KhoOrderList() {
                   onClick={() => {
                     setCurrentView(v);
                     clearSelection();
+                    setSidebarOpen(false);
                   }}
                 >
                   <ViewIcon view={v} />
@@ -1609,6 +1818,15 @@ export default function KhoOrderList() {
         <div className="main">
           {/* Topbar */}
           <header className="topbar">
+            <button
+              className="mobile-menu-btn"
+              onClick={() => setSidebarOpen(true)}
+              aria-label="Mở menu"
+            >
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <path d="M3 12h18M3 6h18M3 18h18" />
+              </svg>
+            </button>
             <div className="pt">
               <span>{VIEW_CFG[currentView].title}</span>
               <small>
@@ -1668,6 +1886,7 @@ export default function KhoOrderList() {
 
             {/* Tool panels */}
             <div
+              className="tool-panels-grid"
               style={{
                 display: "grid",
                 gridTemplateColumns: "1fr 1fr",
@@ -2280,7 +2499,8 @@ export default function KhoOrderList() {
                       )}
                       <th>Mã vận đơn</th>
                       <th>Tình trạng</th>
-                      {(currentView === "needprocess" || currentView === "processed") && (
+                      {(currentView === "needprocess" ||
+                        currentView === "processed") && (
                         <th>Lý do cần xử lý</th>
                       )}
                       <th>Sản phẩm</th>
@@ -2300,9 +2520,7 @@ export default function KhoOrderList() {
                           Đã xử lý
                         </th>
                       )}
-                      {currentView === "processed" && (
-                        <th>Ngày xử lý</th>
-                      )}
+                      {currentView === "processed" && <th>Ngày xử lý</th>}
                     </tr>
                   </thead>
                   <tbody>
@@ -2359,7 +2577,7 @@ export default function KhoOrderList() {
                             className={late && !isDelivered ? "late-row" : ""}
                           >
                             {/* Checkbox chọn */}
-                            <td className="ctr">
+                            <td className="ctr" data-label="">
                               <button
                                 className={`cbx${selectedIds.has(o.id) ? " on" : ""}`}
                                 onClick={() => toggleSelect(o.id)}
@@ -2368,7 +2586,7 @@ export default function KhoOrderList() {
                               </button>
                             </td>
                             {/* Edit */}
-                            <td>
+                            <td data-label="">
                               {/* <button className="edit-btn" title="Sửa đơn">
                               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" /><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" /></svg>
                             </button> */}
@@ -2407,7 +2625,7 @@ export default function KhoOrderList() {
                             )} */}
                             {/* Đã xử lý (chỉ hiển thị ở mục Đơn cần xử lý) */}
                             {currentView === "needprocess" && (
-                              <td className="ctr">
+                              <td className="ctr" data-label="Đã xử lý">
                                 <button
                                   className={`cbx${processedIds.has(o.id) || o.daXuLy ? " on" : ""}`}
                                   title="Tick Đã xử lý → chuyển sang mục Đơn đã xử lý"
@@ -2420,7 +2638,7 @@ export default function KhoOrderList() {
                               </td>
                             )}
                             {/* Mã VĐ */}
-                            <td>
+                            <td data-label="Mã VĐ">
                               {o.track ? (
                                 <span className="track-txt">{o.track}</span>
                               ) : (
@@ -2444,15 +2662,16 @@ export default function KhoOrderList() {
                               )}
                             </td>
                             {/* Tình trạng */}
-                            <td>
+                            <td data-label="Tình trạng">
                               <span className={`chip ${dispSt.cls}`}>
                                 <span className="dot" />
                                 {dispSt.label}
                               </span>
                             </td>
                             {/* Lý do xử lý */}
-                            {(currentView === "needprocess"|| currentView === "processed") && (
-                              <td>
+                            {(currentView === "needprocess" ||
+                              currentView === "processed") && (
+                              <td data-label="Lý do">
                                 <div
                                   style={{
                                     display: "flex",
@@ -2533,7 +2752,7 @@ export default function KhoOrderList() {
                               </td>
                             )}
                             {/* Sản phẩm */}
-                            <td>
+                            <td data-label="Sản phẩm">
                               <div className="prods">
                                 {o.prods.map((p, i) => (
                                   <div
@@ -2546,16 +2765,16 @@ export default function KhoOrderList() {
                                 ))}
                               </div>
                             </td>
-                            <td>
+                            <td data-label="STT">
                               <span className="stt-n">{o.stt}</span>
                             </td>
-                            <td>
+                            <td data-label="Khách">
                               <span className="cust">{o.cust}</span>
                             </td>
-                            <td>
+                            <td data-label="SĐT">
                               <span className="phone">{o.sdt}</span>
                             </td>
-                            <td>
+                            <td data-label="Địa chỉ">
                               {isImg(o.addr) ? (
                                 <img
                                   className="addr-thumb"
@@ -2580,7 +2799,7 @@ export default function KhoOrderList() {
                                 </span>
                               )}
                             </td>
-                            <td>
+                            <td data-label="Quà">
                               {o.qua ? (
                                 <span
                                   style={{
@@ -2602,22 +2821,26 @@ export default function KhoOrderList() {
                               )}
                             </td>
                             <td
+                              data-label="Ngày đặt"
                               style={{ fontSize: 11.5, whiteSpace: "nowrap" }}
                             >
                               {o.ngayDat || "-"}
                             </td>
                             <td
+                              data-label="Ngày gửi"
                               style={{ fontSize: 11.5, whiteSpace: "nowrap" }}
                             >
                               {o.ngayGui || "-"}
                             </td>
                             <td
+                              data-label="Ngày nhận"
                               style={{ fontSize: 11.5, whiteSpace: "nowrap" }}
                             >
                               {o.ngayNhan || "-"}
                             </td>
                             {currentView === "needprocess" && (
                               <td
+                                data-label="Ngày tích xử lý"
                                 style={{ fontSize: 11.5, whiteSpace: "nowrap" }}
                               >
                                 {formatTime(o.istickDate)}
@@ -2625,7 +2848,7 @@ export default function KhoOrderList() {
                             )}
                             {/* Checkbox Đã xử lý cho mục Đơn đã xử lý */}
                             {currentView === "processed" && (
-                              <td className="ctr">
+                              <td className="ctr" data-label="Đã xử lý">
                                 <button
                                   className={`cbx${processedIds.has(o.id) || o.daXuLy ? " on" : ""}`}
                                   title="Đã xử lý"
@@ -2638,6 +2861,7 @@ export default function KhoOrderList() {
                             {/* Ngày xử lý cho mục Đơn đã xử lý */}
                             {currentView === "processed" && (
                               <td
+                                data-label="Ngày xử lý"
                                 style={{ fontSize: 11.5, whiteSpace: "nowrap" }}
                               >
                                 {formatTime(o.daXuLyDate)}
@@ -2796,8 +3020,7 @@ export default function KhoOrderList() {
           <div className="bulk-actions">
             {(currentView === "all" ||
               currentView === "sent" ||
-              currentView === "late" 
-        ) && (
+              currentView === "late") && (
               <button className="bb bb-green" onClick={bulkDeliver}>
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
                   <path d="M20 6 9 17l-5-5" />
@@ -2822,8 +3045,7 @@ export default function KhoOrderList() {
                 Đối soát ({selectedCount})
               </button>
             )}
-            {(
-              currentView === "needprocess" ) && (
+            {currentView === "needprocess" && (
               <button className="bb bb-blue" onClick={bulkProcessed}>
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
                   <path d="M20 6 9 17l-5-5" />
