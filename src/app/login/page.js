@@ -33,25 +33,31 @@ function GoldenCanvas() {
     resize();
     window.addEventListener("resize", resize);
 
-    function rnd(a, b) { return a + (b - a) * Math.random(); }
+    function rnd(a, b) {
+      return a + (b - a) * Math.random();
+    }
 
     function mkCurve() {
-      const W = canvas.width, H = canvas.height;
+      const W = canvas.width,
+        H = canvas.height;
       return {
-        ox: rnd(0, W), oy: rnd(0, H),
-        ax: rnd(0.15, 0.45) * W, ay: rnd(0.12, 0.38) * H,
-        bx: rnd(0.1,  0.4)  * W, by: rnd(0.1,  0.35) * H,
+        ox: rnd(0, W),
+        oy: rnd(0, H),
+        ax: rnd(0.15, 0.45) * W,
+        ay: rnd(0.12, 0.38) * H,
+        bx: rnd(0.1, 0.4) * W,
+        by: rnd(0.1, 0.35) * H,
         px: rnd(0.0003, 0.0009) * (Math.random() < 0.5 ? 1 : -1),
         py: rnd(0.0003, 0.0009) * (Math.random() < 0.5 ? 1 : -1),
         qx: rnd(0.0002, 0.0008) * (Math.random() < 0.5 ? 1 : -1),
         qy: rnd(0.0002, 0.0008) * (Math.random() < 0.5 ? 1 : -1),
         rx: rnd(0.0001, 0.0006) * (Math.random() < 0.5 ? 1 : -1),
         ry: rnd(0.0001, 0.0006) * (Math.random() < 0.5 ? 1 : -1),
-        ph:  rnd(0, Math.PI * 2),
+        ph: rnd(0, Math.PI * 2),
         spd: rnd(0.0004, 0.0012),
-        alpha: rnd(0.2, 0.45),          // HTML values
+        alpha: rnd(0.2, 0.45), // HTML values
         width: rnd(1.0, 3.0),
-        len:   rnd(0.55, 1.4),
+        len: rnd(0.55, 1.4),
         glowR: Math.random() < 0.6,
       };
     }
@@ -60,19 +66,22 @@ function GoldenCanvas() {
     const curves = Array.from({ length: NUM }, mkCurve);
 
     function evalCurve(c, tt) {
-      const W = canvas.width, H = canvas.height;
+      const W = canvas.width,
+        H = canvas.height;
       const pts = [];
       const N = 120;
       for (let s = 0; s <= N; s++) {
         const u = s / N;
-        let x = c.ox
-          + c.ax * Math.sin(u * Math.PI * 2 * c.len + tt * c.px + c.ph)
-          + c.bx * Math.cos(u * Math.PI * 3.3 * c.len + tt * c.qx + c.ph * 1.3);
-        let y = c.oy
-          + c.ay * Math.cos(u * Math.PI * 2 * c.len + tt * c.py + c.ph * 0.7)
-          + c.by * Math.sin(u * Math.PI * 3.7 * c.len + tt * c.qy + c.ph * 1.7);
+        let x =
+          c.ox +
+          c.ax * Math.sin(u * Math.PI * 2 * c.len + tt * c.px + c.ph) +
+          c.bx * Math.cos(u * Math.PI * 3.3 * c.len + tt * c.qx + c.ph * 1.3);
+        let y =
+          c.oy +
+          c.ay * Math.cos(u * Math.PI * 2 * c.len + tt * c.py + c.ph * 0.7) +
+          c.by * Math.sin(u * Math.PI * 3.7 * c.len + tt * c.qy + c.ph * 1.7);
         x += W * 0.12 * Math.sin(tt * c.rx + c.ph * 2.1);
-        y += H * 0.10 * Math.cos(tt * c.ry + c.ph * 2.9);
+        y += H * 0.1 * Math.cos(tt * c.ry + c.ph * 2.9);
         pts.push({ x, y });
       }
       return pts;
@@ -100,14 +109,16 @@ function GoldenCanvas() {
       }
 
       const grd = ctx.createLinearGradient(
-        pts[0].x, pts[0].y,
-        pts[pts.length - 1].x, pts[pts.length - 1].y
+        pts[0].x,
+        pts[0].y,
+        pts[pts.length - 1].x,
+        pts[pts.length - 1].y,
       );
-      grd.addColorStop(0,    GOLD + (alpha * 0.05).toFixed(3) + ")");
-      grd.addColorStop(0.25, GOLD + (alpha * 0.9 ).toFixed(3) + ")");
-      grd.addColorStop(0.5,  PALE + (alpha * 1.0 ).toFixed(3) + ")");
+      grd.addColorStop(0, GOLD + (alpha * 0.05).toFixed(3) + ")");
+      grd.addColorStop(0.25, GOLD + (alpha * 0.9).toFixed(3) + ")");
+      grd.addColorStop(0.5, PALE + (alpha * 1.0).toFixed(3) + ")");
       grd.addColorStop(0.75, GOLD + (alpha * 0.85).toFixed(3) + ")");
-      grd.addColorStop(1,    GOLD + (alpha * 0.05).toFixed(3) + ")");
+      grd.addColorStop(1, GOLD + (alpha * 0.05).toFixed(3) + ")");
 
       ctx.strokeStyle = grd;
       ctx.lineWidth = c.width;
@@ -119,13 +130,22 @@ function GoldenCanvas() {
     }
 
     function drawAmbient(tt) {
-      const W = canvas.width, H = canvas.height;
+      const W = canvas.width,
+        H = canvas.height;
       const pulse = 0.5 + 0.5 * Math.sin(tt * 0.018);
-      const cx = W / 2, cy = H / 2;
-      const rg = ctx.createRadialGradient(cx, cy * 0.6, 0, cx, cy * 0.6, Math.max(W, H) * 0.55);
-      rg.addColorStop(0,   GOLD + (0.12 + pulse * 0.08).toFixed(3) + ")");
+      const cx = W / 2,
+        cy = H / 2;
+      const rg = ctx.createRadialGradient(
+        cx,
+        cy * 0.6,
+        0,
+        cx,
+        cy * 0.6,
+        Math.max(W, H) * 0.55,
+      );
+      rg.addColorStop(0, GOLD + (0.12 + pulse * 0.08).toFixed(3) + ")");
       rg.addColorStop(0.4, GOLD + "0.04)");
-      rg.addColorStop(1,   GOLD + "0)");
+      rg.addColorStop(1, GOLD + "0)");
       ctx.fillStyle = rg;
       ctx.fillRect(0, 0, W, H);
     }
@@ -148,7 +168,12 @@ function GoldenCanvas() {
   return (
     <canvas
       ref={canvasRef}
-      style={{ position: "absolute", inset: 0, zIndex: 0, pointerEvents: "none" }}
+      style={{
+        position: "absolute",
+        inset: 0,
+        zIndex: 0,
+        pointerEvents: "none",
+      }}
     />
   );
 }
@@ -288,7 +313,9 @@ const curtainStyles = {
   },
   left: {
     position: "absolute",
-    top: 0, bottom: 0, left: 0,
+    top: 0,
+    bottom: 0,
+    left: 0,
     width: "50%",
     background: "linear-gradient(to bottom,#0d0700,#1a0e00,#0d0700)",
     borderRight: "1px solid #c9952a44",
@@ -296,7 +323,9 @@ const curtainStyles = {
   },
   right: {
     position: "absolute",
-    top: 0, bottom: 0, right: 0,
+    top: 0,
+    bottom: 0,
+    right: 0,
     width: "50%",
     background: "linear-gradient(to bottom,#0d0700,#1a0e00,#0d0700)",
     borderLeft: "1px solid #c9952a44",
@@ -304,9 +333,12 @@ const curtainStyles = {
   },
   seam: {
     position: "absolute",
-    top: 0, bottom: 0, left: "50%",
+    top: 0,
+    bottom: 0,
+    left: "50%",
     width: 2,
-    background: "linear-gradient(to bottom,transparent,#fff9e6,#c9952a,#fff9e6,transparent)",
+    background:
+      "linear-gradient(to bottom,transparent,#fff9e6,#c9952a,#fff9e6,transparent)",
     transform: "translateX(-50%)",
     animation: "seamGlow 1.5s ease-out 1s forwards",
     opacity: 0,
@@ -321,7 +353,8 @@ const curtainStyles = {
     position: "relative",
   },
   ring: {
-    width: 130, height: 130,
+    width: 130,
+    height: 130,
     borderRadius: "50%",
     border: "2px solid #c9952a",
     display: "flex",
@@ -333,7 +366,8 @@ const curtainStyles = {
     background: "#0a0600",
   },
   img: {
-    width: "100%", height: "100%",
+    width: "100%",
+    height: "100%",
     objectFit: "cover",
     display: "block",
   },
@@ -371,14 +405,21 @@ function Orn({ pos }) {
     br: { bottom: 10, right: 10 },
   };
   return (
-    <div style={{ position: "absolute", width: 20, height: 20, ...positions[pos] }}>
+    <div
+      style={{ position: "absolute", width: 20, height: 20, ...positions[pos] }}
+    >
       <svg
         viewBox="0 0 20 20"
         width="20"
         height="20"
         style={{ transform: transforms[pos] }}
       >
-        <path d="M0 20 L0 0 L20 0" fill="none" stroke="#f5d78e" strokeWidth="1.5" />
+        <path
+          d="M0 20 L0 0 L20 0"
+          fill="none"
+          stroke="#f5d78e"
+          strokeWidth="1.5"
+        />
         <circle cx="0" cy="0" r="2" fill="#f5d78e" />
       </svg>
     </div>
@@ -423,6 +464,10 @@ export default function LoginPage() {
         router.push("/ordersjp");
         return;
       }
+      if (position === "kho2" && quocgia === "kr") {
+        router.push("/orderkhohanh");
+        return;
+      }
       if (position === "kho2") {
         router.push("/orderkho");
         return;
@@ -438,7 +483,8 @@ export default function LoginPage() {
       router.push("/orders");
     } catch (error) {
       message.error(
-        error?.response?.data?.error || "Đăng nhập thất bại. Vui lòng kiểm tra lại!"
+        error?.response?.data?.error ||
+          "Đăng nhập thất bại. Vui lòng kiểm tra lại!",
       );
     } finally {
       setLoading(false);
@@ -524,7 +570,9 @@ export default function LoginPage() {
                 <Form.Item
                   name="username"
                   noStyle
-                  rules={[{ required: true, message: "Vui lòng nhập tài khoản" }]}
+                  rules={[
+                    { required: true, message: "Vui lòng nhập tài khoản" },
+                  ]}
                 >
                   <Input
                     placeholder="Nhập tài khoản"
@@ -545,7 +593,9 @@ export default function LoginPage() {
                 <Form.Item
                   name="password"
                   noStyle
-                  rules={[{ required: true, message: "Vui lòng nhập mật khẩu" }]}
+                  rules={[
+                    { required: true, message: "Vui lòng nhập mật khẩu" },
+                  ]}
                 >
                   <Input.Password
                     placeholder="Nhập mật khẩu"
@@ -596,7 +646,8 @@ const styles = {
   bg: {
     position: "absolute",
     inset: 0,
-    background: "radial-gradient(ellipse at 50% 0%,#2a1a00 0%,#140d00 40%,#000 100%)",
+    background:
+      "radial-gradient(ellipse at 50% 0%,#2a1a00 0%,#140d00 40%,#000 100%)",
     zIndex: 0,
   },
   bgOverlay: {
@@ -618,7 +669,8 @@ const styles = {
     position: "absolute",
     inset: -80,
     borderRadius: 100,
-    background: "radial-gradient(ellipse,rgba(255,215,0,0.6) 0%,transparent 60%)",
+    background:
+      "radial-gradient(ellipse,rgba(255,215,0,0.6) 0%,transparent 60%)",
     filter: "blur(50px)",
     animation: "auraPulse 5s ease-in-out infinite",
     pointerEvents: "none",
@@ -630,7 +682,8 @@ const styles = {
     left: "10%",
     width: "80%",
     height: "80%",
-    background: "radial-gradient(ellipse at center,rgba(255,215,0,0.6) 0%,transparent 70%)",
+    background:
+      "radial-gradient(ellipse at center,rgba(255,215,0,0.6) 0%,transparent 70%)",
     filter: "blur(70px)",
     pointerEvents: "none",
     animation: "beamPulse 6s ease-in-out infinite",

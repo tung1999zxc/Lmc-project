@@ -256,6 +256,7 @@ const OrderList = () => {
       setInitialOrders3(data);
       setInitialOrders4(data);
       setInitialOrders5(data);
+      setInitialOrders6(data);
     } catch (error) {
       console.error("Lỗi khi gọi API:", error);
       messageApi.error("Lỗi khi lấy đơn hàng");
@@ -1585,6 +1586,56 @@ const OrderList = () => {
       messageApi.error(errMsg);
     }
   };
+
+  // ===== Istick6 =====
+  const [initialOrders6, setInitialOrders6] = useState([]);
+
+  const allRowsSelected6 =
+    filteredOrders.length > 0 && filteredOrders.every((order) => order.istick6);
+
+  const handleSelectAllIstick6 = (value) => {
+    setOrders((prevOrders) =>
+      prevOrders.map((order) =>
+        filteredOrders.some((fOrder) => fOrder.id === order.id)
+          ? { ...order, istick6: value }
+          : order,
+      ),
+    );
+  };
+
+  const handleIstickChange6 = (orderId, value) => {
+    setOrders((prevOrders) =>
+      prevOrders.map((order) =>
+        order.id === orderId ? { ...order, istick6: value } : order,
+      ),
+    );
+  };
+
+  const handleSaveIstick6 = async () => {
+    const ordersToUpdate = orders.filter((order) => {
+      const originalOrder = initialOrders6.find((o) => o.id === order.id);
+      return !originalOrder || order.istick6 !== originalOrder.istick6;
+    });
+
+    if (ordersToUpdate.length === 0) {
+      messageApi.info("Không có đơn hàng nào thay đổi");
+      return;
+    }
+
+    try {
+      const response = await axios.post("/api/orders/updateIstick6", {
+        orders: ordersToUpdate.map(({ id, istick6 }) => ({ id, istick6 })),
+      });
+      messageApi.success(response.data.message || "Đã lưu cập nhật các đơn");
+      alert("Thao tác thành công!");
+      setInitialOrders6(orders);
+      fetchOrders();
+    } catch (error) {
+      console.error(error);
+      messageApi.error("Lỗi khi lưu các đơn");
+    }
+  };
+
   const columns = [
     {
       title: (
@@ -1767,6 +1818,37 @@ const OrderList = () => {
           },
         ]
       : []),
+    ...(currentUser.position === "admin" ||
+    currentUser.position === "managerSALE"
+      ? [
+          {
+            title: (
+              <>
+                <Checkbox
+                  checked={allRowsSelected6}
+                  onChange={(e) => handleSelectAllIstick6(e.target.checked)}
+                >
+                  KHO HẠNH
+                </Checkbox>
+                <Button type="primary" onClick={handleSaveIstick6}>
+                  Lưu
+                </Button>
+              </>
+            ),
+            key: "istick6",
+            dataIndex: "istick6",
+            width: 50,
+            render: (_, record) => (
+              <Checkbox
+                checked={record.istick6 || false}
+                onChange={(e) =>
+                  handleIstickChange6(record.id, e.target.checked)
+                }
+              />
+            ),
+          },
+        ]
+      : []),
     // ...((currentUser.position === "salexuly" ||currentUser.position === "salefull")
     //   ? [
     //     {
@@ -1930,7 +2012,7 @@ const OrderList = () => {
           },
         ]
       : []),
-    ...((currentUser.position === "kho1" || currentUser.position === "salexuly")
+    ...(currentUser.position === "kho1" || currentUser.position === "salexuly"
       ? [
           {
             title: " Kho Đóng Hàng",
@@ -2676,7 +2758,7 @@ const OrderList = () => {
       fetchOrders();
     } catch (error) {
       console.error(error);
-      messageApi.error("Lỗi khi lưu các đơn");
+      messageApi.error("Lợi khi lưu các đơn");
     }
   };
 
@@ -2745,6 +2827,7 @@ const OrderList = () => {
         />
       ),
     },
+
     {
       title: (
         <>
