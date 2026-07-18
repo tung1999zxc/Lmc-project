@@ -1624,7 +1624,11 @@ const OrderList = () => {
 
     try {
       const response = await axios.post("/api/orders/updateIstick6", {
-        orders: ordersToUpdate.map(({ id, istick6 }) => ({ id, istick6 })),
+        orders: ordersToUpdate.map((o) => ({
+          id: o.id,
+          istick6: o.istick6,
+          isShippingName: o.istick6 === false ? "" : o.isShippingName,
+        })),
       });
       messageApi.success(response.data.message || "Đã lưu cập nhật các đơn");
       alert("Thao tác thành công!");
@@ -3659,15 +3663,14 @@ const OrderList = () => {
 
   const filteredOrdersForExcel = orders
     .filter(
-      (order) =>
-        (order) =>
-          order.saleReport === "DONE" &&
-          order.istick === true &&
-          order.deliveryStatus === "ĐÃ GỬI HÀNG" &&
-          order.trackingCode === "" &&
-          (order.isShippingName ?? "") === "" &&
-          (order.istick6 ?? false) === false &&
-          (order.istick4 ?? false) === false
+      (order) => (order) =>
+        order.saleReport === "DONE" &&
+        order.istick === true &&
+        order.deliveryStatus === "ĐÃ GỬI HÀNG" &&
+        order.trackingCode === "" &&
+        (order.isShippingName ?? "") === "" &&
+        (order.istick6 ?? false) === false &&
+        (order.istick4 ?? false) === false,
     )
     .map((order) => ({
       STT: order.stt,

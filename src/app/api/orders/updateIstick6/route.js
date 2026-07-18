@@ -11,6 +11,9 @@ export async function POST(req) {
         update: {
           $set: {
             istick6: order.istick6,
+            ...(order.istick6 === false
+              ? { isShippingName: order.isShippingName ?? "" }
+              : {}),
           },
         },
       },
