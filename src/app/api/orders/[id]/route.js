@@ -15,6 +15,7 @@ export async function PUT(request, { params }) {
     delete data.istick2;
     delete data.istick4;
     delete data.istick5;
+    delete data.istick6;
     delete data.isShippingName;
     delete data.reconciled;
     delete data.reconciledDate;

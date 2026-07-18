@@ -3660,11 +3660,14 @@ const OrderList = () => {
   const filteredOrdersForExcel = orders
     .filter(
       (order) =>
-        order.saleReport === "DONE" &&
-        order.istick === true &&
-        order.deliveryStatus === "ĐÃ GỬI HÀNG" &&
-        order.trackingCode === "" &&
-        (order.istick4 ?? false) === false,
+        (order) =>
+          order.saleReport === "DONE" &&
+          order.istick === true &&
+          order.deliveryStatus === "ĐÃ GỬI HÀNG" &&
+          order.trackingCode === "" &&
+          (order.isShippingName ?? "") === "" &&
+          (order.istick6 ?? false) === false &&
+          (order.istick4 ?? false) === false
     )
     .map((order) => ({
       STT: order.stt,
