@@ -3663,7 +3663,7 @@ const OrderList = () => {
 
   const filteredOrdersForExcel = orders
     .filter(
-      (order) => (order) =>
+      (order) => 
         order.saleReport === "DONE" &&
         order.istick === true &&
         order.deliveryStatus === "ĐÃ GỬI HÀNG" &&
