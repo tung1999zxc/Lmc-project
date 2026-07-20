@@ -3668,10 +3668,18 @@ const OrderList = () => {
         order.istick === true &&
         order.deliveryStatus === "ĐÃ GỬI HÀNG" &&
         order.trackingCode === "" &&
-        (order.isShippingName ?? "") === "" &&
-        (order.istick6 ?? false) === false &&
         (order.istick4 ?? false) === false,
     )
+    // .filter(
+    //   (order) => (order) =>
+    //     order.saleReport === "DONE" &&
+    //     order.istick === true &&
+    //     order.deliveryStatus === "ĐÃ GỬI HÀNG" &&
+    //     order.trackingCode === "" &&
+    //     (order.isShippingName ?? "") === "" &&
+    //     (order.istick6 ?? false) === false &&
+    //     (order.istick4 ?? false) === false,
+    // )
     .map((order) => ({
       STT: order.stt,
       NAME: order.customerName,
