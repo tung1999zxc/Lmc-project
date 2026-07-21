@@ -1628,6 +1628,8 @@ const OrderList = () => {
           id: o.id,
           istick6: o.istick6,
           isShippingName: o.istick6 === false ? "" : o.isShippingName,
+          deliveryStatus: o.istick6 === false ? "" : o.deliveryStatus,
+          shippingDate1: o.istick6 === false ? "" : o.shippingDate1,
         })),
       });
       messageApi.success(response.data.message || "Đã lưu cập nhật các đơn");

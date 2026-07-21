@@ -12,7 +12,7 @@ export async function POST(req) {
           $set: {
             istick6: order.istick6,
             ...(order.istick6 === false
-              ? { isShippingName: order.isShippingName ?? "" }
+              ? { isShippingName: order.isShippingName ?? "" , deliveryStatus: order.deliveryStatus ?? "", shippingDate1: order.shippingDate1 ?? "" }
               : {}),
           },
         },
