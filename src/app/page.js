@@ -3577,10 +3577,16 @@ const columns = useMemo(() => [
             <>
             <Row gutter={[16, 16]} style={{ marginTop: "2rem" }}>
               <Col xs={24} md={12}>
-                
+                <div className="card-mkt-chart" style={{ padding: "16px", marginBottom: 16 }}>
+                  <h3>👥 Doanh số Nhân viên MKT</h3>
+                  <GroupedDoubleBarChartComponent data={employeeChartDataNew} />
+                </div>
               </Col>
               <Col xs={24} md={12}>
-               
+                <div className="card-mkt-daily" style={{ padding: "16px", marginBottom: 16 }}>
+                  <h3>{isFilterApplied ? "📅 Doanh số hàng ngày" : "📅 Doanh số hàng ngày"}</h3>
+                  <GroupedDoubleBarChartComponent data={dailyChartDataNew} />
+                </div>
               </Col>
             </Row>
             <Row gutter={[16, 16]} style={{ marginTop: "2rem" }}>

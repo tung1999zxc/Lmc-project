@@ -1,0 +1,357 @@
+/* ============================================================
+   LMC THEME — ported from lmc-leader-mkt reference mockup
+   Only visual styling. No component logic lives in this file.
+   ============================================================ */
+
+:root {
+  --lmc-gold: #c9952a;
+  --lmc-gold-light: #f5d67a;
+  --lmc-gold-dark: #a87820;
+  --lmc-purple: #7c3aed;
+  --lmc-sidebar: #0e1420;
+  --lmc-sidebar2: #0a0f18;
+  --lmc-sidebar-hover: #192030;
+  --lmc-bg: #f7f8fb;
+  --lmc-white: #fff;
+  --lmc-border: #e6e9f0;
+  --lmc-text: #1a1e2e;
+  --lmc-sub: #6b7280;
+  --lmc-light: #9ca3af;
+  --lmc-green: #16a34a;
+  --lmc-green-bg: #f0fdf4;
+  --lmc-red: #dc2626;
+  --lmc-red-bg: #fef2f2;
+  --lmc-blue: #2563eb;
+  --lmc-orange: #ea580c;
+}
+
+body {
+  background: var(--lmc-bg) !important;
+}
+
+/* ── Sidebar shell ─────────────────────────────────────────── */
+.lmc-sider .ant-layout-sider-children {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: linear-gradient(180deg, var(--lmc-sidebar) 0%, var(--lmc-sidebar2) 100%);
+}
+
+.lmc-sider,
+.lmc-sider.ant-layout-sider,
+.lmc-sider .ant-layout-sider-trigger {
+  background: var(--lmc-sidebar2) !important;
+}
+
+.lmc-sidebar-logo {
+  padding: 16px 16px 13px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: rgba(0, 0, 0, 0.2);
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.lmc-gem {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  background: linear-gradient(135deg, var(--lmc-gold), #8a5d10);
+  border: 2px solid rgba(201, 149, 42, 0.55);
+  box-shadow: 0 2px 12px rgba(201, 149, 42, 0.35);
+}
+
+.lmc-logo-text {
+  font-size: 13px;
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: 1px;
+}
+
+.lmc-logo-sub {
+  font-size: 9px;
+  color: rgba(201, 149, 42, 0.65);
+  letter-spacing: 2.5px;
+  text-transform: uppercase;
+  margin-top: 1px;
+  font-weight: 600;
+}
+
+.lmc-sidebar-user {
+  padding: 13px 16px;
+  border-bottom: none;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: linear-gradient(90deg, rgba(201, 149, 42, 0.08), transparent);
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.lmc-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  background: linear-gradient(135deg, var(--lmc-gold), #8a5d10);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 700;
+  color: #fff;
+  box-shadow: 0 2px 8px rgba(201, 149, 42, 0.4);
+}
+
+.lmc-user-name {
+  font-size: 12.5px;
+  color: #fff;
+  font-weight: 700;
+}
+
+.lmc-user-role {
+  font-size: 10px;
+  color: var(--lmc-gold-light);
+  margin-top: 2px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+.lmc-sidebar-bottom {
+  padding: 11px;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.lmc-logout-btn {
+  width: 100%;
+  padding: 9px;
+  background: rgba(255, 255, 255, 0.03) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  border-radius: 9px !important;
+  color: rgba(255, 255, 255, 0.6) !important;
+  font-size: 12px !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+}
+
+.lmc-logout-btn:hover {
+  background: rgba(220, 38, 38, 0.14) !important;
+  border-color: rgba(220, 38, 38, 0.3) !important;
+  color: #fca5a5 !important;
+}
+
+/* Navigation menu (SidebarMenu.js is unchanged, only restyled) */
+.lmc-sider .ant-menu-dark,
+.lmc-sider .ant-menu-dark .ant-menu-sub {
+  background: transparent !important;
+}
+
+.lmc-sider .ant-menu-item,
+.lmc-sider .ant-menu-submenu-title {
+  color: rgba(255, 255, 255, 0.55) !important;
+  font-size: 12.5px !important;
+  border-radius: 8px !important;
+  margin: 2px 8px !important;
+  width: calc(100% - 16px) !important;
+}
+
+.lmc-sider .ant-menu-item:hover,
+.lmc-sider .ant-menu-submenu-title:hover {
+  background: var(--lmc-sidebar-hover) !important;
+  color: rgba(255, 255, 255, 0.92) !important;
+}
+
+.lmc-sider .ant-menu-item-selected {
+  background: linear-gradient(90deg, rgba(201, 149, 42, 0.22), rgba(201, 149, 42, 0.05)) !important;
+  color: var(--lmc-gold-light) !important;
+  box-shadow: inset 0 0 0 1px rgba(201, 149, 42, 0.25);
+}
+
+.lmc-sider .ant-menu-item-selected::after {
+  border-color: var(--lmc-gold) !important;
+}
+
+/* ── Topbar ────────────────────────────────────────────────── */
+.lmc-topbar {
+  background: linear-gradient(90deg, #15102499, #0e142099) !important;
+  background-color: #0f1420 !important;
+  border-bottom: 1px solid rgba(201, 149, 42, 0.18);
+}
+
+.lmc-topbar-name {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: #fff;
+}
+
+.lmc-role-badge {
+  padding: 3px 10px;
+  background: linear-gradient(135deg, rgba(201, 149, 42, 0.25), rgba(201, 149, 42, 0.1));
+  border: 1px solid rgba(201, 149, 42, 0.4);
+  border-radius: 20px;
+  font-size: 10.5px;
+  color: var(--lmc-gold-light);
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  margin-left: 10px;
+}
+
+.lmc-topbar .lmc-logout-btn {
+  width: auto;
+  padding: 7px 13px !important;
+  background: rgba(220, 38, 38, 0.12) !important;
+  border: 1px solid rgba(220, 38, 38, 0.25) !important;
+  color: #fca5a5 !important;
+}
+
+.lmc-topbar .lmc-logout-btn:hover {
+  background: rgba(220, 38, 38, 0.22) !important;
+}
+
+/* ── Content shell ─────────────────────────────────────────── */
+.ant-layout-content {
+  background: var(--lmc-bg);
+}
+
+/* ── Cards / summary banners / tables (reusable) ─────────────── */
+.lmc-card {
+  background: var(--lmc-white);
+  border: 1px solid var(--lmc-border);
+  border-radius: 13px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+  overflow: hidden;
+  margin-bottom: 16px;
+}
+
+.lmc-card .ant-table-wrapper {
+  margin: 0;
+}
+
+.lmc-summary-banner {
+  background: #fce4ec;
+  border: 1px solid #f48fb1;
+  border-radius: 8px;
+  padding: 11px 16px;
+  margin-bottom: 16px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #c62828;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.lmc-filter-bar {
+  background: var(--lmc-white);
+  border: 1px solid var(--lmc-border);
+  border-radius: 12px;
+  padding: 12px 16px;
+  margin-bottom: 16px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+}
+
+.lmc-section-title {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: var(--lmc-text);
+  margin-bottom: 10px;
+}
+
+/* ── AntD component reskin (site-wide) ───────────────────────── */
+.ant-btn-primary {
+  background: var(--lmc-gold) !important;
+  border-color: var(--lmc-gold) !important;
+  color: #3a2000 !important;
+  font-weight: 600 !important;
+}
+
+.ant-btn-primary:hover,
+.ant-btn-primary:focus {
+  background: var(--lmc-gold-light) !important;
+  border-color: var(--lmc-gold-light) !important;
+  color: #3a2000 !important;
+}
+
+.ant-btn-dangerous.ant-btn-primary {
+  background: var(--lmc-red) !important;
+  border-color: var(--lmc-red) !important;
+  color: #fff !important;
+}
+
+.ant-btn-dangerous.ant-btn-primary:hover {
+  background: #b91c1c !important;
+  border-color: #b91c1c !important;
+}
+
+.ant-table {
+  border-radius: 13px;
+  overflow: hidden;
+}
+
+.ant-table-thead > tr > th {
+  background: #fafbfd !important;
+  color: var(--lmc-light) !important;
+  font-size: 11px !important;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  font-weight: 700 !important;
+  border-bottom: 1px solid var(--lmc-border) !important;
+}
+
+.ant-table-tbody > tr > td {
+  border-bottom: 1px solid #f1f3f9 !important;
+}
+
+.ant-table-tbody > tr:hover > td {
+  background: #fafbfe !important;
+}
+
+.ant-select-focused .ant-select-selector,
+.ant-select:hover .ant-select-selector {
+  border-color: var(--lmc-gold) !important;
+}
+
+.ant-picker:hover,
+.ant-picker-focused {
+  border-color: var(--lmc-gold) !important;
+}
+
+.ant-pagination-item-active {
+  border-color: var(--lmc-gold) !important;
+}
+
+.ant-pagination-item-active a {
+  color: var(--lmc-gold-dark) !important;
+}
+
+.ant-tabs-tab.ant-tabs-tab-active .ant-tabs-tab-btn {
+  color: var(--lmc-gold-dark) !important;
+}
+
+.ant-tabs-ink-bar {
+  background: var(--lmc-gold) !important;
+}
+
+/* Percent / status pills (used inline via style, class kept for reuse) */
+.lmc-pill {
+  display: inline-block;
+  padding: 3px 9px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 700;
+  min-width: 58px;
+  text-align: center;
+}
+.lmc-pill.green { background: var(--lmc-green-bg); color: var(--lmc-green); }
+.lmc-pill.orange { background: #fff7ed; color: var(--lmc-orange); }
+.lmc-pill.red { background: var(--lmc-red-bg); color: var(--lmc-red); }

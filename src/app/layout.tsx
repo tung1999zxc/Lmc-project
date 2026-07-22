@@ -2,7 +2,7 @@
 
 import "@ant-design/v5-patch-for-react-19";
 import React, { useEffect, ReactNode, useState } from "react";
-
+import "./custom.css";
 import { Button, ConfigProvider } from "antd";
 import viVN from "antd/locale/vi_VN";
 import { LogoutOutlined } from "@ant-design/icons";
