@@ -1774,75 +1774,7 @@ const teamChartDataNew2 = useMemo(() => {
     );
   }
 
-  // Tạo marketingReportData1 mới đúng điều kiện
- const marketingReportData3 = mktEmployees.map((emp, index) => {
-  const nameLC = emp.name.trim().toLowerCase();
-
-  // 1️⃣ Doanh số hôm nay
-  const totalToday = orders
-    .filter((order) => {
-      const orderDate = new Date(order.createdAt);
-      return (
-        order.mkt.trim().toLowerCase() === nameLC &&
-        orderDate >= startOfToday &&
-        orderDate < endOfToday
-      );
-    })
-    .reduce((sum, order) => sum + order.profit, 0);
-
-  // 1b️⃣ Số đơn hôm nay
-  const orderCountToday = orders
-    .filter((order) => {
-      const orderDate = new Date(order.createdAt);
-      return (
-        order.mkt.trim().toLowerCase() === nameLC &&
-        orderDate >= startOfToday &&
-        orderDate < endOfToday
-      );
-    }).length;
-
-  // 2️⃣ Doanh số từ đầu tháng đến nay
-  const now = new Date();
-  const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-  const twoDaysAgo = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 2);
-
-  const endOfMonth = new Date(
-    now.getFullYear(),
-    now.getMonth() + 1,
-    0,
-    23,
-    59,
-    59,
-    999
-  );
-
-  const totalMonth = orders
-    .filter((order) => {
-      const orderDate = new Date(order.createdAt);
-      return (
-        order.mkt.trim().toLowerCase() === nameLC &&
-        orderDate >= startOfMonth &&
-        orderDate <= endOfMonth
-      );
-    })
-    .reduce((sum, order) => sum + order.profit, 0);
-
-  // 3️⃣ Chi phí ads trong tháng hiện tại (giữ nguyên)
-  const adsThisMonth = adsMoneyData
-    .filter((ad) => {
-      const adDate = new Date(ad.createdAt);
-      return (
-        ad.name.trim().toLowerCase() === nameLC &&
-        adDate >= twoDaysAgo &&
-        adDate <= endOfMonth
-      );
-    })
-    .reduce((sum, ad) => sum + (ad.request1 + ad.request2), 0);
-
-  return { key: index, name: emp.name, totalToday, totalMonth, adsThisMonth, orderCountToday };
-});
-
-// 🧩 Chọn người có doanh số thấp nhất từ đầu tháng
+  // 🧩 Chọn người có doanh số thấp nhất từ đầu tháng
 const excludedNames = [
   "đỗ ngọc ánh",
   "trần ngọc diện",
@@ -1852,54 +1784,130 @@ const excludedNames = [
   "Phan Thế Phong",
 ];
 
-const warningEmployeesList = marketingReportData3.filter((emp) => {
-  const name = emp.name.trim().toLowerCase();
+// Cache tạm cho marketingReportData3 để tránh tính lại nhiều lần
+const _mktReportCache = React.useRef({ key: null, data: null });
 
-  return (
-    emp.adsThisMonth > 0 &&
-    !excludedNames.includes(name)
-  );
-});
+const marketingReportData3 = React.useMemo(() => {
+  const cacheKey = `${mktEmployees.length}-${filteredOrdersByArea.length}-${adsMoneyData.length}`;
+  if (_mktReportCache.current.key === cacheKey && _mktReportCache.current.data) {
+    return _mktReportCache.current.data;
+  }
 
-const minMonthSales = Math.min(...warningEmployeesList.map(e => e.totalMonth));
-const lowestMonthEmployees = warningEmployeesList.filter(
-  e => e.totalMonth === minMonthSales
-);
+  const now = new Date();
+  const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+  const twoDaysAgo = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 2);
+  const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999);
+  const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const endOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
+
+  // Single pass: build maps for all calculations
+  const todayByName = new Map();
+  const monthByName = new Map();
+  const adsByName = new Map();
+  const orderCountByName = new Map();
+
+  for (let i = 0; i < orders.length; i++) {
+    const o = orders[i];
+    const nameLC = (o.mkt || "").trim().toLowerCase();
+    if (!nameLC) continue;
+    const orderDate = new Date(o.createdAt);
+    const profit = o.profit || 0;
+
+    if (orderDate >= startOfToday && orderDate < endOfToday) {
+      todayByName.set(nameLC, (todayByName.get(nameLC) || 0) + profit);
+      orderCountByName.set(nameLC, (orderCountByName.get(nameLC) || 0) + 1);
+    }
+    if (orderDate >= startOfMonth && orderDate <= endOfMonth) {
+      monthByName.set(nameLC, (monthByName.get(nameLC) || 0) + profit);
+    }
+  }
+
+  for (let i = 0; i < adsMoneyData.length; i++) {
+    const a = adsMoneyData[i];
+    const nameLC = (a.name || "").trim().toLowerCase();
+    if (!nameLC) continue;
+    const adDate = new Date(a.createdAt);
+    if (adDate >= twoDaysAgo && adDate <= endOfMonth) {
+      adsByName.set(nameLC, (adsByName.get(nameLC) || 0) + (a.request1 || 0) + (a.request2 || 0));
+    }
+  }
+
+  const result = mktEmployees.map((emp, index) => {
+    const nameLC = emp.name.trim().toLowerCase();
+    return {
+      key: index,
+      name: emp.name,
+      totalToday: todayByName.get(nameLC) || 0,
+      totalMonth: monthByName.get(nameLC) || 0,
+      adsThisMonth: adsByName.get(nameLC) || 0,
+      orderCountToday: orderCountByName.get(nameLC) || 0,
+    };
+  });
+
+  _mktReportCache.current = { key: cacheKey, data: result };
+  return result;
+}, [mktEmployees, orders, adsMoneyData]);
+
+const warningEmployeesList = React.useMemo(() => {
+  return marketingReportData3.filter((emp) => {
+    const name = emp.name.trim().toLowerCase();
+    return emp.adsThisMonth > 0 && !excludedNames.includes(name);
+  });
+}, [marketingReportData3]);
+
+const minMonthSales = React.useMemo(() => {
+  if (warningEmployeesList.length === 0) return 0;
+  let min = warningEmployeesList[0].totalMonth;
+  for (let i = 1; i < warningEmployeesList.length; i++) {
+    if (warningEmployeesList[i].totalMonth < min) min = warningEmployeesList[i].totalMonth;
+  }
+  return min;
+}, [warningEmployeesList]);
+
+const lowestMonthEmployees = React.useMemo(() => {
+  return warningEmployeesList.filter(e => e.totalMonth === minMonthSales);
+}, [warningEmployeesList, minMonthSales]);
 
 // Nếu nhiều người cùng doanh số thấp nhất → chọn ngẫu nhiên 1 người
-const randomEmployee =
-  lowestMonthEmployees.length > 0
-    ? lowestMonthEmployees[Math.floor(Math.random() * lowestMonthEmployees.length)]
-    : null;
+const randomEmployee = React.useMemo(() => {
+  if (lowestMonthEmployees.length === 0) return null;
+  return lowestMonthEmployees[Math.floor(Math.random() * lowestMonthEmployees.length)];
+}, [lowestMonthEmployees]);
 
-const top5Employees2 = randomEmployee ? [randomEmployee] : [];
+const top5Employees2 = React.useMemo(() => {
+  return randomEmployee ? [randomEmployee] : [];
+}, [randomEmployee]);
 
-  // Lọc chỉ những người có ads tháng này > 0
-  const excludedNames2 = ["quách phú"];
+// Lọc chỉ những người có ads tháng này > 0
+const excludedNames2 = ["quách phú"];
 
-const top5Employees = marketingReportData3
-  .filter((emp) => {
-    const name = emp.name.trim().toLowerCase();
-    return emp.adsThisMonth > 0 && !excludedNames2.includes(name);
-  })
-  .sort((a, b) => b.totalToday - a.totalToday)
-  .slice(0, 3);
-  // Lọc ra nhân viên có chi phí ads tháng này > 0
+const top5Employees = React.useMemo(() => {
+  return marketingReportData3
+    .filter((emp) => {
+      const name = emp.name.trim().toLowerCase();
+      return emp.adsThisMonth > 0 && !excludedNames2.includes(name);
+    })
+    .sort((a, b) => b.totalToday - a.totalToday)
+    .slice(0, 3);
+}, [marketingReportData3]);
 
-  // Top 10 theo doanh thu hôm nay (cùng điều kiện lọc với top 3 để đồng bộ)
-  const top10RevenueEmployees = marketingReportData3
+// Top 10 theo doanh thu hôm nay
+const top10RevenueEmployees = React.useMemo(() => {
+  return marketingReportData3
     .filter((emp) => {
       const name = emp.name.trim().toLowerCase();
       return emp.adsThisMonth > 0 && !excludedNames2.includes(name);
     })
     .sort((a, b) => b.totalToday - a.totalToday)
     .slice(0, 10);
+}, [marketingReportData3]);
 
-
-  const top1Employees = marketingReportData3
+const top1Employees = React.useMemo(() => {
+  return marketingReportData3
     .filter((emp) => emp.adsThisMonth > 0)
     .sort((a, b) => b.totalToday - a.totalToday)
     .slice(0, 1);
+}, [marketingReportData3]);
 
   // Lọc ra các thành viên mkt thuộc team của currentUser
   // Lọc nhân viên MKT thuộc team
@@ -2645,89 +2653,51 @@ const top5Employees = marketingReportData3
     },
   ];
 
-  // Thống kê để dục chuyển khoản
-  const giaoThanhCongKW = filteredOrdersByArea
-    .filter(
-      (order) =>
-        (order.paymentStatus === "CHƯA THANH TOÁN" ||
-          order.paymentStatus === "") &&
-        order.deliveryStatus === "GIAO THÀNH CÔNG" &&
-        order.saleReport === "DONE"
-    )
-    .reduce((sum, order) => sum + order.revenue, 0);
-  const daGuiHangKW = filteredOrdersByArea
-    .filter(
-      (order) =>
-        (order.paymentStatus === "CHƯA THANH TOÁN" ||
-          order.paymentStatus === "") &&
-        order.deliveryStatus === "ĐÃ GỬI HÀNG" &&
-        order.saleReport === "DONE"
-    )
-    .reduce((sum, order) => sum + order.revenue, 0);
-  const chuaGuiHangKW = filteredOrdersByArea
-    .filter(
-      (order) =>
-        (order.paymentStatus === "CHƯA THANH TOÁN" ||
-          order.paymentStatus === "") &&
-        (order.deliveryStatus === "" ||
-          order.deliveryStatus === "BỊ BẮT CHỜ GỬI LẠI") &&
-        order.saleReport === "DONE"
-    )
-    .reduce((sum, order) => sum + order.revenue, 0);
-  const SLgiaoThanhCongKW = filteredOrdersByArea.filter(
-    (order) =>
-      (order.paymentStatus === "CHƯA THANH TOÁN" ||
-        order.paymentStatus === "") &&
-      order.deliveryStatus === "GIAO THÀNH CÔNG" &&
-      order.saleReport === "DONE"
-  );
+  // Thống kê để dục chuyển khoản - optimized with single pass
+  const transferStats = { giaoThanhCong: 0, daGuiHang: 0, chuaGuiHang: 0, slGiao: 0, slDaGui: 0, slChuaGui: 0 };
+  for (let i = 0; i < filteredOrdersByArea.length; i++) {
+    const o = filteredOrdersByArea[i];
+    if ((o.paymentStatus === "CHƯA THANH TOÁN" || o.paymentStatus === "") && o.saleReport === "DONE") {
+      const revenue = o.revenue || 0;
+      if (o.deliveryStatus === "GIAO THÀNH CÔNG") {
+        transferStats.giaoThanhCong += revenue;
+        transferStats.slGiao++;
+      } else if (o.deliveryStatus === "ĐÃ GỬI HÀNG") {
+        transferStats.daGuiHang += revenue;
+        transferStats.slDaGui++;
+      } else if (o.deliveryStatus === "" || o.deliveryStatus === "BỊ BẮT CHỜ GỬI LẠI") {
+        transferStats.chuaGuiHang += revenue;
+        transferStats.slChuaGui++;
+      }
+    }
+  }
 
-  const SLdaGuiHangKW = filteredOrdersByArea.filter(
-    (order) =>
-      (order.paymentStatus === "CHƯA THANH TOÁN" ||
-        order.paymentStatus === "") &&
-      order.deliveryStatus === "ĐÃ GỬI HÀNG" &&
-      order.saleReport === "DONE"
-  );
-
-  const SLchuaGuiHangKW = filteredOrdersByArea.filter(
-    (order) =>
-      (order.paymentStatus === "CHƯA THANH TOÁN" ||
-        order.paymentStatus === "") &&
-      (order.deliveryStatus === "" ||
-        order.deliveryStatus === "BỊ BẮT CHỜ GỬI LẠI") &&
-      order.saleReport === "DONE"
-  );
-
-  const tong = giaoThanhCongKW + daGuiHangKW + chuaGuiHangKW;
+  const tong = transferStats.giaoThanhCong + transferStats.daGuiHang + transferStats.chuaGuiHang;
 
   const transferData = [
     {
       key: "KW",
       currency: "KW",
-      giaoThanhCong: giaoThanhCongKW,
-      daGuiHang: daGuiHangKW,
-      chuaGuiHang: chuaGuiHangKW,
+      giaoThanhCong: transferStats.giaoThanhCong,
+      daGuiHang: transferStats.daGuiHang,
+      chuaGuiHang: transferStats.chuaGuiHang,
       tong: tong,
     },
     {
       key: "VND",
       currency: "VND",
-      giaoThanhCong: giaoThanhCongKW * exchangeRate,
-      daGuiHang: daGuiHangKW * exchangeRate,
-      chuaGuiHang: chuaGuiHangKW * exchangeRate,
+      giaoThanhCong: transferStats.giaoThanhCong * exchangeRate,
+      daGuiHang: transferStats.daGuiHang * exchangeRate,
+      chuaGuiHang: transferStats.chuaGuiHang * exchangeRate,
       tong: tong * exchangeRate,
     },
     {
       key: "SL",
       currency: "SL ĐƠN",
-      giaoThanhCong: SLgiaoThanhCongKW.length,
-      daGuiHang: SLdaGuiHangKW.length,
-      chuaGuiHang: SLchuaGuiHangKW.length,
-      tong:
-        SLgiaoThanhCongKW.length +
-        SLdaGuiHangKW.length +
-        SLchuaGuiHangKW.length,
+      giaoThanhCong: transferStats.slGiao,
+      daGuiHang: transferStats.slDaGui,
+      chuaGuiHang: transferStats.slChuaGui,
+      tong: transferStats.slGiao + transferStats.slDaGui + transferStats.slChuaGui,
     },
   ];
 
@@ -2766,90 +2736,72 @@ const top5Employees = marketingReportData3
     },
   ];
 
-  // THỰC TẾ ĐÃ TRỪ 5
-  const daThanhToanKW3 = filteredOrdersByArea0mkt
-    .filter((order) => order.paymentStatus === "ĐÃ THANH TOÁN")
-    .reduce((sum, order) => sum + order.profit, 0);
-  const chuaThanhToanKW3 = filteredOrdersByArea0mkt
-    .filter(
-      (order) =>
-        order.paymentStatus === "CHƯA THANH TOÁN" || order.paymentStatus === ""
-    )
-    .reduce((sum, order) => sum + order.profit, 0);
+  // THỰC TẾ ĐÃ TRỪ 5 - optimized single pass
+  let daThanhToanKW3 = 0, chuaThanhToanKW3 = 0;
+  for (let i = 0; i < filteredOrdersByArea0mkt.length; i++) {
+    const o = filteredOrdersByArea0mkt[i];
+    const profit = o.profit || 0;
+    if (o.paymentStatus === "ĐÃ THANH TOÁN") daThanhToanKW3 += profit;
+    else if (o.paymentStatus === "CHƯA THANH TOÁN" || o.paymentStatus === "") chuaThanhToanKW3 += profit;
+  }
   const tongKW3 = (daThanhToanKW3 + chuaThanhToanKW3) * 0.95;
 
-  const totalAdsKW3 = filteredAdsByArea2.reduce(
-    (sum, ad) => sum + (ad.request1 + ad.request2),
-    0
-  );
-  const percentAds3 =
-    tongKW3 > 0
-      ? Number(((totalAdsKW3 / (tongKW3 * exchangeRate)) * 100).toFixed(2))
-      : 0;
+  let totalAdsKW3 = 0;
+  for (let i = 0; i < filteredAdsByArea2.length; i++) {
+    const a = filteredAdsByArea2[i];
+    totalAdsKW3 += (a.request1 || 0) + (a.request2 || 0);
+  }
+  const percentAds3 = tongKW3 > 0 ? Number(((totalAdsKW3 / (tongKW3 * exchangeRate)) * 100).toFixed(2)) : 0;
 
-  //bang trong team    
-  const daThanhToanKW4 = filteredOrdersByArea
-    .filter((order) => order.paymentStatus === "ĐÃ THANH TOÁN")
-    .reduce((sum, order) => sum + order.profit, 0);
-  const chuaThanhToanKW4 = filteredOrdersByArea
-    .filter(
-      (order) =>
-        order.paymentStatus === "CHƯA THANH TOÁN" || order.paymentStatus === ""
-    )
-    .reduce((sum, order) => sum + order.profit, 0);
+  //bang trong team - optimized single pass
+  let daThanhToanKW4 = 0, chuaThanhToanKW4 = 0;
+  for (let i = 0; i < filteredOrdersByArea.length; i++) {
+    const o = filteredOrdersByArea[i];
+    const profit = o.profit || 0;
+    if (o.paymentStatus === "ĐÃ THANH TOÁN") daThanhToanKW4 += profit;
+    else if (o.paymentStatus === "CHƯA THANH TOÁN" || o.paymentStatus === "") chuaThanhToanKW4 += profit;
+  }
   const tongKW4 = (daThanhToanKW4 + chuaThanhToanKW4) * 0.95;
 
-  const totalAdsKW4 = filteredAdsByArea.reduce(
-    (sum, ad) => sum + (ad.request1 + ad.request2),
-    0
-  );
-  const percentAds4 =
-    tongKW4 > 0
-      ? Number(((totalAdsKW4 / (tongKW4 * exchangeRate)) * 100).toFixed(2))
-      : 0;
-  // Bảng Tổng
-  const daThanhToanKW = filteredOrdersByArea
-    .filter((order) => order.paymentStatus === "ĐÃ THANH TOÁN")
-    .reduce((sum, order) => sum + order.revenue, 0);
-  const chuaThanhToanKW = filteredOrdersByArea
-    .filter(
-      (order) =>
-        order.paymentStatus === "CHƯA THANH TOÁN" || order.paymentStatus === ""
-    )
-    .reduce((sum, order) => sum + order.revenue, 0);
+  let totalAdsKW4 = 0;
+  for (let i = 0; i < filteredAds.length; i++) {
+    const a = filteredAds[i];
+    totalAdsKW4 += (a.request1 || 0) + (a.request2 || 0);
+  }
+  const percentAds4 = tongKW4 > 0 ? Number(((totalAdsKW4 / (tongKW4 * exchangeRate)) * 100).toFixed(2)) : 0;
+
+  // Bảng Tổng - optimized single pass
+  let daThanhToanKW = 0, chuaThanhToanKW = 0;
+  for (let i = 0; i < filteredOrdersByArea.length; i++) {
+    const o = filteredOrdersByArea[i];
+    const revenue = o.revenue || 0;
+    if (o.paymentStatus === "ĐÃ THANH TOÁN") daThanhToanKW += revenue;
+    else if (o.paymentStatus === "CHƯA THANH TOÁN" || o.paymentStatus === "") chuaThanhToanKW += revenue;
+  }
   const tongKW = daThanhToanKW + chuaThanhToanKW;
   const thanhToanDat = tongKW > 0 ? (daThanhToanKW / tongKW) * 100 : 0;
-  const totalAdsKW = filteredAdsByArea2.reduce(
-    (sum, ad) => sum + (ad.request1 + ad.request2),
-    0
-  );
-  const percentAds =
-    tongKW > 0
-      ? Number(((totalAdsKW / (tongKW * exchangeRate)) * 100).toFixed(2))
-      : 0;
+  let totalAdsKW = 0;
+  for (let i = 0; i < filteredAdsByArea2.length; i++) {
+    const a = filteredAdsByArea2[i];
+    totalAdsKW += (a.request1 || 0) + (a.request2 || 0);
+  }
+  const percentAds = tongKW > 0 ? Number(((totalAdsKW / (tongKW * exchangeRate)) * 100).toFixed(2)) : 0;
 
-  const daThanhToanKWSALE = filteredOrdersByArea
-    .filter((order) => order.paymentStatus === "ĐÃ THANH TOÁN")
-    .reduce((sum, order) => sum + order.profit, 0);
-  const chuaThanhToanKWSALE = filteredOrdersByArea
-    .filter(
-      (order) =>
-        order.paymentStatus === "CHƯA THANH TOÁN" || order.paymentStatus === ""
-    )
-    .reduce((sum, order) => sum + order.profit, 0);
+  let daThanhToanKWSALE = 0, chuaThanhToanKWSALE = 0;
+  for (let i = 0; i < filteredOrdersByArea.length; i++) {
+    const o = filteredOrdersByArea[i];
+    const profit = o.profit || 0;
+    if (o.paymentStatus === "ĐÃ THANH TOÁN") daThanhToanKWSALE += profit;
+    else if (o.paymentStatus === "CHƯA THANH TOÁN" || o.paymentStatus === "") chuaThanhToanKWSALE += profit;
+  }
   const tongKWSALE = daThanhToanKWSALE + chuaThanhToanKWSALE;
-  const thanhToanDatSALE =
-    tongKWSALE > 0 ? (daThanhToanKWSALE / tongKWSALE) * 100 : 0;
-  const totalAdsKWSALE = filteredAdsByArea2.reduce(
-    (sum, ad) => sum + (ad.request1 + ad.request2),
-    0
-  );
-  const percentAdsSALE =
-    tongKWSALE > 0
-      ? Number(
-          ((totalAdsKWSALE / (tongKWSALE * exchangeRate)) * 100).toFixed(2)
-        )
-      : 0;
+  const thanhToanDatSALE = tongKWSALE > 0 ? (daThanhToanKWSALE / tongKWSALE) * 100 : 0;
+  let totalAdsKWSALE = 0;
+  for (let i = 0; i < filteredAdsByArea2.length; i++) {
+    const a = filteredAdsByArea2[i];
+    totalAdsKWSALE += (a.request1 || 0) + (a.request2 || 0);
+  }
+  const percentAdsSALE = tongKWSALE > 0 ? Number(((totalAdsKWSALE / (tongKWSALE * exchangeRate)) * 100).toFixed(2)) : 0;
 
   if (
     isTeamLead ||
@@ -2884,26 +2836,22 @@ const top5Employees = marketingReportData3
     );
   }
 
-  // Bảng Tổng chỉ của các thành viên trong team
-  const daThanhToanKW2 = filteredOrdersByArea
-    .filter((order) => order.paymentStatus === "ĐÃ THANH TOÁN")
-    .reduce((sum, order) => sum + order.profit, 0);
-  const chuaThanhToanKW2 = filteredOrdersByArea
-    .filter(
-      (order) =>
-        order.paymentStatus === "CHƯA THANH TOÁN" || order.paymentStatus === ""
-    )
-    .reduce((sum, order) => sum + order.profit, 0);
+  // Bảng Tổng chỉ của các thành viên trong team - optimized
+  let daThanhToanKW2 = 0, chuaThanhToanKW2 = 0;
+  for (let i = 0; i < filteredOrdersByArea.length; i++) {
+    const o = filteredOrdersByArea[i];
+    const profit = o.profit || 0;
+    if (o.paymentStatus === "ĐÃ THANH TOÁN") daThanhToanKW2 += profit;
+    else if (o.paymentStatus === "CHƯA THANH TOÁN" || o.paymentStatus === "") chuaThanhToanKW2 += profit;
+  }
   const tongKW2 = daThanhToanKW2 + chuaThanhToanKW2;
   const thanhToanDat2 = tongKW2 > 0 ? (daThanhToanKW2 / tongKW2) * 100 : 0;
-  const totalAdsKW2 = filteredAds.reduce(
-    (sum, ad) => sum + (ad.request1 + ad.request2),
-    0
-  );
-  const percentAds2 =
-    tongKW2 > 0
-      ? Number(((totalAdsKW2 / (tongKW2 * exchangeRate)) * 100).toFixed(2))
-      : 0;
+  let totalAdsKW2 = 0;
+  for (let i = 0; i < filteredAds.length; i++) {
+    const a = filteredAds[i];
+    totalAdsKW2 += (a.request1 || 0) + (a.request2 || 0);
+  }
+  const percentAds2 = tongKW2 > 0 ? Number(((totalAdsKW2 / (tongKW2 * exchangeRate)) * 100).toFixed(2)) : 0;
   const totalData = [
   
     {

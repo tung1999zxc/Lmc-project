@@ -56,36 +56,42 @@ function GoldenCanvas({ onReady }) {
       };
     }
 
-    const NUM = 30; // matches HTML
+    const NUM = 18; // Giảm từ 30 để tăng performance
     const curves = Array.from({ length: NUM }, mkCurve);
 
     function evalCurve(c, tt) {
       const W = canvas.width, H = canvas.height;
       const pts = [];
-      const N = 120;
+      const N = 60; // Giảm từ 120 điểm xuống 60
+      const TWO_PI = Math.PI * 2;
+      const lenPx = c.len;
+      const ax = c.ax, ay = c.ay, bx = c.bx, by = c.by;
+      const px = c.px, py = c.py, qx = c.qx, qy = c.qy;
+      const rx = c.rx, ry = c.ry, ph = c.ph;
+      const W_012 = W * 0.12, H_010 = H * 0.10;
+
       for (let s = 0; s <= N; s++) {
         const u = s / N;
         let x = c.ox
-          + c.ax * Math.sin(u * Math.PI * 2 * c.len + tt * c.px + c.ph)
-          + c.bx * Math.cos(u * Math.PI * 3.3 * c.len + tt * c.qx + c.ph * 1.3);
+          + ax * Math.sin(u * TWO_PI * lenPx + tt * px + ph)
+          + bx * Math.cos(u * Math.PI * 3.3 * lenPx + tt * qx + ph * 1.3);
         let y = c.oy
-          + c.ay * Math.cos(u * Math.PI * 2 * c.len + tt * c.py + c.ph * 0.7)
-          + c.by * Math.sin(u * Math.PI * 3.7 * c.len + tt * c.qy + c.ph * 1.7);
-        x += W * 0.12 * Math.sin(tt * c.rx + c.ph * 2.1);
-        y += H * 0.10 * Math.cos(tt * c.ry + c.ph * 2.9);
-        pts.push({ x, y });
+          + ay * Math.cos(u * TWO_PI * lenPx + tt * py + ph * 0.7)
+          + by * Math.sin(u * Math.PI * 3.7 * lenPx + tt * qy + ph * 1.7);
+        x += W_012 * Math.sin(tt * rx + ph * 2.1);
+        y += H_010 * Math.cos(tt * ry + ph * 2.9);
+        pts.push(x, y); // Pack as flat array [x,y,x,y,...] for faster iteration
       }
       return pts;
     }
 
-    function drawCurve(c, tt) {
-      const pts = evalCurve(c, tt);
-      if (pts.length < 2) return;
+    function drawCurve(c, pts, tt) {
+      const len = pts.length;
+      if (len < 4) return;
       const pulse = 0.5 + 0.5 * Math.sin(tt * c.spd * 8 + c.ph);
       const alpha = c.alpha * (0.4 + 0.6 * pulse);
 
       ctx.save();
-      ctx.lineWidth = c.width;
       ctx.lineCap = "round";
       ctx.lineJoin = "round";
 
@@ -93,16 +99,13 @@ function GoldenCanvas({ onReady }) {
         ctx.lineWidth = c.width * 4;
         ctx.strokeStyle = GOLD + (alpha * 0.2).toFixed(3) + ")";
         ctx.beginPath();
-        ctx.moveTo(pts[0].x, pts[0].y);
-        for (let k = 1; k < pts.length; k++) ctx.lineTo(pts[k].x, pts[k].y);
+        ctx.moveTo(pts[0], pts[1]);
+        for (let k = 2; k < len; k += 2) ctx.lineTo(pts[k], pts[k + 1]);
         ctx.stroke();
         ctx.lineWidth = c.width * 2;
       }
 
-      const grd = ctx.createLinearGradient(
-        pts[0].x, pts[0].y,
-        pts[pts.length - 1].x, pts[pts.length - 1].y
-      );
+      const grd = ctx.createLinearGradient(pts[0], pts[1], pts[len - 2], pts[len - 1]);
       grd.addColorStop(0,    GOLD + (alpha * 0.05).toFixed(3) + ")");
       grd.addColorStop(0.25, GOLD + (alpha * 0.9 ).toFixed(3) + ")");
       grd.addColorStop(0.5,  PALE + (alpha * 1.0 ).toFixed(3) + ")");
@@ -112,8 +115,8 @@ function GoldenCanvas({ onReady }) {
       ctx.strokeStyle = grd;
       ctx.lineWidth = c.width;
       ctx.beginPath();
-      ctx.moveTo(pts[0].x, pts[0].y);
-      for (let k = 1; k < pts.length; k++) ctx.lineTo(pts[k].x, pts[k].y);
+      ctx.moveTo(pts[0], pts[1]);
+      for (let k = 2; k < len; k += 2) ctx.lineTo(pts[k], pts[k + 1]);
       ctx.stroke();
       ctx.restore();
     }
@@ -130,24 +133,37 @@ function GoldenCanvas({ onReady }) {
       ctx.fillRect(0, 0, W, H);
     }
 
-    function draw() {
+    let lastTime = 0;
+    let rafId;
+
+    function draw(now) {
+      rafId = requestAnimationFrame(draw);
+      // Frame rate limiting: chỉ vẽ mỗi ~33ms (~30fps) thay vì 60fps
+      if (now - lastTime < 33) return;
+      lastTime = now;
+
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       drawAmbient(t);
-      curves.forEach((c) => drawCurve(c, t));
+      for (let i = 0; i < NUM; i++) {
+        const pts = evalCurve(curves[i], t);
+        drawCurve(curves[i], pts, t);
+      }
       t += 1;
-      animId = requestAnimationFrame(draw);
     }
     // Vẽ frame đầu synchronously để canvas xuất hiện ngay frame paint đầu tiên
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     drawAmbient(t);
-    curves.forEach((c) => drawCurve(c, t));
+    for (let i = 0; i < NUM; i++) {
+      const pts = evalCurve(curves[i], t);
+      drawCurve(curves[i], pts, t);
+    }
     t += 1;
-    animId = requestAnimationFrame(draw);
+    rafId = requestAnimationFrame(draw);
     // Báo cho parent là canvas đã sẵn sàng
     if (onReady) onReady();
 
     return () => {
-      cancelAnimationFrame(animId);
+      cancelAnimationFrame(rafId);
       window.removeEventListener("resize", resize);
     };
   }, []);
@@ -170,26 +186,46 @@ function FloatingParticles() {
     const container = containerRef.current;
     if (!container) return;
 
-    // Create 120 floating dots
-    for (let i = 0; i < 120; i++) {
+    let mounted = true;
+
+    function createParticle() {
+      if (!mounted || !container) return;
       const d = document.createElement("div");
-      const sz = Math.random() * 3.5 + 0.8;
+      const size = 1 + Math.random() * 2.5;
       d.className = "fp";
       d.style.cssText = [
-        `width:${sz}px`,
-        `height:${sz}px`,
+        `width:${size}px`,
+        `height:${size}px`,
         `left:${Math.random() * 100}%`,
         `bottom:${Math.random() * 10}%`,
-        `--d:${(5 + Math.random() * 12).toFixed(1)}s`,
+        `--d:${(8 + Math.random() * 10).toFixed(1)}s`,
         `--delay:-${(Math.random() * 15).toFixed(1)}s`,
       ].join(";");
       container.appendChild(d);
     }
 
-    // Sparkle interval
+    // Tạo particles từ từ để không block main thread
+    const batchSize = 15;
+    let created = 0;
+    function createBatch() {
+      if (!mounted) return;
+      const end = Math.min(created + batchSize, 50); // Giảm từ 120 xuống 50
+      while (created < end) {
+        createParticle();
+        created++;
+      }
+      if (created < 50) {
+        requestAnimationFrame(createBatch);
+      }
+    }
+    requestAnimationFrame(createBatch);
+
+    // Giảm sparkle từ 200ms xuống 400ms
     const sparkInterval = setInterval(() => {
+      if (!mounted || !container) return;
       const s = document.createElement("div");
-      const size = Math.random() * 4 + 2;
+      const size = 3 + Math.random() * 3;
+      s.className = "fp-sparkle";
       s.style.cssText = [
         "position:absolute",
         `width:${size}px`,
@@ -197,18 +233,25 @@ function FloatingParticles() {
         "border-radius:50%",
         "background:#fff9e6",
         "pointer-events:none",
-        `left:${10 + Math.random() * 80}%`,
-        `top:${10 + Math.random() * 80}%`,
+        `left:${15 + Math.random() * 70}%`,
+        `top:${15 + Math.random() * 70}%`,
         "animation:sparkFade 0.6s ease-out forwards",
         "box-shadow:0 0 15px #c9952a,0 0 30px #fff",
         "z-index:2",
       ].join(";");
       container.appendChild(s);
-      setTimeout(() => s.remove(), 700);
-    }, 200);
+      setTimeout(() => {
+        if (s.parentNode) s.remove();
+      }, 700);
+    }, 400);
 
     return () => {
+      mounted = false;
       clearInterval(sparkInterval);
+      // Clean up particles on unmount
+      if (container) {
+        container.innerHTML = "";
+      }
     };
   }, []);
 
@@ -572,6 +615,10 @@ export default function LoginPage() {
         navigateWithCurtain("/orders");
         return;
       }
+ if (name === "Trần Hằng Nga") {
+        navigateWithCurtain("/orders2");
+        return;
+      }
  
       if (["lead", "leadSALE", "managerMKT", "managersale", "managerSALE"].includes(position)) {
         navigateWithCurtain("/");
@@ -585,8 +632,16 @@ export default function LoginPage() {
         navigateWithCurtain("/ordersjp");
         return;
       }
+      if (position === "kho2" && quocgia === "kr") {
+        navigateWithCurtain("/orderkhohanh");
+        return;
+      }
       if (position === "kho2") {
         navigateWithCurtain("/orderkho");
+        return;
+      }
+      if (position === "kho1") {
+        navigateWithCurtain("/orders2");
         return;
       }
       if (position === "khomalay2") {

@@ -96,6 +96,7 @@ const CustomerHistoryModal = ({
   const defaultColumns = [
     "action", "products", "customerName", "revenue", "phone", "orderDate",
     "stt", "note", "processStatus", "saleReport", "deliveryStatus", "paymentStatus",
+    "backupBy", "backupAt",
   ];
   const visibleCols = selectedColumns.length > 0 ? selectedColumns : defaultColumns;
 
@@ -299,6 +300,52 @@ const CustomerHistoryModal = ({
         <Tag color={text === "ĐÃ THANH TOÁN" ? "green" : "red"} className="customer-history-tag">{text}</Tag>
       ),
     },
+    ...(currentUser?.position === "leadSALE" ||
+      currentUser?.position === "managerSALE" ||
+      currentUser?.position === "admin"
+      ? [{
+          title: (
+            <Checkbox checked={selectedColumns.includes("backupBy")} onChange={(e) => handleColumnSelect("backupBy", e.target.checked)}>
+              NGƯỜI SỬA
+            </Checkbox>
+          ),
+          dataIndex: "backupBy",
+          key: "backupBy",
+          width: 100,
+          render: (text) => {
+            if (!text) return "";
+            return <span>{decodeURIComponent(text)}</span>;
+          },
+        }]
+      : []),
+    ...(currentUser?.position === "leadSALE" ||
+      currentUser?.position === "managerSALE" ||
+      currentUser?.position === "admin" ||
+      currentUser?.name === "Uyển Nhi"
+      ? [{
+          title: (
+            <Checkbox checked={selectedColumns.includes("backupAt")} onChange={(e) => handleColumnSelect("backupAt", e.target.checked)}>
+              TIME
+            </Checkbox>
+          ),
+          dataIndex: "backupAt",
+          key: "backupAt",
+          width: 130,
+          render: (text) => {
+            if (!text) return "";
+            const vnTime = new Date(text).toLocaleString("vi-VN", {
+              timeZone: "Asia/Ho_Chi_Minh",
+              year: "numeric",
+              month: "2-digit",
+              day: "2-digit",
+              hour: "2-digit",
+              minute: "2-digit",
+              second: "2-digit",
+            });
+            return <span>{vnTime}</span>;
+          },
+        }]
+      : []),
   ];
 
   const columns = allColumns.filter((col) => visibleCols.includes(col.key));

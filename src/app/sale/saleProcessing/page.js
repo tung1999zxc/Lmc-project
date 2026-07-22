@@ -309,9 +309,59 @@ const Dashboard = () => {
     );
   };
 
+  // Xác định user lọc (salexuly lọc theo cá nhân)
+  const isSalexulyRole = !["managerMKT", "managerSALE", "admin", "leadSALE"].includes(currentUser.position);
+  const filterUser = isSalexulyRole ? currentUser.name : null;
+
+  // Lọc orders theo user nếu cần
+  const getFilteredByUser = (ordersList) => {
+    if (!filterUser) return ordersList;
+    return ordersList.filter((order) => order.salexuly === filterUser);
+  };
+
   // Stats calculations
+  const getTotalPaidRevenue = () => {
+    const filtered = getFilteredByUser(getFilteredOrders());
+    return filtered
+      .filter((order) => order.paymentStatus === "ĐÃ THANH TOÁN")
+      .reduce((acc, order) => acc + Number(order.profit || 0), 0) * 17000;
+  };
+
+  const getAvgPaymentRate = () => {
+    const filtered = getFilteredByUser(getFilteredOrders());
+    const dates = [...new Set(filtered.map((order) => order.orderDate))];
+    if (dates.length === 0) return 0;
+    let totalRate = 0;
+    let count = 0;
+    dates.forEach((date) => {
+      const ordersForDate = filtered.filter((order) => order.orderDate === date);
+      const totalRevenue = ordersForDate.reduce((acc, order) => acc + Number(order.profit || 0), 0);
+      const paidRevenue = ordersForDate
+        .filter((order) => order.paymentStatus === "ĐÃ THANH TOÁN")
+        .reduce((acc, order) => acc + Number(order.profit || 0), 0);
+      if (totalRevenue > 0) {
+        totalRate += paidRevenue / totalRevenue;
+        count++;
+      }
+    });
+    return count > 0 ? (totalRate / count * 100).toFixed(1) : 0;
+  };
+
+  const getSharedVsClaimedOrders = () => {
+    const filtered = getFilteredByUser(getFilteredOrders());
+    const dates = [...new Set(filtered.map((order) => order.orderDate))];
+    let totalShared = 0;
+    let totalClaimed = 0;
+    dates.forEach((date) => {
+      const ordersForDate = filtered.filter((order) => order.orderDate === date);
+      totalShared += ordersForDate.length;
+      totalClaimed += ordersForDate.filter((order) => order.paymentStatus === "ĐÃ THANH TOÁN").length;
+    });
+    return { shared: totalShared, claimed: totalClaimed };
+  };
+
   const getTotalSalesThisMonth = () => {
-    return getFilteredOrders().reduce((sum, p) => sum + Number(p.profit || 0), 0) * 17000;
+    return getFilteredByUser(getFilteredOrders()).reduce((sum, p) => sum + Number(p.profit || 0), 0) * 17000;
   };
 
   const getTotalSalesLastMonth = () => {
@@ -333,31 +383,31 @@ const Dashboard = () => {
   };
 
   const getDoneOrders = () => {
-    return getFilteredOrders().filter((p) => p.saleReport === "DONE").length;
+    return getFilteredByUser(getFilteredOrders()).filter((p) => p.saleReport === "DONE").length;
   };
 
   const getTotalOrders = () => {
-    return getFilteredOrders().length;
+    return getFilteredByUser(getFilteredOrders()).length;
   };
 
   const getProcessingOrders = () => {
-    return getFilteredOrders().filter((p) => p.saleReport === "Đang xử lý").length;
+    return getFilteredByUser(getFilteredOrders()).filter((p) => p.saleReport === "Đang xử lý").length;
   };
 
   const getDeletedOrders = () => {
-    return getFilteredOrders().filter((p) => p.saleReport === "Đã xoá DS").length;
+    return getFilteredByUser(getFilteredOrders()).filter((p) => p.saleReport === "Đã xoá DS").length;
   };
 
   const getPaidOrders = () => {
-    return getFilteredOrders().filter((p) => p.paymentStatus === "ĐÃ THANH TOÁN").length;
+    return getFilteredByUser(getFilteredOrders()).filter((p) => p.paymentStatus === "ĐÃ THANH TOÁN").length;
   };
 
   const getUnpaidOrders = () => {
-    return getFilteredOrders().filter((p) => p.paymentStatus === "CHƯA THANH TOÁN" || p.paymentStatus === "").length;
+    return getFilteredByUser(getFilteredOrders()).filter((p) => p.paymentStatus === "CHƯA THANH TOÁN" || p.paymentStatus === "").length;
   };
 
   const getTotalMess = () => {
-    return getFilteredOrders().reduce((sum, p) => sum + (p.messCount || 0), 0);
+    return getFilteredByUser(getFilteredOrders()).reduce((sum, p) => sum + (p.messCount || 0), 0);
   };
 
   const statsData = {
@@ -365,14 +415,16 @@ const Dashboard = () => {
     salesChange: getSalesChangePercent(),
     doneOrders: getDoneOrders(),
     totalOrders: getTotalOrders(),
-    doneRatio: getTotalOrders() > 0 ? (getDoneOrders() / getTotalOrders() * 100).toFixed(1) : 0,
+    doneRatio: getAvgPaymentRate(),
     undoneOrders: getTotalOrders() - getDoneOrders(),
     totalMess: getTotalMess(),
     processingOrders: getProcessingOrders(),
-    doneOrdersCount: getDoneOrders(),
+    doneOrdersCount: getPaidOrders(),
     deletedOrders: getDeletedOrders(),
     paidOrders: getPaidOrders(),
     unpaidOrders: getUnpaidOrders(),
+    totalPaidRevenue: getTotalPaidRevenue(),
+    sharedVsClaimed: getSharedVsClaimedOrders(),
   };
 
   return loading ? (
@@ -393,7 +445,7 @@ const Dashboard = () => {
               alignItems: "center"
             }}>
               <div>
-                <div style={{ fontSize: 12, opacity: 0.9, marginBottom: 4 }}>Doanh số tháng</div>
+                <div style={{ fontSize: 12, opacity: 0.9, marginBottom: 4 }}>Doanh số</div>
                 <div style={{ fontSize: 20, fontWeight: "bold" }}>{statsData.totalSales.toLocaleString('vi-VN')} ₫</div>
                 <div style={{ fontSize: 12, opacity: 0.9, marginTop: 4 }}>
                   {statsData.salesChange >= 0 ? "▲" : "▼"} {Math.abs(statsData.salesChange)}% so tháng trước
@@ -412,9 +464,9 @@ const Dashboard = () => {
               alignItems: "center"
             }}>
               <div>
-                <div style={{ fontSize: 12, opacity: 0.9, marginBottom: 4 }}>Đơn đã Done</div>
-                <div style={{ fontSize: 20, fontWeight: "bold" }}>{statsData.doneOrders}</div>
-                <div style={{ fontSize: 12, opacity: 0.9, marginTop: 4 }}>Tổng {statsData.totalOrders} đơn tháng này</div>
+                <div style={{ fontSize: 12, opacity: 0.9, marginBottom: 4 }}>Đã thanh toán</div>
+                <div style={{ fontSize: 20, fontWeight: "bold" }}>{statsData.totalPaidRevenue.toLocaleString('vi-VN')} ₫</div>
+                <div style={{ fontSize: 12, opacity: 0.9, marginTop: 4 }}>{statsData.paidOrders} đơn đã TT</div>
               </div>
               <div style={{ fontSize: 36 }}>✅</div>
             </div>
@@ -431,7 +483,7 @@ const Dashboard = () => {
               <div>
                 <div style={{ fontSize: 12, opacity: 0.9, marginBottom: 4 }}>Tỉ lệ Done</div>
                 <div style={{ fontSize: 20, fontWeight: "bold" }}>{statsData.doneRatio}%</div>
-                <div style={{ fontSize: 12, opacity: 0.9, marginTop: 4 }}>{statsData.undoneOrders} đơn còn chưa done</div>
+                <div style={{ fontSize: 12, opacity: 0.9, marginTop: 4 }}>Trung bình tỉ lệ TT</div>
               </div>
               <div style={{ fontSize: 36 }}>📊</div>
             </div>
@@ -446,16 +498,19 @@ const Dashboard = () => {
               alignItems: "center"
             }}>
               <div>
-                <div style={{ fontSize: 12, opacity: 0.9, marginBottom: 4 }}>Mess / DS</div>
-                <div style={{ fontSize: 20, fontWeight: "bold" }}>{statsData.totalMess.toLocaleString('vi-VN')}</div>
-                <div style={{ fontSize: 12, opacity: 0.9, marginTop: 4 }}>Tin nhắn xử lý tháng này</div>
+                <div style={{ fontSize: 12, opacity: 0.9, marginBottom: 4 }}>Đơn được chia/Đơn đòi</div>
+                <div style={{ fontSize: 20, fontWeight: "bold" }}>{statsData.sharedVsClaimed.shared}/{statsData.sharedVsClaimed.claimed}</div>
+                <div style={{ fontSize: 12, opacity: 0.9, marginTop: 4 }}>Chia / Đòi được</div>
               </div>
               <div style={{ fontSize: 36 }}>💬</div>
             </div>
           </div>
 
           {/* Header Thống kê đơn hàng tháng */}
-          <h3 style={{ marginBottom: 12, color: "#333" }}>📦 Thống kê đơn hàng tháng</h3>
+          <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 16 }}>
+            <span style={{ fontSize: 20 }}>📦</span>
+            <h3 style={{ margin: 0, color: "#333" }}>Thống kê đơn hàng tháng</h3>
+          </div>
           
           {/* 2 Box riêng biệt */}
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginBottom: 24 }}>
@@ -464,21 +519,28 @@ const Dashboard = () => {
               background: "#fff",
               padding: "20px 24px",
               borderRadius: 12,
-              boxShadow: "0 2px 8px rgba(0,0,0,0.1)"
+              boxShadow: "0 2px 12px rgba(0,0,0,0.08)",
+              border: "1px solid #f0f0f0"
             }}>
-              <div style={{ fontSize: 13, fontWeight: 600, color: "#333", marginBottom: 10 }}>Trạng thái đơn:</div>
+              <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }}>
+                <span style={{ fontSize: 16 }}>📋</span>
+                <div style={{ fontSize: 14, fontWeight: 600, color: "#333" }}>Trạng thái đơn</div>
+              </div>
               <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 12 }}>
-                <div style={{ textAlign: "center", padding: 12, background: "#fff7e6", borderRadius: 8 }}>
-                  <div style={{ fontSize: 12, color: "#888", marginBottom: 4 }}>Đang xử lý</div>
-                  <div style={{ fontSize: 20, fontWeight: "bold", color: "#fa8c16" }}>{statsData.processingOrders} đơn</div>
+                <div style={{ textAlign: "center", padding: 16, background: "#fff7e6", borderRadius: 10, border: "1px solid #ffd591" }}>
+                  <div style={{ fontSize: 24, marginBottom: 4 }}>🔄</div>
+                  <div style={{ fontSize: 22, fontWeight: "bold", color: "#fa8c16" }}>{statsData.processingOrders}</div>
+                  <div style={{ fontSize: 12, color: "#888", marginTop: 4 }}>Đang xử lý</div>
                 </div>
-                <div style={{ textAlign: "center", padding: 12, background: "#f6ffed", borderRadius: 8 }}>
-                  <div style={{ fontSize: 12, color: "#888", marginBottom: 4 }}>Đã done</div>
-                  <div style={{ fontSize: 20, fontWeight: "bold", color: "#52c41a" }}>{statsData.doneOrdersCount} đơn</div>
+                <div style={{ textAlign: "center", padding: 16, background: "#f6ffed", borderRadius: 10, border: "1px solid #b7eb8f" }}>
+                  <div style={{ fontSize: 24, marginBottom: 4 }}>✅</div>
+                  <div style={{ fontSize: 22, fontWeight: "bold", color: "#52c41a" }}>{statsData.doneOrdersCount}</div>
+                  <div style={{ fontSize: 12, color: "#888", marginTop: 4 }}>Đã done</div>
                 </div>
-                <div style={{ textAlign: "center", padding: 12, background: "#fff1f0", borderRadius: 8 }}>
-                  <div style={{ fontSize: 12, color: "#888", marginBottom: 4 }}>Đã xoá DS</div>
-                  <div style={{ fontSize: 20, fontWeight: "bold", color: "#ff4d4f" }}>{statsData.deletedOrders} đơn</div>
+                <div style={{ textAlign: "center", padding: 16, background: "#fff1f0", borderRadius: 10, border: "1px solid #ffccc7" }}>
+                  <div style={{ fontSize: 24, marginBottom: 4 }}>🗑️</div>
+                  <div style={{ fontSize: 22, fontWeight: "bold", color: "#ff4d4f" }}>{statsData.deletedOrders}</div>
+                  <div style={{ fontSize: 12, color: "#888", marginTop: 4 }}>Đã xoá DS</div>
                 </div>
               </div>
             </div>
@@ -488,41 +550,60 @@ const Dashboard = () => {
               background: "#fff",
               padding: "20px 24px",
               borderRadius: 12,
-              boxShadow: "0 2px 8px rgba(0,0,0,0.1)"
+              boxShadow: "0 2px 12px rgba(0,0,0,0.08)",
+              border: "1px solid #f0f0f0"
             }}>
-              <div style={{ fontSize: 13, fontWeight: 600, color: "#333", marginBottom: 10 }}>Thanh toán:</div>
+              <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }}>
+                <span style={{ fontSize: 16 }}>💳</span>
+                <div style={{ fontSize: 14, fontWeight: 600, color: "#333" }}>Thanh toán</div>
+              </div>
               <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 12 }}>
-                <div style={{ textAlign: "center", padding: 16, background: "#f6ffed", borderRadius: 8 }}>
-                  <div style={{ fontSize: 12, color: "#888", marginBottom: 4 }}>Đã TT</div>
-                  <div style={{ fontSize: 24, fontWeight: "bold", color: "#52c41a" }}>{statsData.paidOrders} đơn</div>
+                <div style={{ textAlign: "center", padding: 20, background: "#f6ffed", borderRadius: 10, border: "1px solid #b7eb8f" }}>
+                  <div style={{ fontSize: 24, marginBottom: 4 }}>✓</div>
+                  <div style={{ fontSize: 28, fontWeight: "bold", color: "#52c41a" }}>{statsData.paidOrders}</div>
+                  <div style={{ fontSize: 12, color: "#888", marginTop: 4 }}>Đã TT</div>
                 </div>
-                <div style={{ textAlign: "center", padding: 16, background: "#fff7e6", borderRadius: 8 }}>
-                  <div style={{ fontSize: 12, color: "#888", marginBottom: 4 }}>Chưa TT</div>
-                  <div style={{ fontSize: 24, fontWeight: "bold", color: "#fa8c16" }}>{statsData.unpaidOrders} đơn</div>
+                <div style={{ textAlign: "center", padding: 20, background: "#fff7e6", borderRadius: 10, border: "1px solid #ffd591" }}>
+                  <div style={{ fontSize: 24, marginBottom: 4 }}>⏳</div>
+                  <div style={{ fontSize: 28, fontWeight: "bold", color: "#fa8c16" }}>{statsData.unpaidOrders}</div>
+                  <div style={{ fontSize: 12, color: "#888", marginTop: 4 }}>Chưa TT</div>
                 </div>
               </div>
             </div>
           </div>
 
           {/* Bộ lọc theo khoảng thời gian */}
-          <div style={{ marginBottom: 16 }}>
-            <span style={{ marginRight: 8 }}>Bộ lọc theo khoảng thời gian: </span>
+          <div style={{ 
+            background: "#fff", 
+            padding: "16px 24px", 
+            borderRadius: 12, 
+            boxShadow: "0 2px 12px rgba(0,0,0,0.08)",
+            border: "1px solid #f0f0f0",
+            marginBottom: 24,
+            display: "flex",
+            alignItems: "center",
+            gap: 16
+          }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              <span style={{ fontSize: 18 }}>🔍</span>
+              <span style={{ fontSize: 14, fontWeight: 500, color: "#333" }}>Khoảng thời gian:</span>
+            </div>
             <Select
               value={filterRange}
               onChange={setFilterRange}
-              style={{ width: 250 }}
+              style={{ width: 200 }}
+              size="large"
             >
-            {/* <Select.Option value="all">Tất cả</Select.Option> */}
-            <Select.Option value="today">1 Ngày</Select.Option>
-            <Select.Option value="week">1 Tuần</Select.Option>
-            <Select.Option value="currentMonth">
-              1 Tháng (từ đầu tháng)
-            </Select.Option>
-            <Select.Option value="lastMonth">Tháng trước</Select.Option>
-            <Select.Option value="twoMonthsAgo">2 tháng trước</Select.Option>
-            <Select.Option value="threeMonthsAgo">3 tháng trước</Select.Option>
+            <Select.Option value="today">📅 1 Ngày</Select.Option>
+            <Select.Option value="week">📅 1 Tuần</Select.Option>
+            <Select.Option value="currentMonth">📅 1 Tháng (từ đầu tháng)</Select.Option>
+            <Select.Option value="lastMonth">📅 Tháng trước</Select.Option>
+            <Select.Option value="twoMonthsAgo">📅 2 tháng trước</Select.Option>
+            <Select.Option value="threeMonthsAgo">📅 3 tháng trước</Select.Option>
           </Select>
         </div>
+        
+        {/* Chi tiết theo nhân viên */}
         {currentUser.position === "managerMKT" ||
         currentUser.position === "managerSALE" ||
         currentUser.position === "admin" ||
@@ -530,7 +611,19 @@ const Dashboard = () => {
           // Nếu là quản lý, hiển thị bảng cho từng nhân viên
           [...new Set(getFilteredOrders().map((order) => order.salexuly))].map(
             (user) => (
-              <div key={user} style={{ marginBottom: 10 }}>
+              <div key={user} style={{ marginBottom: 24 }}>
+                <div style={{ 
+                  background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+                  padding: "12px 20px",
+                  borderRadius: 10,
+                  marginBottom: 12,
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 10
+                }}>
+                  <span style={{ fontSize: 18 }}>👤</span>
+                  <span style={{ color: "#fff", fontWeight: 600, fontSize: 15 }}>{user}</span>
+                </div>
                 {renderSummary(user)}
                 <Table
                   dataSource={getUniqueDatesForUser(user).map((orderDate) => ({
@@ -540,6 +633,7 @@ const Dashboard = () => {
                   columns={columns(user)}
                   pagination={{ pageSize: 5 }}
                   bordered
+                  style={{ borderRadius: 10, overflow: "hidden" }}
                 />
               </div>
             )
@@ -547,6 +641,18 @@ const Dashboard = () => {
         ) : (
           // Nếu không phải quản lý, chỉ hiển thị dữ liệu của người dùng hiện tại
           <>
+            <div style={{ 
+              background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+              padding: "12px 20px",
+              borderRadius: 10,
+              marginBottom: 12,
+              display: "flex",
+              alignItems: "center",
+              gap: 10
+            }}>
+              <span style={{ fontSize: 18 }}>👤</span>
+              <span style={{ color: "#fff", fontWeight: 600, fontSize: 15 }}>{currentUser.name}</span>
+            </div>
             {renderSummary(currentUser.name)}
             <Table
               dataSource={getUniqueDatesForUser(currentUser.name).map(
@@ -555,6 +661,7 @@ const Dashboard = () => {
               columns={columns(currentUser.name)}
               pagination={{ pageSize: 30 }}
               bordered
+              style={{ borderRadius: 10, overflow: "hidden" }}
             />
           </>
         )}

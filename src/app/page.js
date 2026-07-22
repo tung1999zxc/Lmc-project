@@ -1813,21 +1813,66 @@ const top5Employees2 = randomEmployee ? [randomEmployee] : [];
   // Lọc chỉ những người có ads tháng này > 0
   const excludedNames2 = ["quách phú"];
 
+// Mảng nickname động vật
+const allNicknames = [
+  "Cáo May Mắn",
+  "Cáo Bí Ẩn",
+  "Cáo Nhanh Nhẹn",
+  "Cáo Bạc",
+  "Chồn Chạy Nhanh",
+  "Chồn Lanh Lợi",
+  "Chồn Tinh Nghịch",
+  "Sói Thầm Lặng",
+  "Sói Dũng Cảm",
+  "Sói Băng Giá",
+  "Mèo Tò Mò",
+  "Mèo Tia Chớp",
+  "Cú Thông Thái",
+  "Cú Đêm",
+  "Đại Bàng Kiêu Hãnh",
+  "Chim Ưng Mạnh Mẽ",
+  "Hươu Thanh Lịch",
+  "Nai Bình Yên",
+  "Thỏ Tốc Độ",
+  "Thỏ Ánh Trăng",
+  "Gấu Trầm Tĩnh",
+  "Gấu Mật Ong",
+  "Rái Cá Vui Vẻ",
+  "Sóc Chăm Chỉ",
+  "Nhím Gan Dạ",
+  "Gấu Trúc Điềm Đạm",
+  "Hải Ly Cần Mẫn",
+  "Chim Sẻ Nhanh Nhẹn",
+  "Chim Cánh Cụt Dễ Thương",
+  "Rồng Uy Nghi",
+];
+
+// Hàm shuffle mảng
+function shuffleArray(array) {
+  const arr = [...array];
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+// Shuffle nickname và avatar
+const shuffledNicknames = shuffleArray(allNicknames);
+const shuffledAvatars = shuffleArray([1, 2, 3, 4]);
+
 const top5Employees = marketingReportData3
   .filter((emp) => {
     const name = emp.name.trim().toLowerCase();
     return emp.adsThisMonth > 0 && !excludedNames2.includes(name);
   })
   .sort((a, b) => b.totalToday - a.totalToday)
-  .slice(0, 3);
-  // Lọc ra nhân viên có chi phí ads tháng này > 0
-
-
-  const top1Employees = marketingReportData3
-    .filter((emp) => emp.adsThisMonth > 0 &&
-    (emp.name.trim().toLowerCase() !== "Quách Phú Thành"))
-    .sort((a, b) => b.totalToday - a.totalToday)
-    .slice(0, 1);
+  .slice(0, 3)
+  .map((emp, index) => ({
+    ...emp,
+    nickname: shuffledNicknames[index] || emp.name,
+    avatarNum: shuffledAvatars[index] || 1,
+  }));
 
   // Lọc ra các thành viên mkt thuộc team của currentUser
   // Lọc nhân viên MKT thuộc team
@@ -3162,7 +3207,7 @@ const columns = useMemo(() => [
         <div className="lb-sub">🏆 Vinh danh hôm nay · <span id="lb-date">{new Date().getDate().toString().padStart(2, '0')}/{new Date().getMonth() + 1}/{new Date().getFullYear()}</span></div>
         <div className="lb-hl">
           {top5Employees[0].totalToday * 17000 >= 15000000 ? (
-            <span>Đội ngũ bùng nổ — <span>{top5Employees[0].name}!</span></span>
+            <span>Đội ngũ bùng nổ — <span>{top5Employees[0].nickname}!</span></span>
           ) : (
             <span style={{color: 'rgba(255,255,255,0.5)', fontSize: 14}}>Hãy cố lên — chưa ai đạt 15 triệu hôm nay!</span>
           )}
@@ -3178,8 +3223,8 @@ const columns = useMemo(() => [
               <div key={index} className={`lb-card ${ranks[index] || ''}`}>
                 <div className="lb-rank">{medals[index]}</div>
                 <img
-                  src={`/${emp.name.trim()}.jpg`}
-                  alt={emp.name.trim()}
+                  src={`/${emp.avatarNum}.png`}
+                  alt={emp.nickname}
                   className={`lb-av ${ranks[index] || ''}`}
                   style={{ width: 54, height: 54, borderRadius: '50%', objectFit: 'cover' }}
                   onError={(e) => {
@@ -3187,7 +3232,7 @@ const columns = useMemo(() => [
                     e.currentTarget.src = "/ngockem.jpg";
                   }}
                 />
-                <div className="lb-name">{emp.name}</div>
+                <div className="lb-name">{emp.nickname}</div>
                 <div className={`lb-badge ${badges[index]}`}>{tops[index]}</div>
                 {showDs && (
                   <div className="lb-stat">
@@ -3575,20 +3620,7 @@ const columns = useMemo(() => [
         (() => {
           const mktTabContent = (
             <>
-            <Row gutter={[16, 16]} style={{ marginTop: "2rem" }}>
-              <Col xs={24} md={12}>
-                <div className="card-mkt-chart" style={{ padding: "16px", marginBottom: 16 }}>
-                  <h3>👥 Doanh số Nhân viên MKT</h3>
-                  <GroupedDoubleBarChartComponent data={employeeChartDataNew} />
-                </div>
-              </Col>
-              <Col xs={24} md={12}>
-                <div className="card-mkt-daily" style={{ padding: "16px", marginBottom: 16 }}>
-                  <h3>{isFilterApplied ? "📅 Doanh số hàng ngày" : "📅 Doanh số hàng ngày"}</h3>
-                  <GroupedDoubleBarChartComponent data={dailyChartDataNew} />
-                </div>
-              </Col>
-            </Row>
+           
             <Row gutter={[16, 16]} style={{ marginTop: "2rem" }}>
               <Col xs={24} md={12}>
                 <div className="card-mkt-chart" style={{ padding: "16px", marginBottom: 16 }}>
@@ -4096,7 +4128,7 @@ const columns = useMemo(() => [
                         <th style={{ ...thStyle, backgroundColor: "#FFD700", color: "#7a5900" }}>TÊN</th>
                         <th style={{ ...thStyle, backgroundColor: "#FFD54F", color: "#7a5900" }}>ĐÃ TT</th>
                         <th style={{ ...thStyle, backgroundColor: "#FFE082", color: "#7a5900" }}>CHƯA TT</th>
-                        <th style={{ ...thStyle, backgroundColor: "#FFE7A0", color: "#7a5900" }}>TỔNG ĐƠN</th>
+                        <th style={{ ...thStyle, backgroundColor: "#FFE7A0", color: "#7a5900" }}>TỔNG</th>
                         <th style={{ ...thStyle, backgroundColor: "#FFEFB8", color: "#7a5900" }}>TIỀN VNĐ</th>
                         <th style={{ ...thStyle, backgroundColor: "#FFF5D1", color: "#7a5900" }}>CHI PHÍ ADS</th>
                         <th style={{ ...thStyle, backgroundColor: "#FFFBE6", color: "#7a5900" }}>% ADS</th>

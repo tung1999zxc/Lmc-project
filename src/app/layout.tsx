@@ -119,6 +119,9 @@ function InnerDashboardLayout({ children }: { children: ReactNode }) {
   if (currentUser?.position === "kho2") {
     return <>{children}</>;
   }
+  if (currentUser?.position === "kho1") {
+    return <>{children}</>;
+  }
   if (currentUser?.position === "khomalay2") {
     return <>{children}</>;
   }
@@ -174,6 +177,7 @@ function InnerDashboardLayout({ children }: { children: ReactNode }) {
             </div>
             <div className="tb-r">
               <DynamicTimeTopbar />
+              {/* <CurrentUserSelector /> */}
               <Button
                 type="primary"
                 icon={<LogoutOutlined />}
