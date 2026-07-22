@@ -53,7 +53,7 @@ const Dashboard = () => {
 
   const employees = employees2.filter(
     (emp) =>
-      emp.quocgia === "jp" 
+      (emp.quocgia || "kr") === "jp"
       
   );
   const fetchOrders = async () => {
@@ -2670,7 +2670,7 @@ const columns = useMemo(() => [
         width: "115%", // Để bù lại không gian khi scale
       }}
     >
-      <PraiseBanner top5Employees={top1Employees} />
+      {/* <PraiseBanner top5Employees={top1Employees} /> */}
       {/* <PraiseBanner2 /> */}
 
       <div className="criticism-container">
@@ -3163,7 +3163,7 @@ const columns = useMemo(() => [
           <Row>
             <Col xs={24} md={12}>
               <Card
-                bordered={true}
+                variant="outlined"
                 // style={{
                 //   width: "50%", // nửa màn hình
                 //   margin: "20px auto",
@@ -3234,213 +3234,205 @@ const columns = useMemo(() => [
       {(currentUser.position === "admin" && !selectedTeam) ||
       (currentUser.position === "managerMKT" && !selectedTeam) ||
       (currentUser.position === "managerSALE" && !selectedTeam) ? (
-        <Tabs defaultActiveKey="MKT">
-          <Tabs.TabPane tab="MKT" key="MKT">
-            <Row gutter={[16, 16]} style={{ marginTop: "2rem" }}>
-              <Col xs={24} md={24}>
-                <h3>Doanh số Nhân viên MKT</h3>
+        (() => {
+          const mktTabContent = (
+            <>
+              <Row gutter={[16, 16]} style={{ marginTop: "2rem" }}>
+                <Col xs={24} md={24}>
+                  <h3>Doanh số Nhân viên MKT</h3>
+                  <GroupedDoubleBarChartComponent data={employeeChartDataNew} />
+                </Col>
+                <Col xs={24} md={24}>
+                  <h3 style={{ marginTop: "2rem" }}>Doanh số hàng ngày </h3>
+                  <GroupedDoubleBarChartComponent data={dailyChartDataNew} />
+                </Col>
+              </Row>
 
-                <GroupedDoubleBarChartComponent data={employeeChartDataNew} />
-              </Col>
-              {/* <Col xs={24} md={1}></Col> */}
-              <Col xs={24} md={24}>
-                <h3 style={{ marginTop: "2rem" }}>
-                  {isFilterApplied
-                    ? "Doanh số hàng ngày "
-                    : "Doanh số hàng ngày "}
-                </h3>
-                <GroupedDoubleBarChartComponent data={dailyChartDataNew} />
-              </Col>
-            </Row>
+              <Row gutter={[16, 16]}>
+                <Col xs={24} md={24}></Col>
+                <Col xs={24} md={24}></Col>
+              </Row>
+              <Row gutter={[16, 16]}>
+                <Col xs={24} md={24}></Col>
+              </Row>
 
-            <Row gutter={[16, 16]}>
-              <Col xs={24} md={24}></Col>
-              <Col xs={24} md={24}></Col>
-            </Row>
+              <Row gutter={[16, 16]} style={{ marginTop: "2rem" }}>
+                <Col xs={24} md={14}>
+                  {/* <h3>Doanh số theo Team</h3>
+                  <GroupedDoubleBarChartComponent3 data={teamChartDataNew} /> */}
+                </Col>
+                <Col xs={24} md={2}></Col>
+                <Col xs={24} md={8}>
+                  <br></br>
+                  <br></br>
+                  {/* <h3>Phần trăm doanh số theo Team</h3>
+                  <PieChartComponent data={teamPieData} /> */}
+                </Col>
+              </Row>
+              <Row gutter={[16, 16]} style={{ marginTop: "2rem" }}>
+                <Col xs={24} md={15}>
+                  {/* <h3 style={{ marginTop: "2rem" }}>
+                    Doanh số trung bình theo Nhân viên theo Team
+                  </h3>
+                  <BarChartComponent data={averageTeamChartData} /> */}
+                </Col>
+                <Col xs={24} md={18}>
+                  <br></br>
+                </Col>
+              </Row>
+              <Row gutter={[16, 16]}>
+                <Col xs={24} md={5}></Col>
+                <Col xs={24} md={14}></Col>
+                <Col xs={24} md={5}></Col>
+              </Row>
+              <Row gutter={[16, 16]}>
+                <Col xs={24} md={24}>
+                  <h2>Báo cáo marketing</h2>
+                  <Table
+                    columns={marketingColumns}
+                    dataSource={marketingReportData}
+                    pagination={false}
+                  />
+                </Col>
+              </Row>
+            </>
+          );
 
-            <Row gutter={[16, 16]}>
-              <Col xs={24} md={24}></Col>
-            </Row>
+          const adminSaleTabContent = (
+            <>
+              <Row gutter={[16, 16]}>
+                <Col xs={24} md={24}>
+                  <h3>Doanh số Nhân viên SALE</h3>
+                  <GroupedDoubleBarChartComponent2
+                    data={employeeChartDataNewsale}
+                  />
+                </Col>
+              </Row>
 
-            {/* Báo cáo Marketing và các biểu đồ cũ */}
-            <Row gutter={[16, 16]} style={{ marginTop: "2rem" }}>
-              <Col xs={24} md={14}>
-                {/* <h3>Doanh số theo Team</h3>
-                <GroupedDoubleBarChartComponent3 data={teamChartDataNew} /> */}
-              </Col>
-              <Col xs={24} md={2}></Col>
-              {/* <Col xs={24} md={1}></Col> */}
-              <Col xs={24} md={8}>
-                <br></br>
-                <br></br>
-                {/* <h3>Phần trăm doanh số theo Team</h3>
-                <PieChartComponent data={teamPieData} /> */}
-              </Col>
-            </Row>
-            <Row gutter={[16, 16]} style={{ marginTop: "2rem" }}>
-              <Col xs={24} md={15}>
-                {/* <h3 style={{ marginTop: "2rem" }}>
-                  Doanh số trung bình theo Nhân viên theo Team
-                </h3>
-                <BarChartComponent data={averageTeamChartData} /> */}
-              </Col>
-              {/* <Col xs={24} md={1}></Col> */}
-              <Col xs={24} md={18}>
-                <br></br>
+              <Row gutter={[16, 16]}>
+                <Col xs={24} md={14}>
+                  <h2 style={{ marginTop: "2rem" }}>Báo cáo doanh số ngày</h2>
+                  <Table
+                    columns={dailySaleColumns}
+                    dataSource={[...saleDailyData].sort(
+                      (a, b) => new Date(b.date) - new Date(a.date)
+                    )}
+                    pagination={7}
+                  />
+                </Col>
+                <Col xs={24} md={1}></Col>
+                <Col xs={24} md={9}>
+                  <br />
+                  <br />
+                  <br />
+                  <br />
+                  <br />
+                  <br />
+                  <PieChartComponent data={salePieData} />
+                </Col>
+              </Row>
 
-                {/* <h3 style={{ marginTop: "2rem" }}>
-      So sánh %ADS : Gồm Leader vs Các nhân viên khác trong Team
-    </h3>
-    <GroupedBarChartComponent data={leaderComparisonChartData} /> */}
-              </Col>
-            </Row>
-            <Row gutter={[16, 16]}>
-              <Col xs={24} md={5}></Col>
-              <Col xs={24} md={14}></Col>
-              <Col xs={24} md={5}></Col>
-            </Row>
-            <Row gutter={[16, 16]}>
-              <Col xs={24} md={24}>
-                <h2>Báo cáo marketing</h2>
-                <Table
-                  columns={marketingColumns}
-                  dataSource={marketingReportData}
-                  pagination={false}
-                />
-              </Col>
-            </Row>
-            {/* <h3 style={{ marginTop: "2rem" }}>
-      So sánh %ADS : Gồm Leader vs Các nhân viên khác trong Team
-    </h3>
-    <GroupedBarChartComponent data={leaderComparisonChartData} /> */}
-          </Tabs.TabPane>
-          <Tabs.TabPane tab="SALE" key="SALE">
-            <Row gutter={[16, 16]}>
-              <Col xs={24} md={24}>
-                <h3>Doanh số Nhân viên SALE</h3>
+              <Row gutter={[16, 16]}>
+                <Col xs={24} md={15}></Col>
+                <Col xs={24} md={7}></Col>
+              </Row>
+              <h2 style={{ marginTop: "2rem" }}>
+                Báo cáo Doanh Số Nhân Viên Sale XỬ LÝ
+              </h2>
+              <Table
+                columns={saleColumns}
+                dataSource={saleReportDataXL}
+                pagination={false}
+              />
+              <h2 style={{ marginTop: "2rem" }}>
+                Báo cáo Doanh Số Nhân Viên Sale ONLINE
+              </h2>
+              <Table
+                columns={saleColumnsOLND}
+                dataSource={saleReportDataOL}
+                pagination={false}
+              />
+              <h2 style={{ marginTop: "2rem" }}>
+                Báo cáo Doanh Số Nhân Viên Sale NHẬP ĐƠN
+              </h2>
+              <Table
+                columns={saleColumnsOLND}
+                dataSource={saleReportDataND}
+                pagination={false}
+              />
+            </>
+          );
 
-                <GroupedDoubleBarChartComponent2
-                  data={employeeChartDataNewsale}
-                />
-              </Col>
-            </Row>
+          const items = [
+            { key: "MKT", label: "MKT", children: mktTabContent },
+            { key: "SALE", label: "SALE", children: adminSaleTabContent },
+          ];
 
-            {/* Các bảng báo cáo SALE */}
-            <Row gutter={[16, 16]}>
-              <Col xs={24} md={14}>
-                <h2 style={{ marginTop: "2rem" }}>Báo cáo doanh số ngày</h2>
-                <Table
-                  columns={dailySaleColumns}
-                  dataSource={[...saleDailyData].sort(
-                    (a, b) => new Date(b.date) - new Date(a.date)
-                  )}
-                  pagination={7}
-                />{" "}
-              </Col>
-              <Col xs={24} md={1}></Col>
-
-              <Col xs={24} md={9}>
-                <br />
-                <br />
-                <br />
-                <br />
-                <br />
-                <br />
-                <PieChartComponent data={salePieData} />
-              </Col>
-            </Row>
-
-            <Row gutter={[16, 16]}>
-              <Col xs={24} md={15}></Col>
-              <Col xs={24} md={7}></Col>
-            </Row>
-            <h2 style={{ marginTop: "2rem" }}>
-              Báo cáo Doanh Số Nhân Viên Sale XỬ LÝ
-            </h2>
-            <Table
-              columns={saleColumns}
-              dataSource={saleReportDataXL}
-              pagination={false}
-            />
-            <h2 style={{ marginTop: "2rem" }}>
-              Báo cáo Doanh Số Nhân Viên Sale ONLINE
-            </h2>
-            <Table
-              columns={saleColumnsOLND}
-              dataSource={saleReportDataOL}
-              pagination={false}
-            />
-            <h2 style={{ marginTop: "2rem" }}>
-              Báo cáo Doanh Số Nhân Viên Sale NHẬP ĐƠN
-            </h2>
-            <Table
-              columns={saleColumnsOLND}
-              dataSource={saleReportDataND}
-              pagination={false}
-            />
-          </Tabs.TabPane>
-        </Tabs>
+          return <Tabs defaultActiveKey="MKT" items={items} />;
+        })()
       ) : currentUser.position === "leadSALE" ||
         currentUser.position === "managerSALE" ? (
-        <Tabs>
-          <Tabs.TabPane tab="SALE" key="SALE">
-            {/* Các bảng báo cáo SALE */}
-            <Row gutter={[16, 16]}>
-              <Col xs={24} md={15}>
-                <h2 style={{ marginTop: "2rem" }}>Báo cáo doanh số ngày</h2>
-                <Table
-                  columns={dailySaleColumns}
-                  dataSource={[...saleDailyData].sort(
-                    (a, b) => new Date(b.date) - new Date(a.date)
-                  )}
-                  pagination={7}
-                />
+        (() => {
+          const saleOnlyContent = (
+            <>
+              <Row gutter={[16, 16]}>
+                <Col xs={24} md={15}>
+                  <h2 style={{ marginTop: "2rem" }}>Báo cáo doanh số ngày</h2>
+                  <Table
+                    columns={dailySaleColumns}
+                    dataSource={[...saleDailyData].sort(
+                      (a, b) => new Date(b.date) - new Date(a.date)
+                    )}
+                    pagination={7}
+                  />
 
-                <Row gutter={[16, 16]}>
-                  <Col xs={24} md={10}></Col>
-                  <Col xs={24} md={10}>
-                    <PieChartComponent data={salePieData} />
-                  </Col>
-                </Row>
-              </Col>
-              <Col xs={24} md={9}>
-                <br />
+                  <Row gutter={[16, 16]}>
+                    <Col xs={24} md={10}></Col>
+                    <Col xs={24} md={10}>
+                      <PieChartComponent data={salePieData} />
+                    </Col>
+                  </Row>
+                </Col>
+                <Col xs={24} md={9}>
+                  <br />
 
-                <h2 style={{ marginTop: "2rem" }}>
-                  Báo cáo Doanh Số Nhân Viên Sale Vận Đơn
-                </h2>
-                <Table
-                  columns={saleColumns}
-                  dataSource={saleReportDataXL}
-                  pagination={false}
-                />
-                <h2 style={{ marginTop: "2rem" }}>
-                  Báo cáo Doanh Số Nhân Viên Sale ONLINE
-                </h2>
-                <Table
-                  columns={saleColumnsOLND}
-                  dataSource={saleReportDataOL}
-                  pagination={false}
-                />
-                <h2 style={{ marginTop: "2rem" }}>
-                  Báo cáo Doanh Số Nhân Viên Sale NHẬP ĐƠN
-                </h2>
-                <Table
-                  columns={saleColumnsOLND}
-                  dataSource={saleReportDataND}
-                  pagination={false}
-                />
-              </Col>
-            </Row>
-            <h3>Doanh số Nhân viên SALE</h3>
-
-            <GroupedDoubleBarChartComponent2 data={employeeChartDataNewsale} />
-            <h3 style={{ marginTop: "2rem" }}>
-              {isFilterApplied ? "Doanh số hàng ngày " : "Doanh số hàng ngày "}
-            </h3>
-            <GroupedDoubleBarChartComponent data={dailyChartDataNew} />
-          </Tabs.TabPane>
-        </Tabs>
+                  <h2 style={{ marginTop: "2rem" }}>
+                    Báo cáo Doanh Số Nhân Viên Sale Vận Đơn
+                  </h2>
+                  <Table
+                    columns={saleColumns}
+                    dataSource={saleReportDataXL}
+                    pagination={false}
+                  />
+                  <h2 style={{ marginTop: "2rem" }}>
+                    Báo cáo Doanh Số Nhân Viên Sale ONLINE
+                  </h2>
+                  <Table
+                    columns={saleColumnsOLND}
+                    dataSource={saleReportDataOL}
+                    pagination={false}
+                  />
+                  <h2 style={{ marginTop: "2rem" }}>
+                    Báo cáo Doanh Số Nhân Viên Sale NHẬP ĐƠN
+                  </h2>
+                  <Table
+                    columns={saleColumnsOLND}
+                    dataSource={saleReportDataND}
+                    pagination={false}
+                  />
+                </Col>
+              </Row>
+              <h3>Doanh số Nhân viên SALE</h3>
+              <GroupedDoubleBarChartComponent2 data={employeeChartDataNewsale} />
+              <h3 style={{ marginTop: "2rem" }}>Doanh số hàng ngày </h3>
+              <GroupedDoubleBarChartComponent data={dailyChartDataNew} />
+            </>
+          );
+          const items = [
+            { key: "SALE", label: "SALE", children: saleOnlyContent },
+          ];
+          return <Tabs items={items} />;
+        })()
       ) : null}
       {(currentUser.position === "lead" ||
         (currentUser.position === "admin" && selectedTeam) ||

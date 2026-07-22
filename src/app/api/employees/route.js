@@ -48,6 +48,8 @@ export async function POST(req) {
     // Mã hóa mật khẩu
     const hashedPassword = await bcrypt.hash(password, 10);
 
+    const normalizedQuocgia = quocgia || "kr";
+
     // Tạo object nhân viên mới
     const newEmployee = {
       employee_id: Date.now(), // sử dụng timestamp làm ID
@@ -59,7 +61,7 @@ export async function POST(req) {
       stk,
       position,
       status,
-      quocgia,
+      quocgia: normalizedQuocgia,
       khuvuc,
       team_id: team_id || null,
       position_team: position_team || null,
@@ -121,13 +123,16 @@ export async function GET(req) {
   try {
     const { db } = await connectToDatabase();
 
-    // Lấy danh sách nhân viên từ collection "employees"
     const employees = await db.collection("employees").find({}).toArray();
+    const employeesWithDefaultCountry = employees.map((employee) => ({
+      ...employee,
+      quocgia: employee.quocgia || "kr",
+    }));
 
     return new Response(
       JSON.stringify({
         message: "Danh sách nhân viên",
-        data: employees,
+        data: employeesWithDefaultCountry,
       }),
       { status: 200 }
     );

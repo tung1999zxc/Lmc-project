@@ -7,16 +7,12 @@ export async function PUT(req) {
 
     // Danh sách nhân viên nguồn
     const sourceEmployees = [
-      "Phạm Khánh Lâm",
-      "Phan Linh Chi",
-      "Nguyễn Thị Lan Anh",
-      "Nguyễn Văn Đức",
-      "Lường Ngọc Trung",
-      "Hoàng Hồng Nhung",
+      "Nguyễn Thị Ngọc Linh",
+      
     ];
 
     // Nhân viên đích
-    const targetEmployee = "Trần Ngọc Diện";
+    const targetEmployee = "Nguyễn Tuấn Anh";
    
 
     const result = await db.collection("pageName").updateMany(

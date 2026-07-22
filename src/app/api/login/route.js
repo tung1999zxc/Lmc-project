@@ -36,7 +36,8 @@ export async function POST(req) {
     
     // Loại bỏ trường mật khẩu trước khi trả về
     const { password: _, ...safeEmployee } = employee;
-    
+    safeEmployee.quocgia = safeEmployee.quocgia || "kr";
+
     return new Response(
       JSON.stringify({ message: 'Đăng nhập thành công', data: safeEmployee }),
       { status: 200 }

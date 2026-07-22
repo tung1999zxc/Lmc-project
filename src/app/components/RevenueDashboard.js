@@ -167,8 +167,8 @@ export default function HomePage() {
   const teams = [
     { label: 'TEAM SƠN', value: 'SON' },
     { label: 'TEAM QUÂN', value: 'QUAN' },
-    { label: 'TEAM CHI', value: 'CHI' },
-    { label: 'TEAM LẺ', value: 'LE' },
+    // { label: 'TEAM CHI', value: 'CHI' },
+   
   ];
 
   // Dữ liệu nhân viên (mẫu)

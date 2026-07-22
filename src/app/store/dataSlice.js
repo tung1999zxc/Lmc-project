@@ -3,7 +3,14 @@ import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 // 🎯 Gọi API lấy dữ liệu
 export const fetchEmployees = createAsyncThunk("data/fetchEmployees", async () => {
   const response = await fetch("/api/employees");
-  return response.json();
+  const payload = await response.json();
+  return {
+    ...payload,
+    data: (payload.data || []).map((employee) => ({
+      ...employee,
+      quocgia: employee.quocgia || "kr",
+    })),
+  };
 });
 
 export const fetchProducts = createAsyncThunk("data/fetchProducts", async () => {

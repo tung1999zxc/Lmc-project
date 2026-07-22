@@ -1,4 +1,4 @@
-// src/app/api/orders/route.js
+
 import { connectToDatabase } from '../../../../app/lib/mongodb2.js';
 
 export async function GET(req) {

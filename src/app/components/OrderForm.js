@@ -19,7 +19,7 @@ import dayjs from "dayjs";
 import moment from "moment";
 import { useDispatch, useSelector } from "react-redux";
 
-const OrderForm = ({ visible, onCancel,loading, onSubmit, resetPagename,initialValues, namesalexuly, employees=[] ,dataPagename=[],onProductsChange}) => {
+const OrderForm = ({ open, onCancel,loading, onSubmit, resetPagename,initialValues, namesalexuly, employees=[] ,dataPagename=[],onProductsChange}) => {
   const [form] = Form.useForm();
   const { Option } = Select;
   const currentUser = useSelector((state) => state.user.currentUser);
@@ -219,41 +219,43 @@ const productOptions = products.map((p) => p.name);
   return (<>
     <Modal
   title="Các đơn hàng của khách"
-  visible={modalVisible}
+  open={modalVisible}
   onCancel={() => setModalVisible(false)}
   footer={null}
   width={1300}
 >
   <Table
     dataSource={modalCustomerOrders}
+    scroll={{ x: 'max-content' }}
     columns={[
-      { title: 'Sản phẩm', key: 'products', render: (_, record) => (
-        record.products?.map(p => `${p.product} - SL: ${p.quantity}`).join(', ')
+      { title: 'Sản phẩm', key: 'products', width: 200, render: (_, record) => (
+        <span style={{ fontSize: 12 }}>{record.products?.map(p => `${p.product} - SL: ${p.quantity}`).join(', ')}</span>
       )},
-      { title: 'Tên Khách', dataIndex: "customerName",
-        key: "customerName"},
+      { title: 'Tên Khách', dataIndex: "customerName", key: "customerName", width: 120 },
         {
           title: 
               'TÊN PAGE'
            ,
           dataIndex: "pageName",
           key: "pageName",
+          width: 120,
           render: (text) => text ? text.split("||")[0].trim() : "",
         },
-        { title: 'SĐT', dataIndex: 'phone', key: 'phone' },
-      { title: 'Ngày đặt', dataIndex: 'orderDate', key: 'orderDate',render: (text) => dayjs(text).format("DD/MM"), },
-      { title: 'STT', dataIndex: 'stt', key: 'stt' },
+        { title: 'SĐT', dataIndex: 'phone', key: 'phone', width: 100 },
+      { title: 'Ngày đặt', dataIndex: 'orderDate', key: 'orderDate', width: 90, render: (text) => dayjs(text).format("DD/MM"), },
+      { title: 'STT', dataIndex: 'stt', key: 'stt', width: 60 },
       {title: 'GHI CHÚ SALE',
       dataIndex: "note",
       key: "note",
-      width: 200,
-      render: (text) => <div style={{ width: 200,  }}><h3>{text} </h3></div>,
+      width: 180,
+      render: (text) => <div style={{ width: '100%' }}><span style={{ fontSize: 12 }}>{text}</span></div>,
     },{
       title:
           "TT XỬ LÍ",
        
       dataIndex: "processStatus",
       key: "processStatus",
+      width: 100,
     },
     {
       title: 
@@ -262,6 +264,7 @@ const productOptions = products.map((p) => p.name);
       ,
       dataIndex: "saleReport",
       key: "saleReport",
+      width: 80,
       render: (text) => (
         <Tag color={text === "DONE" ? "green" : "red"}>{text}</Tag>
       ),
@@ -271,7 +274,7 @@ const productOptions = products.map((p) => p.name);
           'TÌNH TRẠNG GH',
       
       dataIndex: "deliveryStatus",
-      width: 90,
+      width: 120,
       key: "deliveryStatus",
       render: (text) => (
         <Tag color={text === "GIAO THÀNH CÔNG" ? "blue" : "orange"}>{text}</Tag>
@@ -280,19 +283,22 @@ const productOptions = products.map((p) => p.name);
       title: "THANH TOÁN",
       dataIndex: "paymentStatus",
       key: "paymentStatus",
-      width: 100,
+      width: 110,
       render: (text) => (
         <Tag color={text === "ĐÃ THANH TOÁN" ? "green" : "red"}>{text}</Tag>
       )
     },
     ]}
     rowKey="id"
+    bordered
+    size="small"
+    pagination={false}
 />
 </Modal>
     <Modal
       title={initialValues ? "Chỉnh sửa đơn hàng" : "Thêm đơn hàng mới"}
-      open={visible}
-      onCancel={onCancel}
+        open={open}
+        onCancel={onCancel}
       footer={null}
       width={1000}
       style={{ top: 20 }}
@@ -305,7 +311,7 @@ const productOptions = products.map((p) => p.name);
             {/* Các trường dành cho nhân viên kho */}
             <Row gutter={16}>
               <Col span={8}>
-                <Form.Item label="TÌNH TRẠNG GIAO HÀNG" name="deliveryStatus">
+                <Form.Item label="TÌNH TRẠNG GIAO HÀNG" name="deliveryStatus" hidden={!initialValues}>
                   <Select allowClear>
                     {tinhTrangGHOptions.map((status) => (
                       <Option key={status} value={status}>
@@ -316,22 +322,22 @@ const productOptions = products.map((p) => p.name);
                 </Form.Item>
               </Col>
               <Col span={8}>
-                <Form.Item label="MÃ VẬN ĐƠN" name="trackingCode" hidden={false}>
+                <Form.Item label="MÃ VẬN ĐƠN" name="trackingCode" hidden={!initialValues}>
                   <Input />
                 </Form.Item>
               </Col>
               <Col span={8}>
-                <Form.Item label="NGÀY GỬI" name="shippingDate1">
+                <Form.Item label="NGÀY GỬI" name="shippingDate1" hidden={!initialValues}>
                   <DatePicker allowClear style={{ width: "100%" }} format="YYYY-MM-DD" />
                 </Form.Item>
               </Col>
               <Col span={8}>
-                <Form.Item allowClear label="NGÀY NHẬN" name="shippingDate2">
+                <Form.Item allowClear label="NGÀY NHẬN" name="shippingDate2" hidden={!initialValues}>
                   <DatePicker style={{ width: "100%" }} format="YYYY-MM-DD" />
                 </Form.Item>
               </Col>
               <Col span={8}>
-                <Form.Item label="GHI CHÚ KHO" name="noteKHO">
+                <Form.Item label="GHI CHÚ KHO" name="noteKHO" hidden={!initialValues}>
                   <Input.TextArea rows={3} />
                 </Form.Item>
               </Col>
@@ -394,6 +400,9 @@ const productOptions = products.map((p) => p.name);
               <Input />
             </Form.Item>
             <Form.Item label="ĐÃ in đơn" name="istick4" hidden={true}>
+              <Input />
+            </Form.Item>
+            <Form.Item label="Đơn cần xử lý" name="istick5" hidden={true}>
               <Input />
             </Form.Item>
             <Form.Item label="cty đóng hàng" name="isShipping" hidden={true}>
@@ -802,7 +811,7 @@ const productOptions = products.map((p) => p.name);
               </Col>
             </Row>
             
-            <Form.Item label="TÌNH TRẠNG GIAO HÀNG" name="deliveryStatus" hidden={currentUser.position_team === "sale"}>
+            <Form.Item label="TÌNH TRẠNG GIAO HÀNG" name="deliveryStatus" hidden={!initialValues || currentUser.position_team === "sale"}>
               <Select>
                 {tinhTrangGHOptions.map((status) => (
                   <Option key={status} value={status}>
@@ -811,7 +820,7 @@ const productOptions = products.map((p) => p.name);
                 ))}
               </Select>
             </Form.Item>
-            <Form.Item label="MÃ VẬN ĐƠN" name="trackingCode" hidden={currentUser.position_team === "sale"}>
+            <Form.Item label="MÃ VẬN ĐƠN" name="trackingCode" hidden={!initialValues || currentUser.position_team === "sale"}>
               <Input />
             </Form.Item>
             <Form.Item label="in đơn" name="istick" hidden={true}>
@@ -820,22 +829,25 @@ const productOptions = products.map((p) => p.name);
             <Form.Item label="ĐÃ in đơn" name="istick4" hidden={true}>
               <Input />
             </Form.Item>
+            <Form.Item label="Đơn cần xử lý" name="istick5" hidden={true}>
+              <Input />
+            </Form.Item>
             <Form.Item label="cty đóng hàng" name="isShipping" hidden={true}>
               <Input />
             </Form.Item>
             <Form.Item label="xác nhận giao thành công" name="istickDONE" hidden={true}>
               <Input />
             </Form.Item>
-            <Form.Item label="NGÀY GỬI" name="shippingDate1"  hidden={currentUser.position_team === "sale"}>
+            <Form.Item label="NGÀY GỬI" name="shippingDate1"  hidden={!initialValues || currentUser.position_team === "sale"}>
               <DatePicker style={{ width: "100%" }} format="YYYY-MM-DD"/>
             </Form.Item>
             <Form.Item label="odate4" name="orderDate4" hidden={true}>
               <Input type="number" />
             </Form.Item>
-            <Form.Item label="NGÀY NHẬN" name="shippingDate2" hidden={currentUser.position_team === "sale"}>
+            <Form.Item label="NGÀY NHẬN" name="shippingDate2" hidden={!initialValues || currentUser.position_team === "sale"}>
               <DatePicker style={{ width: "100%" }} format="YYYY-MM-DD" />
             </Form.Item>
-            <Form.Item label="GHI CHÚ KHO" name="noteKHO" hidden={currentUser.position_team === "sale"}>
+            <Form.Item label="GHI CHÚ KHO" name="noteKHO" hidden={!initialValues || currentUser.position_team === "sale"}>
               <Input.TextArea rows={3} />
             </Form.Item>
             <Form.Item style={{ marginTop: 24, textAlign: "right" }}>

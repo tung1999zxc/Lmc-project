@@ -82,6 +82,29 @@ const Dashboard = () => {
     fetchOrders();
   }, [period]);
 
+  // Refresh khi có thay đổi từ SidebarMenu (xin ads)
+  const [refreshKey, setRefreshKey] = useState(0);
+  useEffect(() => {
+    const handleStorage = () => setRefreshKey(k => k + 1);
+    window.addEventListener("storage", handleStorage);
+    const interval = setInterval(() => {
+      const lastXin = localStorage.getItem("xinAdsSuccess");
+      if (lastXin) {
+        localStorage.removeItem("xinAdsSuccess");
+        setRefreshKey(k => k + 1);
+      }
+    }, 500);
+    return () => {
+      window.removeEventListener("storage", handleStorage);
+      clearInterval(interval);
+    };
+  }, []);
+  useEffect(() => {
+    fetchRecords();
+    fetchEmployees();
+    fetchOrders();
+  }, [refreshKey]);
+
   // if (currentUser.position === 'admin'){
   //   // Nếu admin thì trả về gì đó (theo code ban đầu của bạn)
   //   return (currentUser.position_team = ['sale', 'mkt']);
@@ -419,7 +442,11 @@ const Dashboard = () => {
       .filter((r) => r.date === date && isMatchTeam(r.userId))
       .reduce((sum, r) => sum + (r.request2 || 0), 0);
 
-    const tongAdsXin = adsSang + adsChieu;
+    const adsGap = records
+      .filter((r) => r.date === date && isMatchTeam(r.userId))
+      .reduce((sum, r) => sum + (r.request3 || 0), 0);
+
+    const tongAdsXin = adsSang + adsChieu + adsGap;
 
     const tongTienTieu = records
       .filter((r) => r.date === date && isMatchTeam(r.userId))
@@ -435,6 +462,7 @@ const Dashboard = () => {
       dsTong,
       adsSang,
       adsChieu,
+      adsGap,
       tongAdsXin,
       tongTienTieu,
       tienThua,
@@ -494,6 +522,12 @@ const Dashboard = () => {
       title: "ADS CHIỀU",
       dataIndex: "adsChieu",
       key: "adsChieu",
+      render: (value) => value.toLocaleString("vi-VN"),
+    },
+    {
+      title: "ADS GẤP",
+      dataIndex: "adsGap",
+      key: "adsGap",
       render: (value) => value.toLocaleString("vi-VN"),
     },
     {
@@ -750,11 +784,32 @@ const Dashboard = () => {
       ),
     },
     {
+      title: "Xin gấp",
+      key: "request3",
+      render: (_, record) => (
+        <InputNumber
+          readOnly={
+            record.isLocked &&
+            currentUser.position !== "managerMKT" &&
+            currentUser.position !== "admin"
+          }
+          value={record.request3}
+          onChange={(value) => handleInlineChange(record.id, "request3", value)}
+          style={{
+            width: "100%",
+            minWidth: "100px",
+          }}
+          formatter={(value) => value.toLocaleString("vi-VN")}
+          parser={(value) => value.replace(/\$\s?|(,*)/g, "")}
+        />
+      ),
+    },
+    {
       title: "Tiền dư",
       key: "excessMoney3",
 
       render: (_, record) => {
-        const total = record.request1 + record.request2;
+        const total = record.request1 + record.request2 + (record.request3 || 0);
         return total - record.totalReceived
           ? (total - record.totalReceived).toLocaleString("vi-VN")
           : 0;
@@ -949,8 +1004,13 @@ const Dashboard = () => {
         .filter((r) => r.date === date && members.includes(r.userId))
         .reduce((sum, r) => sum + (r.request2 || 0), 0);
 
+      const adsGap = records
+        .filter((r) => r.date === date && members.includes(r.userId))
+        .reduce((sum, r) => sum + (r.request3 || 0), 0);
+
       row[`${team.name}_sang`] = adsSang;
       row[`${team.name}_chieu`] = adsChieu;
+      row[`${team.name}_gap`] = adsGap;
     });
 
     return row;
@@ -978,6 +1038,12 @@ const Dashboard = () => {
             title: "ADS Chiều",
             dataIndex: `${team.name}_chieu`,
             key: `${team.name}_chieu`,
+            render: (value) => value.toLocaleString("vi-VN"),
+          },
+          {
+            title: "ADS Gấp",
+            dataIndex: `${team.name}_gap`,
+            key: `${team.name}_gap`,
             render: (value) => value.toLocaleString("vi-VN"),
           },
         ],

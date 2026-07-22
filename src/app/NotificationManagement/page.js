@@ -3,8 +3,6 @@
 import React, { useState, useEffect } from "react";
 import {
   Form,
-  Row,
-  Col,
   Input,
   Select,
   Button,
@@ -15,6 +13,17 @@ import {
 } from "antd";
 import axios from "axios";
 import { useSelector } from "react-redux";
+import { 
+  BellOutlined, 
+  SendOutlined, 
+  TeamOutlined, 
+  CheckCircleOutlined, 
+  UserOutlined, 
+  ExpandAltOutlined,
+  CalendarOutlined,
+  PlusCircleOutlined,
+  CloseCircleOutlined
+} from "@ant-design/icons";
 
 const { Option } = Select;
 
@@ -26,8 +35,10 @@ const NotificationManagement = () => {
   const [loading, setLoading] = useState(false);
   const [confirmModalVisible, setConfirmModalVisible] = useState(false);
   const [selectedNotification, setSelectedNotification] = useState(null);
+  const [expandedRows, setExpandedRows] = useState({});
+  const [confirmExpanded, setConfirmExpanded] = useState({});
+  const [showForm, setShowForm] = useState(false);
 
-  // Fetch employees và notifications khi component mount
   useEffect(() => {
     fetchEmployees();
     fetchNotifications();
@@ -51,7 +62,6 @@ const NotificationManagement = () => {
     }
   };
 
-  // Các lựa chọn bộ phận (bao gồm từng team)
   const departmentOptions = [
     { value: "all", label: "TẤT CẢ" },
     { value: "mkt", label: "MKT" },
@@ -62,7 +72,7 @@ const NotificationManagement = () => {
     { value: "DIEU", label: "TEAM DIỆU" },
     { value: "SON", label: "TEAM SƠN" },
     { value: "QUAN", label: "TEAM QUÂN" },
-    { value: "PHONG", label: "TEAM PHONG" },
+    { value: "PHONG", label: "TEAM LẺ" },
     { value: "TUANANH", label: "TEAM TUẤN ANH" },
     { value: "DIEN", label: "TEAM DIỆN" },
   ];
@@ -71,13 +81,11 @@ const NotificationManagement = () => {
     (emp) => emp.username.toLowerCase() !== "admin"
   );
 
-  // Đối tượng thông báo: toàn bộ nhân viên
   const recipientOptions = filteredEmployees.map((emp) => ({
     value: emp.name,
     label: emp.name,
   }));
 
-  // Xử lý lưu thông báo
   const handleFormSubmit = async (values) => {
     if (
       !values.department &&
@@ -142,7 +150,7 @@ const NotificationManagement = () => {
         author: currentUser.name,
         department: values.department || null,
         recipients: recipients,
-         type: values.type || "normal",
+        type: values.type || "normal",
         createdAt: new Date(),
         confirmed: [],
       };
@@ -150,13 +158,13 @@ const NotificationManagement = () => {
       message.success("Thông báo đã được tạo");
       form.resetFields();
       fetchNotifications();
+      setShowForm(false);
     } catch (error) {
       console.error("Lỗi khi tạo thông báo", error);
       message.error("Lỗi khi tạo thông báo");
     }
   };
 
-  // Popup xác nhận thông báo
   const handleConfirmClick = (notification) => {
     setSelectedNotification(notification);
     setConfirmModalVisible(true);
@@ -166,9 +174,7 @@ const NotificationManagement = () => {
     try {
       await axios.patch(
         `/api/notifications/${selectedNotification._id}/confirm`,
-        {
-          user: currentUser.name,
-        }
+        { user: currentUser.name }
       );
       message.success("Bạn đã xác nhận thông báo");
       setConfirmModalVisible(false);
@@ -180,7 +186,14 @@ const NotificationManagement = () => {
     }
   };
 
-  // Lọc danh sách thông báo
+  const toggleExpand = (id) => {
+    setExpandedRows(prev => ({ ...prev, [id]: !prev[id] }));
+  };
+
+  const toggleConfirmExpand = (id) => {
+    setConfirmExpanded(prev => ({ ...prev, [id]: !prev[id] }));
+  };
+
   const allowedPositions = ["leadSALE", "admin", "managerSALE"];
   const filteredNotifications = allowedPositions.includes(currentUser.position)
     ? notifications
@@ -190,35 +203,26 @@ const NotificationManagement = () => {
           (notif.recipients && notif.recipients.includes(currentUser.name))
       );
 
-  // Định nghĩa các cột cho bảng thông báo
   const columns = [
     {
       title: "Thời gian",
       dataIndex: "createdAt",
-      width: "10%",
+      width: 110,
       key: "createdAt",
-      render: (value) => {
-        const date = new Date(value);
-        return date.toLocaleDateString("vi-VN");
-      },
+      render: (value) => (
+        <div className="notif-table-date">
+          <CalendarOutlined />
+          {new Date(value).toLocaleDateString("vi-VN")}
+        </div>
+      ),
     },
     {
       title: "Thông điệp",
       dataIndex: "message",
-      width: "10%",
       key: "message",
       render: (text) => (
         <Tooltip title={text}>
-          <span
-            style={{
-              display: "block",
-              whiteSpace: "nowrap",
-              overflow: "hidden",
-              textOverflow: "ellipsis",
-            }}
-          >
-            TEXT
-          </span>
+          <span className="notif-table-message">{text}</span>
         </Tooltip>
       ),
     },
@@ -226,148 +230,258 @@ const NotificationManagement = () => {
       title: "Người viết",
       dataIndex: "author",
       key: "author",
-      width: "10%",
+      width: 130,
+      render: (text) => (
+        <div className="notif-table-author">
+          <UserOutlined /> {text}
+        </div>
+      ),
     },
     {
       title: "Bộ phận",
       dataIndex: "department",
       key: "department",
-      width: "10%",
-      render: (dep) => (dep ? dep.toUpperCase() : "N/A"),
+      width: 100,
+      render: (dep) => (
+        <span className="notif-table-dept">
+          {dep ? dep.toUpperCase() : "—"}
+        </span>
+      ),
     },
     {
       title: "Đối tượng",
       dataIndex: "recipients",
       key: "recipients",
-      width: "25%",
-      render: (recipients) =>
-        `SL: ${recipients.length} - (${recipients.join(", ")})`,
+      width: 280,
+      render: (recipients, record) => {
+        const isExpanded = expandedRows[record._id];
+        const displayText = `SL: ${recipients.length} - (${recipients.join(", ")})`;
+        const isLong = recipients.length > 3;
+        
+        return (
+          <div className="notif-table-list-cell">
+            <div className={`notif-list-text ${!isExpanded && isLong ? 'notif-truncate-2' : ''}`}>
+              <TeamOutlined /> {displayText}
+            </div>
+            {isLong && (
+              <button 
+                className="notif-expand-btn"
+                onClick={() => toggleExpand(record._id)}
+              >
+                <ExpandAltOutlined /> {isExpanded ? 'Thu gọn' : `Xem thêm (${recipients.length})`}
+              </button>
+            )}
+          </div>
+        );
+      },
     },
     {
       title: "Đã xác nhận",
       dataIndex: "confirmed",
       key: "confirmed",
-      width: "25%",
+      width: 280,
       render: (confirmed, record) => {
+        const isExpanded = confirmExpanded[record._id];
         const notConfirmed = record.recipients.filter(
           (name) => !confirmed.includes(name)
         );
-        const tooltipText =
-          notConfirmed.length > 0
-            ? "CHƯA XÁC NHẬN: " + notConfirmed.join(", ")
-            : "Tất cả đã xác nhận";
+        const displayText = confirmed.length > 0 
+          ? `SL: ${confirmed.length} - (${confirmed.join(", ")})`
+          : "Chưa có ai xác nhận";
+        const isLong = confirmed.length > 3;
+        
         return (
-          <Tooltip title={tooltipText}>
-            <span>
-              SL: {confirmed.length} - ({confirmed.join(", ")})
-            </span>
-          </Tooltip>
+          <div className="notif-table-list-cell">
+            <div className={`notif-list-text ${!isExpanded && isLong ? 'notif-truncate-2' : ''}`}>
+              <CheckCircleOutlined style={{ color: confirmed.length > 0 ? '#52c41a' : '#999' }} /> {displayText}
+            </div>
+            {isLong && (
+              <button 
+                className="notif-expand-btn"
+                onClick={() => toggleConfirmExpand(record._id)}
+              >
+                <ExpandAltOutlined /> {isExpanded ? 'Thu gọn' : `Xem thêm (${confirmed.length})`}
+              </button>
+            )}
+          </div>
         );
       },
     },
   ];
 
   return (
-    <div style={{ padding: 24 }}>
-      <Form
-        form={form}
-        layout="vertical"
-        onFinish={handleFormSubmit}
-        initialValues={{ author: currentUser.name }}
-      >
-        <Form.Item
-          label="Thông điệp"
-          name="message"
-          rules={[{ required: true, message: "Vui lòng nhập thông điệp" }]}
-        >
-          <Input.TextArea rows={3} />
-        </Form.Item>
-        <Row gutter={16}>
-          <Col span={8}>
-            <Form.Item label="Người viết" name="author">
-              <Input disabled />
-            </Form.Item>
-          </Col>
-          <Col span={8}>
-            <Form.Item label="Bộ phận thông báo (Tùy chọn)" name="department">
-              <Select
-                allowClear
-                placeholder="Chọn bộ phận thông báo (nếu muốn)"
+    <div className="notif-mgmt-container">
+      {/* Header */}
+      <div className="notif-mgmt-header">
+        <div className="notif-mgmt-header-left">
+          <BellOutlined className="notif-header-icon" />
+          <h1>Quản Lý Thông Báo</h1>
+        </div>
+        <div className="notif-mgmt-header-actions">
+          <div className="notif-mgmt-header-stats">
+            <div className="notif-stat-card">
+              <div className="notif-stat-value">{filteredNotifications.length}</div>
+              <div className="notif-stat-label">Tổng thông báo</div>
+            </div>
+          </div>
+          <button 
+            className="notif-create-btn"
+            onClick={() => setShowForm(!showForm)}
+          >
+            {showForm ? (
+              <>
+                <CloseCircleOutlined /> Đóng
+              </>
+            ) : (
+              <>
+                <PlusCircleOutlined /> Tạo thông báo mới
+              </>
+            )}
+          </button>
+        </div>
+      </div>
+
+      <div className="notif-mgmt-content">
+        {/* Form Section - Collapsible */}
+        {showForm && (
+          <div className="notif-mgmt-form-section">
+            <div className="notif-section-header">
+              <SendOutlined />
+              <h2>Tạo thông báo mới</h2>
+            </div>
+            
+            <Form
+              form={form}
+              layout="vertical"
+              onFinish={handleFormSubmit}
+              initialValues={{ author: currentUser.name }}
+            >
+              <div className="notif-form-item">
+                <label>Thông điệp</label>
+                <Form.Item
+                  name="message"
+                  rules={[{ required: true, message: "Vui lòng nhập thông điệp" }]}
+                >
+                  <Input.TextArea rows={3} placeholder="Nhập nội dung thông báo..." />
+                </Form.Item>
+              </div>
+
+              <div className="notif-form-row">
+                <div className="notif-form-item">
+                  <label>Người viết</label>
+                  <Form.Item name="author">
+                    <Input disabled prefix={<UserOutlined />} />
+                  </Form.Item>
+                </div>
+
+                <div className="notif-form-item">
+                  <label>Bộ phận thông báo</label>
+                  <Form.Item name="department">
+                    <Select
+                      allowClear
+                      placeholder="Chọn bộ phận (tùy chọn)"
+                      options={departmentOptions}
+                    />
+                  </Form.Item>
+                </div>
+
+                <div className="notif-form-item">
+                  <label>Đối tượng thông báo</label>
+                  <Form.Item name="recipients">
+                    <Select
+                      allowClear
+                      mode="multiple"
+                      placeholder="Chọn đối tượng (tùy chọn)"
+                      options={recipientOptions}
+                    />
+                  </Form.Item>
+                </div>
+
+                {currentUser.name === "Tung99" && (
+                  <div className="notif-form-item">
+                    <label>Loại thông báo</label>
+                    <Form.Item name="type">
+                      <Select placeholder="Chọn loại">
+                        <Option value="normal">Thông báo thường</Option>
+                        <Option value="reset">Reset trang</Option>
+                      </Select>
+                    </Form.Item>
+                  </div>
+                )}
+              </div>
+
+              <button 
+                className="notif-submit-btn"
+                type="submit"
               >
-                {departmentOptions.map((dep) => (
-                  <Option key={dep.value} value={dep.value}>
-                    {dep.label}
-                  </Option>
-                ))}
-              </Select>
-            </Form.Item>
-          </Col>
-          <Col span={8}>
-            <Form.Item label="Đối tượng thông báo (Tùy chọn)" name="recipients">
-              <Select
-                allowClear
-                mode="multiple"
-                placeholder="Chọn đối tượng thông báo (nếu muốn)"
-                options={recipientOptions}
-              />
-            </Form.Item>
-          </Col>
-           {currentUser.name=== "Tung99" &&(
-          <Col span={8}>
-         
-  <Form.Item
-    label="Loại thông báo"
-    name="type"
-    
-  >
-    <Select>
-      <Option value="normal">Thông báo thường</Option>
-      <Option value="reset">Thông báo có nút Reset trang</Option>
-    </Select>
-  </Form.Item>
-</Col>)}
-        </Row>
-        <Form.Item>
-          <Button type="primary" htmlType="submit">
-            Lưu thông báo
-          </Button>
-        </Form.Item>
-      </Form>
+                <SendOutlined /> Gửi thông báo
+              </button>
+            </Form>
+          </div>
+        )}
 
-      <h3>Danh sách thông báo</h3>
-      <Table
-        dataSource={filteredNotifications}
-        columns={columns}
-        rowKey="_id"
-        tableLayout="fixed"
-      />
+        {/* Table Section */}
+        <div className="notif-mgmt-table-section">
+          <div className="notif-section-header">
+            <BellOutlined />
+            <h2>Danh sách thông báo ({filteredNotifications.length})</h2>
+          </div>
+          
+          <div className="notif-table-container">
+            <Table
+              dataSource={filteredNotifications}
+              columns={columns}
+              rowKey="_id"
+              pagination={{ 
+                pageSize: 10,
+                showSizeChanger: true,
+                pageSizeOptions: ['10', '20', '50'],
+                showTotal: (total, range) => (
+                  <span style={{ color: "var(--sub)", fontWeight: 600 }}>
+                    {range[0]}-{range[1]} / {total} thông báo
+                  </span>
+                )
+              }}
+              scroll={{ x: 1200 }}
+            />
+          </div>
+        </div>
+      </div>
 
+      {/* Confirm Modal */}
       <Modal
-        title="Xác nhận thông báo"
+        title={
+          <div className="notif-modal-title">
+            <CheckCircleOutlined style={{ color: '#52c41a' }} />
+            <span>Xác nhận thông báo</span>
+          </div>
+        }
         open={confirmModalVisible}
         onOk={handleConfirmNotification}
         onCancel={() => setConfirmModalVisible(false)}
+        okText="Xác nhận"
+        cancelText="Hủy"
+        className="notif-confirm-modal"
       >
-        <p>Bạn có chắc chắn xác nhận thông báo này không?</p>
-        <p>
-          <strong>Thông điệp:</strong>{" "}
-          {selectedNotification && selectedNotification.message}
-        </p>
-        <Tooltip
-          title={
-            selectedNotification &&
-            selectedNotification.confirmed.length > 0 &&
-            selectedNotification.confirmed.join(", ")
-          }
-        >
-          <p>
-            <strong>Đã xác nhận:</strong>{" "}
-            {selectedNotification &&
-              (selectedNotification.confirmed.length > 0
-                ? selectedNotification.confirmed.join(", ")
-                : "Chưa có ai xác nhận")}
-          </p>
-        </Tooltip>
+        {selectedNotification && (
+          <div className="notif-confirm-content">
+            <div className="notif-confirm-message">
+              <strong>Thông điệp:</strong>
+              <p>{selectedNotification.message}</p>
+            </div>
+            <div className="notif-confirm-info">
+              <div>
+                <strong>Người viết:</strong> {selectedNotification.author}
+              </div>
+              <div>
+                <strong>Đã xác nhận:</strong>{" "}
+                {selectedNotification.confirmed.length > 0
+                  ? selectedNotification.confirmed.join(", ")
+                  : "Chưa có ai xác nhận"}
+              </div>
+            </div>
+          </div>
+        )}
       </Modal>
     </div>
   );

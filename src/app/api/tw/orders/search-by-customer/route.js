@@ -14,18 +14,24 @@ export async function GET(req) {
       );
     }
 
-const searchTerm = customerName.trim();
-
-const query = isNaN(searchTerm)
-  ? { customerName: { $regex: new RegExp(searchTerm, 'i') } } // nếu nhập chữ, tìm trong tên
-  : {
+    const searchTerm = customerName.trim();
+    const escapedSearchTerm = searchTerm.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const searchRegex = new RegExp(escapedSearchTerm, 'i');
+    const query = {
       $or: [
-        { customerName: { $regex: new RegExp(searchTerm, 'i') } },
-        { stt: Number(searchTerm) } // nếu nhập số, tìm chính xác trong stt
-      ]
+        { customerName: { $regex: searchRegex } },
+        { phone: { $regex: searchRegex } },
+        { fb: { $regex: searchRegex } },
+        ...(Number.isNaN(Number(searchTerm)) ? [] : [{ stt: Number(searchTerm) }]),
+      ],
     };
 
-const orders = await db.collection('orders').find(query).toArray();
+    const orders = await db
+      .collection('orders')
+      .find(query)
+      .sort({ createdAt: -1 })
+      .limit(50)
+      .toArray();
 
     return new Response(
       JSON.stringify({ message: 'Tìm đơn theo tên khách thành công', data: orders }),

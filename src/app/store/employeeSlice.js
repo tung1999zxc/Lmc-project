@@ -8,7 +8,11 @@ import { createSlice } from '@reduxjs/toolkit';
 const loadEmployeesFromLocalStorage = () => {
   if (typeof window !== "undefined" && window.localStorage) {
     const savedEmployees = localStorage.getItem("employees");
-    return savedEmployees ? JSON.parse(savedEmployees) : [];
+    const employees = savedEmployees ? JSON.parse(savedEmployees) : [];
+    return employees.map((employee) => ({
+      ...employee,
+      quocgia: employee.quocgia || "kr",
+    }));
   }
   return [];
 };
@@ -21,7 +25,10 @@ const employeeSlice = createSlice({
   initialState,
   reducers: {
     addEmployee: (state, action) => {
-      state.employees.push(action.payload);
+      state.employees.push({
+        ...action.payload,
+        quocgia: action.payload.quocgia || "kr",
+      });
       if (typeof window !== "undefined" && window.localStorage) {
         localStorage.setItem('employees', JSON.stringify(state.employees));
       }
@@ -31,7 +38,10 @@ const employeeSlice = createSlice({
         (emp) => emp.employee_id === action.payload.employee_id
       );
       if (index !== -1) {
-        state.employees[index] = action.payload;
+        state.employees[index] = {
+          ...action.payload,
+          quocgia: action.payload.quocgia || "kr",
+        };
         if (typeof window !== "undefined" && window.localStorage) {
           localStorage.setItem('employees', JSON.stringify(state.employees));
         }

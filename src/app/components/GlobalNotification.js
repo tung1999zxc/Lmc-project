@@ -1,22 +1,20 @@
 // src/components/GlobalNotification.js
 "use client";
 import React, { useState, useEffect } from "react";
-import { Modal, Button, message, Card, Typography, Divider } from "antd";
+import { Modal, Button, message } from "antd";
 import axios from "axios";
 import { useSelector } from "react-redux";
-
-const { Title, Text } = Typography;
+import { CheckCircleOutlined, UserOutlined, TeamOutlined, BellOutlined, ExpandOutlined } from "@ant-design/icons";
 
 const GlobalNotification = () => {
   const currentUser = useSelector((state) => state.user.currentUser);
   const [activeNotification, setActiveNotification] = useState(null);
+  const [expanded, setExpanded] = useState(false);
 
   const fetchActiveNotification = async () => {
     try {
       const response = await axios.get("/api/notifications");
       const notifications = response.data.data;
-      // Lọc ra các thông báo mà currentUser là đối tượng nhận và chưa xác nhận,
-      // sử dụng .trim() để so sánh chính xác hơn
       const filtered = notifications.filter((notif) => 
         notif.recipients.some(
           (name) => name.trim() === currentUser.name.trim()
@@ -25,9 +23,9 @@ const GlobalNotification = () => {
           (name) => name.trim() === currentUser.name.trim()
         )
       );
-      // Nếu có nhiều thông báo, chọn thông báo đầu tiên
       if (filtered.length > 0) {
         setActiveNotification(filtered[0]);
+        setExpanded(false);
       } else {
         setActiveNotification(null);
       }
@@ -39,7 +37,7 @@ const GlobalNotification = () => {
   useEffect(() => {
     if (currentUser && currentUser.name) {
       fetchActiveNotification();
-      const intervalId = setInterval(fetchActiveNotification, 60000); // mỗi 60 giây
+      const intervalId = setInterval(fetchActiveNotification, 60000);
       return () => clearInterval(intervalId);
     }
   }, [currentUser]);
@@ -57,65 +55,128 @@ const GlobalNotification = () => {
       message.error("Lỗi khi xác nhận thông báo");
     }
   };
+
   const handleResetPage = () => {
-  message.info("Trang sẽ được tải lại...");
-  window.location.reload();
-};
+    message.info("Trang sẽ được tải lại...");
+    window.location.reload();
+  };
+
+  const recipients = activeNotification?.recipients || [];
+  const confirmed = activeNotification?.confirmed || [];
 
   return (
     <Modal
-      visible={!!activeNotification}
-      title="Thông báo mới"
-     footer={
-  activeNotification ? (
-    activeNotification.type === "reset" ? (
-      [
-        <Button key="reset" type="primary" danger onClick={handleResetPage}>
-          Reset trang
-        </Button>,
-      ]
-    ) : (
-      [
-        <Button key="confirm" type="primary" onClick={handleConfirm}>
-          Xác nhận
-        </Button>,
-      ]
-    )
-  ) : null
-}
-      closable={false}
+      open={!!activeNotification}
+      title={
+        <div style={{ 
+          display: 'flex', 
+          alignItems: 'center', 
+          gap: 10,
+          color: '#fff',
+          fontSize: 16,
+          fontWeight: 700
+        }}>
+          <BellOutlined style={{ color: '#ffd700', fontSize: 20 }} />
+          <span>Thông báo mới</span>
+        </div>
+      }
+      footer={
+        activeNotification ? (
+          <div style={{ 
+            display: 'flex', 
+            justifyContent: 'flex-end', 
+            gap: 12 
+          }}>
+            {activeNotification.type === "reset" ? (
+              <Button 
+                danger 
+                onClick={handleResetPage}
+                className="notif-btn notif-btn-danger"
+              >
+                Reset trang
+              </Button>
+            ) : (
+              <Button 
+                type="primary" 
+                onClick={handleConfirm}
+                className="notif-btn notif-btn-primary"
+              >
+                <CheckCircleOutlined /> Xác nhận
+              </Button>
+            )}
+          </div>
+        ) : null
+      }
+      closable={true}
+      onCancel={() => setActiveNotification(null)}
+      centered
+      width={520}
+      className="notif-modal"
     >
       {activeNotification && (
-        <Card
-          style={{
-            margin: "20px auto",
-            maxWidth: "600px",
-            borderRadius: "8px",
-            boxShadow: "0 2px 8px rgba(0,0,0,0.15)",
-          }}
-          bodyStyle={{ padding: "20px" }}
-        >
-          <Text strong style={{ fontSize: "14px" }}>
-            Người thông báo:
-          </Text>{" "}
-          <Text style={{ fontSize: "14px" }}>
-            {activeNotification.author}
-          </Text>
-          <br />
-          <Divider style={{ margin: "12px 0" }} />
-          <Title level={3} style={{ color: "#1890ff", textAlign: "center" }}>
-            {activeNotification.message}
-          </Title>
-          <Divider style={{ margin: "12px 0" }} />
-          <Text strong style={{ fontSize: "14px" }}>
-            Người được thông báo:
-          </Text>{" "}
-          <Text style={{ fontSize: "14px" }}>
-            {activeNotification.recipients.length > 0
-              ? activeNotification.recipients.join(", ")
-              : "Không có"}
-          </Text>
-        </Card>
+        <div className="notif-content">
+          {/* Message */}
+          <div className="notif-message">
+            <div className="notif-message-text">
+              {activeNotification.message}
+            </div>
+          </div>
+
+          {/* Info Section */}
+          <div className="notif-info-section">
+            {/* Author */}
+            <div className="notif-info-item">
+              <div className="notif-info-label">
+                <UserOutlined /> Người thông báo
+              </div>
+              <div className="notif-info-value">
+                {activeNotification.author}
+              </div>
+            </div>
+
+            {/* Recipients */}
+            <div className="notif-info-item">
+              <div className="notif-info-label">
+                <TeamOutlined /> Đối tượng
+              </div>
+              <div className={`notif-info-value ${!expanded ? 'notif-truncate' : ''}`}>
+                {recipients.length > 0 ? recipients.join(", ") : "Không có"}
+              </div>
+            </div>
+
+            {/* Expand button for recipients */}
+            {!expanded && recipients.length > 5 && (
+              <button 
+                className="notif-expand-btn"
+                onClick={() => setExpanded(true)}
+              >
+                <ExpandOutlined /> Xem thêm ({recipients.length} người)
+              </button>
+            )}
+
+            {/* Confirmed */}
+            {confirmed.length > 0 && (
+              <div className="notif-info-item">
+                <div className="notif-info-label">
+                  <CheckCircleOutlined style={{ color: '#52c41a' }} /> Đã xác nhận
+                </div>
+                <div className={`notif-info-value ${!expanded ? 'notif-truncate' : ''}`}>
+                  {confirmed.length > 0 ? confirmed.join(", ") : "Chưa có ai xác nhận"}
+                </div>
+              </div>
+            )}
+
+            {/* Collapse button */}
+            {expanded && (
+              <button 
+                className="notif-expand-btn"
+                onClick={() => setExpanded(false)}
+              >
+                <ExpandOutlined style={{ transform: 'rotate(180deg)' }} /> Thu gọn
+              </button>
+            )}
+          </div>
+        </div>
       )}
     </Modal>
   );

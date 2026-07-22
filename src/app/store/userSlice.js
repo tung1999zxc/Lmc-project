@@ -8,7 +8,9 @@ const initialState = {
     name: '',
     positions: '',
     team_id: '',
-    position_team: ''
+    quocgia: "kr",
+    khuvuc: "",
+    position_team: ""
   }
 };
 
@@ -18,7 +20,10 @@ const userSlice = createSlice({
   reducers: {
     // Action này sẽ nhận payload là thông tin của 1 nhân viên
     setCurrentUser(state, action) {
-      state.currentUser = action.payload;
+      state.currentUser = {
+        ...action.payload,
+        quocgia: action.payload?.quocgia || "kr",
+      };
     }
   },
 });

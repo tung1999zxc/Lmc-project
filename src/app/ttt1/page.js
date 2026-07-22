@@ -412,13 +412,14 @@ function getLast30Days() {
 
   // Dữ liệu teams
   const teams = [
+    { label: 'TEAM DIỆU', value: 'DIEU' }, 
     { label: 'TEAM SƠN', value: 'SON' },
     { label: 'TEAM QUÂN', value: 'QUAN' },
-    { label: 'TEAM CHI', value: 'CHI' },
+    // { label: 'TEAM CHI', value: 'CHI' },
     { label: 'TEAM PHONG', value: 'PHONG' },   
     { label: 'TEAM TUẤN ANH', value: 'TUANANH' }, 
     { label: 'TEAM DIỆN', value: 'DIEN' }, 
-    { label: 'TEAM LẺ', value: 'LE' }, 
+    
   ];
 
   // Dữ liệu nhân viên (mẫu)
@@ -1060,8 +1061,9 @@ function getLast30Days() {
 </Row>)}
       
 {(currentUser.position === "admin" || currentUser.position === "managerMKT") ? (
-  <Tabs defaultActiveKey="MKT">
-  <Tabs.TabPane tab="MKT" key="MKT">
+  (() => {
+    const mktTabContent = (
+      <>
   <div style={{ paddingLeft: '10px' }}>
   <h3>Doanh số &amp; chi phí Ads theo Nhân viên MKT</h3>
   <div style={{ width: '100%' }}>
@@ -1073,7 +1075,7 @@ function getLast30Days() {
       : "Doanh số & chi phí Ads hàng ngày (30 ngày gần nhất)"}
   </h3>
   <GroupedDoubleBarChartComponent data={dailyChartDataNew} />
-    
+
   <h3>Doanh số &amp; chi phí Ads theo Team</h3>
   <GroupedDoubleBarChartComponent data={teamChartDataNew} />
 </div>
@@ -1112,8 +1114,11 @@ function getLast30Days() {
     
     
     
-  </Tabs.TabPane>
-  <Tabs.TabPane tab="SALE" key="SALE">
+  </>
+    );
+
+    const saleTabContent = (
+      <>
   <h3>Doanh số Nhân viên SALE</h3>
 <div style={{ width: '100%' }}>
   <GroupedDoubleBarChartComponent2 data={employeeChartDataNewsale} />
@@ -1124,11 +1129,11 @@ function getLast30Days() {
 <h2 style={{ marginTop: "2rem" }}>Thống kê để giục chuyển khoản</h2>
 <Table columns={transferColumns} dataSource={transferData} pagination={false} />
 <h2 style={{ marginTop: "2rem" }}>Báo cáo doanh số ngày</h2>
-<Table 
-columns={dailySaleColumns} 
-dataSource={[...saleDailyData].sort((a, b) => new Date(b.date) - new Date(a.date))} 
-pagination={7} 
-/> 
+<Table
+columns={dailySaleColumns}
+dataSource={[...saleDailyData].sort((a, b) => new Date(b.date) - new Date(a.date))}
+pagination={7}
+/>
 <PieChartComponent data={salePieData} />
 </Col>
 <Col xs={24} md={10}>
@@ -1144,33 +1149,36 @@ pagination={7}
 
 </Col>
 <Col xs={24} md={7}>
-        
+
 
 </Col>
 </Row>
+      </>
+    );
 
+    const items = [
+      { key: "MKT", label: "MKT", children: mktTabContent },
+      { key: "SALE", label: "SALE", children: saleTabContent },
+    ];
 
-   
-
-    
-  </Tabs.TabPane>
-</Tabs>
+    return <Tabs defaultActiveKey="MKT" items={items} />;
+  })()
 ) : 
 (currentUser.position === "leadSALE" || currentUser.position === "managerSALE") ? (
-  <Tabs >
-        
-        <Tabs.TabPane tab="SALE" key="SALE">
+  (() => {
+    const saleOnlyContent = (
+      <>
           {/* Các bảng báo cáo SALE */}
           <Row gutter={[16, 16]}>
   <Col xs={24} md={14}>
   <h2 style={{ marginTop: "2rem" }}>Thống kê để giục chuyển khoản</h2>
   <Table columns={transferColumns} dataSource={transferData} pagination={false} />
   <h2 style={{ marginTop: "2rem" }}>Báo cáo doanh số ngày</h2>
-    <Table 
-      columns={dailySaleColumns} 
-      dataSource={[...saleDailyData].sort((a, b) => new Date(b.date) - new Date(a.date))} 
-      pagination={7} 
-    /> 
+    <Table
+      columns={dailySaleColumns}
+      dataSource={[...saleDailyData].sort((a, b) => new Date(b.date) - new Date(a.date))}
+      pagination={7}
+    />
     <PieChartComponent data={salePieData} />
   </Col>
   <Col xs={24} md={10}>
@@ -1179,15 +1187,13 @@ pagination={7}
   <Table columns={saleColumns} dataSource={saleReportData} pagination={false} />
   </Col>
 </Row>
-
-
-
-
-         
-
-          
-        </Tabs.TabPane>
-      </Tabs>
+      </>
+    );
+    const items = [
+      { key: "SALE", label: "SALE", children: saleOnlyContent },
+    ];
+    return <Tabs items={items} />;
+  })()
 ): null}
     
     </div>

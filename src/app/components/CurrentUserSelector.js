@@ -2,7 +2,7 @@
 'use client'
 
 import React from 'react';
-import { Select } from 'antd';
+import { Select, message } from 'antd';
 import { useDispatch, useSelector } from 'react-redux';
 import { setCurrentUser } from '../store/userSlice';
 import { useState,useEffect } from "react";
@@ -22,8 +22,11 @@ const currentUser = useSelector((state) => state.user.currentUser);
       
       try {
         const response = await axios.get('/api/employees');
-        // response.data.data chứa danh sách nhân viên theo API đã viết
-        setEmployees(response.data.data);
+      const normalizedEmployees = (response.data.data || []).map((employee) => ({
+        ...employee,
+        quocgia: employee.quocgia || "kr",
+      }));
+      setEmployees(normalizedEmployees);
       } catch (error) {
         console.error('Lỗi khi lấy danh sách nhân viên:', error);
         message.error('Lỗi khi lấy danh sách nhân viên');
@@ -54,6 +57,7 @@ useEffect(() => {
         position: selectedEmployee.position,
         team_id: selectedEmployee.team_id,
         position_team: selectedEmployee.position_team,
+        quocgia: selectedEmployee.quocgia || "kr",
       }));
     }
   };

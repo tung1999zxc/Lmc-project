@@ -1,47 +1,106 @@
 "use client";
 
-import React, { useState, useEffect, ReactNode } from "react";
-import { Layout, Button } from "antd";
+import "@ant-design/v5-patch-for-react-19";
+import React, { useEffect, ReactNode, useState } from "react";
+
+import { Button, ConfigProvider } from "antd";
+import viVN from "antd/locale/vi_VN";
 import { LogoutOutlined } from "@ant-design/icons";
 import { useRouter } from "next/navigation";
 import { Provider, useDispatch, useSelector } from "react-redux";
 import { store } from "./store/store";
 import { setCurrentUser } from "./store/userSlice";
 import { usePathname } from "next/navigation";
-import SidebarMenu from "./components/SidebarMenu";
-// import PraiseBanner2 from './components/PraiseBanner2'
-import Script from "next/script";
+import SidebarMenu, { DynamicTimeTopbar } from "./components/SidebarMenu";
 import CurrentUserSelector from "./components/CurrentUserSelector";
 import { motion, useAnimation } from "framer-motion";
 import GlobalNotification from "./components/GlobalNotification";
-import Head from "next/head";
-import { current } from "@reduxjs/toolkit";
+import MyRankBadge from "./components/MyRankBadge";
+import { buildPageTitle } from "./utils/pageTitles";
 
-const { Content, Sider } = Layout;
-const MotionHeader = motion(Layout.Header);
+const MotionHeader = motion.create("header");
+const SidebarMenuComponent = SidebarMenu as unknown as React.ComponentType<{
+  isOpen: boolean;
+  onToggle: (open?: boolean) => void;
+}>;
+
+// LƯU Ý: `metadata` chỉ export được từ server component.
+// Vì layout này là "use client" nên ta dùng document.title trong useEffect
+// để đồng bộ tiêu đề tab theo pathname (xem InnerDashboardLayout + DashboardLayout).
+// Fallback cho SSR: "LMC - Dashboard".
 
 function InnerDashboardLayout({ children }: { children: ReactNode }) {
-  const [collapsed, setCollapsed] = useState(false);
   const dispatch = useDispatch();
   const router = useRouter();
+  const pathname = usePathname();
+  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
 
   // Lấy thông tin người dùng từ Redux store
   const currentUser = useSelector((state: any) => state.user.currentUser);
-  if (currentUser?.position === "kho2") {
-    return <>{children}</>;
-  }
-  if (currentUser?.position === "khomalay2") {
-    return <>{children}</>;
-  }
+
+  // Map position (MongoDB) -> tên hiển thị đồng bộ với bảng "📋 Báo cáo marketing"
+  const getRoleLabel = (position: string) => {
+    switch ((position || "").toLowerCase()) {
+      case "lead":
+        return "Leader MKT";
+      case "leadsale":
+        return "Leader SALE";
+      case "managermkt":
+        return "Manager MKT";
+      case "managersale":
+        return "Manager SALE";
+      case "admin":
+        return "Admin";
+      case "kho2":
+        return "Kho";
+      case "khomalay2":
+        return "Kho Malaysia";
+      case "salenhapdon":
+        return "Sale Nhập đơn";
+      case "salefull":
+        return "Sale Online";
+      case "salexuly":
+        return "Sale Xử Lý";
+      default:
+        return position || "Nhân viên";
+    }
+  };
+  const roleLabel = getRoleLabel(currentUser?.position);
+
+  // Đồng bộ <title> tab trình duyệt với pathname hiện tại (App Router không dùng next/head)
+  useEffect(() => {
+    if (typeof document !== "undefined") {
+      document.title = buildPageTitle(pathname);
+    }
+  }, [pathname]);
+
+  // Khởi tạo hiệu ứng đổi màu cho header với framer-motion
+  const headerControls = useAnimation();
+
   // Kiểm tra nếu chưa đăng nhập, chuyển hướng về trang login
   useEffect(() => {
     if (!currentUser || !currentUser.username) {
-      router.push("/login");
+      // Tránh push trùng khi đã đang ở /login
+      if (typeof window !== "undefined" && window.location.pathname !== "/login") {
+        router.push("/login");
+      }
     }
   }, [currentUser, router]);
 
+  useEffect(() => {
+    headerControls.start({
+      background: "#111322",
+    });
+  }, [headerControls]);
+
   // Hàm logout
   const handleLogout = () => {
+    // Set flag TRƯỚC mọi thứ để LoginPage biết cần chạy animation "đóng lại".
+    if (typeof window !== "undefined") {
+      sessionStorage.setItem("logout-curtain", "1");
+    }
+    // Reset user, dùng Redux + redirect ngay bằng router.replace (không đợi effect)
     dispatch(
       setCurrentUser({
         username: "",
@@ -49,38 +108,29 @@ function InnerDashboardLayout({ children }: { children: ReactNode }) {
         name: "",
         position: "",
         team_id: "",
+        quocgia: "kr",
+        khuvuc: "",
         position_team: "",
       })
     );
-    router.push("/login");
+    router.replace("/login");
   };
 
-  // Khởi tạo hiệu ứng đổi màu cho header với framer-motion
-  const headerControls = useAnimation();
-
-  useEffect(() => {
-    headerControls.start({
-      background: [
-        "linear-gradient(90deg, #FF0000, #FF7F00)",
-        "linear-gradient(90deg, #FF7F00, #FFFF00)",
-        "linear-gradient(90deg, #FFFF00, #00FF00)",
-        "linear-gradient(90deg, #00FF00, #0000FF)",
-        "linear-gradient(90deg, #0000FF, #4B0082)",
-        "linear-gradient(90deg, #4B0082, #9400D3)",
-        "linear-gradient(90deg, #9400D3, #FF0000)",
-      ],
-      transition: { duration: 50, repeat: Infinity, repeatType: "mirror" },
-    });
-  }, [headerControls]);
+  if (currentUser?.position === "kho2") {
+    return <>{children}</>;
+  }
+  if (currentUser?.position === "khomalay2") {
+    return <>{children}</>;
+  }
+  // Nếu chưa đăng nhập (bị dispatch clear khi logout hoặc truy cập trực tiếp),
+  // KHÔNG render sidebar/header. handleLogout đã chủ động router.replace
+  // nên không cần đợi effect.
+  if (!currentUser || !currentUser.username) {
+    return null;
+  }
 
   return (
     <>
-      <Head>
-        <meta
-          name="facebook-domain-verification"
-          content="4flq2d7bue0buct1vgi1wqhpay3sqr"
-        />
-      </Head>
       <div
         style={{
           position: "fixed",
@@ -95,78 +145,69 @@ function InnerDashboardLayout({ children }: { children: ReactNode }) {
           zIndex: 1,
         }}
       />
-      <Layout style={{ transform: "scale(1)" }}>
-        <Sider
-          collapsible
-          collapsed={collapsed}
-          onCollapse={(value) => setCollapsed(value)}
-        >
-          <div
-            className="logo"
-            style={{ color: "white", textAlign: "center", padding: "20px" }}
-          />
-          <SidebarMenu />
-          <div
-            className="logo"
-            style={{ color: "white", textAlign: "center", height: "400px" }}
-          />
-        </Sider>
+      <div id="app">
+        <SidebarMenuComponent isOpen={sidebarOpen} onToggle={toggleSidebar} />
 
-        <Layout>
+        <div id="main">
           <MotionHeader
+            id="topbar"
             animate={headerControls}
-            initial={{
-              background: "linear-gradient(90deg, #4b6cb7, #182848)",
-            }}
             style={{
               padding: "0 20px",
-              boxShadow: "0 2px 8px rgba(0, 0, 0, 0.15)",
               display: "flex",
               alignItems: "center",
               justifyContent: "space-between",
               height: "64px",
               width: "100%",
-              minWidth: "1000px",
               whiteSpace: "nowrap",
             }}
           >
-            <div
-              style={{
-                fontSize: "1.2em",
-                fontWeight: "bold",
-                color: "#fff",
-              }}
-            >
-              {currentUser.name}
+            <div className="tb-l">
+              <button className="tb-toggle" id="sb-btn" onClick={() => toggleSidebar()}>{sidebarOpen ? '☰' : '▶'}</button>
+              <div className="tb-user">
+                <div className="tb-name">{currentUser.name}</div>
+                <div className="tb-role-badge" style={{ textTransform: "capitalize" }}>
+                  ⭐ {roleLabel}
+                </div>
+              </div>
+              <MyRankBadge />
             </div>
-            {(currentUser.name === 'Tung99' || currentUser.name === 'Trần Mỹ Hạnh' || currentUser.name === 'KHO') && <CurrentUserSelector />}
-            {/* <PraiseBanner2 /> */}
-            <Button
-              type="primary"
-              icon={<LogoutOutlined />}
-              danger
-              onClick={handleLogout}
-            >
-              Đăng Xuất
-            </Button>
+            <div className="tb-r">
+              <DynamicTimeTopbar />
+              <Button
+                type="primary"
+                icon={<LogoutOutlined />}
+                danger
+                onClick={handleLogout}
+              >
+                Đăng Xuất
+              </Button>
+            </div>
           </MotionHeader>
-          <Content style={{ margin: "16px", minWidth: "1000px" }}>
+          <div id="content">
             {children}
-          </Content>
+          </div>
           {/* GlobalNotification luôn xuất hiện để thông báo mới đến cho người dùng */}
           <GlobalNotification />
-        </Layout>
-      </Layout>
+        </div>
+      </div>
     </>
   );
 }
 
 export default function DashboardLayout({ children }: { children: ReactNode }) {
   const pathname = usePathname();
+
+  // Đồng bộ title ngay cả ở nhánh /login (InnerDashboardLayout không mount ở đây)
+  useEffect(() => {
+    if (typeof document !== "undefined") {
+      document.title = buildPageTitle(pathname);
+    }
+  }, [pathname]);
+
   if (pathname === "/login") {
     return (
       <html lang="en">
-
         <body>
           <Provider store={store}>{children}</Provider>
         </body>
@@ -175,17 +216,12 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
   }
   return (
     <html lang="en">
-
       <body>
         <Provider store={store}>
-          <InnerDashboardLayout>{children}</InnerDashboardLayout>
-
+          <ConfigProvider locale={viVN}>
+            <InnerDashboardLayout>{children}</InnerDashboardLayout>
+          </ConfigProvider>
         </Provider>
-        {/* 👇 Thêm đoạn này ngay trước </body> */}
-
-
-
-
       </body>
     </html>
   );

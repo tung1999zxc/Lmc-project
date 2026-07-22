@@ -17,6 +17,9 @@ export async function PUT(request, context) {
 
     // Lấy dữ liệu cập nhật từ request body
     let data = await request.json();
+    if (Object.prototype.hasOwnProperty.call(data, "quocgia")) {
+      data.quocgia = data.quocgia || "kr";
+    }
     console.log("Updating employee with ID:", employee_id, "Data:", data);
 
     // Nếu có trường password, kiểm tra xem đã được băm chưa

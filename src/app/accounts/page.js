@@ -7,14 +7,15 @@ import {
   Button,
   Select,
   Table,
-  Card,
-  Row,
-  Col,
   Modal,
   Popconfirm,
   message,
 } from "antd";
-import { EditOutlined, DeleteOutlined } from "@ant-design/icons";
+import {
+  EditOutlined,
+  DeleteOutlined,
+  UserAddOutlined,
+} from "@ant-design/icons";
 import { ExclamationCircleOutlined } from "@ant-design/icons";
 import { useSelector, useDispatch } from "react-redux";
 
@@ -31,6 +32,7 @@ export default function EmployeeManagement() {
   }, []);
 
   const [editModalVisible, setEditModalVisible] = useState(false);
+  const [createModalVisible, setCreateModalVisible] = useState(false);
   const [loading, setLoading] = useState(false);
   const [edit, setEdit] = useState(false);
   const [selectedEmployee, setSelectedEmployee] = useState(null);
@@ -99,8 +101,11 @@ export default function EmployeeManagement() {
     setLoading(true);
     try {
       const response = await axios.get("/api/employees");
-      // response.data.data chứa danh sách nhân viên theo API đã viết
-      setEmployees(response.data.data);
+  const normalizedEmployees = (response.data.data || []).map((employee) => ({
+        ...employee,
+        quocgia: employee.quocgia || "kr",
+      }));
+      setEmployees(normalizedEmployees);
     } catch (error) {
       console.error("Lỗi khi lấy danh sách nhân viên:", error);
       message.error("Lỗi khi lấy danh sách nhân viên");
@@ -135,8 +140,9 @@ export default function EmployeeManagement() {
     return pt ? pt.label : ptValue;
   };
   const getPositionTeamLabel3 = (ptValue) => {
-    const pt = quocgia.find((pt) => pt.value === ptValue);
-    return pt ? pt.label : ptValue;
+    const normalizedValue = ptValue || "kr";
+    const pt = quocgia.find((pt) => pt.value === normalizedValue);
+    return pt ? pt.label : normalizedValue;
   };
   const getPositionTeamLabel4 = (ptValue) => {
     const pt = khuvuc.find((pt) => pt.value === ptValue);
@@ -155,49 +161,69 @@ const handleMassUpdateKhuvuc = async () => {
         }
    
   };
+  
+  // Get badge class based on position
+  const getBadgeClass = (position) => {
+    if (position === 'admin') return 'admin';
+    if (position === 'lead' || position === 'managerMKT' || position === 'managerSALE') return 'lead';
+    if (position === 'mkt') return 'mkt';
+    if (position === 'kho1' || position === 'kho2' || position === 'khomalay2') return 'kho';
+    return 'sale';
+  };
+
   const columns = [
-    { title: "Mã NV", dataIndex: "employee_code" },
-    { title: "Tài khoản", dataIndex: "username" },
-    { title: "Họ tên", dataIndex: "name" },
+    { title: "Mã NV", dataIndex: "employee_code", width: 90 },
+    { title: "Tài khoản", dataIndex: "username", width: 120 },
+    { title: "Họ tên", dataIndex: "name", width: 150 },
     {
       title: "Chức vụ",
       dataIndex: "position",
-      render: (value) => getPositionLabel(value),
+      width: 130,
+      render: (value) => (
+        <span className={`accounts-badge ${getBadgeClass(value)}`}>
+          {getPositionLabel(value)}
+        </span>
+      ),
     },
     {
       title: "Team",
       dataIndex: "team_id",
+      width: 140,
       render: (value) => getTeamName(value),
     },
     {
       title: "Bộ phận",
       dataIndex: "position_team",
+      width: 100,
       render: (value) => getPositionTeamLabel(value),
     },
     {
       title: "Ca làm việc",
       dataIndex: "position_team2",
+      width: 120,
       render: (value) => getPositionTeamLabel2(value),
     },
     {
       title: "Quốc gia",
       dataIndex: "quocgia",
+      width: 100,
       render: (value) => getPositionTeamLabel3(value),
     },
     {
       title: "Khu Vực",
       dataIndex: "khuvuc",
+      width: 110,
       render: (value) => getPositionTeamLabel4(value),
     },
     {
       title: "STK",
       dataIndex: "stk",
-      
+      width: 120,
     },
     {
       title: "Ngân Hàng",
       dataIndex: "nh",
-     
+      width: 120,
     },
     {
       title: "Trạng thái",
@@ -221,8 +247,7 @@ const handleMassUpdateKhuvuc = async () => {
             }
           }}
           disabled={
-            currentUser.name !== "Tung99" 
-            
+            currentUser.name !== "Tung99"
           }
         />
       ),
@@ -230,6 +255,7 @@ const handleMassUpdateKhuvuc = async () => {
     {
       title: "Thao tác",
       key: "actions",
+      width: 120,
       render: (_, record) => {
         // Nếu currentUser có vai trò admin, managerMKT, managerSALE → hiển thị đầy đủ nút chỉnh sửa và xóa
         if (
@@ -238,19 +264,22 @@ const handleMassUpdateKhuvuc = async () => {
           currentUser.position === "managerSALE"
         ) {
           return (
-            <div>
-              <Button
-                type="link"
-                icon={<EditOutlined />}
+            <div style={{ display: 'flex', gap: 6 }}>
+              <button
+                className="accounts-action-btn edit"
                 onClick={() => handleEdit(record)}
-              />
+              >
+                <EditOutlined /> Sửa
+              </button>
               <Popconfirm
                 title="Bạn chắc chắn muốn xóa?"
                 onConfirm={() => handleDelete(record.employee_id)}
                 okText="Xóa"
                 cancelText="Hủy"
               >
-                <Button type="link" danger icon={<DeleteOutlined />} />
+                <button className="accounts-action-btn delete">
+                  <DeleteOutlined /> Xóa
+                </button>
               </Popconfirm>
             </div>
           );
@@ -282,6 +311,7 @@ const handleMassUpdateKhuvuc = async () => {
       console.log(response.data.message);
       alert("Tạo tài khoản thành công");
       createForm.resetFields();
+      setCreateModalVisible(false);
       setLoading(false);
       fetchEmployees();
       // Xử lý thành công (ví dụ: chuyển hướng, thông báo, ...)
@@ -303,7 +333,7 @@ const handleMassUpdateKhuvuc = async () => {
       position_team: employee.position_team,
       position_team2: employee.position_team2,
       status: employee.status,
-      quocgia: employee.quocgia,
+      quocgia: employee.quocgia || "kr",
       khuvuc: employee.khuvuc,
       stk: employee.stk,
       nh: employee.nh,
@@ -398,12 +428,15 @@ const visibleEmployees =
   const EditModal = () => (
     <Modal
       title="Chỉnh sửa nhân viên"
-      visible={editModalVisible}
+      open={editModalVisible}
+      className="accounts-modal"
       onCancel={() => {
         setEditModalVisible(false);
         editForm.resetFields();
       }}
       footer={null}
+      width={500}
+      centered
     >
       <Form form={editForm} layout="vertical" onFinish={handleUpdate}>
         <Form.Item label="Mã NV">
@@ -528,204 +561,324 @@ const visibleEmployees =
                 <Input />
               </Form.Item>
               <Form.Item
-              // disabled={currentUser.position !== "admin"}
                 label="Ngân Hàng"
                 name="nh"
               >
                 <Input />
               </Form.Item>
 
-        <Form.Item>
-          <Button type="primary" htmlType="submit" loading={loading}>
-            Cập nhật
-          </Button>
-        </Form.Item>
+        <div className="accounts-modal-footer">
+          <button
+            className="btn-prod-ghost"
+            onClick={() => {
+              setEditModalVisible(false);
+              editForm.resetFields();
+            }}
+            style={{ padding: "8px 20px" }}
+          >
+            Hủy
+          </button>
+          <button
+            className="accounts-submit-btn"
+            type="submit"
+            disabled={loading}
+          >
+            {loading ? 'Đang xử lý...' : 'Cập nhật'}
+          </button>
+        </div>
       </Form>
     </Modal>
   );
 
 
-// ... trong component EmployeeManagement, thêm hàm:
+  // ... trong component EmployeeManagement, thêm hàm:
 
+  // Calculate stats
+  const totalEmployees = visibleEmployees.length;
+  const adminCount = visibleEmployees.filter(e => e.position === 'admin' || e.position === 'managerMKT' || e.position === 'managerSALE' || e.position === 'lead').length;
+  const mktCount = visibleEmployees.filter(e => e.position === 'mkt').length;
+  const saleCount = visibleEmployees.filter(e => e.position?.startsWith('sale')).length;
+  const canCreateAccount = ["admin", "managerMKT", "managerSALE"].includes(
+    currentUser.position
+  );
+
+  const closeCreateModal = () => {
+    setCreateModalVisible(false);
+    createForm.resetFields();
+  };
 
   return (
-    <div style={{ padding: 24 }}>
-     {currentUser.name === 'Tung99' && ( <Button
-        danger
-        onClick={async () => {
-          Modal.confirm({
-            title: "Xác nhận reset mật khẩu",
-            content:
-              "Bạn có chắc muốn đặt lại mật khẩu của toàn bộ nhân viên SALE về '1' không?",
-            okText: "Đồng ý",
-            cancelText: "Hủy",
-            onOk: async () => {
-              try {
-                const res = await axios.put(
-                  "/api/employees"
-                );
-                message.success(res.data.message);
-              } catch (error) {
-                console.error(error);
-                message.error("Lỗi khi reset mật khẩu");
-              }
-            },
-          });
-        }}
+    <div className="accounts-container">
+      {/* Header */}
+      <div className="accounts-header">
+        <h1>
+          <span className="icon">👥</span>
+          Quản Lý Tài Khoản
+        </h1>
+        <div className="accounts-header-actions">
+          <button
+            className="accounts-create-btn"
+            type="button"
+            onClick={() => setCreateModalVisible(true)}
+            disabled={!canCreateAccount}
+            title={
+              canCreateAccount
+                ? "Tạo tài khoản nhân viên"
+                : "Bạn không có quyền tạo tài khoản"
+            }
+          >
+            <UserAddOutlined />
+            Tạo tài khoản nhân viên
+          </button>
+          {currentUser.name === 'Tung99' && (
+            <button
+              className="accounts-reset-btn"
+              onClick={async () => {
+                Modal.confirm({
+                  title: "Xác nhận reset mật khẩu",
+                  content: "Bạn có chắc muốn đặt lại mật khẩu của toàn bộ nhân viên SALE về '1' không?",
+                  okText: "Đồng ý",
+                  cancelText: "Hủy",
+                  onOk: async () => {
+                    try {
+                      const res = await axios.put("/api/employees");
+                      message.success(res.data.message);
+                    } catch (error) {
+                      console.error(error);
+                      message.error("Lỗi khi reset mật khẩu");
+                    }
+                  },
+                });
+              }}
+            >
+              🔄 Reset mật khẩu SALE về 1
+            </button>
+          )}
+        </div>
+      </div>
+
+      {/* Stats Cards */}
+      <div className="accounts-stats" style={{ marginBottom: 24 }}>
+        <div className="accounts-stat-card" style={{ background: 'rgba(255,255,255,0.9)', border: '1px solid var(--border)' }}>
+          <div className="accounts-stat-icon gold">👥</div>
+          <div>
+            <div className="accounts-stat-value">{totalEmployees}</div>
+            <div className="accounts-stat-label">Tổng nhân viên</div>
+          </div>
+        </div>
+        <div className="accounts-stat-card" style={{ background: 'rgba(255,255,255,0.9)', border: '1px solid var(--border)' }}>
+          <div className="accounts-stat-icon purple">⭐</div>
+          <div>
+            <div className="accounts-stat-value">{adminCount}</div>
+            <div className="accounts-stat-label">Quản lý</div>
+          </div>
+        </div>
+        <div className="accounts-stat-card" style={{ background: 'rgba(255,255,255,0.9)', border: '1px solid var(--border)' }}>
+          <div className="accounts-stat-icon gold">📢</div>
+          <div>
+            <div className="accounts-stat-value">{mktCount}</div>
+            <div className="accounts-stat-label">MKT</div>
+          </div>
+        </div>
+        <div className="accounts-stat-card" style={{ background: 'rgba(255,255,255,0.9)', border: '1px solid var(--border)' }}>
+          <div className="accounts-stat-icon blue">💰</div>
+          <div>
+            <div className="accounts-stat-value">{saleCount}</div>
+            <div className="accounts-stat-label">Sale</div>
+          </div>
+        </div>
+      </div>
+
+      <Modal
+        title={
+          <span className="accounts-modal-title-content">
+            <UserAddOutlined />
+            Tạo tài khoản nhân viên
+          </span>
+        }
+        open={createModalVisible}
+        className="accounts-modal accounts-create-modal"
+        onCancel={closeCreateModal}
+        footer={null}
+        width={760}
+        centered
       >
-        Reset mật khẩu SALE về 1
-      </Button>)}
-    
-      <Row gutter={[16, 16]}>
-        <Col span={8}>
-          <Card title="Tạo tài khoản nhân viên">
-            <Form form={createForm} layout="vertical" onFinish={handleSubmit}>
+        <Form
+          form={createForm}
+          className="accounts-create-form"
+          layout="vertical"
+          onFinish={handleSubmit}
+          initialValues={{ quocgia: "kr" }}
+        >
+            <div className="accounts-form-item">
+              <label>Tài khoản</label>
               <Form.Item
-                label="Tài khoản"
                 name="username"
                 rules={[{ required: true, message: "Vui lòng nhập tài khoản" }]}
               >
-                <Input />
+                <Input placeholder="Nhập tài khoản" />
               </Form.Item>
+            </div>
 
+            <div className="accounts-form-item">
+              <label>Mật khẩu</label>
               <Form.Item
-                label="Mật khẩu"
                 name="password"
                 rules={[{ required: true, message: "Vui lòng nhập mật khẩu" }]}
               >
-                <Input.Password />
+                <Input.Password placeholder="Nhập mật khẩu" />
               </Form.Item>
+            </div>
 
+            <div className="accounts-form-item">
+              <label>Họ tên</label>
               <Form.Item
-                label="Họ tên"
                 name="name"
                 rules={[{ required: true, message: "Vui lòng nhập họ tên" }]}
               >
-                <Input />
+                <Input placeholder="Nhập họ tên" />
               </Form.Item>
+            </div>
 
+            <div className="accounts-form-item">
+              <label>Chức vụ</label>
               <Form.Item
-                label="Chức vụ"
                 name="position"
                 rules={[{ required: true, message: "Vui lòng chọn chức vụ" }]}
               >
                 <Select
-                  options={positions.map((p) => ({
-                    label: p.label,
-                    value: p.value,
-                  }))}
+                  options={positions.map((p) => ({ label: p.label, value: p.value }))}
+                  placeholder="Chọn chức vụ"
                 />
               </Form.Item>
+            </div>
 
-              <Form.Item label="Team (chỉ dành cho MKT)" name="team_id">
-                <Select options={teams} />
+            <div className="accounts-form-item">
+              <label>Team (chỉ dành cho MKT)</label>
+              <Form.Item name="team_id">
+                <Select options={teams} placeholder="Chọn team" allowClear />
               </Form.Item>
+            </div>
+
+            <div className="accounts-form-item">
+              <label>Bộ Phận</label>
               <Form.Item
-                label="Bộ Phận"
                 name="position_team"
                 rules={[{ required: true, message: "Vui lòng chọn bộ phận" }]}
               >
                 <Select
-                  options={position_team.map((p) => ({
-                    label: p.label,
-                    value: p.value,
-                  }))}
+                  options={position_team.map((p) => ({ label: p.label, value: p.value }))}
+                  placeholder="Chọn bộ phận"
                 />
               </Form.Item>
-              <Form.Item
-                label="Ca Làm Việc (chỉ dành cho Sale Nhập đơn và sale Online)"
-                name="position_team2"
-              >
-                <Select
-                  options={position_team2.map((p) => ({
-                    label: p.label,
-                    value: p.value,
-                  }))}
-                />
-              </Form.Item>
-              <Form.Item
-                label="Quốc Gia"
-                name="quocgia"
-              >
-                <Select
-                  options={quocgia.map((p) => ({
-                    label: p.label,
-                    value: p.value,
-                  }))}
-                />
-              </Form.Item>
-              <Form.Item
-                label="Khu vực"
-                name="khuvuc"
-              >
-                <Select
-                  options={khuvuc.map((p) => ({
-                    label: p.label,
-                    value: p.value,
-                  }))}
-                />
-              </Form.Item>
-              <Form.Item
-                label="STK ADS"
-                name="stk"
-              >
-                <Input />
-              </Form.Item>
-              <Form.Item
-                label="NGÂN HÀNG"
-                name="nh"
-              >
-             <Input />
-              </Form.Item>
-              <Form.Item
-                label="status"
-                name="status"
-                initialValue={true}
-                hidden
-              ></Form.Item>
+            </div>
 
-              <Form.Item>
-                <Button
-                  disabled={
-                    currentUser.position !== "admin" &&
-                    currentUser.position !== "managerMKT" &&
-                    currentUser.position !== "managerSALE"
-                  }
-                  type="primary"
-                  htmlType="submit"
-                  loading={loading}
-                >
-                  Tạo tài khoản
-                </Button>
+            <div className="accounts-form-item">
+              <label>Ca Làm Việc</label>
+              <Form.Item name="position_team2">
+                <Select
+                  options={position_team2.map((p) => ({ label: p.label, value: p.value }))}
+                  placeholder="Chọn ca làm việc"
+                  allowClear
+                />
               </Form.Item>
-            </Form>
-          </Card>
-        </Col>
-{/* <Button type="primary" onClick={handleMassUpdateKhuvuc}>
-            Cập nhật Khu vực về PVD (Tất cả)
-          </Button> */}
-          
-        <Col span={16}>
-          <Card
-            title="Danh sách nhân viên"
-            extra={
-              <Input.Search
-                placeholder="Tìm theo tên, tài khoản hoặc mã NV"
-                allowClear
-                onChange={(e) => setSearchText(e.target.value)}
-                style={{ width: 300 }}
-              />
-            }
-          >
-          <Table
-  columns={columns}
-  dataSource={visibleEmployees}
-  rowKey="employee_id"
-  pagination={{ pageSize: 10 }}
-/>
-          </Card>
-        </Col>
-      </Row>
+            </div>
+
+            <div className="accounts-form-item">
+              <label>Quốc Gia</label>
+              <Form.Item name="quocgia">
+                <Select
+                  options={quocgia.map((p) => ({ label: p.label, value: p.value }))}
+                  placeholder="Chọn quốc gia"
+                  allowClear
+                />
+              </Form.Item>
+            </div>
+
+            <div className="accounts-form-item">
+              <label>Khu vực</label>
+              <Form.Item name="khuvuc">
+                <Select
+                  options={khuvuc.map((p) => ({ label: p.label, value: p.value }))}
+                  placeholder="Chọn khu vực"
+                  allowClear
+                />
+              </Form.Item>
+            </div>
+
+            <div className="accounts-form-item">
+              <label>STK ADS</label>
+              <Form.Item name="stk">
+                <Input placeholder="Nhập số tài khoản" />
+              </Form.Item>
+            </div>
+
+            <div className="accounts-form-item">
+              <label>Ngân Hàng</label>
+              <Form.Item name="nh">
+                <Input placeholder="Nhập tên ngân hàng" />
+              </Form.Item>
+            </div>
+
+            <Form.Item name="status" initialValue={true} hidden>
+              <Input />
+            </Form.Item>
+
+            <div className="accounts-modal-footer accounts-create-modal-footer">
+              <button
+                className="btn-prod-ghost"
+                type="button"
+                onClick={closeCreateModal}
+              >
+                Hủy
+              </button>
+              <button
+                className="accounts-submit-btn"
+                type="submit"
+                disabled={!canCreateAccount || loading}
+              >
+                {loading ? 'Đang xử lý...' : 'Tạo tài khoản'}
+              </button>
+            </div>
+          </Form>
+      </Modal>
+
+      <div className="accounts-content">
+        {/* Table Section */}
+        <div className="accounts-table-section">
+          <div className="accounts-table-header">
+            <h2>
+              <span className="icon">📋</span>
+              Danh sách nhân viên ({totalEmployees})
+            </h2>
+            <Input.Search
+              placeholder="Tìm theo tên, tài khoản hoặc mã NV"
+              allowClear
+              onChange={(e) => setSearchText(e.target.value)}
+              className="accounts-search-input"
+              prefix={<span style={{ color: '#9ca3af' }}>🔍</span>}
+            />
+          </div>
+          <div className="accounts-table-container">
+            <Table
+              columns={columns}
+              dataSource={visibleEmployees}
+              rowKey="employee_id"
+              pagination={{ 
+                pageSize: 10,
+                showSizeChanger: true,
+                pageSizeOptions: ['10', '20', '50'],
+                showTotal: (total, range) => (
+                  <span style={{ color: "var(--sub)", fontWeight: 600 }}>
+                    {range[0]}-{range[1]} / {total} nhân viên
+                  </span>
+                )
+              }}
+              scroll={{ x: 1400 }}
+            />
+          </div>
+        </div>
+      </div>
       {editModalVisible && <EditModal />}
     </div>
   );

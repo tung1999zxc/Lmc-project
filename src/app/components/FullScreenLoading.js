@@ -7,7 +7,9 @@ const FullScreenLoading = ({ loading, tip = 'Đang tải dữ liệu...' }) => {
   if (!loading) return null;
   return (
     <div className="loading-overlay">
-      <Spin size="large" tip={tip} />
+      <Spin size="large">
+        <div className="loading-tip">{tip}</div>
+      </Spin>
       <style jsx>{`
         .loading-overlay {
           position: fixed;
@@ -17,10 +19,16 @@ const FullScreenLoading = ({ loading, tip = 'Đang tải dữ liệu...' }) => {
           height: 100vh;
           background: rgba(255, 255, 255, 0.8);
           display: flex;
+          flex-direction: column;
           align-items: center;
           justify-content: center;
+          gap: 16px;
           z-index: 9999;
           backdrop-filter: blur(5px);
+        }
+        .loading-tip {
+          color: #1890ff;
+          font-size: 14px;
         }
       `}</style>
     </div>

@@ -31,13 +31,13 @@ export async function POST(req) {
       name,
       image,
       description,
+      weight = 0,
       importedQty = 0,
       importVN = 0,
       importKR = 0,
       slvn = 0,
       status,
       sltq = 0,
-      weight = 0,
     } = await req.json();
 
     // Kiểm tra tên sản phẩm
@@ -53,9 +53,9 @@ export async function POST(req) {
       name,
       image,
       description,
+      weight,
       slvn,
       sltq,
-      weight: Number(weight) || 0,
       status,
       imports: [
         {

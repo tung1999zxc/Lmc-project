@@ -216,7 +216,7 @@ const productOptions = products.map((p) => p.name);
   return (<>
     <Modal
   title="Các đơn hàng của khách"
-  visible={modalVisible}
+  open={modalVisible}
   onCancel={() => setModalVisible(false)}
   footer={null}
   width={1300}
@@ -275,7 +275,7 @@ const productOptions = products.map((p) => p.name);
       ),
     }, {
       title: "THANH TOÁN",
-      dataIndex: "paymentStatus",
+      dataIndex: "paymentStatus",   
       key: "paymentStatus",
       width: 100,
       render: (text) => (

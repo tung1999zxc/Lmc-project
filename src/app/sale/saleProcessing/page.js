@@ -309,19 +309,209 @@ const Dashboard = () => {
     );
   };
 
+  // Stats calculations
+  const getTotalSalesThisMonth = () => {
+    return getFilteredOrders().reduce((sum, p) => sum + Number(p.profit || 0), 0) * 17000;
+  };
+
+  const getTotalSalesLastMonth = () => {
+    const today = dayjs();
+    return orders
+      .filter((p) => {
+        const orderDate = dayjs(p.orderDate);
+        const prevMonth = today.subtract(1, "month");
+        return orderDate.isSame(prevMonth, "month");
+      })
+      .reduce((sum, p) => sum + Number(p.profit || 0), 0) * 17000;
+  };
+
+  const getSalesChangePercent = () => {
+    const thisMonth = getTotalSalesThisMonth();
+    const lastMonth = getTotalSalesLastMonth();
+    if (lastMonth === 0) return 0;
+    return ((thisMonth - lastMonth) / lastMonth * 100).toFixed(1);
+  };
+
+  const getDoneOrders = () => {
+    return getFilteredOrders().filter((p) => p.saleReport === "DONE").length;
+  };
+
+  const getTotalOrders = () => {
+    return getFilteredOrders().length;
+  };
+
+  const getProcessingOrders = () => {
+    return getFilteredOrders().filter((p) => p.saleReport === "Đang xử lý").length;
+  };
+
+  const getDeletedOrders = () => {
+    return getFilteredOrders().filter((p) => p.saleReport === "Đã xoá DS").length;
+  };
+
+  const getPaidOrders = () => {
+    return getFilteredOrders().filter((p) => p.paymentStatus === "ĐÃ THANH TOÁN").length;
+  };
+
+  const getUnpaidOrders = () => {
+    return getFilteredOrders().filter((p) => p.paymentStatus === "CHƯA THANH TOÁN" || p.paymentStatus === "").length;
+  };
+
+  const getTotalMess = () => {
+    return getFilteredOrders().reduce((sum, p) => sum + (p.messCount || 0), 0);
+  };
+
+  const statsData = {
+    totalSales: getTotalSalesThisMonth(),
+    salesChange: getSalesChangePercent(),
+    doneOrders: getDoneOrders(),
+    totalOrders: getTotalOrders(),
+    doneRatio: getTotalOrders() > 0 ? (getDoneOrders() / getTotalOrders() * 100).toFixed(1) : 0,
+    undoneOrders: getTotalOrders() - getDoneOrders(),
+    totalMess: getTotalMess(),
+    processingOrders: getProcessingOrders(),
+    doneOrdersCount: getDoneOrders(),
+    deletedOrders: getDeletedOrders(),
+    paidOrders: getPaidOrders(),
+    unpaidOrders: getUnpaidOrders(),
+  };
+
   return loading ? (
     <Spin size="large" />
   ) : (
     <>
       <div>
-        {/* Bộ lọc theo khoảng thời gian */}
-        <div style={{ marginBottom: 16 }}>
-          <span style={{ marginRight: 8 }}>Bộ lọc theo khoảng thời gian: </span>
-          <Select
-            value={filterRange}
-            onChange={setFilterRange}
-            style={{ width: 250 }}
-          >
+        <div style={{ padding: 24 }}>
+          {/* 4 Box Stats */}
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 16, marginBottom: 24 }}>
+            <div style={{
+              background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+              padding: "20px 24px",
+              borderRadius: 12,
+              color: "#fff",
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center"
+            }}>
+              <div>
+                <div style={{ fontSize: 12, opacity: 0.9, marginBottom: 4 }}>Doanh số tháng</div>
+                <div style={{ fontSize: 20, fontWeight: "bold" }}>{statsData.totalSales.toLocaleString('vi-VN')} ₫</div>
+                <div style={{ fontSize: 12, opacity: 0.9, marginTop: 4 }}>
+                  {statsData.salesChange >= 0 ? "▲" : "▼"} {Math.abs(statsData.salesChange)}% so tháng trước
+                </div>
+              </div>
+              <div style={{ fontSize: 36 }}>💰</div>
+            </div>
+
+            <div style={{
+              background: "linear-gradient(135deg, #f093fb 0%, #f5576c 100%)",
+              padding: "20px 24px",
+              borderRadius: 12,
+              color: "#fff",
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center"
+            }}>
+              <div>
+                <div style={{ fontSize: 12, opacity: 0.9, marginBottom: 4 }}>Đơn đã Done</div>
+                <div style={{ fontSize: 20, fontWeight: "bold" }}>{statsData.doneOrders}</div>
+                <div style={{ fontSize: 12, opacity: 0.9, marginTop: 4 }}>Tổng {statsData.totalOrders} đơn tháng này</div>
+              </div>
+              <div style={{ fontSize: 36 }}>✅</div>
+            </div>
+
+            <div style={{
+              background: "linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)",
+              padding: "20px 24px",
+              borderRadius: 12,
+              color: "#fff",
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center"
+            }}>
+              <div>
+                <div style={{ fontSize: 12, opacity: 0.9, marginBottom: 4 }}>Tỉ lệ Done</div>
+                <div style={{ fontSize: 20, fontWeight: "bold" }}>{statsData.doneRatio}%</div>
+                <div style={{ fontSize: 12, opacity: 0.9, marginTop: 4 }}>{statsData.undoneOrders} đơn còn chưa done</div>
+              </div>
+              <div style={{ fontSize: 36 }}>📊</div>
+            </div>
+
+            <div style={{
+              background: "linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)",
+              padding: "20px 24px",
+              borderRadius: 12,
+              color: "#fff",
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center"
+            }}>
+              <div>
+                <div style={{ fontSize: 12, opacity: 0.9, marginBottom: 4 }}>Mess / DS</div>
+                <div style={{ fontSize: 20, fontWeight: "bold" }}>{statsData.totalMess.toLocaleString('vi-VN')}</div>
+                <div style={{ fontSize: 12, opacity: 0.9, marginTop: 4 }}>Tin nhắn xử lý tháng này</div>
+              </div>
+              <div style={{ fontSize: 36 }}>💬</div>
+            </div>
+          </div>
+
+          {/* Header Thống kê đơn hàng tháng */}
+          <h3 style={{ marginBottom: 12, color: "#333" }}>📦 Thống kê đơn hàng tháng</h3>
+          
+          {/* 2 Box riêng biệt */}
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginBottom: 24 }}>
+            {/* Trạng thái đơn - bên trái */}
+            <div style={{
+              background: "#fff",
+              padding: "20px 24px",
+              borderRadius: 12,
+              boxShadow: "0 2px 8px rgba(0,0,0,0.1)"
+            }}>
+              <div style={{ fontSize: 13, fontWeight: 600, color: "#333", marginBottom: 10 }}>Trạng thái đơn:</div>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 12 }}>
+                <div style={{ textAlign: "center", padding: 12, background: "#fff7e6", borderRadius: 8 }}>
+                  <div style={{ fontSize: 12, color: "#888", marginBottom: 4 }}>Đang xử lý</div>
+                  <div style={{ fontSize: 20, fontWeight: "bold", color: "#fa8c16" }}>{statsData.processingOrders} đơn</div>
+                </div>
+                <div style={{ textAlign: "center", padding: 12, background: "#f6ffed", borderRadius: 8 }}>
+                  <div style={{ fontSize: 12, color: "#888", marginBottom: 4 }}>Đã done</div>
+                  <div style={{ fontSize: 20, fontWeight: "bold", color: "#52c41a" }}>{statsData.doneOrdersCount} đơn</div>
+                </div>
+                <div style={{ textAlign: "center", padding: 12, background: "#fff1f0", borderRadius: 8 }}>
+                  <div style={{ fontSize: 12, color: "#888", marginBottom: 4 }}>Đã xoá DS</div>
+                  <div style={{ fontSize: 20, fontWeight: "bold", color: "#ff4d4f" }}>{statsData.deletedOrders} đơn</div>
+                </div>
+              </div>
+            </div>
+
+            {/* Thanh toán - bên phải */}
+            <div style={{
+              background: "#fff",
+              padding: "20px 24px",
+              borderRadius: 12,
+              boxShadow: "0 2px 8px rgba(0,0,0,0.1)"
+            }}>
+              <div style={{ fontSize: 13, fontWeight: 600, color: "#333", marginBottom: 10 }}>Thanh toán:</div>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 12 }}>
+                <div style={{ textAlign: "center", padding: 16, background: "#f6ffed", borderRadius: 8 }}>
+                  <div style={{ fontSize: 12, color: "#888", marginBottom: 4 }}>Đã TT</div>
+                  <div style={{ fontSize: 24, fontWeight: "bold", color: "#52c41a" }}>{statsData.paidOrders} đơn</div>
+                </div>
+                <div style={{ textAlign: "center", padding: 16, background: "#fff7e6", borderRadius: 8 }}>
+                  <div style={{ fontSize: 12, color: "#888", marginBottom: 4 }}>Chưa TT</div>
+                  <div style={{ fontSize: 24, fontWeight: "bold", color: "#fa8c16" }}>{statsData.unpaidOrders} đơn</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Bộ lọc theo khoảng thời gian */}
+          <div style={{ marginBottom: 16 }}>
+            <span style={{ marginRight: 8 }}>Bộ lọc theo khoảng thời gian: </span>
+            <Select
+              value={filterRange}
+              onChange={setFilterRange}
+              style={{ width: 250 }}
+            >
             {/* <Select.Option value="all">Tất cả</Select.Option> */}
             <Select.Option value="today">1 Ngày</Select.Option>
             <Select.Option value="week">1 Tuần</Select.Option>
@@ -368,6 +558,7 @@ const Dashboard = () => {
             />
           </>
         )}
+      </div>
       </div>
     </>
   );

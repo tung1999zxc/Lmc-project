@@ -19,13 +19,14 @@ const { Option } = Select;
 
 import { useRouter } from 'next/navigation';
 const Dashboard = () => {
-    const router = useRouter(); 
+    const router = useRouter();
+    const dispatch = useDispatch();
+  const currentUser = useSelector((state) => state.user.currentUser);
     useEffect(() => {
       if (!currentUser.name) {
         router.push("/login");
       }
     }, []);
-  const currentUser = useSelector((state) => state.user.currentUser);
   // Giả sử thông tin người dùng hiện tại được lấy từ hệ thống xác thực
   const [sampleOrders, setSampleOrders] = useState([]);
   const [form] = Form.useForm();
@@ -412,11 +413,194 @@ const computeAverageClosingRate = (employeeName) => {
     }, {});
   };
 
-   return loading ? (
-     <Spin size="large" />
-   ) : (
-     <>
+  // Tính tổng doanh số tháng này
+  const getTotalSalesThisMonth = () => {
+    return sampleOrders
+      .filter((p) => filterSampleOrdersByPeriod(p))
+      .reduce((sum, p) => sum + (p.profit || 0), 0) * 17000;
+  };
+
+  // Tính tổng doanh số tháng trước
+  const getTotalSalesLastMonth = () => {
+    const now = moment();
+    const lastMonthStart = now.clone().subtract(1, "months").startOf("month");
+    const lastMonthEnd = now.clone().subtract(1, "months").endOf("month");
+    return sampleOrders
+      .filter((p) => {
+        const orderDate = moment(p.orderDate, "YYYY-MM-DD");
+        return orderDate.isSame(lastMonthStart, "month");
+      })
+      .reduce((sum, p) => sum + (p.profit || 0), 0) * 17000;
+  };
+
+  // Tính % thay đổi so với tháng trước
+  const getSalesChangePercent = () => {
+    const thisMonth = getTotalSalesThisMonth();
+    const lastMonth = getTotalSalesLastMonth();
+    if (lastMonth === 0) return 0;
+    return ((thisMonth - lastMonth) / lastMonth * 100).toFixed(1);
+  };
+
+  // Đơn hàng Done
+  const getDoneOrders = () => {
+    return sampleOrders.filter((p) => p.saleReport === "DONE" && filterSampleOrdersByPeriod(p)).length;
+  };
+
+  // Tổng đơn hàng
+  const getTotalOrders = () => {
+    return sampleOrders.filter((p) => filterSampleOrdersByPeriod(p)).length;
+  };
+
+  // Tổng mess tháng này
+  const getTotalMess = () => {
+    return filteredRecords.reduce((sum, r) => sum + (r.newMess || 0), 0);
+  };
+
+    const statsData = {
+    totalSales: getTotalSalesThisMonth(),
+    salesChange: getSalesChangePercent(),
+    doneOrders: getDoneOrders(),
+    totalOrders: getTotalOrders(),
+    doneRatio: getTotalOrders() > 0 ? (getDoneOrders() / getTotalOrders() * 100).toFixed(1) : 0,
+    undoneOrders: getTotalOrders() - getDoneOrders(),
+    totalMess: getTotalMess(),
+    // Thống kê trạng thái đơn
+    processingOrders: sampleOrders.filter((p) => p.saleReport === "Đang xử lý" && filterSampleOrdersByPeriod(p)).length,
+    doneOrdersCount: sampleOrders.filter((p) => p.saleReport === "DONE" && filterSampleOrdersByPeriod(p)).length,
+    deletedOrders: sampleOrders.filter((p) => p.saleReport === "Đã xoá DS" && filterSampleOrdersByPeriod(p)).length,
+    // Thống kê thanh toán
+    paidOrders: sampleOrders.filter((p) => p.paymentStatus === "Đã TT" && filterSampleOrdersByPeriod(p)).length,
+    unpaidOrders: sampleOrders.filter((p) => p.paymentStatus === "Chưa TT" && filterSampleOrdersByPeriod(p)).length,
+  };
+
+  return loading ? (
+    <Spin size="large" />
+  ) : (
+    <>
     <div style={{ padding: 24 }}>
+      {/* 4 Box Stats */}
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 16, marginBottom: 24 }}>
+        <div style={{ 
+          background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)", 
+          padding: "20px 24px", 
+          borderRadius: 12, 
+          color: "#fff",
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center"
+        }}>
+          <div>
+            <div style={{ fontSize: 12, opacity: 0.9, marginBottom: 4 }}>Doanh số tháng</div>
+            <div style={{ fontSize: 20, fontWeight: "bold" }}>{statsData.totalSales.toLocaleString('vi-VN')} ₫</div>
+            <div style={{ fontSize: 12, opacity: 0.9, marginTop: 4 }}>
+              {statsData.salesChange >= 0 ? "▲" : "▼"} {Math.abs(statsData.salesChange)}% so tháng trước
+            </div>
+          </div>
+          <div style={{ fontSize: 36 }}>💰</div>
+        </div>
+
+        <div style={{ 
+          background: "linear-gradient(135deg, #f093fb 0%, #f5576c 100%)", 
+          padding: "20px 24px", 
+          borderRadius: 12, 
+          color: "#fff",
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center"
+        }}>
+          <div>
+            <div style={{ fontSize: 12, opacity: 0.9, marginBottom: 4 }}>Đơn đã Done</div>
+            <div style={{ fontSize: 20, fontWeight: "bold" }}>{statsData.doneOrders}</div>
+            <div style={{ fontSize: 12, opacity: 0.9, marginTop: 4 }}>Tổng {statsData.totalOrders} đơn tháng này</div>
+          </div>
+          <div style={{ fontSize: 36 }}>✅</div>
+        </div>
+
+        <div style={{ 
+          background: "linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)", 
+          padding: "20px 24px", 
+          borderRadius: 12, 
+          color: "#fff",
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center"
+        }}>
+          <div>
+            <div style={{ fontSize: 12, opacity: 0.9, marginBottom: 4 }}>Tỉ lệ Done</div>
+            <div style={{ fontSize: 20, fontWeight: "bold" }}>{statsData.doneRatio}%</div>
+            <div style={{ fontSize: 12, opacity: 0.9, marginTop: 4 }}>{statsData.undoneOrders} đơn còn chưa done</div>
+          </div>
+          <div style={{ fontSize: 36 }}>📊</div>
+        </div>
+
+        <div style={{ 
+          background: "linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)", 
+          padding: "20px 24px", 
+          borderRadius: 12, 
+          color: "#fff",
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center"
+        }}>
+          <div>
+            <div style={{ fontSize: 12, opacity: 0.9, marginBottom: 4 }}>Mess / DS</div>
+            <div style={{ fontSize: 20, fontWeight: "bold" }}>{statsData.totalMess.toLocaleString('vi-VN')}</div>
+            <div style={{ fontSize: 12, opacity: 0.9, marginTop: 4 }}>Tin nhắn xử lý tháng này</div>
+          </div>
+          <div style={{ fontSize: 36 }}>💬</div>
+        </div>
+      </div>
+
+      {/* Header Thống kê đơn hàng tháng */}
+      <h3 style={{ marginBottom: 12, color: "#333" }}>📦 Thống kê đơn hàng tháng</h3>
+      
+      {/* 2 Box riêng biệt */}
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginBottom: 24 }}>
+        {/* Trạng thái đơn - bên trái */}
+        <div style={{
+          background: "#fff",
+          padding: "20px 24px",
+          borderRadius: 12,
+          boxShadow: "0 2px 8px rgba(0,0,0,0.1)"
+        }}>
+          <div style={{ fontSize: 13, fontWeight: 600, color: "#333", marginBottom: 10 }}>Trạng thái đơn:</div>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 12 }}>
+            <div style={{ textAlign: "center", padding: 12, background: "#fff7e6", borderRadius: 8 }}>
+              <div style={{ fontSize: 12, color: "#888", marginBottom: 4 }}>Đang xử lý</div>
+              <div style={{ fontSize: 20, fontWeight: "bold", color: "#fa8c16" }}>{statsData.processingOrders} đơn</div>
+            </div>
+            <div style={{ textAlign: "center", padding: 12, background: "#f6ffed", borderRadius: 8 }}>
+              <div style={{ fontSize: 12, color: "#888", marginBottom: 4 }}>Đã done</div>
+              <div style={{ fontSize: 20, fontWeight: "bold", color: "#52c41a" }}>{statsData.doneOrdersCount} đơn</div>
+            </div>
+            <div style={{ textAlign: "center", padding: 12, background: "#fff1f0", borderRadius: 8 }}>
+              <div style={{ fontSize: 12, color: "#888", marginBottom: 4 }}>Đã xoá DS</div>
+              <div style={{ fontSize: 20, fontWeight: "bold", color: "#ff4d4f" }}>{statsData.deletedOrders} đơn</div>
+            </div>
+          </div>
+        </div>
+
+        {/* Thanh toán - bên phải */}
+        <div style={{
+          background: "#fff",
+          padding: "20px 24px",
+          borderRadius: 12,
+          boxShadow: "0 2px 8px rgba(0,0,0,0.1)"
+        }}>
+          <div style={{ fontSize: 13, fontWeight: 600, color: "#333", marginBottom: 10 }}>Thanh toán:</div>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 12 }}>
+            <div style={{ textAlign: "center", padding: 16, background: "#f6ffed", borderRadius: 8 }}>
+              <div style={{ fontSize: 12, color: "#888", marginBottom: 4 }}>Đã TT</div>
+              <div style={{ fontSize: 24, fontWeight: "bold", color: "#52c41a" }}>{statsData.paidOrders} đơn</div>
+            </div>
+            <div style={{ textAlign: "center", padding: 16, background: "#fff7e6", borderRadius: 8 }}>
+              <div style={{ fontSize: 12, color: "#888", marginBottom: 4 }}>Chưa TT</div>
+              <div style={{ fontSize: 24, fontWeight: "bold", color: "#fa8c16" }}>{statsData.unpaidOrders} đơn</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <h1>Nhập dữ liệu</h1>
       <Form
         form={form}
@@ -499,7 +683,7 @@ currentUser.position === "leadSALE" ? (
         <Table
           dataSource={[...userRecords].sort((a, b) => moment(b.date).valueOf() - moment(a.date).valueOf())}
           columns={columns}
-          rowKey="key"
+          rowKey={(r) => r._id || r.id || r.key}
           pagination={{ pageSize: 5 }}
         />
       </div>
@@ -516,7 +700,7 @@ currentUser.position === "leadSALE" ? (
           .sort((a, b) => moment(b.date).valueOf() - moment(a.date).valueOf())
       }
       columns={columns}
-      rowKey="key"
+      rowKey={(r) => r._id || r.id || r.key}
       pagination={{ pageSize: 5 }}
     />
   </>

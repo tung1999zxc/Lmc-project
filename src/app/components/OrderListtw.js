@@ -15,8 +15,7 @@ import {
   Tag,Spin,
   Checkbox
 } from "antd";
-import { EditOutlined, DeleteOutlined ,SearchOutlined} from "@ant-design/icons";
-import FullScreenLoading from './FullScreenLoading.js';
+import { EditOutlined, DeleteOutlined ,SearchOutlined,CloseOutlined} from "@ant-design/icons";
 import dayjs from "dayjs";
 import OrderFormtw from "./OrderFormtw.js";
 import isBetween from "dayjs/plugin/isBetween";
@@ -27,6 +26,416 @@ import ExportExcelButton from "./exportOrdersToExcel.js";
 // Gọi dayjs.extend bên ngoài component để không gọi lại mỗi lần render
 dayjs.extend(isBetween);
 import { useRouter } from 'next/navigation';
+
+// Address Cell Component with expand/collapse
+const AddressCell = ({ text, maxHeight = 60 }) => {
+  const [expanded, setExpanded] = useState(false);
+  const [needsExpand, setNeedsExpand] = useState(false);
+  const textRef = useRef(null);
+
+  useEffect(() => {
+    if (textRef.current) {
+      const needsMoreLines = textRef.current.scrollHeight > maxHeight;
+      setNeedsExpand(needsMoreLines);
+    }
+  }, [text, maxHeight]);
+
+  if (!text) return <span style={{ color: '#999' }}>-</span>;
+
+  return (
+    <div
+      className="address-cell"
+      style={{
+        position: 'relative',
+        maxHeight: expanded ? 'none' : maxHeight,
+        overflow: 'hidden',
+        transition: 'all 0.2s ease',
+        textAlign: 'left',
+        wordBreak: 'break-word',
+        lineHeight: 1.4,
+      }}
+    >
+      <div ref={textRef} style={{ paddingRight: needsExpand && !expanded ? 24 : 0 }}>
+        {text}
+      </div>
+      {needsExpand && (
+        <button
+          onClick={() => setExpanded(!expanded)}
+          style={{
+            position: expanded ? 'relative' : 'absolute',
+            right: 2,
+            bottom: expanded ? 0 : 2,
+            background: expanded ? 'var(--gold)' : 'rgba(255,255,255,0.95)',
+            color: expanded ? '#fff' : 'var(--gold)',
+            border: 'none',
+            borderRadius: '4px',
+            padding: '2px 6px',
+            fontSize: '10px',
+            fontWeight: 600,
+            cursor: 'pointer',
+            boxShadow: '0 1px 3px rgba(0,0,0,0.15)',
+            whiteSpace: 'nowrap',
+            marginTop: expanded ? 4 : 0,
+          }}
+        >
+          {expanded ? 'Thu gọn' : 'Mở rộng'}
+        </button>
+      )}
+    </div>
+  );
+};
+
+const PhoneCell = ({ text }) => {
+  const [expanded, setExpanded] = useState(false);
+  const [needsExpand, setNeedsExpand] = useState(false);
+  const textRef = useRef(null);
+
+  useEffect(() => {
+    if (textRef.current) {
+      const isLong = textRef.current.scrollWidth > textRef.current.parentElement?.clientWidth;
+      setNeedsExpand(isLong);
+    }
+  }, [text]);
+
+  if (!text) return <span style={{ color: '#999' }}>-</span>;
+
+  return (
+    <div
+      style={{
+        position: 'relative',
+        overflow: 'hidden',
+        textAlign: 'left',
+        whiteSpace: expanded ? 'normal' : 'nowrap',
+        transition: 'all 0.2s ease',
+      }}
+    >
+      <div
+        ref={textRef}
+        style={{
+          overflow: 'hidden',
+          textOverflow: 'ellipsis',
+          paddingRight: needsExpand && !expanded ? 24 : 0,
+        }}
+      >
+        {text}
+      </div>
+      {needsExpand && (
+        <button
+          onClick={() => setExpanded(!expanded)}
+          style={{
+            position: 'absolute',
+            right: 2,
+            top: '50%',
+            transform: 'translateY(-50%)',
+            background: expanded ? 'var(--gold)' : 'rgba(255,255,255,0.95)',
+            color: expanded ? '#fff' : 'var(--gold)',
+            border: 'none',
+            borderRadius: '4px',
+            padding: '2px 6px',
+            fontSize: '10px',
+            fontWeight: 600,
+            cursor: 'pointer',
+            boxShadow: '0 1px 3px rgba(0,0,0,0.15)',
+            whiteSpace: 'nowrap',
+          }}
+        >
+          {expanded ? 'Thu' : '+'}
+        </button>
+      )}
+    </div>
+  );
+};
+
+/* ══ AnimatedCounter: đếm số từ 0 → target khi mount hoặc đổi giá trị ══ */
+const AnimatedCounter = ({ value, duration = 900, className, style }) => {
+  const [display, setDisplay] = useState(0);
+  const [counting, setCounting] = useState(false);
+  const rafRef = useRef(null);
+  const startRef = useRef(null);
+  const fromRef = useRef(0);
+
+  useEffect(() => {
+    const from = fromRef.current;
+    const to = Number(value) || 0;
+    if (from === to) {
+      setDisplay(to);
+      setCounting(false);
+      return;
+    }
+    setCounting(true);
+    startRef.current = null;
+    cancelAnimationFrame(rafRef.current);
+
+    const step = (ts) => {
+      if (!startRef.current) startRef.current = ts;
+      const elapsed = ts - startRef.current;
+      const progress = Math.min(elapsed / duration, 1);
+      const eased = 1 - Math.pow(1 - progress, 3);
+      const current = Math.round(from + (to - from) * eased);
+      setDisplay(current);
+      if (progress < 1) {
+        rafRef.current = requestAnimationFrame(step);
+      } else {
+        fromRef.current = to;
+        setCounting(false);
+      }
+    };
+    rafRef.current = requestAnimationFrame(step);
+    return () => cancelAnimationFrame(rafRef.current);
+  }, [value, duration]);
+
+  return (
+    <span
+      className={`${className || ''} ${counting ? 'counting' : ''}`.trim()}
+      style={style}
+    >
+      {display.toLocaleString('vi-VN')}
+    </span>
+  );
+};
+
+/* ══ DemSLBlock: bảng đếm sản phẩm sang trọng — dạng cards gradient + animated counter ══ */
+const DemSLBlock = ({ totalQuantities, totalQuantitiesINDON, totalQuantitiesCTYDONG, totalQuantitiesKHODONG, totalRevenue, currentUser, visibleSections, onClose }) => {
+  const SECTIONS = [
+    visibleSections.main && {
+      key: 'main',
+      title: 'Tổng sản phẩm',
+      subtitle: 'Tất cả đơn trong bộ lọc',
+      data: totalQuantities,
+      accent: '#c9952a',
+      accent2: '#f5d680',
+      icon: '📦',
+    },
+    visibleSections.tick && {
+      key: 'tick',
+      title: 'Đã tick xuất Excel',
+      subtitle: 'Các đơn đã được tích chọn',
+      data: totalQuantitiesINDON,
+      accent: '#0a8a4a',
+      accent2: '#7be0a3',
+      icon: '✅',
+    },
+    visibleSections.ctyDong && {
+      key: 'ctyDong',
+      title: 'Kho HQ đóng',
+      subtitle: 'Công ty đóng hàng',
+      data: totalQuantitiesCTYDONG,
+      accent: '#1f5fa8',
+      accent2: '#7fb6ee',
+      icon: '🏢',
+    },
+    visibleSections.khoDong && {
+      key: 'khoDong',
+      title: 'Kho đóng',
+      subtitle: 'Kho chi nhánh đóng',
+      data: totalQuantitiesKHODONG,
+      accent: '#a8441f',
+      accent2: '#f0a87b',
+      icon: '🏬',
+    },
+  ].filter(Boolean);
+
+  const totalQty = Object.values(totalQuantities || {}).reduce((a, b) => a + (Number(b) || 0), 0);
+  const productCount = Object.keys(totalQuantities || {}).length;
+
+  return (
+    <div className="dem-sl-wrapper">
+      {/* Nút đóng X */}
+      <button
+        type="button"
+        className="dem-sl-close"
+        onClick={onClose}
+        title="Đóng bảng thống kê"
+        aria-label="Đóng"
+      >
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round">
+          <path d="M6 6 L18 18 M18 6 L6 18" />
+        </svg>
+      </button>
+
+      {/* Hero header */}
+      <div className="dem-sl-hero">
+        <div className="dem-sl-hero-left">
+          <div className="dem-sl-hero-icon">📊</div>
+          <div>
+            <div className="dem-sl-hero-title">Thống kê sản phẩm</div>
+            <div className="dem-sl-hero-sub">
+              Cập nhật theo bộ lọc hiện tại • {productCount} mặt hàng
+            </div>
+          </div>
+        </div>
+        <div className="dem-sl-hero-stats">
+          <div className="dem-sl-hero-stat">
+            <div className="dem-sl-hero-stat-label">Tổng SL</div>
+            <AnimatedCounter
+              value={totalQty}
+              className="dem-sl-hero-stat-value"
+              duration={1100}
+            />
+          </div>
+          {typeof totalRevenue === 'number' && (
+            <div className="dem-sl-hero-stat">
+              <div className="dem-sl-hero-stat-label">Doanh thu</div>
+              <span className="dem-sl-hero-stat-value">
+                <AnimatedCounter
+                  value={Math.round((totalRevenue || 0) * 17 * 1000)}
+                  duration={1200}
+                />
+                <span style={{ fontSize: 12, opacity: 0.8, marginLeft: 4, fontWeight: 700 }}>đ</span>
+              </span>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Sections */}
+      <div className="dem-sl-sections">
+        {SECTIONS.map((sec) => {
+          const entries = Object.entries(sec.data || {})
+            .filter(([, v]) => Number(v) > 0)
+            .sort((a, b) => Number(b[1]) - Number(a[1]));
+          const secTotal = entries.reduce((acc, [, v]) => acc + (Number(v) || 0), 0);
+          return (
+            <div
+              key={sec.key}
+              className="dem-sl-section"
+              style={{
+                '--accent': sec.accent,
+                '--accent2': sec.accent2,
+              }}
+            >
+              <div className="dem-sl-section-head">
+                <div className="dem-sl-section-title">
+                  <span className="dem-sl-section-icon">{sec.icon}</span>
+                  <span>{sec.title}</span>
+                </div>
+                <div className="dem-sl-section-total">
+                  <AnimatedCounter value={secTotal} duration={1000} />
+                  <span className="dem-sl-section-total-unit">sp</span>
+                </div>
+              </div>
+              <div className="dem-sl-section-sub">{sec.subtitle}</div>
+
+              {entries.length === 0 ? (
+                <div className="dem-sl-empty">Chưa có dữ liệu</div>
+              ) : (
+                <div className="dem-sl-grid">
+                  {entries.map(([name, qty], idx) => (
+                    <div
+                      key={`${sec.key}-${name}`}
+                      className="dem-sl-card"
+                      style={{ animationDelay: `${idx * 35}ms` }}
+                    >
+                      <div className="dem-sl-card-name" title={name}>{name}</div>
+                      <div className="dem-sl-card-qty">
+                        <AnimatedCounter value={Number(qty)} duration={900} />
+                      </div>
+                      <div className="dem-sl-card-bar">
+                        <div
+                          className="dem-sl-card-bar-fill"
+                          style={{
+                            width: `${Math.min(100, (Number(qty) / Math.max(...entries.map(([, v]) => Number(v)), 1)) * 100)}%`,
+                          }}
+                        />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+};
+
+const CustomerHistoryHeader = ({ orders = [], onClose }) => {
+  const targetTotal = orders.length;
+  const targetDone = orders.filter((o) => o.saleReport === "DONE").length;
+  const targetShipped = orders.filter(
+    (o) => o.deliveryStatus === "GIAO THÀNH CÔNG"
+  ).length;
+  const targetRev =
+    orders.reduce((acc, o) => acc + (Number(o.revenue) || 0), 0) * 1000 * 17;
+
+  const [vals, setVals] = useState({
+    total: 0,
+    done: 0,
+    shipped: 0,
+    rev: 0,
+  });
+
+  useEffect(() => {
+    let raf;
+    const duration = 1100;
+    const start = performance.now();
+
+    const animate = (now) => {
+      const t = Math.min(1, (now - start) / duration);
+      const ease = 1 - Math.pow(1 - t, 3);
+      setVals({
+        total: Math.round(targetTotal * ease),
+        done: Math.round(targetDone * ease),
+        shipped: Math.round(targetShipped * ease),
+        rev: Math.round(targetRev * ease),
+      });
+      if (t < 1) raf = requestAnimationFrame(animate);
+    };
+    raf = requestAnimationFrame(animate);
+    return () => cancelAnimationFrame(raf);
+  }, [targetTotal, targetDone, targetShipped, targetRev]);
+
+  const customerName =
+    orders.length > 0 ? orders[0]?.customerName || "—" : "Tra cứu đơn hàng";
+
+  return (
+    <div className="customer-history-header">
+      <div className="customer-history-header-left">
+        <div className="customer-history-icon">📋</div>
+        <div>
+          <div className="customer-history-title">
+            Lịch sử đơn hàng của khách
+          </div>
+          <div className="customer-history-subtitle">
+            Khách hàng: {customerName}
+          </div>
+        </div>
+      </div>
+      <div className="customer-history-stats">
+        <div className="customer-history-stat">
+          <span className="customer-history-stat-label">Tổng đơn</span>
+          <span className="customer-history-stat-value">{vals.total}</span>
+        </div>
+        <div className="customer-history-stat">
+          <span className="customer-history-stat-label">Hoàn thành</span>
+          <span className="customer-history-stat-value customer-history-stat-done">
+            {vals.done}
+          </span>
+        </div>
+        <div className="customer-history-stat">
+          <span className="customer-history-stat-label">Đã giao</span>
+          <span className="customer-history-stat-value customer-history-stat-shipped">
+            {vals.shipped}
+          </span>
+        </div>
+        <div className="customer-history-stat">
+          <span className="customer-history-stat-label">Tổng DS</span>
+          <span className="customer-history-stat-value customer-history-stat-rev">
+            {vals.rev.toLocaleString()}
+            <span className="customer-history-stat-unit">đ</span>
+          </span>
+        </div>
+      </div>
+      <Button
+        type="text"
+        icon={<CloseOutlined style={{ fontSize: 18, color: "#fde68a" }} />}
+        onClick={onClose}
+        className="customer-history-close"
+      />
+    </div>
+  );
+};
 
 const OrderListtw = () => {
   // Lấy thông tin người dùng và danh sách nhân viên từ Redux
@@ -55,6 +464,7 @@ const OrderListtw = () => {
   const [initialOrders4, setInitialOrders4] = useState([]); 
   const [loading, setLoading] = useState(false);
   const [shiftFilter, setShiftFilter] = useState(null);
+  const [shiftFilter2, setShiftFilter2] = useState(null);
   const [totalRevenue, setTotalRevenue] = useState(0);
   const [sttInput, setSttInput] = useState("");
   const [codeInput, setCodeInput] = useState("");
@@ -80,6 +490,7 @@ const OrderListtw = () => {
   const [initialOrders2, setInitialOrders2] = useState([]);
   const [initialOrders3, setInitialOrders3] = useState([]);
   const [isdem, setIsdem] = useState(false);
+  const [isFilterExpanded, setIsFilterExpanded] = useState(false);
   const [dataPagename, setdataPagename] = useState([]);
   const [searchCustomerName, setSearchCustomerName] = useState("");
   const [searchCustomerName2, setSearchCustomerName2] = useState("");
@@ -825,6 +1236,10 @@ const getCustomerColor = (name) => {
 //   }, 0);
 
   const handleCalculateTotals = () => {
+    if (isdem) {
+      setIsdem(false);
+      return;
+    }
     const totals = calculateTotalQuantities(filteredOrders);
     setTotalQuantities(totals);
       const tickedOrders = filteredOrders.filter(order => order.istick);
@@ -1293,27 +1708,18 @@ onChange={(e) => handleColumnSelect("istick", e.target.checked)}
       dataIndex: "orderDate4",
       key: "orderDate",
       render: (text, record) => {
-        // Kiểm tra nếu orderDate4 không hợp lệ thì lấy orderDate
         const dateValue = text || record.orderDate;
-    
-        if (!dateValue) return "N/A"; // Nếu không có cả hai giá trị, hiển thị "N/A"
-    
-        const formattedDate = dayjs(dateValue).isValid()
-          ? dayjs(dateValue).format("DD/MM")
-          : "N/A";
-        const formattedTime = dayjs(dateValue).isValid()
-          ? dayjs(dateValue).format("HH:mm:ss")
-          : "N/A";
-    
+        if (!dateValue) return "N/A";
+        const date = dayjs(dateValue).isValid() ? dayjs(dateValue) : null;
+        if (!date) return "N/A";
         return (
-          <div>
-            {formattedDate}
-            <br />
-            {formattedTime}
+          <div className="date-cell">
+            <span className="date-main">{date.format("DD/MM/YYYY")}</span>
+            <span className="date-time">{date.format("HH:mm:ss")}</span>
           </div>
         );
       },
-      width: 80, // Tăng width nếu cần để hiển thị đủ thông tin
+      width: 90,
     },
     
         {
@@ -1424,14 +1830,15 @@ onChange={(e) => handleColumnSelect("istick", e.target.checked)}
       ),
       key: "products",
       render: (_, record) => (
-        <>
+        <div className="product-cell">
           {record.products &&
             record.products.map((item, index) => (
-              <div key={index} style={{ whiteSpace: "nowrap" }}>
-                <strong>{item.product} </strong> - SL: <strong>{item.quantity}</strong>
+              <div key={index} className="product-item">
+                <span className="product-name">{item.product}</span>
+                <span className="product-quantity">SL: {item.quantity}</span>
               </div>
             ))}
-        </>
+        </div>
       ),
     },
     {
@@ -1851,15 +2258,15 @@ const selectedTableColumns = columns.filter((col) =>
       key: "products",
       width: 80,
       render: (_, record) => (
-        <>
+        <div className="product-cell">
           {record.products &&
             record.products.map((item, index) => (
-              <div key={index} style={{ whiteSpace: "nowrap" }}>
-                <strong>{item.product} </strong> - SL :{" "}
-                <strong>{item.quantity}</strong>
+              <div key={index} className="product-item">
+                <span className="product-name">{item.product}</span>
+                <span className="product-quantity">SL: {item.quantity}</span>
               </div>
             ))}
-        </>
+        </div>
       )
     },
     { title: "DOANH SỐ",width: 100, dataIndex: "revenue", key: "revenue" },
@@ -2211,14 +2618,15 @@ onChange={(e) => handleColumnSelect("istick", e.target.checked)}
       ),
       key: "products",
       render: (_, record) => (
-        <>
+        <div className="product-cell">
           {record.products &&
             record.products.map((item, index) => (
-              <div key={index} style={{ whiteSpace: "nowrap" }}>
-                <strong>{item.product}</strong> - SL: <strong>{item.quantity}</strong>
+              <div key={index} className="product-item">
+                <span className="product-name">{item.product}</span>
+                <span className="product-quantity">SL: {item.quantity}</span>
               </div>
             ))}
-        </>
+        </div>
       ),
     },
     
@@ -2750,7 +3158,6 @@ const handleResetAllSTT = async () => {
      
     }}>
       {contextHolder}
-      <FullScreenLoading loading={loading} tip="Đang tải dữ liệu..." />
       {/* <Button
   type="primary"
   danger
@@ -2766,363 +3173,368 @@ const handleResetAllSTT = async () => {
 {/* <Button type="primary" danger onClick={handleResetAllSTT}>
   Đặt STT về 0
 </Button> */}
-      <Row>
-      <Col span={6}><div style={{ marginBottom: 16 }}>
-        <Button
-          type="primary"
-          onClick={handleAddNew}
-          disabled={
-            currentUser.position_team === "mkt" ||
-            currentUser.position_team === "kho" ||
-            // currentUser.position === "salexuly" ||
-            currentUser.position === "salexacnhan"
-          }
-        >
-          Thêm đơn hàng mới
-        </Button>
-        <span style={{  }}> |SL ĐƠN : {filteredOrders.length} </span>
-      </div> </Col>
-      
-      {/* {ordersDone} */}
-       {/* <Button
-  type="primary"
-  danger
-  onClick={handleSplitOrders}
-  style={{ marginLeft: 10 }}
->
-  Chia đều đơn Lê Linh Chi tháng 6
-</Button>
-      */}
-      {(currentUser.position_team==="kho"||currentUser.position_team==="mkt" ||currentUser.position ==="leadSALE"||currentUser.position ==="admin"||currentUser.position ==="managerSALE"||  currentUser.name ==="Hoàng Lan Phương"  )&& <Col span={8}>
-     {/* Tổng số lượng sản phẩm (đơn vừa tích): {countNewTickedProductQuantity()} */}
-     
-    {isdem && <> 
-      <Table 
-      columns={columns3} 
-      dataSource={dataSource3} 
-      pagination={false} 
-      bordered
-    />
-    {(currentUser.position_team==="kho" || currentUser.name ==="Hoàng Lan Phương") && (
-     <>
-      <h4>SL SẢN PHẨM ĐÃ TICK (XUẤT EXCELL)</h4>
-     <Table 
-      columns={columns3} 
-      dataSource={dataSource4} 
-      pagination={false}  // Không hiển thị phân trang nếu chỉ có 1 dòng
-      bordered
-    />
-    </>)} 
-    {(currentUser.position_team !== "mkt" && currentUser.position_team!=="kho" && currentUser.name !=="Hoàng Lan Phương")&&(<>
-     <h4>SL SẢN PHẨM ĐÃ TICK (CTY ĐÓNG) </h4>
-    <Table 
-      columns={columns3} 
-      dataSource={dataSourceCTYDONG} 
-      pagination={false}  
-      bordered
-    /></>)}
-    {( currentUser.position_team==="kho" || currentUser.name ==="Hoàng Lan Phương")&&(<>
-     <h4>SL SẢN PHẨM KHO ĐÓNG </h4>
-    <Table 
-      columns={columns3} 
-      dataSource={dataSourceKHODONG} 
-      pagination={false}  
-      bordered
-    /></>)}
-    
-    </>} 
-      
-    
-      <Button
-          type="primary"
-          onClick={handleCalculateTotals}
-          
-        >
-         Đếm SL 
-        </Button> 
-      {/* <Button
-          type="primary"
-          onClick={setIsdem(true)}
-          
-        >
-         Huỷ đếm 
-        </Button>  */}
+<div className="filter-card" style={{ marginBottom: 12 }}>
+        <div className="filter-card-body" style={{ padding: '12px 20px' }}>
+          <Row gutter={[12, 12]} align="middle">
+            <Col xs={24} md={10}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
+                <Button
+                  type="primary"
+                  onClick={handleAddNew}
+                  disabled={currentUser.position_team === "mkt" || currentUser.position_team === "kho" || currentUser.position === "salexacnhan"}
+                  className="ft-btn-add action-btn-darkgold"
+                  icon={<span style={{fontSize:15, fontWeight:800}}>+</span>}
+                >
+                  Thêm đơn hàng
+                </Button>
+                <div className="filter-revenue-box" style={{ flexDirection: 'row', padding: '8px 16px', gap: 8, marginTop: 0 }}>
+                  <span className="filter-revenue-label" style={{ fontSize: 11 }}>SL ĐƠN</span>
+                  <AnimatedCounter
+                    value={filteredOrders.length}
+                    className="filter-revenue-value"
+                    style={{ fontSize: 16 }}
+                  />
+                </div>
+              </div>
+            </Col>
+            <Col xs={24} md={14}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10, justifyContent: 'flex-end', flexWrap: 'wrap' }}>
+                <Button
+                  type="primary"
+                  onClick={handleCalculateTotals}
+                  className={`ft-btn-add action-btn-darkgold ${isdem ? 'is-dem' : ''}`}
+                  icon={<span style={{fontSize:14}}>{isdem ? '✕' : '🧮'}</span>}
+                >
+                  {isdem ? 'Huỷ đếm' : 'Đếm SL'}
+                </Button>
+                <Button
+                  type="primary"
+                  onClick={fetchOrders}
+                  className="ft-btn-add action-btn-darkgold"
+                  icon={<span style={{fontSize:14}}>🔄</span>}
+                >
+                  Tải lại tất cả đơn hàng
+                </Button>
+              </div>
+            </Col>
+          </Row>
+        </div>
+      </div>
 
-        
-        </Col>
-        
-        }
-<Button
-  type="primary"
-  onClick={fetchOrders} // hoặc onClick={() => fetchOrders()}
-  style={{ float: 'right' }}
->
-  Tải lại tất cả đơn hàng
-</Button>
-      </Row>
-      
-      <Row gutter={[16, 16]} style={{ marginBottom: 24 }}>
-        <Col span={5}>
-        <RangePicker
-  style={{ width: "100%" }}
-  placeholder={["Từ ngày", "Đến ngày"]}
-  value={
-    dateRange && Array.isArray(dateRange) && dateRange.length === 2
-      ? [dayjs(dateRange[0]), dayjs(dateRange[1])]
-      : []
-  }
-  onChange={(dates) =>
-    setDateRange(dates ? [dates[0].toDate(), dates[1].toDate()] : null)
-  }
-/>
-        <Select
-          allowClear
-          id="presetFilter"
-          style={{ width: '100%' }}
-          placeholder="Chọn khoảng thời gian"
-          value={dateRange2 || undefined}
-          onChange={(value) => {
-            setDateRange2(value);
+      {/* Bảng thống kê SL sản phẩm (nếu đang ở chế độ đếm) */}
+      {(currentUser.position_team==="kho"||currentUser.position_team==="mkt" ||currentUser.position ==="leadSALE"||currentUser.position ==="admin"||currentUser.position ==="managerSALE"||  currentUser.name ==="Hoàng Lan Phương"  )&& isdem && (
+        <DemSLBlock
+          totalQuantities={totalQuantities}
+          totalQuantitiesINDON={totalQuantitiesINDON}
+          totalQuantitiesCTYDONG={totalQuantitiesCTYDONG}
+          totalQuantitiesKHODONG={totalQuantitiesKHODONG}
+          totalRevenue={totalRevenue}
+          currentUser={currentUser}
+          onClose={() => setIsdem(false)}
+          visibleSections={{
+            main: true,
+            tick: currentUser.position_team==="kho" || currentUser.name ==="Hoàng Lan Phương",
+            ctyDong: currentUser.position_team !== "mkt" && currentUser.position_team!=="kho" && currentUser.name !=="Hoàng Lan Phương",
+            khoDong: currentUser.position_team==="kho" || currentUser.name ==="Hoàng Lan Phương",
           }}
-        >
-     
-          <Option value="today">Hôm Nay</Option>
-          <Option value="yesterday">Hôm Qua</Option>
-          <Option value="week">1 Tuần gần nhất</Option>
-          <Option value="currentMonth">1 Tháng (Từ đầu tháng đến hiện tại)</Option>
-          <Option value="2currentMonth">2 Tháng (Từ tháng trước đến hiện tại)</Option>
-          <Option value="3currentMonth">3 Tháng (Từ tháng trước đến hiện tại)</Option>
-          <Option value="lastMonth">Tháng trước</Option>
-          <Option value="twoMonthsAgo">2 Tháng trước</Option>
-          <Option value="threeMonthsAgo">3 Tháng trước</Option>
-          { !(currentUser.position === "salenhapdon" || currentUser.position === "salexacnhan") && (
-  <Option value="all">Tất cả (hạn chế dùng)</Option>
-)}
-        </Select>
+        />
+      )}
+
+      <div className={`filter-card ${isFilterExpanded ? 'is-expanded' : 'is-collapsed'}`}>
+        <div className="filter-card-header">
+          <span className="filter-card-icon">🔍</span>
+          <span className="filter-card-title">Bộ lọc & Tìm kiếm</span>
+          <div className="filter-card-actions">
+            <button
+              type="button"
+              className="filter-toggle-btn filter-toggle-expand"
+              onClick={() => setIsFilterExpanded(true)}
+              data-tooltip="Mở rộng"
+              aria-label="Mở rộng"
+            >
+              <span className="filter-toggle-tooltip">Mở rộng</span>
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M4 9 L12 17 L20 9" />
+              </svg>
+            </button>
+            <button
+              type="button"
+              className="filter-toggle-btn filter-toggle-collapse"
+              onClick={() => setIsFilterExpanded(false)}
+              data-tooltip="Thu gọn"
+              aria-label="Thu gọn"
+            >
+              <span className="filter-toggle-tooltip">Thu gọn</span>
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M4 15 L12 7 L20 15" />
+              </svg>
+            </button>
+          </div>
+        </div>
+        <div className="filter-card-body">
+        <Row gutter={[12, 12]}>
+            <Col xs={24} md={8} lg={7}>
+              <div className="filter-group">
+                <div className="filter-group-label">
+                  <span className="filter-group-dot" style={{background:'#3b82f6'}}></span>
+                  Thời gian & Trạng thái
+                </div>
+                <RangePicker
+                  style={{ width: "100%" }}
+                  placeholder={["Từ ngày", "Đến ngày"]}
+                  value={
+                    dateRange && Array.isArray(dateRange) && dateRange.length === 2
+                      ? [dayjs(dateRange[0]), dayjs(dateRange[1])]
+                      : []
+                  }
+                  onChange={(dates) =>
+                    setDateRange(dates ? [dates[0].toDate(), dates[1].toDate()] : null)
+                  }
+                />
         <Select
-  value={filterType}
-  onChange={handleFilterChange}
-  style={{ width: '100%'}}
-  placeholder="Chọn trạng thái đơn hàng"
->
-  <Option value="failed">Đơn hàng chưa hoàn thành</Option>
-  <Option value="success">Đã thanh toán + GTC</Option>
-  <Option value="all">Tất cả đơn hàng</Option>
-</Select>
-
-        </Col>
-        <Col span={6}>
-        <Input
-      placeholder="Tìm kiếm..."
-      allowClear
-      // value={searchValue} // Hiển thị giá trị nhập vào
-      // onChange={(e) => setSearchValue(e.target.value)} // Cập nhật nhưng không tìm kiếm ngay
-      onPressEnter={(e) => handleSearch(e.target.value.trim())} // Chỉ tìm kiếm khi nhấn Enter hoặc nút Search
-      onClear={() => {
-        setSearchValue("");
-        handleSearch(""); // Hiển thị lại danh sách đầy đủ khi nhấn X
-      }}
-      suffix={
-        <SearchOutlined
-          style={{  fontSize: "16px", color: "#1890ff" }}
-          
-        />}
-    />
-    
- <Input
-  placeholder="Tìm kiếm STT"
-  allowClear
-  onPressEnter={(e) => handleSearch2(e.target.value.trim())}
-  
-  onClear={() => {
-    setSearchValue2("");
-    handleSearch2(""); // Hiển thị lại danh sách đầy đủ khi nhấn X
-  }}
-  // onChange={(e) => setSearchValue2(e.target.value)}
-  suffix={
-    <SearchOutlined
-      style={{  fontSize: "16px", color: "#1890ff" }}
-      
-    />
-  }
+                  allowClear
+                  id="presetFilter"
+                  style={{ width: '100%' }}
+                  placeholder="Chọn khoảng thời gian"
+                  value={dateRange2 || undefined}
+                  onChange={(value) => setDateRange2(value)}
+                >
+                  <Option value="today">Hôm Nay</Option>
+                  <Option value="yesterday">Hôm Qua</Option>
+                  <Option value="week">1 Tuần gần nhất</Option>
+                  <Option value="currentMonth">1 Tháng (Từ đầu tháng đến hiện tại)</Option>
+                  <Option value="2currentMonth">2 Tháng (Từ tháng trước đến hiện tại)</Option>
+                  <Option value="3currentMonth">3 Tháng (Từ tháng trước đến hiện tại)</Option>
+                  <Option value="lastMonth">Tháng trước</Option>
+                  <Option value="twoMonthsAgo">2 Tháng trước</Option>
+                  <Option value="threeMonthsAgo">3 Tháng trước</Option>
+                  {!(currentUser.position === "salenhapdon" || currentUser.position === "salexacnhan") && (
+                    <Option value="all">Tất cả (hạn chế dùng)</Option>
+                  )}
+                </Select>
+                <Select
+                  value={filterType}
+                  onChange={handleFilterChange}
+                  style={{ width: '100%' }}
+                  placeholder="Chọn trạng thái đơn hàng"
+                >
+                  <Option value="failed">Đơn hàng chưa hoàn thành</Option>
+                  <Option value="success">Đã thanh toán + GTC</Option>
+                  <Option value="all">Tất cả đơn hàng</Option>
+                </Select>
+              </div>
+            </Col>
+          </Row>
+          <Row gutter={[12, 12]}>
+            <Col xs={24} md={8} lg={6}>
+              <div className="filter-group">
+                <div className="filter-group-label">
+                  <span className="filter-group-dot" style={{background:'#10b981'}}></span>
+                  Tìm kiếm nhanh
+                </div>
+                <Input
+                  placeholder="Tìm kiếm..."
+                  allowClear
+                  onPressEnter={(e) => handleSearch(e.target.value.trim())}
+                  onClear={() => { setSearchValue(""); handleSearch(""); }}
+                  prefix={<SearchOutlined style={{ color: "#9ca3af" }} />}
+                />
+                {currentUser.position !== "kho2" && (
+                  <Input
+                    placeholder="Tìm kiếm STT"
+                    allowClear
+                    onPressEnter={(e) => handleSearch2(e.target.value.trim())}
+                    onClear={() => { setSearchValue2(""); handleSearch2(""); }}
+                    prefix={<SearchOutlined style={{ color: "#9ca3af" }} />}
 />
-{( currentUser.position_team==="kho" ||currentUser.position_team==="sale" )&&(<>
-  <Input
-    placeholder="Tìm tên khách hàng..."
-    allowClear
-    onClear={() => {
-      setSearchCustomerName("");
-      // Hiển thị lại danh sách đầy đủ khi nhấn X
-    }}
-    onPressEnter={(e) => setSearchCustomerName(e.target.value.trim())}
-    suffix={<SearchOutlined style={{ fontSize: "16px", color: "#1890ff" }} />}
-  /><Input
-  placeholder="Tìm tên Sản Phẩm..."
-  allowClear
-  onClear={() => {
-    setSearchCustomerName2("");
-    // Hiển thị lại danh sách đầy đủ khi nhấn X
-  }}
-  onPressEnter={(e) => setSearchCustomerName2(e.target.value.trim())}
-  suffix={<SearchOutlined style={{ fontSize: "16px", color: "#1890ff" }} />}
-/></>)}
-  {( currentUser.position ==="admin" )&&(
-  <Input
-    placeholder="Tìm tên Sản Phẩm..."
-    allowClear
-    onClear={() => {
-      setSearchCustomerName2("");
-      // Hiển thị lại danh sách đầy đủ khi nhấn X
-    }}
-    onPressEnter={(e) => setSearchCustomerName2(e.target.value.trim())}
-    suffix={<SearchOutlined style={{ fontSize: "16px", color: "#1890ff" }} />}
-  />
-  )}
-    
-        
-        </Col>
-        
-        {currentUser.position_team==="kho" ?(<Col span={8}><Select
-            mode="multiple"
-            style={{ width: "100%" }}
-            placeholder="Chọn bộ lọc"
-            allowClear
-            options={[
-              { value: "deliveredchuatick", label: "Đã lên đơn + CẦN TÍCH ĐÃ IN" },
-              { value: "DALENDON", label: "Đơn ĐÃ LÊN ĐƠN" },
-              { value: "unpaid", label: "Chưa thanh toán" },
-              { value: "paid", label: "Đã thanh toán" },
-              { value: "deliveredkomavandon", label: "Đã gửi hàng + chưa mã" },
-              { value: "deliveredcomavandon", label: "Đã gửi hàng + Có mã" },
-              { value: "deliveredcomavandon2", label: "Chưa gửi hàng + Có mã" },
-              { value: "waitDelivered", label: "Chưa gửi hàng" },
-              { value: "not_delivered", label: "Đã gửi hàng" },
-              { value: "khoshiping", label: "Kho đóng hàng" },
-              { value: "delivered", label: "Giao thành công" },
-              { value: "ctyshiping2", label: "Công Ty đóng hàng + Chưa mã" },
-              { value: "ctyshiping", label: "Công Ty đóng hàng" },
-             
-              
-             
-              
-            ]}
-            onChange={(values) => setSelectedFilters(values)}
-          />  
-         
-          
-        </Col>) :(<Col span={5}> <Select
-            mode="multiple"
-            style={{ width: "100%" }}
-            placeholder="Chọn bộ lọc"
-            allowClear
-            options={[
-              
-             
-              { value: "done", label: "Đơn DONE" },
-              { value: "DALENDON", label: "Đơn ĐÃ LÊN ĐƠN" },
-              { value: "waiting_done", label: "Đơn chưa DONE" },          
-              { value: "ds0", label: "Doanh số bằng 0" },
-              { value: "dskhac0", label: "Doanh số khác 0" },
-              { value: "not_delivered", label: "ĐÃ GỬI HÀNG" },
-              { value: "vangmat", label: "Đơn VẮNG MẶT " },
-              { value: "daguivaocuahang", label: "Đơn ĐÃ GỬI VÀO CỬA HÀNG" },
-              { value: "hoan", label: "Đơn HOÀN" },
-              
-              { value: "delivered", label: "Đơn GIAO THÀNH CÔNG" },
-              { value: "waitDelivered", label: "Đơn chưa gửi hàng" },
-              { value: "deliveredkomavandon", label: "Đơn ĐÃ GỬI HÀNG + Chưa mã vận đơn" },
+                )}
+                {(currentUser.position === "kho1" || currentUser.position_team === "sale") && (
+                  <>
+                  <Input
+                    placeholder="Tìm tên khách hàng..."
+                    allowClear
+                    onClear={() => setSearchCustomerName("")}
+                    onPressEnter={(e) => setSearchCustomerName(e.target.value.trim())}
+                    prefix={<SearchOutlined style={{ color: "#9ca3af" }} />}
+                  />
+                  <Input
+                    placeholder="Tìm tên Sản Phẩm..."
+                    allowClear
+                    onClear={() => setSearchCustomerName2("")}
+                    onPressEnter={(e) => setSearchCustomerName2(e.target.value.trim())}
+                    prefix={<SearchOutlined style={{ color: "#9ca3af" }} />}
+                  />
+                  <Input
+                    placeholder="Tìm tên Sản Phẩm..."
+                    allowClear
+                    onClear={() => setSearchCustomerName2("")}
+                    onPressEnter={(e) => setSearchCustomerName2(e.target.value.trim())}
+                    prefix={<SearchOutlined style={{ color: "#9ca3af" }} />}
+                  />
+                </>
+              )}
+              </div>
+            </Col>
 
-              // { value: "chuyendon", label: "Đơn CHUYỂN ĐƠN" },
-              // { value: "booktb", label: "BOOK TB" },
-              // { value: "waiting_approval", label: "Đợi xác nhận" },
-              // { value: "done", label: "Đơn đã Done" },
-              // { value: "duplicate_name", label: "Trùng tên khách" },
-              // { value: "duplicate_phone", label: "Trùng số điện thoại" },
-              // { value: "unpaid", label: "Chưa thanh toán" },
-              // { value: "paid", label: "Đã thanh toán" },
-              // { value: "ero", label: "Đơn thiếu sale xử lý" },
-              // { value: "ctyshiping2", label: "Công Ty đóng hàng + Chưa mã" },
-              // { value: "ctyshiping", label: "Công Ty đóng hàng" },
-              // { value: "khoshiping", label: "Kho đóng hàng" },
-              // { value: "waitDelivered", label: "Chưa gửi hàng" },
-              // { value: "deliveredkomavandon", label: "Đã gửi hàng + chưa mã" },
-              // { value: "not_delivered", label: "Đã gửi hàng" },
-              // { value: "delivered", label: "Giao thành công" },
-              // { value: "donechuaguichuagui2", label: "Khác Done + Đã Gửi Hàng" },  
-
-              
-             
-              
-          
-            ]}
-            onChange={(values) => setSelectedFilters(values)}
-          />
-          <Select
-    value={shiftFilter}
-    onChange={(value) => setShiftFilter(value)}
-    style={{ width: 250, marginRight: 16 }}
-    placeholder="Chọn ca làm việc"
-    allowClear
-  >
-    <Option value="hanhchinh">Ca Hành Chính</Option>
-    <Option value="onlinetoi">Ca Online Tối</Option>
-    <Option value="onlinesang">Ca Online Sáng</Option>
-  </Select>
-  <Input.Search
-  placeholder="CHECK KHÁCH"
-  enterButton="CHECK"
-  allowClear
-  style={{ width: 300, marginBottom: 10 }}
-  onSearch={handleSearchCustomerModal}
-/>
-  </Col> ) }
+            <Col xs={24} md={8} lg={7}>
+              <div className="filter-group">
+                <div className="filter-group-label">
+                  <span className="filter-group-dot" style={{background:'#f59e0b'}}></span>
+                  Bộ lọc nâng cao
+                </div>
+                {currentUser.position_team === "kho" ? (
+                  <Select
+                    mode="multiple"
+                    style={{ width: "100%" }}
+                    placeholder="Chọn bộ lọc"
+                    allowClear
+                    options={[
+                      { value: "khoshiping", label: "NHI đóng hàng" },
+                      { value: "deliveredchuatick", label: "Đã gửi hàng + CẦN TÍCH ĐÃ IN" },
+                      { value: "unpaid", label: "Chưa thanh toán" },
+                      { value: "paid", label: "Đã thanh toán" },
+                      { value: "deliveredkomavandon", label: "Đã gửi hàng + chưa mã" },
+                      { value: "deliveredcomavandon", label: "Đã gửi hàng + Có mã" },
+                      { value: "deliveredcomavandon2", label: "Chưa gửi hàng + Có mã" },
+                      { value: "waitDelivered", label: "Chưa gửi hàng" },
+                      { value: "not_delivered", label: "Đã gửi hàng" },
+                      { value: "delivered", label: "Giao thành công" },
+                      { value: "ctyshiping2", label: "Công Ty đóng hàng + Chưa mã" },
+                      { value: "ctyshiping", label: "Công Ty đóng hàng" },
+                    ]}
+                    onChange={(values) => setSelectedFilters(values)}
+                  />
+                ) : (
+                  <Select
+                    mode="multiple"
+                    style={{ width: "100%" }}
+                    placeholder="Chọn bộ lọc"
+                    allowClear
+                    options={[
+                      { value: "done", label: "Đơn Done" },
+                      { value: "unpaid_success", label: "Chưa thanh toán & Giao Thành công" },
+                      { value: "donechuaguichuagui", label: "Done + Chưa Gửi Hàng" },
+                      { value: "waiting_done", label: "Đơn chưa Done" },
+                      { value: "ok", label: "Đơn OK" },
+                      { value: "check", label: "Đơn CHECK" },
+                      { value: "ds0", label: "Doanh số bằng 0" },
+                      { value: "dskhac0", label: "Doanh số khác 0" },
+                      { value: "even_stt", label: "Đơn STT CHẴN" },
+                      { value: "odd_stt", label: "Đơn STT LẺ" },
+                      { value: "slam", label: "Điền sl âm" },
+                      { value: "chuyendon", label: "Đơn CHUYỂN ĐƠN" },
+                      { value: "booktb", label: "BOOK TB" },
+                      { value: "waiting_approval", label: "Đợi xác nhận" },
+                      { value: "duplicate_name", label: "Trùng tên khách" },
+                      { value: "duplicate_phone", label: "Trùng số điện thoại" },
+                      { value: "unpaid", label: "Chưa thanh toán" },
+                      { value: "paid", label: "Đã thanh toán" },
+                      { value: "ero", label: "Đơn thiếu sale xử lý" },
+                      { value: "ctyshiping2", label: "Công Ty đóng hàng + Chưa mã" },
+                      { value: "ctyshiping", label: "Công Ty đóng hàng" },
+                      { value: "khoshiping", label: "NHI đóng hàng" },
+                      { value: "waitDelivered", label: "Chưa gửi hàng" },
+                      { value: "deliveredkomavandon", label: "Đã gửi hàng + chưa mã" },
+                      { value: "not_delivered", label: "Đã gửi hàng" },
+                      { value: "delivered", label: "Giao thành công" },
+                      { value: "donechuaguichuagui2", label: "Khác Done + Đã Gửi Hàng" },
+                    ]}
+                    onChange={(values) => setSelectedFilters(values)}
+                  />
+                )}
+                <Select
+                  value={shiftFilter}
+                  onChange={(value) => setShiftFilter(value)}
+                  style={{ width: '100%' }}
+                  placeholder="Chọn ca làm việc"
+                  allowClear
+                >
+                  <Option value="hanhchinh">Ca Hành Chính</Option>
+                  <Option value="onlinetoi">Ca Online Tối</Option>
+                  <Option value="onlinesang">Ca Online Sáng</Option>
+                </Select>
+                <Select
+                  value={shiftFilter2}
+                  onChange={(value) => setShiftFilter2(value)}
+                  style={{ width: '100%' }}
+                  placeholder="Chọn Team"
+                  allowClear
+                >
+                  <Option value="SON">TEAM SƠN</Option>
+                  <Option value="QUAN">TEAM QUÂN</Option>
+                  <Option value="LE">TEAM LẺ</Option>
+                  <Option value="TUANANH">TEAM TUẤN ANH</Option>
+                  <Option value="DIEN">TEAM DIỆN</Option>
+                  <Option value="DIEU">TEAM DIỆU</Option>
+                  <Option value="PHI">TEAM PHI</Option>
+                  <Option value="DIENON">TEAM DIỆN ON</Option>
+                  <Option value="ANH">TEAM ÁNH</Option>
+                  <Option value="PHUTHANH">TEAM Phú Thành</Option>
+                  <Option value="TUNG">TEAM TÙNG</Option>
+                </Select>
+                <div className="check-customer-box">
+                  <Input
+                    placeholder="Nhập tên hoặc SĐT khách..."
+                    allowClear
+                    onPressEnter={(e) => handleSearchCustomerModal(e.target.value.trim())}
+                    id="check-customer-input"
+                    className="check-customer-input"
+                  />
+                  <Button
+                    type="primary"
+                    onClick={() => {
+                      const el = document.getElementById('check-customer-input');
+                      const v = el ? el.value.trim() : '';
+                      handleSearchCustomerModal(v);
+                    }}
+                    className="check-customer-btn"
+                    icon={<span style={{fontSize:14}}>🔎</span>}
+                  >
+                    CHECK KHÁCH
+                  </Button>
+                </div>
+              </div>
+            </Col>
   
  
         
-        {currentUser.position_team!=="kho" &&(<>
-        <Col span={4}>
-          <Select style={{ width: "100%" }}
-         
-            disabled={
-              currentUser.position === "mkt" 
-            }
-            placeholder="Chọn Sale"
+        {currentUser.position_team !== "kho" && (
+              <Col xs={24} md={24} lg={4}>
+                <div className="filter-group">
+                  <div className="filter-group-label">
+                    <span className="filter-group-dot" style={{background:'#8b5cf6'}}></span>
+                    Sale / MKT
+                  </div>
+                  <Select
+                    style={{ width: "100%" }}
+                    disabled={currentUser.position === "mkt"}
+                    placeholder="Chọn Sale"
             options={saleOptions.map((s) => ({ value: s, label: s }))}
             onChange={(value) => setSelectedSale(value)}
             allowClear
-            showSearch
-          />
-        </Col>
-        <Col span={4}>
-  <Select
-    mode="multiple" // Cho phép chọn nhiều giá trị
-    style={{ width: "100%" }}
-    disabled={currentUser.position === "mkt"|| currentUser.position === "salenhapdon"}
-    placeholder="Chọn MKT"
-    options={mktOptions.map((m) => ({ value: m, label: m }))}
-    onChange={(value) => setSelectedMKT(value)}
-    allowClear 
-    showSearch
-  />
-  {currentUser.position !=="sale" &&
-   <span ><strong>
-  Tổng Doanh Số: {(filteredOrders.reduce((acc, order) => {
-        // Chuyển revenue về số nếu chưa phải số
-        return acc + (Number(order.revenue) || 0);
-      }, 0)*750).toLocaleString()}
-</strong></span>}
-</Col>
-        <Col span={3}>
-         
-        </Col></>)}
-       
-        {currentUser.position_team==="kho" && exportDisabled && 
-        <Col span={2}>
-        <ExportExcelButton  orders={filteredOrdersForExcel} />
-        
-          
-        </Col>}
-      </Row>
+                    showSearch
+                  />
+                  {currentUser.position !== "salenhapdon" && (
+                    <div className="filter-revenue-box">
+                      <span className="filter-revenue-label">Tổng DS (Chưa DONE)</span>
+                      <span className="filter-revenue-value">
+                        {(filteredOrders.reduce((acc, order) => {
+                          return acc + (Number(order.revenuemkt ?? order.revenue ?? 0) || 0);
+                        }, 0) * 17000).toLocaleString()}
+                      </span>
+                    </div>
+                  )}
+                </div>
+              </Col>
+            )}
+          </Row>
+          {currentUser.position_team === "kho" && exportDisabled && (
+            <div className="filter-card-footer">
+              <ExportExcelButton orders={filteredOrdersForExcel} />
+            </div>
+          )}
+        </div>
+      </div>
       {( currentUser.position_team==="kho"
  ) && (<>
   {/* <Row gutter={10} style={{ marginBottom: 10 }}>
@@ -3198,15 +3610,15 @@ const handleResetAllSTT = async () => {
  ) && (<><Button onClick={handleCopy} type="primary" style={{ marginBottom: 16 }}>
   Copy toàn bộ dữ liệu
 </Button>
-  <Table  
-  
-    columns={selectedTableColumns}
-    dataSource={sortedOrders}
-    rowKey="id"
-    bordered
-    pagination={{ pageSize: searchText ? 100 : 20 }}
-    // pagination={false}
-  /></>
+<Table  
+  columns={selectedTableColumns}
+  dataSource={sortedOrders}
+  rowKey="id"
+  bordered
+  loading={loading}
+  pagination={{ pageSize: searchText ? 100 : 20 }}
+  // pagination={false}
+/></>
 )}
         </Col>
         <Col flex="auto">
@@ -3288,7 +3700,8 @@ const handleResetAllSTT = async () => {
 />
 </>)}
 
-        <Table 
+        <Table
+  className="order-table-wrapper"
   scroll={{ x: 3000}}
   columns={
     currentUser.position_team === "kho"
@@ -3300,13 +3713,14 @@ const handleResetAllSTT = async () => {
   }
   dataSource={sortedOrders}
   rowKey="id"
+  loading={loading}
   pagination={{ pageSize: searchText ? 100 : 20 }}
   bordered
 />
         </Col>
       </Row>
       <OrderFormtw
-        visible={formVisible}
+        open={formVisible}
         onCancel={() => setFormVisible(false)}
         onSubmit={handleSubmit}
         initialValues={editingOrder || orders.find((order) => order.id === currentEditId)}
@@ -3318,12 +3732,15 @@ const handleResetAllSTT = async () => {
         loading={loading}
       />
       <Modal
-  title="Các đơn hàng của khách"
-  visible={modalVisible}
+  title={null}
+  open={modalVisible}
   onCancel={() => setModalVisible(false)}
   footer={null}
   width={1500}
+  className="customer-history-modal"
+  closable={false}
 >
+  <CustomerHistoryHeader orders={modalCustomerOrders} onClose={() => setModalVisible(false)} />
   <Table
     dataSource={modalCustomerOrders}
     columns={[

@@ -19,7 +19,7 @@ import dayjs from "dayjs";
 import moment from "moment";
 import { useDispatch, useSelector } from "react-redux";
 
-const OrderFormtw = ({ visible, onCancel,loading, onSubmit, resetPagename,initialValues, namesalexuly, employees=[] ,dataPagename=[]}) => {
+const OrderFormjp = ({ visible, onCancel,loading, onSubmit, resetPagename,initialValues, namesalexuly, employees=[] ,dataPagename=[]}) => {
   const [form] = Form.useForm();
   const { Option } = Select;
   const currentUser = useSelector((state) => state.user.currentUser);
@@ -211,7 +211,7 @@ const productOptions = products.map((p) => p.name);
   return (<>
     <Modal
   title="Các đơn hàng của khách"
-  visible={modalVisible}
+  open={modalVisible}
   onCancel={() => setModalVisible(false)}
   footer={null}
   width={1300}
@@ -284,10 +284,11 @@ const productOptions = products.map((p) => p.name);
     >
       <FullScreenLoading loading={loading2||loading} tip="Đang tải dữ liệu..." />
 
-      {currentUser.position === "kho1" || currentUser.position === "kho2" ? (
+      {currentUser.position === "kho1" || currentUser.position === "kho2"  ? (
         <>
           <Form form={form} layout="vertical" onFinish={onFinish}>
             {/* Các trường dành cho nhân viên kho */}
+            {!initialValues && (
             <Row gutter={16}>
               <Col span={8}>
                 <Form.Item label="TÌNH TRẠNG GIAO HÀNG" name="deliveryStatus">
@@ -301,7 +302,7 @@ const productOptions = products.map((p) => p.name);
                 </Form.Item>
               </Col>
               <Col span={8}>
-                <Form.Item label="MÃ VẬN ĐƠN" name="trackingCode" hidden={false}>
+                <Form.Item label="MÃ VẬN ĐƠN" name="trackingCode">
                   <Input />
                 </Form.Item>
               </Col>
@@ -321,6 +322,7 @@ const productOptions = products.map((p) => p.name);
                 </Form.Item>
               </Col>
             </Row>
+            )}
 
             {/* Các trường ẩn khi là kho */}
             <Form.Item label="NGÀY ĐẶT" name="orderDate" hidden={true}>
@@ -845,4 +847,4 @@ const productOptions = products.map((p) => p.name);
   );
 };
 
-export default OrderFormtw;
+export default OrderFormjp;
