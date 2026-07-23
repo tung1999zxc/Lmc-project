@@ -865,6 +865,10 @@ const SidebarMenu = ({ isOpen, onToggle }) => {
 
   const getOverviewMenu = () => {
     if (isMarketing) return [overviewItems[userCountryKey]];
+    if (isLeadSale) {
+      // Leader SALE: xem Tổng Quan Hàn
+      return [overviewItems.kr];
+    }
     if (isManagerSale) {
       // Manager Sale: xem Tổng Quan Hàn + Malaysia, mặc định vào Hàn
       return [overviewItems.kr, overviewItems.jp];
@@ -1001,7 +1005,7 @@ const SidebarMenu = ({ isOpen, onToggle }) => {
     ...(isMarketing || isSales
       ? []
       : isEmployee
-        ? [
+        ? [ 
             {
               key: "sub6",
               icon: "🕐",
