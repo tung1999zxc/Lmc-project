@@ -3189,14 +3189,14 @@ const handleResetAllSTT = async () => {
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 10 }}>
             <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
               {/* ── Thêm đơn hàng ── */}
-              {!(
-                currentUser.position_team === "mk" ||
-                (currentUser.position_team === "mkt" && currentUser.name !== "Phi Navy") ||
-                currentUser.position_team === "kho" ||
-                currentUser.position === "salexuly" ||
-                currentUser.position === "salenhapdon" ||
-                currentUser.position === "salexacnhan" ||
-                currentUser.position_team === "mkt"
+              {(true 
+                // currentUser.position_team === "mk" ||
+                // (currentUser.position_team === "mkt" && currentUser.name !== "Phi Navy") ||
+                // currentUser.position_team === "kho" ||
+                // currentUser.position === "salexuly" ||
+                // currentUser.position === "salenhapdon" ||
+                // currentUser.position === "salexacnhan" ||
+                // currentUser.position_team === "mkt"
               ) && (
                 <Button
                   type="primary"
