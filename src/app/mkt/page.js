@@ -1417,25 +1417,25 @@ const Dashboard = () => {
     const p = parseFloat(computePercentADS(employeeName));
     if (isNaN(p))
       return {
-        background: "#f0f0f0",
+       
         border: "2px solid #8c8c8c",
         color: "#595959",
       };
     if (p < 30)
       return {
-        background: "#54DA1F",
+        
         border: "2px solid #2e9c0f",
         color: "#0f3d04",
       }; // xanh lá
     if (p >= 30 && p < 35)
       return {
-        background: "#FF9501",
+       
         border: "2px solid #b35a00",
         color: "#3d1f00",
       }; // cam
     if (p >= 35)
       return {
-        background: "#F999A8",
+        
         border: "2px solid #c4394f",
         color: "#5a0d1a",
       }; // hồng
@@ -1794,7 +1794,7 @@ const Dashboard = () => {
           .map(([userId, userRecords]) => (
             <Row gutter={[16, 16]} key={userId} style={{ marginBottom: 24 }}>
               <Col xs={24}>
-                <h4>Nhân viên: {userRecords?.[0]?.name}</h4>
+               
                 <div
                   style={{
                     minWidth: "800px",
