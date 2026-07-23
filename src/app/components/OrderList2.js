@@ -4517,7 +4517,7 @@ const OrderList = () => {
         </Col>
       </Row>
       <OrderForm
-        visible={formVisible}
+        open={formVisible}
         onCancel={() => setFormVisible(false)}
         onSubmit={handleSubmit}
         initialValues={

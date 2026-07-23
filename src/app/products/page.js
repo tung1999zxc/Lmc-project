@@ -1789,7 +1789,7 @@ const calculateStats2Days = useCallback(() => {
         centered
       >
         <Form form={addImportForm} onFinish={handleAddImportFinish} layout="vertical" className="prod-form-item">
-          <Form.Item name="importedQty" label="Số lượng nhập tổng" rules={[{ required: true, message: "Vui lòng nhập số lượng" }]}>
+          <Form.Item name="importedQty" label="Số lượng nhập tổng" >
             <InputNumber style={{ width: "100%" }} placeholder="Nhập số lượng" />
           </Form.Item>
 
