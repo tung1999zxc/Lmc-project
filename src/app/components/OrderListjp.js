@@ -1368,7 +1368,7 @@ const getCustomerColor = (name) => {
       });
       return copy;
     });
-  }, 3000);
+  }, 0);
 
   const handleIstickChangeDONE = useCallback((orderId, value) => {
     debouncedChangeDONE(orderId, value);
@@ -1548,6 +1548,49 @@ const getCustomerColor = (name) => {
         </Space>)
       },
       width: 50,
+    },
+    {
+      title: (
+        <>
+          <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+            <Checkbox
+              checked={selectedColumns.includes("isShipping")}
+              onChange={(e) => handleColumnSelect("isShipping", e.target.checked)}
+            ></Checkbox>
+
+            <Checkbox.Group
+              options={[{ label: "KHO MALAYSIA ĐÓNG", value: "istick2" }]}
+              value={allRowsSelected2 ? ["istick2"] : []}
+              onChange={(checkedValues) =>
+                handleSelectAllIstick2(checkedValues.length > 0)
+              }
+              style={{
+                border: "1px solid #1890ff",
+                padding: "5px 10px",
+                borderRadius: "5px",
+               
+                color: allRowsSelected2 ? "white" : "black",
+                fontWeight: "bold",
+              }}
+            />
+          </div>
+          <Button type="primary" onClick={handleSaveIstick2}>
+            Lưu
+          </Button>
+        </>
+      ),
+
+      key: "isShipping",
+      dataIndex: "isShipping",
+      width: 50,
+      render: (_, record) => (
+        <MemoizedCheckbox
+          checked={record.isShipping}
+          onChange={(e) =>
+            handleIstickChange2(record.id, e.target.checked)
+          }
+        />
+      ),
     },
     ...((currentUser.position_team === "kho")
     ? [
@@ -2555,6 +2598,7 @@ onChange={(e) => handleColumnSelect("istick", e.target.checked)}
       />
       ),
     },
+    
     {
       title: (
         <Checkbox
