@@ -11,7 +11,6 @@ import {
   Button,
   Select,
   message,
-
   Row,
   notification,
   Col,
@@ -47,12 +46,11 @@ const Dashboard = () => {
   // Bộ lọc theo khoảng thời gian (mặc định 7 ngày)
   // const [filterOption, setFilterOption] = useState("7"); // Đã loại bỏ
   // Nếu là manager, có thêm bộ lọc để chọn team (default "all" hiển thị tất cả các team)
-const [isPopupOpen, setIsPopupOpen] = useState(false);
+  const [isPopupOpen, setIsPopupOpen] = useState(false);
   const [popupData, setPopupData] = useState([]);
   const [selectedTeam, setSelectedTeam] = useState("all");
 
   const fetchEmployees = async () => {
-    
     try {
       const response = await axios.get("/api/employees");
       // response.data.data chứa danh sách nhân viên theo API đã viết
@@ -61,31 +59,32 @@ const [isPopupOpen, setIsPopupOpen] = useState(false);
       console.error("Lỗi khi lấy danh sách nhân viên:", error);
       message.error("Lỗi khi lấy danh sách nhân viên");
     } finally {
-       
     }
   };
 
   const fetchOrders = async () => {
     try {
       const dates = getDateRange();
-    const start = dates[0];
-    const end = dates[dates.length - 1];
-    const response = await axios.get(`/api/ordersMKT?start=${start}&end=${end}`);
+      const start = dates[0];
+      const end = dates[dates.length - 1];
+      const response = await axios.get(
+        `/api/ordersMKT?start=${start}&end=${end}`,
+      );
       setSafeOrders(response.data.data);
     } catch (error) {
       console.error(error);
       message.error("Lỗi khi lấy đơn hàng");
     }
   };
-useEffect(() => {
-  if (!currentUser) return;
+  useEffect(() => {
+    if (!currentUser) return;
 
-  if (currentUser.position === "lead") {
-    setPeriod("week");
-  } else {
-    setPeriod("month");
-  }
-}, [currentUser]);
+    if (currentUser.position === "lead") {
+      setPeriod("week");
+    } else {
+      setPeriod("month");
+    }
+  }, [currentUser]);
   useEffect(() => {
     fetchRecords();
     fetchEmployees();
@@ -95,13 +94,13 @@ useEffect(() => {
   // Refresh khi có thay đổi từ SidebarMenu (xin ads)
   const [refreshKey, setRefreshKey] = useState(0);
   useEffect(() => {
-    const handleStorage = () => setRefreshKey(k => k + 1);
+    const handleStorage = () => setRefreshKey((k) => k + 1);
     window.addEventListener("storage", handleStorage);
     const interval = setInterval(() => {
       const lastXin = localStorage.getItem("xinAdsSuccess");
       if (lastXin) {
         localStorage.removeItem("xinAdsSuccess");
-        setRefreshKey(k => k + 1);
+        setRefreshKey((k) => k + 1);
       }
     }, 500);
     return () => {
@@ -210,7 +209,7 @@ useEffect(() => {
   // Calculate min width for team select based on longest text
   const maxTeamNameLength = Math.max(
     "Tất cả".length,
-    ...teamsList.map(t => t.name.length)
+    ...teamsList.map((t) => t.name.length),
   );
   const teamSelectWidth = Math.max(140, maxTeamNameLength * 10 + 20);
 
@@ -279,12 +278,12 @@ useEffect(() => {
         .filter(
           (p) =>
             p.mkt.trim().toLowerCase() === employeeName.trim().toLowerCase() &&
-            filterSampleOrdersByPeriod(p)
+            filterSampleOrdersByPeriod(p),
         )
-         .reduce((sum, order) => {
-    const value = Number(order.profitmkt ?? order.profit ?? 0);
-    return sum + (isNaN(value) ? 0 : value);
-  }, 0) * 17000;
+        .reduce((sum, order) => {
+          const value = Number(order.profitmkt ?? order.profit ?? 0);
+          return sum + (isNaN(value) ? 0 : value);
+        }, 0) * 17000;
     return totalProfit * 0.95;
   };
   // --- CHỨC NĂNG LỌC %ADS > 30% TRONG 3 NGÀY LIÊN TIẾP & GỬI TELEGRAM ---
@@ -292,10 +291,9 @@ useEffect(() => {
   const handleCheckAndSendTelegram = async () => {
     try {
       setLoading(true);
-      
+
       // 1. Lấy danh sách 3 ngày gần nhất (Hôm nay, Hôm qua, Hôm kia)
       const targetDates = [
-       
         dayjs().subtract(1, "day").format("YYYY-MM-DD"),
         dayjs().subtract(2, "day").format("YYYY-MM-DD"),
         dayjs().subtract(3, "day").format("YYYY-MM-DD"),
@@ -310,22 +308,28 @@ useEffect(() => {
 
         targetDates.forEach((date) => {
           const record = records.find(
-            (r) => r.userId === emp.employee_code && r.date === date
+            (r) => r.userId === emp.employee_code && r.date === date,
           );
-          
+
           // Tính doanh số thực tế ngày đó (áp dụng công thức giống trong bảng của bạn)
-          const totalSales = computeTotalSalesForDate(date, emp.name) * 17000 * 0.95;
+          const totalSales =
+            computeTotalSalesForDate(date, emp.name) * 17000 * 0.95;
           // Tính số tiền xin ngày đó
-          const totalAdsRequest = record ? (record.request1 || 0) + (record.request2 || 0) + (record.request3 || 0) : 0;
+          const totalAdsRequest = record
+            ? (record.request1 || 0) +
+              (record.request2 || 0) +
+              (record.request3 || 0)
+            : 0;
           // Tính %ADS
-          const percentAds = totalSales > 0 ? (totalAdsRequest / totalSales) * 100 : 0;
+          const percentAds =
+            totalSales > 0 ? (totalAdsRequest / totalSales) * 100 : 0;
 
           details3Days.push({
             key: date,
             date: moment(date).format("DD/MM/YYYY"),
             sales: totalSales,
             adsRequest: totalAdsRequest,
-            percent: parseFloat(percentAds.toFixed(2))
+            percent: parseFloat(percentAds.toFixed(2)),
           });
 
           if (percentAds > 33) {
@@ -339,13 +343,15 @@ useEffect(() => {
             key: emp.employee_code,
             code: emp.employee_code,
             name: emp.name,
-            details: details3Days // Mảng chứa dữ liệu chi tiết từng ngày
+            details: details3Days, // Mảng chứa dữ liệu chi tiết từng ngày
           });
         }
       });
 
       if (highAdsEmployees.length === 0) {
-        message.info("Không có nhân viên nào vượt quá 33% ADS trong 3 ngày liên tiếp.");
+        message.info(
+          "Không có nhân viên nào vượt quá 33% ADS trong 3 ngày liên tiếp.",
+        );
         setLoading(false);
         return;
       }
@@ -362,15 +368,18 @@ useEffect(() => {
         telegramMessage += ``;
         telegramMessage += `|   Ngày   | Doanh Số | Tiền ADS | %ADS  |\n`;
         telegramMessage += `|----------|----------|----------|-------|\n`;
-        
-        emp.details.forEach(day => {
+
+        emp.details.forEach((day) => {
           // Hàm bổ trợ cắt/thêm khoảng trắng giúp các cột luôn thẳng hàng hoàn hảo
-          const padCenter = (str, len) => str.padEnd(len - Math.floor((len - str.length)/2)).padStart(len);
+          const padCenter = (str, len) =>
+            str.padEnd(len - Math.floor((len - str.length) / 2)).padStart(len);
           const padLeft = (str, len) => str.padStart(len);
-          
+
           const dateStr = day.date.substring(0, 5); // Lấy dạng DD/MM cho ngắn gọn, vừa khung bảng
-          const salesStr = day.sales > 0 ? `${Math.round(day.sales / 1000)}k` : "0";
-          const adsStr = day.adsRequest > 0 ? `${Math.round(day.adsRequest / 1000)}k` : "0";
+          const salesStr =
+            day.sales > 0 ? `${Math.round(day.sales / 1000)}k` : "0";
+          const adsStr =
+            day.adsRequest > 0 ? `${Math.round(day.adsRequest / 1000)}k` : "0";
           const percentStr = `${day.percent}%`;
 
           telegramMessage += `| ${padCenter(dateStr, 8)} | ${padLeft(salesStr, 8)} | ${padLeft(adsStr, 8)} | ${padLeft(percentStr, 5)} |\n`;
@@ -380,22 +389,25 @@ useEffect(() => {
       });
 
       // Cấu hình Bot Telegram (Điền Token và Chat ID thực tế của bạn vào đây)
-      const TELEGRAM_BOT_TOKEN = "8539446685:AAGPeAgad4e5Uv5WrTqYoahJQmMA98Y6plA"; 
-      const TELEGRAM_CHAT_ID = "1696923084"; 
-      // const TELEGRAM_CHAT_ID = "6280099511"; 
+      const TELEGRAM_BOT_TOKEN =
+        "8539446685:AAGPeAgad4e5Uv5WrTqYoahJQmMA98Y6plA";
+      const TELEGRAM_CHAT_ID = "1696923084";
+      // const TELEGRAM_CHAT_ID = "6280099511";
 
       if (TELEGRAM_BOT_TOKEN !== "YOUR_BOT_TOKEN_HERE") {
-        await axios.post(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
-          chat_id: TELEGRAM_CHAT_ID,
-          text: telegramMessage,
-          parse_mode: "Markdown",
-        });
+        await axios.post(
+          `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`,
+          {
+            chat_id: TELEGRAM_CHAT_ID,
+            text: telegramMessage,
+            parse_mode: "Markdown",
+          },
+        );
         notification.success({
           message: "Telegram",
           description: "Đã gửi danh sách báo cáo qua Telegram!",
         });
       }
-
     } catch (error) {
       console.error("Lỗi hệ thống:", error);
       message.error("Có lỗi xảy ra khi tính toán dữ liệu.");
@@ -409,9 +421,12 @@ useEffect(() => {
       .filter(
         (p) =>
           p.name.trim().toLowerCase() === employeeName.trim().toLowerCase() &&
-          filterRecordsByPeriod(p)
+          filterRecordsByPeriod(p),
       )
-      .reduce((sum, p) => sum + (p.request1 + p.request2 + (p.request3 || 0)), 0);
+      .reduce(
+        (sum, p) => sum + (p.request1 + p.request2 + (p.request3 || 0)),
+        0,
+      );
     return totalADS;
   };
 
@@ -437,26 +452,26 @@ useEffect(() => {
     const grouped = {};
     teamsList.forEach((team) => {
       grouped[team.id] = records.filter((record) =>
-        team.members.includes(record.userId)
+        team.members.includes(record.userId),
       );
     });
     return grouped;
   };
   const fetchRecords = async () => {
-  
-  try {
-    const dates = getDateRange();
-    const start = dates[0];
-    const end = dates[dates.length - 1];
-    const response = await axios.get(`/api/recordsMKT?start=${start}&end=${end}`);
-    setRecords(response.data.data);
-  } catch (error) {
-    console.error(error);
-    message.error("Lỗi khi lấy danh sách");
-  } finally {
-   
-  }
-};
+    try {
+      const dates = getDateRange();
+      const start = dates[0];
+      const end = dates[dates.length - 1];
+      const response = await axios.get(
+        `/api/recordsMKT?start=${start}&end=${end}`,
+      );
+      setRecords(response.data.data);
+    } catch (error) {
+      console.error(error);
+      message.error("Lỗi khi lấy danh sách");
+    } finally {
+    }
+  };
   /*** Xử lý submit form (Thêm mới hoặc cập nhật) ***/
   const onFinish = async (values) => {
     const {
@@ -494,7 +509,7 @@ useEffect(() => {
       if (editingRecord) {
         const response = await axios.put(
           `/api/recordsMKT/${editingRecord.id}`,
-          newRecord
+          newRecord,
         );
         messageApi.success(response.data.message || "Cập nhật thành công");
 
@@ -520,7 +535,7 @@ useEffect(() => {
       .filter(
         (p) =>
           p.name.trim().toLowerCase() === employeeName.trim().toLowerCase() &&
-          filterRecordsByPeriod(p)
+          filterRecordsByPeriod(p),
       )
       .reduce(
         (sum, p) =>
@@ -531,7 +546,7 @@ useEffect(() => {
             (p.request3 || 0) +
             (p.tiendu || 0) -
             p.totalReceived),
-        0
+        0,
       );
     return totalExcess;
   };
@@ -588,7 +603,7 @@ useEffect(() => {
           return updated;
         }
         return rec;
-      })
+      }),
     );
   };
   //Hàm lấy danh sách ngày dựa theo bộ lọc:
@@ -636,9 +651,9 @@ useEffect(() => {
       selectedTeam !== "all"
         ? teamsList.find((team) => team.id === selectedTeam)?.members || []
         : [];
-const isMatchTeam = (userId) =>
-  selectedTeam === "all" || selectedTeamMembers.includes(userId);
-  // const isMatchTeam = () => true;
+    const isMatchTeam = (userId) =>
+      selectedTeam === "all" || selectedTeamMembers.includes(userId);
+    // const isMatchTeam = () => true;
 
     const dsTong =
       safeOrders
@@ -646,7 +661,7 @@ const isMatchTeam = (userId) =>
         .filter((order) => {
           const matchedEmployee = safeEmployees.find(
             (emp) =>
-              emp.name.trim().toLowerCase() === order.mkt.trim().toLowerCase()
+              emp.name.trim().toLowerCase() === order.mkt.trim().toLowerCase(),
           );
           return matchedEmployee && isMatchTeam(matchedEmployee.employee_code);
         })
@@ -671,9 +686,9 @@ const isMatchTeam = (userId) =>
       .reduce((sum, r) => sum + (r.totalReceived || 0), 0);
 
     const tienThua = tongAdsXin - tongTienTieu;
-    
+
     const percentAds =
-      dsTong > 0 ? (((tongTienTieu - tienThua)/ dsTong) * 100).toFixed(2) : 0;
+      dsTong > 0 ? (((tongTienTieu - tienThua) / dsTong) * 100).toFixed(2) : 0;
 
     return {
       key: date,
@@ -704,18 +719,21 @@ const isMatchTeam = (userId) =>
 
   const totalDSTong = adminSummaryData.reduce(
     (sum, row) => sum + row.dsTong,
-    0
+    0,
   );
   const totalTongAdsXin = adminSummaryData.reduce(
     (sum, row) => sum + row.tongAdsXin,
-    0
+    0,
   );
   const totalTienThua =
     adminSummaryData.reduce((sum, row) => sum + row.tienThua, 0) +
     totalTienDuThangNay;
   const totalPercentAds =
     totalDSTong > 0
-      ? ((((totalTongAdsXin - totalTienThua)/ (totalDSTong * 0.95)) * 100)).toFixed(2)
+      ? (
+          ((totalTongAdsXin - totalTienThua) / (totalDSTong * 0.95)) *
+          100
+        ).toFixed(2)
       : 0;
 
   const adminSummaryColumns = [
@@ -729,7 +747,13 @@ const isMatchTeam = (userId) =>
         return (
           <>
             {formatted}
-            {isToday && <div style={{ color: "#ff4d4f", fontWeight: "bold", fontSize: 11 }}>Hôm nay</div>}
+            {isToday && (
+              <div
+                style={{ color: "#ff4d4f", fontWeight: "bold", fontSize: 11 }}
+              >
+                Hôm nay
+              </div>
+            )}
           </>
         );
       },
@@ -768,7 +792,7 @@ const isMatchTeam = (userId) =>
       title: "ADS GẤP",
       dataIndex: "adsGap",
       key: "adsGap",
-      render: (value) => value ? value.toLocaleString("vi-VN") : "—",
+      render: (value) => (value ? value.toLocaleString("vi-VN") : "—"),
     },
     {
       title: "TIỀN THỪA",
@@ -801,7 +825,8 @@ const isMatchTeam = (userId) =>
       key: "percentAdsXin",
       render: (value) => {
         const numValue = typeof value === "number" ? value : parseFloat(value);
-        if (!numValue || numValue < 5) return <span className="pct em">0%</span>;
+        if (!numValue || numValue < 5)
+          return <span className="pct em">0%</span>;
 
         let pctClass = "g";
         if (numValue >= 30 && numValue <= 35) {
@@ -809,7 +834,11 @@ const isMatchTeam = (userId) =>
         } else if (numValue > 35) {
           pctClass = "r";
         }
-        return <span className={`pct ${pctClass}`}>{(numValue - 1).toFixed(2)}%</span>;
+        return (
+          <span className={`pct ${pctClass}`}>
+            {(numValue - 1).toFixed(2)}%
+          </span>
+        );
       },
     },
   ];
@@ -830,7 +859,9 @@ const isMatchTeam = (userId) =>
         <div className="mkt-sc-icon">💰</div>
         <div className="mkt-sc-content">
           <div className="mkt-sc-label">DS TỔNG</div>
-          <div className="mkt-sc-value">{(totalDSTong * 0.95).toLocaleString("vi-VN")}</div>
+          <div className="mkt-sc-value">
+            {(totalDSTong * 0.95).toLocaleString("vi-VN")}
+          </div>
           <div className="mkt-sc-sub">Doanh số sau 5%</div>
         </div>
       </div>
@@ -839,7 +870,9 @@ const isMatchTeam = (userId) =>
         <div className="mkt-sc-icon">📢</div>
         <div className="mkt-sc-content">
           <div className="mkt-sc-label">TỔNG CẤP ADS</div>
-          <div className="mkt-sc-value">{totalTongAdsXin.toLocaleString("vi-VN")}</div>
+          <div className="mkt-sc-value">
+            {totalTongAdsXin.toLocaleString("vi-VN")}
+          </div>
           <div className="mkt-sc-sub">Tiền ADS đã xin</div>
         </div>
       </div>
@@ -848,7 +881,9 @@ const isMatchTeam = (userId) =>
         <div className="mkt-sc-icon">💚</div>
         <div className="mkt-sc-content">
           <div className="mkt-sc-label">TIỀN THỪA TẤT CẢ</div>
-          <div className="mkt-sc-value">{totalTienThua.toLocaleString("vi-VN")}</div>
+          <div className="mkt-sc-value">
+            {totalTienThua.toLocaleString("vi-VN")}
+          </div>
           <div className="mkt-sc-sub">Tiền còn dư</div>
         </div>
       </div>
@@ -885,15 +920,15 @@ const isMatchTeam = (userId) =>
     // Lọc theo quyền:
     if (currentUser.position === "mkt") {
       filtered = filtered.filter(
-        (record) => record.userId === currentUser.employee_code
+        (record) => record.userId === currentUser.employee_code,
       );
-    // } else if (currentUser.position === "lead" && period === "month") {
-    //  filtered = filtered.filter(
-    //     (record) => record.userId === currentUser.employee_code
-    //   );
+      // } else if (currentUser.position === "lead" && period === "month") {
+      //  filtered = filtered.filter(
+      //     (record) => record.userId === currentUser.employee_code
+      //   );
     } else if (currentUser.position === "lead") {
       filtered = filtered.filter((record) =>
-        leadTeamMembers.includes(record.userId)
+        leadTeamMembers.includes(record.userId),
       );
     } else if (
       currentUser.position === "managerMKT" ||
@@ -905,7 +940,7 @@ const isMatchTeam = (userId) =>
         const teamObj = teamsList.find((team) => team.id === selectedTeam);
         if (teamObj) {
           filtered = filtered.filter((record) =>
-            teamObj.members.includes(record.userId)
+            teamObj.members.includes(record.userId),
           );
         }
       }
@@ -914,11 +949,11 @@ const isMatchTeam = (userId) =>
     } else if (currentUser.position_team === "kho") {
       filtered = [];
     }
-     if (currentUser?.name !== "Tung99" ) {
-    filtered = filtered.filter(
-      (record) => record.name.trim().toLowerCase() !== "tung99"
-    );
-  }
+    if (currentUser?.name !== "test") {
+      filtered = filtered.filter(
+        (record) => record.name.trim().toLowerCase() !== "test",
+      );
+    }
     return filtered;
   };
 
@@ -930,12 +965,12 @@ const isMatchTeam = (userId) =>
           .filter(
             (p) =>
               p.orderDate === date &&
-              p.mkt.trim().toLowerCase() === recordname.trim().toLowerCase()
+              p.mkt.trim().toLowerCase() === recordname.trim().toLowerCase(),
           )
           .reduce((sum, order) => {
-    const value = Number(order.profitmkt ?? order.profit ?? 0);
-    return sum + (isNaN(value) ? 0 : value);
-  }, 0)
+            const value = Number(order.profitmkt ?? order.profit ?? 0);
+            return sum + (isNaN(value) ? 0 : value);
+          }, 0)
       : 0;
   };
 
@@ -951,7 +986,13 @@ const isMatchTeam = (userId) =>
         return (
           <>
             {formatted}
-            {isToday && <div style={{ color: "#ff4d4f", fontWeight: "bold", fontSize: 11 }}>Hôm nay</div>}
+            {isToday && (
+              <div
+                style={{ color: "#ff4d4f", fontWeight: "bold", fontSize: 11 }}
+              >
+                Hôm nay
+              </div>
+            )}
           </>
         );
       },
@@ -970,7 +1011,11 @@ const isMatchTeam = (userId) =>
           }
           value={record.totalReceived ?? ""}
           onChange={(e) =>
-            handleInlineChange(record.id, "totalReceived", parseInt(e.target.value) || 0)
+            handleInlineChange(
+              record.id,
+              "totalReceived",
+              parseInt(e.target.value) || 0,
+            )
           }
           onFocus={(e) => e.target.select()}
           style={{
@@ -995,7 +1040,11 @@ const isMatchTeam = (userId) =>
           }
           value={record.request1 ?? ""}
           onChange={(e) =>
-            handleInlineChange(record.id, "request1", parseInt(e.target.value) || 0)
+            handleInlineChange(
+              record.id,
+              "request1",
+              parseInt(e.target.value) || 0,
+            )
           }
           onFocus={(e) => e.target.select()}
           style={{
@@ -1020,7 +1069,11 @@ const isMatchTeam = (userId) =>
           }
           value={record.request2 ?? ""}
           onChange={(e) =>
-            handleInlineChange(record.id, "request2", parseInt(e.target.value) || 0)
+            handleInlineChange(
+              record.id,
+              "request2",
+              parseInt(e.target.value) || 0,
+            )
           }
           onFocus={(e) => e.target.select()}
           style={{
@@ -1046,7 +1099,11 @@ const isMatchTeam = (userId) =>
             currentUser.position !== "admin"
           }
           onChange={(e) =>
-            handleInlineChange(record.id, "request3", parseInt(e.target.value) || 0)
+            handleInlineChange(
+              record.id,
+              "request3",
+              parseInt(e.target.value) || 0,
+            )
           }
           onFocus={(e) => e.target.select()}
           style={{
@@ -1062,45 +1119,46 @@ const isMatchTeam = (userId) =>
       key: "excessMoney3",
 
       render: (_, record) => {
-        const total = record.request1 + record.request2 + (record.request3 || 0);
+        const total =
+          record.request1 + record.request2 + (record.request3 || 0);
         return total - record.totalReceived
           ? (total - record.totalReceived).toLocaleString("vi-VN")
           : 0;
       },
     },
-  //   {
-  //     title: "Xin đêm",
-  //     key: "tiendu",
-  //     render: (_, record) => {
-  //       const isLastDayOfMonth =
-  // dayjs(record.date).date() === dayjs(record.date).daysInMonth(); // Kiểm tra ngày đầu tháng
+    //   {
+    //     title: "Xin đêm",
+    //     key: "tiendu",
+    //     render: (_, record) => {
+    //       const isLastDayOfMonth =
+    // dayjs(record.date).date() === dayjs(record.date).daysInMonth(); // Kiểm tra ngày đầu tháng
 
-  //       return isLastDayOfMonth ? (
-  //         <InputNumber
-  //           readOnly={
-  //             record.isLocked &&
-  //             currentUser.position !== "managerMKT" &&
-  //             currentUser.position !== "admin"
-  //           }
-  //           value={record.tiendu}
-  //           onChange={(value) => handleInlineChange(record.id, "tiendu", value)}
-  //           style={{ width: "100%" }}
-  //           formatter={(value) => value.toLocaleString("vi-VN")}
-  //           parser={(value) => value.replace(/\$\s?|(,*)/g, "")}
-  //         />
-  //       ) : null; // Không hiển thị gì nếu không phải ngày đầu tháng
-  //     },
-  //   },
+    //       return isLastDayOfMonth ? (
+    //         <InputNumber
+    //           readOnly={
+    //             record.isLocked &&
+    //             currentUser.position !== "managerMKT" &&
+    //             currentUser.position !== "admin"
+    //           }
+    //           value={record.tiendu}
+    //           onChange={(value) => handleInlineChange(record.id, "tiendu", value)}
+    //           style={{ width: "100%" }}
+    //           formatter={(value) => value.toLocaleString("vi-VN")}
+    //           parser={(value) => value.replace(/\$\s?|(,*)/g, "")}
+    //         />
+    //       ) : null; // Không hiển thị gì nếu không phải ngày đầu tháng
+    //     },
+    //   },
     {
       title: "Doanh số",
       key: "sales",
       render: (_, record) => {
         const totalSalesForSelectedDate = computeTotalSalesForDate(
           record.date,
-          record.name
+          record.name,
         );
         return (totalSalesForSelectedDate * 0.95 * 17000).toLocaleString(
-          "vi-VN"
+          "vi-VN",
         );
       },
     },
@@ -1110,13 +1168,12 @@ const isMatchTeam = (userId) =>
       render: (_, record) => {
         const totalSalesForSelectedDate = computeTotalSalesForDate(
           record.date,
-          record.name
+          record.name,
         );
         const total = totalSalesForSelectedDate * 17000 * 0.95;
-        if (totalSalesForSelectedDate === 0) return <span className="pct em">—</span>;
-        const percent = Number(
-          (record.totalReceived / total) * 100
-        );
+        if (totalSalesForSelectedDate === 0)
+          return <span className="pct em">—</span>;
+        const percent = Number((record.totalReceived / total) * 100);
 
         let pctClass = "g";
         if (percent >= 30 && percent <= 35) {
@@ -1133,12 +1190,13 @@ const isMatchTeam = (userId) =>
       render: (_, record) => {
         const totalSalesForSelectedDate = computeTotalSalesForDate(
           record.date,
-          record.name
+          record.name,
         );
         const total = totalSalesForSelectedDate * 17000 * 0.95;
-        if (totalSalesForSelectedDate === 0) return <span className="pct em">—</span>;
+        if (totalSalesForSelectedDate === 0)
+          return <span className="pct em">—</span>;
         const percent = Number(
-          ((record.request1 + record.request2) / total) * 100
+          ((record.request1 + record.request2) / total) * 100,
         );
 
         let pctClass = "g";
@@ -1159,19 +1217,36 @@ const isMatchTeam = (userId) =>
         // Với lead và manager: chỉ cho phép sửa/xóa nếu record thuộc về chính họ, ngược lại chỉ xem
         if (currentUser.position === "lead") {
           if (record.userId === currentUser.employee_code) {
-            const isLocked = record.isLocked &&
+            const isLocked =
+              record.isLocked &&
               currentUser.position !== "managerMKT" &&
               currentUser.position !== "admin";
             if (isLocked) {
               return (
-                <div style={{ display: "flex", gap: 6, justifyContent: "center", alignItems: "center" }}>
-                  <span style={{ color: "#94a3b8", fontSize: 12 }}>Chỉ xem</span>
+                <div
+                  style={{
+                    display: "flex",
+                    gap: 6,
+                    justifyContent: "center",
+                    alignItems: "center",
+                  }}
+                >
+                  <span style={{ color: "#94a3b8", fontSize: 12 }}>
+                    Chỉ xem
+                  </span>
                   <span style={{ fontSize: 14 }}>🔒</span>
                 </div>
               );
             }
             return (
-              <div style={{ display: "flex", gap: 6, justifyContent: "center", alignItems: "center" }}>
+              <div
+                style={{
+                  display: "flex",
+                  gap: 6,
+                  justifyContent: "center",
+                  alignItems: "center",
+                }}
+              >
                 <button
                   className="btn btn-save"
                   onClick={() => onSave(record)}
@@ -1193,22 +1268,39 @@ const isMatchTeam = (userId) =>
               </div>
             );
           } else {
-            return <span style={{ color: "#94a3b8", fontSize: 12 }}>Chỉ xem</span>;
+            return (
+              <span style={{ color: "#94a3b8", fontSize: 12 }}>Chỉ xem</span>
+            );
           }
         }
-        const isLocked = record.isLocked &&
+        const isLocked =
+          record.isLocked &&
           currentUser.position !== "managerMKT" &&
           currentUser.position !== "admin";
         if (isLocked) {
           return (
-            <div style={{ display: "flex", gap: 6, justifyContent: "center", alignItems: "center" }}>
+            <div
+              style={{
+                display: "flex",
+                gap: 6,
+                justifyContent: "center",
+                alignItems: "center",
+              }}
+            >
               <span style={{ color: "#94a3b8", fontSize: 12 }}>Chỉ xem</span>
               <span style={{ fontSize: 14 }}>🔒</span>
             </div>
           );
         }
         return (
-          <div style={{ display: "flex", gap: 6, justifyContent: "center", alignItems: "center" }}>
+          <div
+            style={{
+              display: "flex",
+              gap: 6,
+              justifyContent: "center",
+              alignItems: "center",
+            }}
+          >
             <button
               className="btn btn-save"
               onClick={() => onSave(record)}
@@ -1237,12 +1329,12 @@ const isMatchTeam = (userId) =>
       const userRecordsForDay = records.filter(
         (record) =>
           record.userId === userId &&
-          dayjs(record.date).isSame(targetDate, "day")
+          dayjs(record.date).isSame(targetDate, "day"),
       );
       if (userRecordsForDay.length > 0) {
         // Nếu có nhiều record, chọn record mới nhất trong ngày đó (hoặc bạn có thể chọn record đầu tiên)
         return userRecordsForDay.reduce((latest, record) =>
-          dayjs(record.date).isAfter(dayjs(latest.date)) ? record : latest
+          dayjs(record.date).isAfter(dayjs(latest.date)) ? record : latest,
         );
       }
     }
@@ -1287,7 +1379,13 @@ const isMatchTeam = (userId) =>
         return (
           <>
             {formatted}
-            {isToday && <div style={{ color: "#ff4d4f", fontWeight: "bold", fontSize: 11 }}>Hôm nay</div>}
+            {isToday && (
+              <div
+                style={{ color: "#ff4d4f", fontWeight: "bold", fontSize: 11 }}
+              >
+                Hôm nay
+              </div>
+            )}
           </>
         );
       },
@@ -1317,10 +1415,30 @@ const isMatchTeam = (userId) =>
   // Xác định màu nền và viền dựa trên %ADS
   const getBannerStyle = (employeeName) => {
     const p = parseFloat(computePercentADS(employeeName));
-    if (isNaN(p)) return { background: "#f0f0f0", border: "2px solid #8c8c8c", color: "#595959" };
-    if (p < 30) return { background: "#54DA1F", border: "2px solid #2e9c0f", color: "#0f3d04" }; // xanh lá
-    if (p >= 30 && p < 35) return { background: "#FF9501", border: "2px solid #b35a00", color: "#3d1f00" }; // cam
-    if (p >= 35) return { background: "#F999A8", border: "2px solid #c4394f", color: "#5a0d1a" }; // hồng
+    if (isNaN(p))
+      return {
+        background: "#f0f0f0",
+        border: "2px solid #8c8c8c",
+        color: "#595959",
+      };
+    if (p < 30)
+      return {
+        background: "#54DA1F",
+        border: "2px solid #2e9c0f",
+        color: "#0f3d04",
+      }; // xanh lá
+    if (p >= 30 && p < 35)
+      return {
+        background: "#FF9501",
+        border: "2px solid #b35a00",
+        color: "#3d1f00",
+      }; // cam
+    if (p >= 35)
+      return {
+        background: "#F999A8",
+        border: "2px solid #c4394f",
+        color: "#5a0d1a",
+      }; // hồng
   };
 
   return (
@@ -1328,22 +1446,39 @@ const isMatchTeam = (userId) =>
       {contextHolder}
       {/* POPUP CHI TIẾT NHÂN VIÊN %ADS > 30% TRONG 3 NGÀY */}
       <Modal
-        title={<b style={{ color: '#ff4d4f', fontSize: 18 }}>⚠️ NHÂN VIÊN %ADS trên 33% TRONG 3 NGÀY LIÊN TIẾP</b>}
+        title={
+          <b style={{ color: "#ff4d4f", fontSize: 18 }}>
+            ⚠️ NHÂN VIÊN %ADS trên 33% TRONG 3 NGÀY LIÊN TIẾP
+          </b>
+        }
         open={isPopupOpen}
         onCancel={() => setIsPopupOpen(false)}
         footer={[
-          <Button key="close" type="primary" onClick={() => setIsPopupOpen(false)}>
+          <Button
+            key="close"
+            type="primary"
+            onClick={() => setIsPopupOpen(false)}
+          >
             Đóng bảng
-          </Button>
+          </Button>,
         ]}
         width={900}
         centered
       >
         <div style={{ marginTop: 16 }}>
           {popupData.map((emp) => (
-            <div key={emp.code} style={{ marginBottom: 24, border: '1px solid #f0f0f0', borderRadius: 8, padding: 16, backgroundColor: '#fffbe6' }}>
-              <h4 style={{ margin: '0 0 12px 0', fontSize: 16, color: '#111' }}>
-                Nhân viên: <span style={{ color: '#ff4d4f' }}>{emp.name}</span> 
+            <div
+              key={emp.code}
+              style={{
+                marginBottom: 24,
+                border: "1px solid #f0f0f0",
+                borderRadius: 8,
+                padding: 16,
+                backgroundColor: "#fffbe6",
+              }}
+            >
+              <h4 style={{ margin: "0 0 12px 0", fontSize: 16, color: "#111" }}>
+                Nhân viên: <span style={{ color: "#ff4d4f" }}>{emp.name}</span>
               </h4>
               <Table
                 dataSource={emp.details}
@@ -1377,10 +1512,19 @@ const isMatchTeam = (userId) =>
                     key: "percent",
                     align: "center",
                     render: (val) => (
-                      <span style={{ color: '#ff4d4f', fontWeight: 'bold', backgroundColor: '#fff1f0', padding: '2px 8px', borderRadius: 4, border: '1px solid #ffa39e' }}>
+                      <span
+                        style={{
+                          color: "#ff4d4f",
+                          fontWeight: "bold",
+                          backgroundColor: "#fff1f0",
+                          padding: "2px 8px",
+                          borderRadius: 4,
+                          border: "1px solid #ffa39e",
+                        }}
+                      >
                         {val}%
                       </span>
-                    )
+                    ),
                   },
                 ]}
               />
@@ -1441,7 +1585,12 @@ const isMatchTeam = (userId) =>
       {/* Tiêu đề "Danh sách giao dịch" */}
 
       {/* Bộ lọc - Chọn thời gian (dạng nút ngang) */}
-      <Row gutter={[16, 12]} style={{ marginBottom: 16 }} align="middle" justify="space-between">
+      <Row
+        gutter={[16, 12]}
+        style={{ marginBottom: 16 }}
+        align="middle"
+        justify="space-between"
+      >
         <Col>
           <div className="filter-bar-group">
             <div className="filter-bar-chips">
@@ -1489,8 +1638,16 @@ const isMatchTeam = (userId) =>
         {(currentUser.position === "managerMKT" ||
           currentUser.position === "admin") && (
           <Col>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <span style={{ color: '#1F2937', fontWeight: 600, whiteSpace: 'nowrap' }}>Chọn team:</span>
+            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              <span
+                style={{
+                  color: "#1F2937",
+                  fontWeight: 600,
+                  whiteSpace: "nowrap",
+                }}
+              >
+                Chọn team:
+              </span>
               <Select
                 value={selectedTeam}
                 style={{ width: teamSelectWidth }}
@@ -1507,17 +1664,19 @@ const isMatchTeam = (userId) =>
           </Col>
         )}
       </Row>
-      {(currentUser.position === "managerMKT" || currentUser.position === "admin") && (
-  <Col xs={24} sm={12} md={6} style={{ display: 'flex', alignItems: 'flex-end', marginBottom: 16 }}>
-    <Button
-      type="primary"
-      danger
-      onClick={handleCheckAndSendTelegram}
-    >
-      Kiểm tra & Gửi Tele NV %ADS trên 33%
-    </Button>
-  </Col>
-)}
+      {(currentUser.position === "managerMKT" ||
+        currentUser.position === "admin") && (
+        <Col
+          xs={24}
+          sm={12}
+          md={6}
+          style={{ display: "flex", alignItems: "flex-end", marginBottom: 16 }}
+        >
+          <Button type="primary" danger onClick={handleCheckAndSendTelegram}>
+            Kiểm tra & Gửi Tele NV %ADS trên 33%
+          </Button>
+        </Col>
+      )}
       {/* Summary banner cho admin */}
       {(currentUser.position === "managerMKT" ||
         currentUser.position === "admin") && (
@@ -1543,7 +1702,8 @@ const isMatchTeam = (userId) =>
           </span>
           <span style={{ color: "#d0a0a8" }}>|</span>
           <span>
-            Ads đã xin: <strong>{totalTongAdsXin.toLocaleString("vi-VN")}</strong>
+            Ads đã xin:{" "}
+            <strong>{totalTongAdsXin.toLocaleString("vi-VN")}</strong>
           </span>
           <span style={{ color: "#d0a0a8" }}>|</span>
           <span>
@@ -1578,10 +1738,16 @@ const isMatchTeam = (userId) =>
               }}
             >
               {(() => {
-                const totalTienTieu = adminSummaryData.reduce((sum, r) => sum + (r.tongTienTieu || 0), 0);
+                const totalTienTieu = adminSummaryData.reduce(
+                  (sum, r) => sum + (r.tongTienTieu || 0),
+                  0,
+                );
                 const dsTong = totalDSTong;
-                return dsTong > 0 ? ((totalTienTieu / dsTong) * 100).toFixed(2) : "0.00";
-              })()}%
+                return dsTong > 0
+                  ? ((totalTienTieu / dsTong) * 100).toFixed(2)
+                  : "0.00";
+              })()}
+              %
             </strong>
           </span>
         </div>
@@ -1650,19 +1816,21 @@ const isMatchTeam = (userId) =>
                   Tổng doanh số:{" "}
                   <strong>
                     {computeTotalSales(userRecords[0].name).toLocaleString(
-                      "vi-VN"
+                      "vi-VN",
                     )}
                   </strong>
                   <span style={{ color: "#d0a0a8" }}>|</span>
                   Ads đã xin:{" "}
                   <strong>
-                    {computeTotalADS(userRecords[0].name).toLocaleString("vi-VN")}
+                    {computeTotalADS(userRecords[0].name).toLocaleString(
+                      "vi-VN",
+                    )}
                   </strong>
                   <span style={{ color: "#d0a0a8" }}>|</span>
                   Tiền thừa:{" "}
                   <strong style={{ color: "#16a34a" }}>
                     {computeTotalExcess(userRecords[0].name).toLocaleString(
-                      "vi-VN"
+                      "vi-VN",
                     )}
                   </strong>
                   <span style={{ color: "#d0a0a8" }}>|</span>
@@ -1689,9 +1857,15 @@ const isMatchTeam = (userId) =>
                   >
                     {/* Tính %ADS tiêu = tổng tiền tiêu / tổng ds */}
                     {(() => {
-                      const totalTienTieu = userRecords.reduce((sum, r) => sum + (r.totalReceived || 0), 0);
+                      const totalTienTieu = userRecords.reduce(
+                        (sum, r) => sum + (r.totalReceived || 0),
+                        0,
+                      );
                       const totalDS = computeTotalSales(userRecords[0].name);
-                      const percent = totalDS > 0 ? ((totalTienTieu / totalDS) * 100).toFixed(2) : "0.00";
+                      const percent =
+                        totalDS > 0
+                          ? ((totalTienTieu / totalDS) * 100).toFixed(2)
+                          : "0.00";
                       return `${percent}%`;
                     })()}
                   </strong>
@@ -1716,22 +1890,22 @@ const isMatchTeam = (userId) =>
             </Row>
           ))
       ) : (
-          <>
+        <>
           <div
-                style={{
-                  fontWeight: "bold",
-                  marginBottom: 8,
-                  padding: "12px 16px",
-                  borderRadius: "8px",
-                  ...getBannerStyle(currentUser.name),
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "8px",
-                  flexWrap: "wrap",
-                  fontSize: 13,
-                }}
-              >
-                Tổng doanh số:{" "}
+            style={{
+              fontWeight: "bold",
+              marginBottom: 8,
+              padding: "12px 16px",
+              borderRadius: "8px",
+              ...getBannerStyle(currentUser.name),
+              display: "flex",
+              alignItems: "center",
+              gap: "8px",
+              flexWrap: "wrap",
+              fontSize: 13,
+            }}
+          >
+            Tổng doanh số:{" "}
             <strong>
               {computeTotalSales(currentUser.name).toLocaleString("vi-VN")}
             </strong>
@@ -1770,10 +1944,13 @@ const isMatchTeam = (userId) =>
               {/* Tính %ADS tiêu = tổng tiền tiêu / tổng ds */}
               {(() => {
                 const totalTienTieu = filteredRecords
-                  .filter(r => r.name === currentUser.name)
+                  .filter((r) => r.name === currentUser.name)
                   .reduce((sum, r) => sum + (r.totalReceived || 0), 0);
                 const totalDS = computeTotalSales(currentUser.name);
-                const percent = totalDS > 0 ? ((totalTienTieu / totalDS) * 100).toFixed(2) : "0.00";
+                const percent =
+                  totalDS > 0
+                    ? ((totalTienTieu / totalDS) * 100).toFixed(2)
+                    : "0.00";
                 return `${percent}%`;
               })()}
             </strong>
@@ -1815,11 +1992,8 @@ const isMatchTeam = (userId) =>
           </Row>
         </>
       )}
-      
     </div>
-  
-);
-  
+  );
 };
 
 export default Dashboard;
