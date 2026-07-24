@@ -1106,11 +1106,11 @@ const OrderList = () => {
     const totals2 = calculateTotalQuantities(tickedOrders);
     setTotalQuantitiesINDON(totals2);
 
-    const CTYDONGOrders = filteredOrders.filter((order) => order.isShipping);
+    const CTYDONGOrders = filteredOrders.filter((order) => order.isShipping === false);
     const totals3 = calculateTotalQuantities(CTYDONGOrders);
     setTotalQuantitiesCTYDONG(totals3);
     const KHODONGOrders = filteredOrders.filter(
-      (order) => order.isShipping === false,
+      (order) => order.isShipping,
     );
     const totals4 = calculateTotalQuantities(KHODONGOrders);
     setTotalQuantitiesKHODONG(totals4);
@@ -1683,7 +1683,7 @@ const OrderList = () => {
           </Space>
         );
       },
-      width: 50,
+      width: 40,
     },
     ...(currentUser.position_team === "kho"
       ? [
@@ -1710,7 +1710,7 @@ const OrderList = () => {
             ),
             key: "istick",
             dataIndex: "istick",
-            width: 50,
+            width: 40,
             render: (_, record) => (
               <MemoizedCheckbox
                 checked={record.istick || false}
@@ -1843,7 +1843,7 @@ const OrderList = () => {
             ),
             key: "istick6",
             dataIndex: "istick6",
-            width: 50,
+            width: 40,
             render: (_, record) => (
               <Checkbox
                 checked={record.istick6 || false}
@@ -1870,7 +1870,7 @@ const OrderList = () => {
     //       </Button></>
     //       ),
     //       key: "istickDONE",
-    //       width: 50,
+    //       width: 40,
     //       dataIndex: "istickDONE",
     //       render: (_, record) => (
     //         <Checkbox
@@ -2021,7 +2021,14 @@ const OrderList = () => {
     ...(currentUser.position === "kho1" || currentUser.position === "salexuly"
       ? [
           {
-            title: " Kho Đóng Hàng",
+            title: (
+              <Checkbox
+                checked={selectedColumns.includes("isShippingName")}
+                onChange={(e) => handleColumnSelect("isShippingName", e.target.checked)}
+              >
+                KHO ĐÓNG HÀNG
+              </Checkbox>
+            ),
 
             key: "isShippingName",
             dataIndex: "isShippingName",
@@ -2781,7 +2788,7 @@ const OrderList = () => {
     },
     {
       title: (
-        <>
+        <div style={{ whiteSpace: 'normal', fontSize: '9px', textAlign: 'center' }}>
           <Checkbox
             checked={selectedColumns.includes("istick")}
             onChange={(e) => handleColumnSelect("istick", e.target.checked)}
@@ -2796,11 +2803,11 @@ const OrderList = () => {
           <Button type="primary" onClick={handleSaveIstick}>
             Lưu
           </Button>
-        </>
+        </div>
       ),
       key: "istick",
       dataIndex: "istick",
-      width: 50,
+      width: 40,
       render: (_, record) => (
         <MemoizedCheckbox
           checked={record.istick || false}
@@ -2811,7 +2818,7 @@ const OrderList = () => {
 
     {
       title: (
-        <>
+        <div style={{ whiteSpace: 'normal', fontSize: '9px', textAlign: 'center' }}>
           <Checkbox
             checked={allRowsSelected4}
             onChange={(e) => handleSelectAllIstick4(e.target.checked)}
@@ -2821,11 +2828,11 @@ const OrderList = () => {
           <Button type="primary" onClick={handleSaveIstick4}>
             Lưu
           </Button>
-        </>
+        </div>
       ),
       key: "istick4",
       dataIndex: "istick4",
-      width: 50,
+      width: 40,
       render: (_, record) => (
         <Checkbox
           checked={record.istick4 || false}
@@ -2836,7 +2843,7 @@ const OrderList = () => {
 
     {
       title: (
-        <>
+        <div style={{ whiteSpace: 'normal', fontSize: '9px', textAlign: 'center' }}>
           <Checkbox
             checked={allRowsSelectedDONE}
             onChange={(e) => handleSelectAllIstickDONE(e.target.checked)}
@@ -2846,10 +2853,10 @@ const OrderList = () => {
           <Button type="primary" onClick={handleSaveIstickDONE}>
             Lưu
           </Button>
-        </>
+        </div>
       ),
       key: "istickDONE",
-      width: 50,
+      width: 40,
       dataIndex: "istickDONE",
       render: (_, record) => (
         <MemoizedCheckbox
@@ -2862,13 +2869,9 @@ const OrderList = () => {
       ? [
           {
             title: (
-              <>
-                <div
-                  style={{ display: "flex", alignItems: "center", gap: "10px" }}
-                >
-                  <div
-                    style={{ display: "flex", gap: 10, alignItems: "center" }}
-                  >
+              <div style={{ whiteSpace: 'normal', fontSize: '9px', textAlign: 'center' }}>
+                <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                  <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
                     <Checkbox.Group
                       options={[
                         { label: "CHỌN KHO ĐÓNG HÀNG", value: "istick2" },
@@ -2881,19 +2884,19 @@ const OrderList = () => {
 
                     <Select
                       placeholder="Chọn kho đóng"
-                      style={{ width: 180 }}
+                      style={{ width: 100, fontSize: '10px' }}
                       value={selectedKhoDong}
                       onChange={setSelectedKhoDong}
                       options={kho2Options}
                     />
                   </div>
                 </div>
-                <Button type="primary" onClick={handleSaveIstick2}>
+                <Button type="primary" size="small" onClick={handleSaveIstick2}>
                   Lưu
                 </Button>
-              </>
+              </div>
             ),
-            width: 100,
+            width: 40,
             key: "isShipping",
             dataIndex: "isShipping",
             render: (_, record) => (
@@ -2910,7 +2913,14 @@ const OrderList = () => {
     ...(currentUser.position === "kho1"
       ? [
           {
-            title: " KHO ĐÓNG HÀNG",
+            title: (
+              <Checkbox
+                checked={selectedColumns.includes("isShippingName")}
+                onChange={(e) => handleColumnSelect("isShippingName", e.target.checked)}
+              >
+                KHO ĐÓNG HÀNG
+              </Checkbox>
+            ),
 
             key: "isShippingName",
             dataIndex: "isShippingName",
@@ -3196,7 +3206,7 @@ const OrderList = () => {
       ),
       key: "istick",
       dataIndex: "istick",
-      width: 50,
+      width: 40,
       render: (_, record) => (
         <MemoizedCheckbox
           checked={record.istick || false}
@@ -3221,7 +3231,7 @@ const OrderList = () => {
       ),
       key: "istick4",
       dataIndex: "istick4",
-      width: 50,
+      width: 40,
       render: (_, record) => (
         <Checkbox
           checked={record.istick4 || false}
@@ -3244,7 +3254,7 @@ const OrderList = () => {
         </>
       ),
       key: "istickDONE",
-      width: 50,
+      width: 40,
       dataIndex: "istickDONE",
       render: (_, record) => (
         <MemoizedCheckbox
@@ -4585,7 +4595,7 @@ const OrderList = () => {
                   </Space>
                 );
               },
-              width: 50,
+              width: 40,
             },
             {
               title: "Sản phẩm",
