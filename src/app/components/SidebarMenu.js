@@ -959,7 +959,7 @@ const SidebarMenu = ({ isOpen, onToggle }) => {
     ...getOverviewMenu(),
     ...getOrderMenu(),
     ...getMktMenu(),
-    ...(isMarketing || isSales || isKRTW
+    ...(isMarketing || isKRTW
       ? []
       : [
           {
@@ -1008,7 +1008,7 @@ const SidebarMenu = ({ isOpen, onToggle }) => {
     ...(isMarketing || isSales
       ? []
       : isEmployee
-        ? [ 
+        ? [
             {
               key: "sub6",
               icon: "🕐",

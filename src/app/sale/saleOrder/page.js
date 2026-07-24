@@ -487,22 +487,36 @@ const computeAverageClosingRate = (employeeName) => {
     }, {});
   };
 
-  // Tính tổng doanh số tháng này
+  // Tính tổng doanh số tháng này - chỉ lấy đơn có sale = tên nhân viên đó
   const getTotalSalesThisMonth = () => {
+    const isManager = currentUser.position === "managerSALE" || 
+                      currentUser.position === "admin" || 
+                      currentUser.position === "managerMKT" || 
+                      currentUser.position === "leadSALE";
     return sampleOrders
-      .filter((p) => filterSampleOrdersByPeriod(p))
+      .filter((p) => {
+        if (!filterSampleOrdersByPeriod(p)) return false;
+        if (!isManager && p.sale !== currentUser.name) return false;
+        return true;
+      })
       .reduce((sum, p) => sum + (p.profit || 0), 0) * 17000;
   };
 
-  // Tính tổng doanh số tháng trước
+  // Tính tổng doanh số tháng trước - chỉ lấy đơn có sale = tên nhân viên đó
   const getTotalSalesLastMonth = () => {
     const now = moment();
     const lastMonthStart = now.clone().subtract(1, "months").startOf("month");
     const lastMonthEnd = now.clone().subtract(1, "months").endOf("month");
+    const isManager = currentUser.position === "managerSALE" || 
+                      currentUser.position === "admin" || 
+                      currentUser.position === "managerMKT" || 
+                      currentUser.position === "leadSALE";
     return sampleOrders
       .filter((p) => {
         const orderDate = moment(p.orderDate, "YYYY-MM-DD");
-        return orderDate.isSame(lastMonthStart, "month");
+        if (!orderDate.isSame(lastMonthStart, "month")) return false;
+        if (!isManager && p.sale !== currentUser.name) return false;
+        return true;
       })
       .reduce((sum, p) => sum + (p.profit || 0), 0) * 17000;
   };
@@ -554,17 +568,82 @@ const computeAverageClosingRate = (employeeName) => {
     totalSales: getTotalSalesThisMonth(),
     salesChange: getSalesChangePercent(),
     closedOrders: getTotalClosedOrders(),
-    totalOrders: getTotalOrders(),
+    totalOrders: (() => {
+      const isManager = currentUser.position === "managerSALE" || 
+                        currentUser.position === "admin" || 
+                        currentUser.position === "managerMKT" || 
+                        currentUser.position === "leadSALE";
+      return sampleOrders.filter((p) => {
+        if (!filterSampleOrdersByPeriod(p)) return false;
+        if (!isManager && p.sale !== currentUser.name) return false;
+        return true;
+      }).length;
+    })(),
     avgChotRatio: getAverageRatio(),
     totalNewMess: getTotalMess(),
     totalRemarketing: getTotalRemarketing(),
-    // Thống kê trạng thái đơn
-    processingOrders: sampleOrders.filter((p) => p.saleReport === "Đang xử lý" && filterSampleOrdersByPeriod(p)).length,
-    doneOrdersCount: sampleOrders.filter((p) => p.saleReport === "DONE" && filterSampleOrdersByPeriod(p)).length,
-    deletedOrders: sampleOrders.filter((p) => p.saleReport === "Đã xoá DS" && filterSampleOrdersByPeriod(p)).length,
-    // Thống kê thanh toán
-    paidOrders: sampleOrders.filter((p) => p.paymentStatus === "Đã TT" && filterSampleOrdersByPeriod(p)).length,
-    unpaidOrders: sampleOrders.filter((p) => p.paymentStatus === "Chưa TT" && filterSampleOrdersByPeriod(p)).length,
+    // Thống kê trạng thái đơn - chỉ lấy đơn có sale = nhân viên đó
+    processingOrders: (() => {
+      const isManager = currentUser.position === "managerSALE" || 
+                        currentUser.position === "admin" || 
+                        currentUser.position === "managerMKT" || 
+                        currentUser.position === "leadSALE";
+      return sampleOrders.filter((p) => {
+        if (p.saleReport !== "Đang xử lý") return false;
+        if (!filterSampleOrdersByPeriod(p)) return false;
+        if (!isManager && p.sale !== currentUser.name) return false;
+        return true;
+      }).length;
+    })(),
+    doneOrdersCount: (() => {
+      const isManager = currentUser.position === "managerSALE" || 
+                        currentUser.position === "admin" || 
+                        currentUser.position === "managerMKT" || 
+                        currentUser.position === "leadSALE";
+      return sampleOrders.filter((p) => {
+        if (p.saleReport !== "DONE") return false;
+        if (!filterSampleOrdersByPeriod(p)) return false;
+        if (!isManager && p.sale !== currentUser.name) return false;
+        return true;
+      }).length;
+    })(),
+    deletedOrders: (() => {
+      const isManager = currentUser.position === "managerSALE" || 
+                        currentUser.position === "admin" || 
+                        currentUser.position === "managerMKT" || 
+                        currentUser.position === "leadSALE";
+      return sampleOrders.filter((p) => {
+        if (p.saleReport !== "Đã xoá DS") return false;
+        if (!filterSampleOrdersByPeriod(p)) return false;
+        if (!isManager && p.sale !== currentUser.name) return false;
+        return true;
+      }).length;
+    })(),
+    // Thống kê thanh toán - chỉ lấy đơn có sale = nhân viên đó
+    paidOrders: (() => {
+      const isManager = currentUser.position === "managerSALE" || 
+                        currentUser.position === "admin" || 
+                        currentUser.position === "managerMKT" || 
+                        currentUser.position === "leadSALE";
+      return sampleOrders.filter((p) => {
+        if (p.paymentStatus !== "Đã TT") return false;
+        if (!filterSampleOrdersByPeriod(p)) return false;
+        if (!isManager && p.sale !== currentUser.name) return false;
+        return true;
+      }).length;
+    })(),
+    unpaidOrders: (() => {
+      const isManager = currentUser.position === "managerSALE" || 
+                        currentUser.position === "admin" || 
+                        currentUser.position === "managerMKT" || 
+                        currentUser.position === "leadSALE";
+      return sampleOrders.filter((p) => {
+        if (p.paymentStatus !== "Chưa TT") return false;
+        if (!filterSampleOrdersByPeriod(p)) return false;
+        if (!isManager && p.sale !== currentUser.name) return false;
+        return true;
+      }).length;
+    })(),
   };
 
   return loading ? (
