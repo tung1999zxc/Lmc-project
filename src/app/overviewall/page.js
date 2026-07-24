@@ -71,11 +71,13 @@ const Dashboard = () => {
     }
   }, []);
 
-  const convertOrdersWithRate = (orders, rate) => {
+  const convertOrdersWithRate = (orders, rate, useRevenue = false) => {
     return orders.map((o) => ({
       ...o,
       revenue: (o.revenue || 0) * rate,
-      profit: (o.profit || 0) * rate,
+      profit: useRevenue
+        ? (o.revenue || 0) * rate
+        : (o.profit || 0) * rate,
       totalAmount: o.totalAmount ? o.totalAmount * rate : 0,
     }));
   };
@@ -101,7 +103,7 @@ const Dashboard = () => {
         setOrdersJP(JP_raw);
         setOrdersTW(TW_raw);
         const KR = convertOrdersWithRate(KR_raw, 17000);
-        const JP = convertOrdersWithRate(JP_raw, 6000);
+        const JP = convertOrdersWithRate(JP_raw, 6000, true);
         const TW = convertOrdersWithRate(TW_raw, 750);
         setOrders([...KR, ...JP, ...TW]);
         return;
@@ -125,7 +127,7 @@ const Dashboard = () => {
       setOrdersTW(TW_raw);
 
       const KR = convertOrdersWithRate(KR_raw, 17000);
-      const JP = convertOrdersWithRate(JP_raw, 6000);
+      const JP = convertOrdersWithRate(JP_raw, 6000, true);
       const TW = convertOrdersWithRate(TW_raw, 750);
       setOrders([...KR, ...JP, ...TW]);
     } catch (error) {
@@ -255,7 +257,7 @@ const Dashboard = () => {
     return result;
   }, [employees, selectedArea, selectedTeamTong]);
 
-  const calcRevenue = (orders, rate) => {
+  const calcRevenue = (orders, rate, useRevenue = false) => {
     const today = new Date();
     const todayStr = today.toISOString().split("T")[0];
 
@@ -263,15 +265,17 @@ const Dashboard = () => {
     yesterday.setDate(yesterday.getDate() - 1);
     const yesterdayStr = yesterday.toISOString().split("T")[0];
 
+    const field = useRevenue ? "revenue" : "profit";
+
     const todayRevenue =
       orders
         .filter((o) => o.orderDate === todayStr)
-        .reduce((a, b) => a + b.profit, 0) * rate;
+        .reduce((a, b) => a + (b[field] || 0), 0) * rate;
 
     const yesterdayRevenue =
       orders
         .filter((o) => o.orderDate === yesterdayStr)
-        .reduce((a, b) => a + b.profit, 0) * rate;
+        .reduce((a, b) => a + (b[field] || 0), 0) * rate;
 
     const percent =
       yesterdayRevenue > 0
@@ -282,7 +286,7 @@ const Dashboard = () => {
   };
 
   const kr = calcRevenue(ordersKR, 17000);
-  const jp = calcRevenue(ordersJP, 6000);
+  const jp = calcRevenue(ordersJP, 6000, true);
   const tw = calcRevenue(ordersTW, 750);
 
   const BarChartComponent = dynamic(
@@ -379,8 +383,7 @@ const Dashboard = () => {
                 label={
                   isSaleShift
                     ? ({ percent }) => `${(Number(percent) * 100).toFixed(1)}%`
-                    : ({ name, percent }) =>
-                        `${name}: ${(Number(percent) * 100).toFixed(1)}%`
+                    : ({ name }) => `${name}`
                 }
                 labelLine={{ stroke: "#94a3b8", strokeWidth: 1.5 }}
               >
@@ -3722,13 +3725,13 @@ const Dashboard = () => {
           </div>
           {top5Employees.length > 0 && selectedTeam !== "" && (
             <div className="lb-hl">
-              {top5Employees[0].totalToday * 1 * 0.95 >= 15000000 ? (
+              {top5Employees[0].totalToday * 1 * 0.95 >= 10000000 ? (
                 <span>
                   Đội ngũ bùng nổ — <span>{top5Employees[0].name}!</span>
                 </span>
               ) : (
                 <span style={{ color: "rgba(255,255,255,0.5)", fontSize: 14 }}>
-                  Hãy cố lên — chưa ai đạt 15 triệu hôm nay!
+                  Hãy cố lên — chưa ai đạt 10 triệu hôm nay!
                 </span>
               )}
             </div>
@@ -3785,6 +3788,9 @@ const Dashboard = () => {
                         {emp.orderCountToday || 0}
                       </div>
                       <div className="lb-row-count-lbl">Số đơn</div>
+                      <div className="lb-row-count-sales">
+                        {(emp.totalToday * 1 * 0.95 || 0).toLocaleString("vi-VN")}đ
+                      </div>
                     </div>
                   </div>
                 );
@@ -5180,7 +5186,7 @@ const Dashboard = () => {
                     </div>
                   </div>
                   <div className="fin-stat-rows">
-                    {transferData.map((r, idx) => (
+                    {transferData.filter(r => r.currency !== "KW").map((r, idx) => (
                       <div className="fin-row" key={idx}>
                         <span className="fin-row-label">
                           <span className="fin-row-sub">{r.currency}</span>
@@ -5191,7 +5197,7 @@ const Dashboard = () => {
                         </span>
                       </div>
                     ))}
-                    {transferData.map((r, idx) => (
+                    {transferData.filter(r => r.currency !== "KW").map((r, idx) => (
                       <div className="fin-row" key={"c-" + idx}>
                         <span className="fin-row-label">
                           <span className="fin-row-sub">{r.currency}</span>
@@ -5202,7 +5208,7 @@ const Dashboard = () => {
                         </span>
                       </div>
                     ))}
-                    {transferData.map((r, idx) => (
+                    {transferData.filter(r => r.currency !== "KW").map((r, idx) => (
                       <div className="fin-row" key={"t-" + idx}>
                         <span className="fin-row-label">
                           <span className="fin-row-sub">{r.currency}</span>

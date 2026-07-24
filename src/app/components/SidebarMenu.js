@@ -495,6 +495,9 @@ const SidebarMenu = ({ isOpen, onToggle }) => {
     setXinResult("");
   };
 
+  const isToMyHanh = currentUser?.name === "Tô Mỹ Hạnh";
+  const isLeTuyetKha = currentUser?.name === "Lê Tuyết Kha";
+  const isNguyenThiHuyen = currentUser?.name === "Nguyễn Thị Huyền";
   const isAdmin =
     currentUser?.position === "admin" || currentUser?.name === "Trần Mỹ Hạnh";
   const khohq1 = currentUser?.position === "kho2";
@@ -883,7 +886,7 @@ const SidebarMenu = ({ isOpen, onToggle }) => {
         overviewItems.jp,
         overviewItems.tw,
       ];
-    if (isKRTW) return [overviewItems.kr, overviewItems.tw];
+    if (isKRTW) return [overviewItems.kr];
     if (isJP) return [overviewItems.jp, overviewItems.tw];
     if (isTW) return [overviewItems.tw];
     return [overviewItems.kr];
@@ -904,7 +907,7 @@ const SidebarMenu = ({ isOpen, onToggle }) => {
     }
     if (isMarketing) return [orderItems[userCountryKey]];
     if (isAdmin) return [orderItems.kr, orderItems.jp, orderItems.tw];
-    if (isKRTW) return [orderItems.kr, orderItems.tw];
+    if (isKRTW) return [orderItems.kr];
     if (isJP) return [orderItems.jp, orderItems.tw];
     if (isTW) return [orderItems.tw];
     return [orderItems.kr];
@@ -919,7 +922,7 @@ const SidebarMenu = ({ isOpen, onToggle }) => {
     if (isMarketing) return [mktChildren[userCountryKey]];
     if (khohq1) return [];
     if (isAdmin) return [mktChildren.kr, mktChildren.jp, mktChildren.tw];
-    if (isKRTW) return [mktChildren.kr, mktChildren.tw];
+    if (isKRTW) return [mktChildren.kr];
     if (isJP) return [mktChildren.jp, mktChildren.tw];
     if (isTW) return [mktChildren.tw];
     return [
@@ -939,7 +942,7 @@ const SidebarMenu = ({ isOpen, onToggle }) => {
     if (isMarketing) return [productChildren[userCountryKey]];
     if (isAdmin)
       return [productChildren.kr, productChildren.jp, productChildren.tw];
-    if (isKRTW) return [productChildren.kr, productChildren.tw];
+    if (isKRTW) return [productChildren.kr];
     if (isJP) return [productChildren.jp, productChildren.tw];
     if (isTW) return [productChildren.tw];
     return [
@@ -956,7 +959,7 @@ const SidebarMenu = ({ isOpen, onToggle }) => {
     ...getOverviewMenu(),
     ...getOrderMenu(),
     ...getMktMenu(),
-    ...(isMarketing
+    ...(isMarketing || isSales || isKRTW
       ? []
       : [
           {
@@ -992,7 +995,7 @@ const SidebarMenu = ({ isOpen, onToggle }) => {
       ? []
       : [{ key: "sub7", icon: "📄", label: "Tên page", href: "/pagesName" }]),
     { key: "sub5", icon: "👤", label: "Quản lý tài khoản", href: "/accounts" },
-    ...(isAdmin
+    ...(isAdmin || isToMyHanh || isLeTuyetKha || isNguyenThiHuyen
       ? [
           {
             key: "sub8",

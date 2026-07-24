@@ -4031,14 +4031,14 @@ const Dashboard = () => {
                         <thead>
                           <tr style={{ backgroundColor: "#fff" }}>
                             <th style={thStyle}>TÊN (VAI TRÒ)</th>
-                            <th style={{ ...thStyle, color: "#52c41a" }}>
+                            {/* <th style={{ ...thStyle, color: "#52c41a" }}>
                               ĐÃ TT
                             </th>
                             <th style={{ ...thStyle, color: "#f5222d" }}>
                               CHƯA TT
-                            </th>
+                            </th> */}
                             <th style={{ ...thStyle, color: "#722ed1" }}>
-                              TỔNG ĐƠN
+                              TỔNG
                             </th>
                             <th style={thStyle}>TIỀN VNĐ</th>
                             <th style={{ ...thStyle, color: "#722ed1" }}>
@@ -4106,28 +4106,7 @@ const Dashboard = () => {
                                     </div>
                                   </div>
                                 </td>
-                                <td style={tdStyle}>
-                                  <span
-                                    style={{
-                                      color: "#52c41a",
-                                      fontWeight: "700",
-                                    }}
-                                  >
-                                    {Number(row.paid).toLocaleString()}{" "}
-                                    <span style={{ fontWeight: "400" }}>đ</span>
-                                  </span>
-                                </td>
-                                <td style={tdStyle}>
-                                  <span
-                                    style={{
-                                      color: "#f5222d",
-                                      fontWeight: "700",
-                                    }}
-                                  >
-                                    {Number(row.unpaid).toLocaleString()}{" "}
-                                    <span style={{ fontWeight: "400" }}>đ</span>
-                                  </span>
-                                </td>
+                               
                                 <td style={tdStyle}>
                                   <span
                                     style={{

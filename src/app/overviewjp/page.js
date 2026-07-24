@@ -149,9 +149,9 @@ const Dashboard = () => {
             <Tooltip formatter={(value) => value.toLocaleString("vi-VN")} />
 
             <Legend />
-            <Bar dataKey="profit" fill="#8884d8">
+            <Bar dataKey="revenue" fill="#8884d8">
               <LabelList
-                dataKey="profit"
+                dataKey="revenue"
                 formatter={formatYAxisTick}
                 position="top"
               />
@@ -181,7 +181,7 @@ const Dashboard = () => {
           <PieChart width={450} height={300}>
             <Pie
               data={data}
-              dataKey="profit"
+              dataKey="revenue"
               nameKey="name"
               cx="50%"
               cy="50%"
@@ -352,9 +352,9 @@ const Dashboard = () => {
   //             />
   //             <Tooltip formatter={(value) => value.toLocaleString("vi-VN")} />
   //             <Legend />
-  //             <Bar dataKey="profit" fill="#8884d8">
+  //             <Bar dataKey="revenue" fill="#8884d8">
   //               <LabelList
-  //                 dataKey="profit"
+  //                 dataKey="revenue"
   //                 formatter={(value) => value.toLocaleString("vi-VN")}
   //                 position="top"
   //               />
@@ -401,9 +401,9 @@ const Dashboard = () => {
 
               <Tooltip formatter={(value) => value.toLocaleString("vi-VN")} />
               <Legend />
-              <Bar dataKey="profit" fill="#8884d8">
+              <Bar dataKey="revenue" fill="#8884d8">
                 <LabelList
-                  dataKey="profit"
+                  dataKey="revenue"
                   formatter={formatYAxisTick}
                   position="top"
                 />
@@ -442,9 +442,9 @@ const Dashboard = () => {
 
               <Tooltip formatter={(value) => value.toLocaleString("vi-VN")} />
               <Legend />
-              <Bar dataKey="profit" fill="#8884d8">
+              <Bar dataKey="revenue" fill="#8884d8">
                 <LabelList
-                  dataKey="profit"
+                  dataKey="revenue"
                   formatter={formatYAxisTick}
                   position="top"
                 />
@@ -489,9 +489,9 @@ const Dashboard = () => {
 
             <Tooltip formatter={(value) => value.toLocaleString("vi-VN")} />
             <Legend />
-            <Bar dataKey="profit" fill="#8884d8">
+            <Bar dataKey="revenue" fill="#8884d8">
               <LabelList
-                dataKey="profit"
+                dataKey="revenue"
                 formatter={formatYAxisTick}
                 position="top"
               />
@@ -591,12 +591,12 @@ const Dashboard = () => {
               <Tooltip formatter={(value) => value.toLocaleString("vi-VN")} />
 
               <Legend />
-              <Bar dataKey="profit">
+              <Bar dataKey="revenue">
                 {data.map((entry, index) => (
                   <Cell key={`cell-${index}`} fill={entry.fill} />
                 ))}
                 <LabelList
-                  dataKey="profit"
+                  dataKey="revenue"
                   formatter={formatYAxisTick}
                   position="top"
                 />
@@ -820,13 +820,13 @@ const Dashboard = () => {
         (order) =>
           order.mkt.trim().toLowerCase() === emp.name.trim().toLowerCase()
       )
-      .reduce((sum, order) => sum + order.profit, 0);
+      .reduce((sum, order) => sum + order.revenue, 0);
     const adsCost = filteredAds
       .filter(
         (ad) => ad.name.trim().toLowerCase() === emp.name.trim().toLowerCase()
       )
       .reduce((sum, ad) => sum + (ad.request1 + ad.request2), 0);
-    return { name: emp.name, profit: sales * 6000 , adsCost };
+    return { name: emp.name, revenue: sales * 6000 , adsCost };
   });
 
   const teamEmployees = mktEmployees.filter(
@@ -844,13 +844,13 @@ const Dashboard = () => {
         (order) =>
           order.mkt.trim().toLowerCase() === emp.name.trim().toLowerCase()
       )
-      .reduce((sum, order) => sum + order.profit, 0);
+      .reduce((sum, order) => sum + order.revenue, 0);
     const adsCost = filteredAds
       .filter(
         (ad) => ad.name.trim().toLowerCase() === emp.name.trim().toLowerCase()
       )
       .reduce((sum, ad) => sum + (ad.request1 + ad.request2), 0);
-    return { name: emp.name, profit: sales * 6000 , adsCost };
+    return { name: emp.name, revenue: sales * 6000 , adsCost };
   });
 
   const saleEmployees = employees.filter((emp) => emp.position_team === "sale");
@@ -876,7 +876,7 @@ const Dashboard = () => {
           order.sale.trim().toLowerCase() === emp.name.trim().toLowerCase() ||
           order.salexuly.trim().toLowerCase() === emp.name.trim().toLowerCase()
       )
-      .reduce((sum, order) => sum + order.profit, 0);
+      .reduce((sum, order) => sum + order.revenue, 0);
 
     let fillColor = "#8884d8"; // Màu mặc định
     if (emp.position === "salenhapdon") {
@@ -887,7 +887,7 @@ const Dashboard = () => {
       fillColor = "#AA336A"; // ví dụ: màu vàng
     }
 
-    return { name: emp.name, profit: sales * 6000, fill: fillColor };
+    return { name: emp.name, revenue: sales * 6000 };
   });
 
   // // === Biểu đồ doanh số theo team (Grouped Double Bar Chart) ===
@@ -901,7 +901,7 @@ const Dashboard = () => {
           (order) =>
             order.mkt.trim().toLowerCase() === emp.name.trim().toLowerCase()
         )
-        .reduce((sum, order) => sum + order.profit, 0);
+        .reduce((sum, order) => sum + order.revenue, 0);
       return acc + empSales;
     }, 0);
     const adsCost = teamEmps.reduce((acc, emp) => {
@@ -912,14 +912,14 @@ const Dashboard = () => {
         .reduce((sum, ad) => sum + (ad.request1 + ad.request2), 0);
       return acc + empAds;
     }, 0);
-    return { name: team.label, profit: sales * 6000 , adsCost };
+    return { name: team.label, revenue: sales * 6000 , adsCost };
   });
   // const teamChartDataNew = teams.map(team => {
   //   const teamEmps = employees.filter(emp => emp.position_team === "mkt" && emp.team_id === team.value);
   //   const sales = teamEmps.reduce((acc, emp) => {
   //     const empSales = filteredOrders
   //       .filter(order => order.mkt === emp.name)
-  //       .reduce((sum, order) => sum + order.profit, 0);
+  //       .reduce((sum, order) => sum + order.revenue, 0);
   //     return acc + empSales;
   //   }, 0);
   //   const adsCost = teamEmps.reduce((acc, emp) => {
@@ -948,7 +948,7 @@ const Dashboard = () => {
           (order) =>
             order.mkt.trim().toLowerCase() === emp.name.trim().toLowerCase()
         )
-        .reduce((sum, order) => sum + order.profit, 0);
+        .reduce((sum, order) => sum + order.revenue, 0);
       return acc + empSales;
     }, 0);
     const members = teamEmps2.reduce((acc, emp) => {
@@ -957,7 +957,7 @@ const Dashboard = () => {
           (order) =>
             order.mkt.trim().toLowerCase() === emp.name.trim().toLowerCase()
         )
-        .reduce((sum, order) => sum + order.profit, 0);
+        .reduce((sum, order) => sum + order.revenue, 0);
       return acc + empSales;
     }, 0);
 
@@ -989,22 +989,22 @@ const Dashboard = () => {
     dailyChartDataNew = dateArray.map((date) => {
       const sales = filteredOrders
         .filter((order) => order.orderDate === date)
-        .reduce((sum, order) => sum + order.profit, 0);
+        .reduce((sum, order) => sum + order.revenue, 0);
       const adsCost = filteredAds
         .filter((ad) => ad.date === date)
         .reduce((sum, ad) => sum + (ad.request1 + ad.request2), 0);
-      return { name: date, profit: sales * 6000 , adsCost };
+      return { name: date, revenue: sales * 6000 , adsCost };
     });
   } else {
     const last30Days = getLast30Days();
     dailyChartDataNew = last30Days.map((date) => {
       const sales = orders
         .filter((order) => order.orderDate === date)
-        .reduce((sum, order) => sum + order.profit, 0);
+        .reduce((sum, order) => sum + order.revenue, 0);
       const adsCost = adsMoneyData
         .filter((ad) => ad.date === date)
         .reduce((sum, ad) => sum + (ad.request1 + ad.request2), 0);
-      return { name: date, profit: sales * 6000 , adsCost };
+      return { name: date, revenue: sales * 6000 , adsCost };
     });
   }
 
@@ -1062,40 +1062,40 @@ const Dashboard = () => {
     dailyChartDataNewTEAM = dateArray.map((date) => {
       const sales = filteredOrders
         .filter((order) => order.orderDate === date)
-        .reduce((sum, order) => sum + order.profit, 0);
+        .reduce((sum, order) => sum + order.revenue, 0);
       const adsCost = filteredAds
         .filter((ad) => ad.date === date)
         .reduce((sum, ad) => sum + (ad.request1 + ad.request2), 0);
-      return { name: date, profit: sales * 6000 , adsCost };
+      return { name: date, revenue: sales * 6000 , adsCost };
     });
   } else {
     const last30Days = getLast30Days();
     dailyChartDataNewTEAM = last30Days.map((date) => {
       const sales = orders
         .filter((order) => order.orderDate === date)
-        .reduce((sum, order) => sum + order.profit, 0);
+        .reduce((sum, order) => sum + order.revenue, 0);
       const adsCost = adsMoneyData
         .filter((ad) => ad.date === date)
         .reduce((sum, ad) => sum + (ad.request1 + ad.request2), 0);
-      return { name: date, profit: sales * 6000 , adsCost };
+      return { name: date, revenue: sales * 6000 , adsCost };
     });
   }
 
   // === Biểu đồ phần trăm doanh số theo team (PieChart) ===
-  const totalCompanyProfit = filteredOrders.reduce(
-    (sum, order) => sum + order.profit,
+  const totalCompanyRevenue = filteredOrders.reduce(
+    (sum, order) => sum + order.revenue,
     0
   );
-  const tcp = Number(totalCompanyProfit);
+  const tcp = Number(totalCompanyRevenue);
   const teamPieData = teamChartDataNew2.map((item) => ({
     ...item,
     percent:
-      totalCompanyProfit > 0 ? Number((item.profit / tcp) * 100).toFixed(2) : 0,
+      totalCompanyRevenue > 0 ? Number((item.revenue / tcp) * 100).toFixed(2) : 0,
   }));
 
   // Tính tổng doanh số của các thành viên trong team
-  const totalTeamProfit = employeeChartDataNewTEAM.reduce(
-    (sum, emp) => sum + emp.profit,
+  const totalTeamRevenue = employeeChartDataNewTEAM.reduce(
+    (sum, emp) => sum + emp.revenue,
     0
   );
 
@@ -1103,8 +1103,8 @@ const Dashboard = () => {
   const employeePieDataTEAM = employeeChartDataNewTEAM.map((emp) => ({
     ...emp,
     percent:
-      totalTeamProfit > 0
-        ? Number((emp.profit / totalTeamProfit) * 100).toFixed(2)
+      totalTeamRevenue > 0
+        ? Number((emp.revenue / totalTeamRevenue) * 100).toFixed(2)
         : 0,
   }));
 
@@ -1116,17 +1116,17 @@ const Dashboard = () => {
         emp.team_id === team.value &&
         emp.position !== "lead"
     );
-    const teamProfit = teamEmps.reduce((acc, emp) => {
+    const teamRevenue = teamEmps.reduce((acc, emp) => {
       const empSales = filteredOrders
         .filter(
           (order) =>
             order.mkt.trim().toLowerCase() === emp.name.trim().toLowerCase()
         )
-        .reduce((sum, order) => sum + order.profit, 0);
+        .reduce((sum, order) => sum + order.revenue, 0);
       return acc + empSales;
     }, 0);
-    const avgProfit = teamEmps.length > 0 ? teamProfit / teamEmps.length : 0;
-    return { name: team.label, profit: avgProfit * 6000  };
+    const avgRevenue = teamEmps.length > 0 ? teamRevenue / teamEmps.length : 0;
+    return { name: team.label, revenue: avgRevenue * 6000  };
   });
 
   // === Biểu đồ so sánh doanh số giữa leader và các nhân viên khác trong team (Grouped Bar Chart) ===
@@ -1145,7 +1145,7 @@ const Dashboard = () => {
           (order) =>
             order.mkt.trim().toLowerCase() === emp.name.trim().toLowerCase()
         )
-        .reduce((sum, order) => sum + order.profit, 0);
+        .reduce((sum, order) => sum + order.revenue, 0);
       return acc + empSales;
     }, 0);
     const adsCost = teamEmps.reduce((acc, emp) => {
@@ -1170,7 +1170,7 @@ const Dashboard = () => {
           (order) =>
             order.mkt.trim().toLowerCase() === emp.name.trim().toLowerCase()
         )
-        .reduce((sum, order) => sum + order.profit, 0);
+        .reduce((sum, order) => sum + order.revenue, 0);
       return acc + empSales;
     }, 0);
     const leaderSales =
@@ -1192,7 +1192,7 @@ const Dashboard = () => {
           order.mkt.trim().toLowerCase() === emp.name.trim().toLowerCase() &&
           order.paymentStatus === "ĐÃ THANH TOÁN"
       )
-      .reduce((sum, order) => sum + order.profit, 0);
+      .reduce((sum, order) => sum + order.revenue, 0);
     const unpaid = filteredOrders
       .filter(
         (order) =>
@@ -1200,7 +1200,7 @@ const Dashboard = () => {
           (order.paymentStatus === "CHƯA THANH TOÁN" ||
             order.paymentStatus === "")
       )
-      .reduce((sum, order) => sum + order.profit, 0);
+      .reduce((sum, order) => sum + order.revenue, 0);
     const total = paid + unpaid;
     const tienVND = total * exchangeRate ;
     const totalAds = filteredAds
@@ -1259,7 +1259,7 @@ const Dashboard = () => {
           orderDate < endOfToday
         );
       })
-      .reduce((sum, order) => sum + order.profit, 0);
+      .reduce((sum, order) => sum + order.revenue, 0);
 
     // Tính tổng quảng cáo (tổng request1 + request2) trong ngày hôm nay
     const totalAds1 = adsMoneyData
@@ -1292,7 +1292,7 @@ const Dashboard = () => {
           orderDate < endOfToday
         );
       })
-      .reduce((sum, order) => sum + order.profit, 0);
+      .reduce((sum, order) => sum + order.revenue, 0);
 
     // Tính tổng quảng cáo (tổng request1 + request2) trong ngày hôm nay
     const totalAds2 = adsMoneyData
@@ -1340,7 +1340,7 @@ const Dashboard = () => {
         orderDate < endOfToday
       );
     })
-    .reduce((sum, order) => sum + order.profit, 0);
+    .reduce((sum, order) => sum + order.revenue, 0);
 
   // 2️⃣ Doanh số từ đầu tháng đến nay
   const now = new Date();
@@ -1364,7 +1364,7 @@ const Dashboard = () => {
         orderDate <= endOfMonth
       );
     })
-    .reduce((sum, order) => sum + order.profit, 0);
+    .reduce((sum, order) => sum + order.revenue, 0);
 
   // 3️⃣ Chi phí ads trong tháng hiện tại (giữ nguyên)
   const adsThisMonth = adsMoneyData
@@ -1442,7 +1442,7 @@ const top5Employees2 = randomEmployee ? [randomEmployee] : [];
           order.mkt.trim().toLowerCase() === emp.name.trim().toLowerCase() &&
           order.paymentStatus === "ĐÃ THANH TOÁN"
       )
-      .reduce((sum, order) => sum + order.profit, 0);
+      .reduce((sum, order) => sum + order.revenue, 0);
 
     const unpaid = teamFilteredOrders
       .filter(
@@ -1451,7 +1451,7 @@ const top5Employees2 = randomEmployee ? [randomEmployee] : [];
           (order.paymentStatus === "CHƯA THANH TOÁN" ||
             order.paymentStatus === "")
       )
-      .reduce((sum, order) => sum + order.profit, 0);
+      .reduce((sum, order) => sum + order.revenue, 0);
 
     const total = paid + unpaid;
     const tienVND = total  * exchangeRate;
@@ -1576,7 +1576,7 @@ const top5Employees2 = randomEmployee ? [randomEmployee] : [];
             order.sale.trim().toLowerCase() === emp.name.trim().toLowerCase() &&
             order.paymentStatus === "ĐÃ THANH TOÁN"
         )
-        .reduce((sum, order) => sum + order.profit, 0);
+        .reduce((sum, order) => sum + order.revenue, 0);
       unpaid = filteredOrders
         .filter(
           (order) =>
@@ -1584,7 +1584,7 @@ const top5Employees2 = randomEmployee ? [randomEmployee] : [];
             (order.paymentStatus === "CHƯA THANH TOÁN" ||
               order.paymentStatus === "")
         )
-        .reduce((sum, order) => sum + order.profit, 0);
+        .reduce((sum, order) => sum + order.revenue, 0);
     } else if (emp.position === "salexuly") {
       paid = filteredOrders
         .filter(
@@ -1593,7 +1593,7 @@ const top5Employees2 = randomEmployee ? [randomEmployee] : [];
               emp.name.trim().toLowerCase() &&
             order.paymentStatus === "ĐÃ THANH TOÁN"
         )
-        .reduce((sum, order) => sum + order.profit, 0);
+        .reduce((sum, order) => sum + order.revenue, 0);
       unpaid = filteredOrders
         .filter(
           (order) =>
@@ -1602,7 +1602,7 @@ const top5Employees2 = randomEmployee ? [randomEmployee] : [];
             (order.paymentStatus === "CHƯA THANH TOÁN" ||
               order.paymentStatus === "")
         )
-        .reduce((sum, order) => sum + order.profit, 0);
+        .reduce((sum, order) => sum + order.revenue, 0);
     }
     const total = paid + unpaid;
     const tienVND = total * exchangeRate;
@@ -1627,7 +1627,7 @@ const top5Employees2 = randomEmployee ? [randomEmployee] : [];
             order.sale.trim().toLowerCase() === emp.name.trim().toLowerCase() &&
             order.paymentStatus === "ĐÃ THANH TOÁN"
         )
-        .reduce((sum, order) => sum + order.profit, 0);
+        .reduce((sum, order) => sum + order.revenue, 0);
       unpaid = filteredOrders
         .filter(
           (order) =>
@@ -1635,7 +1635,7 @@ const top5Employees2 = randomEmployee ? [randomEmployee] : [];
             (order.paymentStatus === "CHƯA THANH TOÁN" ||
               order.paymentStatus === "")
         )
-        .reduce((sum, order) => sum + order.profit, 0);
+        .reduce((sum, order) => sum + order.revenue, 0);
     } else if (emp.position === "salexuly") {
       paid = filteredOrders
         .filter(
@@ -1644,7 +1644,7 @@ const top5Employees2 = randomEmployee ? [randomEmployee] : [];
               emp.name.trim().toLowerCase() &&
             order.paymentStatus === "ĐÃ THANH TOÁN"
         )
-        .reduce((sum, order) => sum + order.profit, 0);
+        .reduce((sum, order) => sum + order.revenue, 0);
       unpaid = filteredOrders
         .filter(
           (order) =>
@@ -1653,7 +1653,7 @@ const top5Employees2 = randomEmployee ? [randomEmployee] : [];
             (order.paymentStatus === "CHƯA THANH TOÁN" ||
               order.paymentStatus === "")
         )
-        .reduce((sum, order) => sum + order.profit, 0);
+        .reduce((sum, order) => sum + order.revenue, 0);
     }
     const total = paid + unpaid;
     const tienVND = total * exchangeRate;
@@ -1678,7 +1678,7 @@ const top5Employees2 = randomEmployee ? [randomEmployee] : [];
             order.sale.trim().toLowerCase() === emp.name.trim().toLowerCase() &&
             order.paymentStatus === "ĐÃ THANH TOÁN"
         )
-        .reduce((sum, order) => sum + order.profit, 0);
+        .reduce((sum, order) => sum + order.revenue, 0);
       unpaid = filteredOrders
         .filter(
           (order) =>
@@ -1686,7 +1686,7 @@ const top5Employees2 = randomEmployee ? [randomEmployee] : [];
             (order.paymentStatus === "CHƯA THANH TOÁN" ||
               order.paymentStatus === "")
         )
-        .reduce((sum, order) => sum + order.profit, 0);
+        .reduce((sum, order) => sum + order.revenue, 0);
     } else if (emp.position === "salexuly") {
       paid = filteredOrders
         .filter(
@@ -1695,7 +1695,7 @@ const top5Employees2 = randomEmployee ? [randomEmployee] : [];
               emp.name.trim().toLowerCase() &&
             order.paymentStatus === "ĐÃ THANH TOÁN"
         )
-        .reduce((sum, order) => sum + order.profit, 0);
+        .reduce((sum, order) => sum + order.revenue, 0);
       unpaid = filteredOrders
         .filter(
           (order) =>
@@ -1704,7 +1704,7 @@ const top5Employees2 = randomEmployee ? [randomEmployee] : [];
             (order.paymentStatus === "CHƯA THANH TOÁN" ||
               order.paymentStatus === "")
         )
-        .reduce((sum, order) => sum + order.profit, 0);
+        .reduce((sum, order) => sum + order.revenue, 0);
     }
     const total = paid + unpaid;
     const tienVND = total * exchangeRate;
@@ -1729,7 +1729,7 @@ const top5Employees2 = randomEmployee ? [randomEmployee] : [];
             order.sale.trim().toLowerCase() === emp.name.trim().toLowerCase() &&
             order.paymentStatus === "ĐÃ THANH TOÁN"
         )
-        .reduce((sum, order) => sum + order.profit, 0);
+        .reduce((sum, order) => sum + order.revenue, 0);
       unpaid = filteredOrders
         .filter(
           (order) =>
@@ -1737,7 +1737,7 @@ const top5Employees2 = randomEmployee ? [randomEmployee] : [];
             (order.paymentStatus === "CHƯA THANH TOÁN" ||
               order.paymentStatus === "")
         )
-        .reduce((sum, order) => sum + order.profit, 0);
+        .reduce((sum, order) => sum + order.revenue, 0);
     } else if (emp.position === "salexuly") {
       paid = filteredOrders
         .filter(
@@ -1746,7 +1746,7 @@ const top5Employees2 = randomEmployee ? [randomEmployee] : [];
               emp.name.trim().toLowerCase() &&
             order.paymentStatus === "ĐÃ THANH TOÁN"
         )
-        .reduce((sum, order) => sum + order.profit, 0);
+        .reduce((sum, order) => sum + order.revenue, 0);
       unpaid = filteredOrders
         .filter(
           (order) =>
@@ -1755,7 +1755,7 @@ const top5Employees2 = randomEmployee ? [randomEmployee] : [];
             (order.paymentStatus === "CHƯA THANH TOÁN" ||
               order.paymentStatus === "")
         )
-        .reduce((sum, order) => sum + order.profit, 0);
+        .reduce((sum, order) => sum + order.revenue, 0);
     }
     const total = paid + unpaid;
     const tienVND = total * exchangeRate;
@@ -1879,13 +1879,13 @@ const top5Employees2 = randomEmployee ? [randomEmployee] : [];
         sodon += 1;
         if (emp) {
           if (emp.position_team2 === "onlinesang") {
-            sangSom += order.profit;
+            sangSom += order.revenue;
           }
           if (emp.position_team2 === "hanhchinh") {
-            hanhChinh += order.profit;
+            hanhChinh += order.revenue;
           }
           if (emp.position_team2 === "onlinetoi") {
-            toi += order.profit;
+            toi += order.revenue;
           }
         }
       }
@@ -2156,13 +2156,13 @@ const top5Employees2 = randomEmployee ? [randomEmployee] : [];
   // THỰC TẾ ĐÃ TRỪ 5
   const daThanhToanKW3 = filteredOrders
     .filter((order) => order.paymentStatus === "ĐÃ THANH TOÁN")
-    .reduce((sum, order) => sum + order.profit, 0);
+    .reduce((sum, order) => sum + order.revenue, 0);
   const chuaThanhToanKW3 = filteredOrders
     .filter(
       (order) =>
         order.paymentStatus === "CHƯA THANH TOÁN" || order.paymentStatus === ""
     )
-    .reduce((sum, order) => sum + order.profit, 0);
+    .reduce((sum, order) => sum + order.revenue, 0);
   const tongKW3 = (daThanhToanKW3 + chuaThanhToanKW3) ;
 
   const totalAdsKW3 = filteredAds.reduce(
@@ -2196,13 +2196,13 @@ const top5Employees2 = randomEmployee ? [randomEmployee] : [];
 
   const daThanhToanKWSALE = filteredOrders
     .filter((order) => order.paymentStatus === "ĐÃ THANH TOÁN")
-    .reduce((sum, order) => sum + order.profit, 0);
+    .reduce((sum, order) => sum + order.revenue, 0);
   const chuaThanhToanKWSALE = filteredOrders
     .filter(
       (order) =>
         order.paymentStatus === "CHƯA THANH TOÁN" || order.paymentStatus === ""
     )
-    .reduce((sum, order) => sum + order.profit, 0);
+    .reduce((sum, order) => sum + order.revenue, 0);
   const tongKWSALE = daThanhToanKWSALE + chuaThanhToanKWSALE;
   const thanhToanDatSALE =
     tongKWSALE > 0 ? (daThanhToanKWSALE / tongKWSALE) * 100 : 0;
@@ -2252,13 +2252,13 @@ const top5Employees2 = randomEmployee ? [randomEmployee] : [];
   // Bảng Tổng chỉ của các thành viên trong team
   const daThanhToanKW2 = filteredOrders
     .filter((order) => order.paymentStatus === "ĐÃ THANH TOÁN")
-    .reduce((sum, order) => sum + order.profit, 0);
+    .reduce((sum, order) => sum + order.revenue, 0);
   const chuaThanhToanKW2 = filteredOrders
     .filter(
       (order) =>
         order.paymentStatus === "CHƯA THANH TOÁN" || order.paymentStatus === ""
     )
-    .reduce((sum, order) => sum + order.profit, 0);
+    .reduce((sum, order) => sum + order.revenue, 0);
   const tongKW2 = daThanhToanKW2 + chuaThanhToanKW2;
   const thanhToanDat2 = tongKW2 > 0 ? (daThanhToanKW2 / tongKW2) * 100 : 0;
   const totalAdsKW2 = filteredAds.reduce(
@@ -2449,21 +2449,21 @@ const top5Employees2 = randomEmployee ? [randomEmployee] : [];
       ? [
           {
             name: "Sáng sớm",
-            profit: Number(((totalSangSom / totalSale) * 100).toFixed(2)),
+            revenue: Number(((totalSangSom / totalSale) * 100).toFixed(2)),
           },
           {
             name: "Hành chính",
-            profit: Number(((totalHanhChinh / totalSale) * 100).toFixed(2)),
+            revenue: Number(((totalHanhChinh / totalSale) * 100).toFixed(2)),
           },
           {
             name: "Tối",
-            profit: Number(((totalToi / totalSale) * 100).toFixed(2)),
+            revenue: Number(((totalToi / totalSale) * 100).toFixed(2)),
           },
         ]
       : [
-          { name: "Sáng sớm", profit: 0 },
-          { name: "Hành chính", profit: 0 },
-          { name: "Tối", profit: 0 },
+          { name: "Sáng sớm", revenue: 0 },
+          { name: "Hành chính", revenue: 0 },
+          { name: "Tối", revenue: 0 },
         ];
 
   // Tạo ngày hôm nay
