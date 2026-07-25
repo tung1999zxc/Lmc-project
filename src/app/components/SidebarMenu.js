@@ -948,19 +948,17 @@ const SidebarMenu = ({ isOpen, onToggle }) => {
 
   const getProductMenu = () => {
     if (isSale) return [];
-    if (isSales)
-      return [productChildren.kr, productChildren.jp, productChildren.tw];
-    if (isMarketing) return [productChildren[userCountryKey]];
+    if (isSales) return [productChildren.kr, productChildren.jp];
+    if (isMarketing)
+      return userCountryKey === "tw" ? [] : [productChildren[userCountryKey]];
     if (isAdmin)
       return isTranNgocLam
         ? [productChildren.kr, productChildren.jp]
-        : [productChildren.kr, productChildren.jp, productChildren.tw];
+        : [productChildren.kr, productChildren.jp];
     if (isKRTW) return [productChildren.kr];
     if (isJP)
-      return isTranNgocLam
-        ? [productChildren.jp]
-        : [productChildren.jp, productChildren.tw];
-    if (isTW) return [productChildren.tw];
+      return isTranNgocLam ? [productChildren.jp] : [productChildren.jp];
+    if (isTW) return [];
     return [
       {
         key: "sub4",

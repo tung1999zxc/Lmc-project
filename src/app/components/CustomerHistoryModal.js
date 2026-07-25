@@ -204,7 +204,7 @@ const CustomerHistoryModal = ({
       dataIndex: "customerName",
       key: "customerName",
     },
-    ...(true
+    ...(currentUser.position_team !== "mkt"
       ? [
           {
             title: "TÊN PAGE",

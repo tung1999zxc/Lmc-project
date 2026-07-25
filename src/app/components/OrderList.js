@@ -2420,15 +2420,14 @@ const OrderList = () => {
       sorter: (a, b) =>
         (parseFloat(a.revenue) || 0) - (parseFloat(b.revenue) || 0),
       render: (value) => (
-        <span className="revenue-cell">
+        <span className="revenue-cell revenue-cell-emphasis">
           {value ? Number(value).toLocaleString() : "0"}
         </span>
       ),
     },
     ...(currentUser.position !== "salexuly" &&
     currentUser.position !== "salenhapdon" &&
-    currentUser.position !== "leadSALE" &&
-    currentUser.position !== "managerSALE"
+    currentUser.position !== "leadSALE" 
       ? [
           {
             title: (
@@ -2446,7 +2445,7 @@ const OrderList = () => {
             sorter: (a, b) =>
               (parseFloat(a.revenuemkt) || 0) - (parseFloat(b.revenuemkt) || 0),
             render: (value) => (
-              <span className="revenue-cell">
+              <span className="revenue-cell revenue-cell-emphasis">
                 {value ? Number(value).toLocaleString() : "0"}
               </span>
             ),
@@ -2470,7 +2469,9 @@ const OrderList = () => {
       render: (value) => {
         const numValue = parseFloat(value) || 0;
         return (
-          <span className={`revenue-cell ${numValue < 0 ? "negative" : ""}`}>
+          <span
+            className={`revenue-cell revenue-cell-emphasis ${numValue < 0 ? "negative" : ""}`}
+          >
             {numValue.toLocaleString()}
           </span>
         );
@@ -4413,7 +4414,7 @@ const OrderList = () => {
                     />
                   </span>
                 </div>
-                {true && (
+                {currentUser.position !== "salenhapdon" && (
                   <div className="order-summary-pill order-summary-pill-wide">
                     <span className="order-summary-icon">💰</span>
                     <span className="order-summary-content">
