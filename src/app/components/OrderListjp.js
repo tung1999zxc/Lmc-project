@@ -3882,7 +3882,6 @@ const OrderListjp = () => {
                   allowClear
                 >
                   <Option value="SON">TEAM SƠN</Option>
-                  <Option value="QUAN">TEAM QUÂN</Option>
                   <Option value="LE">TEAM LẺ</Option>
                   <Option value="TUANANH">TEAM TUẤN ANH</Option>
                   <Option value="DIEN">TEAM DIỆN</Option>

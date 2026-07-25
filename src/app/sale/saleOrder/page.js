@@ -274,18 +274,18 @@ const computeAverageClosingRate = (employeeName) => {
       key: "closedOrders",
       width: 130,
       align: "center",
-      render: (val) => (
-        <div style={{
-          background: "#f6ffed",
-          padding: "4px 12px",
-          borderRadius: 6,
-          textAlign: "center",
-          fontWeight: 600,
-          color: "#52c41a"
-        }}>
-          {val}
-        </div>
-      ),
+      render: (_, record) => {
+        const totalSalesForSelectedDate = computeTotalSalesNumberForDate(
+          record.date,
+          record.employeeName
+        );
+        return (
+          <span style={{ fontWeight: 700, color: "#52c41a", fontSize: 14 }}>
+            {totalSalesForSelectedDate}
+          </span>
+        );
+      },
+     
     },
     {
       title: "Mess tiếp thị lại",

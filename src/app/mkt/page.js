@@ -133,13 +133,7 @@ const Dashboard = () => {
         .filter((employee) => employee.team_id === "SON")
         .map((employee) => employee.employee_code),
     },
-    {
-      id: 2,
-      name: `TEAM QUÂN `,
-      members: safeEmployees
-        .filter((employee) => employee.team_id === "QUAN")
-        .map((employee) => employee.employee_code),
-    },
+  
     // {
     //   id: 3,
     //   name: `TEAM CHI `,

@@ -2123,8 +2123,7 @@ const OrderList = () => {
     },
     ...(currentUser.position !== "salexuly" &&
     currentUser.position !== "salenhapdon" &&
-    currentUser.position !== "leadSALE" &&
-    currentUser.position !== "managerSALE"
+    currentUser.position !== "leadSALE" 
       ? [
           {
             title: (

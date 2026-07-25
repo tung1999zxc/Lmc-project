@@ -51,11 +51,7 @@ const Dashboard = () => {
     }
   }, []);
 
-  const employees = employees2.filter(
-    (emp) =>
-      (emp.quocgia || "kr") === "jp"
-      
-  );
+  const employees = employees2.filter((emp) => (emp.quocgia || "kr") === "jp");
   const fetchOrders = async () => {
     try {
       let url = "/api/jp/orders2";
@@ -159,7 +155,7 @@ const Dashboard = () => {
           </BarChart>
         );
       }),
-    { ssr: false, loading: () => <p>Loading Chart...</p> }
+    { ssr: false, loading: () => <p>Loading Chart...</p> },
   );
 
   // Component biểu đồ Pie (Recharts)
@@ -168,7 +164,6 @@ const Dashboard = () => {
       Promise.resolve(({ data }) => {
         const { PieChart, Pie, Cell, Tooltip, Legend } = require("recharts");
         const COLORS = [
-          
           " #FFBB28",
           "#0f9714ff",
           "#c6471dff",
@@ -201,7 +196,7 @@ const Dashboard = () => {
           </PieChart>
         );
       }),
-    { ssr: false, loading: () => <p>Loading Pie Chart...</p> }
+    { ssr: false, loading: () => <p>Loading Pie Chart...</p> },
   );
   const formatEmployeeName2 = (fullName) => {
     const parts = fullName.trim().split(/\s+/);
@@ -412,7 +407,7 @@ const Dashboard = () => {
           </ResponsiveContainer>
         );
       }),
-    { ssr: false, loading: () => <p>Loading Grouped Chart...</p> }
+    { ssr: false, loading: () => <p>Loading Grouped Chart...</p> },
   );
   const GroupedDoubleBarChartComponentTEAM = dynamic(
     () =>
@@ -460,7 +455,7 @@ const Dashboard = () => {
           </ResponsiveContainer>
         );
       }),
-    { ssr: false, loading: () => <p>Loading Grouped Chart...</p> }
+    { ssr: false, loading: () => <p>Loading Grouped Chart...</p> },
   );
   const GroupedDoubleBarChartComponent4 = dynamic(
     () =>
@@ -499,7 +494,7 @@ const Dashboard = () => {
           </BarChart>
         );
       }),
-    { ssr: false, loading: () => <p>Loading Grouped Chart...</p> }
+    { ssr: false, loading: () => <p>Loading Grouped Chart...</p> },
   );
   const GroupedDoubleBarChartComponent3 = dynamic(
     () =>
@@ -543,7 +538,7 @@ const Dashboard = () => {
           </BarChart>
         );
       }),
-    { ssr: false, loading: () => <p>Loading Grouped Chart...</p> }
+    { ssr: false, loading: () => <p>Loading Grouped Chart...</p> },
   );
 
   const [chartWidth, setChartWidth] = useState(800); // giá trị mặc định
@@ -605,7 +600,7 @@ const Dashboard = () => {
           </ResponsiveContainer>
         );
       }),
-    { ssr: false, loading: () => <p>Loading Grouped Chart...</p> }
+    { ssr: false, loading: () => <p>Loading Grouped Chart...</p> },
   );
 
   // Component biểu đồ nhóm so sánh Leader vs Others (như đã có)
@@ -652,7 +647,7 @@ const Dashboard = () => {
           </BarChart>
         );
       }),
-    { ssr: false, loading: () => <p>Loading Grouped Chart...</p> }
+    { ssr: false, loading: () => <p>Loading Grouped Chart...</p> },
   );
 
   // Hàm lọc đơn hàng theo preset (áp dụng cho orders và adsMoney)
@@ -670,7 +665,7 @@ const Dashboard = () => {
           23,
           59,
           59,
-          999
+          999,
         );
         break;
       case "yesterday":
@@ -683,7 +678,7 @@ const Dashboard = () => {
           23,
           59,
           59,
-          999
+          999,
         );
         break;
       case "week":
@@ -696,7 +691,7 @@ const Dashboard = () => {
           23,
           59,
           59,
-          999
+          999,
         );
         break;
       case "currentMonth":
@@ -709,7 +704,7 @@ const Dashboard = () => {
           23,
           59,
           59,
-          999
+          999,
         );
         break;
       case "lastMonth":
@@ -725,7 +720,7 @@ const Dashboard = () => {
           23,
           59,
           59,
-          999
+          999,
         );
         break;
       case "threeMonthsAgo":
@@ -737,7 +732,7 @@ const Dashboard = () => {
           23,
           59,
           59,
-          999
+          999,
         );
         break;
       default:
@@ -785,7 +780,7 @@ const Dashboard = () => {
     { label: "TEAM PHONG", value: "PHONG" },
     { label: "TEAM TUẤN ANH", value: "TUANANH" },
     { label: "TEAM DIỆN", value: "DIEN" },
-     { label: "TEAM HIẾU", value: "HIEU" },
+    { label: "TEAM HIẾU", value: "HIEU" },
   ];
 
   // Dữ liệu nhân viên (mẫu)
@@ -805,7 +800,7 @@ const Dashboard = () => {
   if (selectedPreset) {
     filteredAds = filterByPreset(
       adsMoneyData.map((ad) => ({ ...ad, orderDate: ad.date })),
-      selectedPreset
+      selectedPreset,
     ).map((ad) => ({ ...ad, date: ad.orderDate }));
   } else if (selectedDate) {
     filteredAds = adsMoneyData.filter((ad) => ad.date === selectedDate);
@@ -818,15 +813,15 @@ const Dashboard = () => {
     const sales = filteredOrders
       .filter(
         (order) =>
-          order.mkt.trim().toLowerCase() === emp.name.trim().toLowerCase()
+          order.mkt.trim().toLowerCase() === emp.name.trim().toLowerCase(),
       )
       .reduce((sum, order) => sum + order.revenue, 0);
     const adsCost = filteredAds
       .filter(
-        (ad) => ad.name.trim().toLowerCase() === emp.name.trim().toLowerCase()
+        (ad) => ad.name.trim().toLowerCase() === emp.name.trim().toLowerCase(),
       )
       .reduce((sum, ad) => sum + (ad.request1 + ad.request2), 0);
-    return { name: emp.name, revenue: sales * 6000 , adsCost };
+    return { name: emp.name, revenue: sales * 6000, adsCost };
   });
 
   const teamEmployees = mktEmployees.filter(
@@ -835,22 +830,22 @@ const Dashboard = () => {
       (currentUser.team_id === "SON" &&
         (emp.name.trim() === "Nguyễn Thị Xuân Diệu" ||
           emp.name.trim() === "Nguyễn Bá Quân")) ||
-      (currentUser.team_id === "PHONG" && emp.name.trim() === "Bùi Văn Phi")
+      (currentUser.team_id === "PHONG" && emp.name.trim() === "Bùi Văn Phi"),
   );
 
   const employeeChartDataNewTEAM = teamEmployees.map((emp) => {
     const sales = filteredOrders
       .filter(
         (order) =>
-          order.mkt.trim().toLowerCase() === emp.name.trim().toLowerCase()
+          order.mkt.trim().toLowerCase() === emp.name.trim().toLowerCase(),
       )
       .reduce((sum, order) => sum + order.revenue, 0);
     const adsCost = filteredAds
       .filter(
-        (ad) => ad.name.trim().toLowerCase() === emp.name.trim().toLowerCase()
+        (ad) => ad.name.trim().toLowerCase() === emp.name.trim().toLowerCase(),
       )
       .reduce((sum, ad) => sum + (ad.request1 + ad.request2), 0);
-    return { name: emp.name, revenue: sales * 6000 , adsCost };
+    return { name: emp.name, revenue: sales * 6000, adsCost };
   });
 
   const saleEmployees = employees.filter((emp) => emp.position_team === "sale");
@@ -858,23 +853,23 @@ const Dashboard = () => {
     (emp) =>
       emp.position === "salenhapdon" ||
       emp.position === "salexuly" ||
-      emp.position === "salefull"
+      emp.position === "salefull",
   );
   const saleEmployeesND = employees.filter(
-    (emp) => emp.position_team === "sale" && emp.position === "salenhapdon"
+    (emp) => emp.position_team === "sale" && emp.position === "salenhapdon",
   );
   const saleEmployeesOL = employees.filter(
-    (emp) => emp.position_team === "sale" && emp.position === "salefull" 
+    (emp) => emp.position_team === "sale" && emp.position === "salefull",
   );
   const saleEmployeesXL = employees.filter(
-    (emp) => emp.position_team === "sale" && emp.position === "salexuly"
+    (emp) => emp.position_team === "sale" && emp.position === "salexuly",
   );
   const employeeChartDataNewsale = saleEmployees2.map((emp) => {
     const sales = filteredOrders
       .filter(
         (order) =>
           order.sale.trim().toLowerCase() === emp.name.trim().toLowerCase() ||
-          order.salexuly.trim().toLowerCase() === emp.name.trim().toLowerCase()
+          order.salexuly.trim().toLowerCase() === emp.name.trim().toLowerCase(),
       )
       .reduce((sum, order) => sum + order.revenue, 0);
 
@@ -893,13 +888,13 @@ const Dashboard = () => {
   // // === Biểu đồ doanh số theo team (Grouped Double Bar Chart) ===
   const teamChartDataNew2 = teams.map((team) => {
     const teamEmps = employees.filter(
-      (emp) => emp.position_team === "mkt" && emp.team_id === team.value
+      (emp) => emp.position_team === "mkt" && emp.team_id === team.value,
     );
     const sales = teamEmps.reduce((acc, emp) => {
       const empSales = filteredOrders
         .filter(
           (order) =>
-            order.mkt.trim().toLowerCase() === emp.name.trim().toLowerCase()
+            order.mkt.trim().toLowerCase() === emp.name.trim().toLowerCase(),
         )
         .reduce((sum, order) => sum + order.revenue, 0);
       return acc + empSales;
@@ -907,12 +902,13 @@ const Dashboard = () => {
     const adsCost = teamEmps.reduce((acc, emp) => {
       const empAds = filteredAds
         .filter(
-          (ad) => ad.name.trim().toLowerCase() === emp.name.trim().toLowerCase()
+          (ad) =>
+            ad.name.trim().toLowerCase() === emp.name.trim().toLowerCase(),
         )
         .reduce((sum, ad) => sum + (ad.request1 + ad.request2), 0);
       return acc + empAds;
     }, 0);
-    return { name: team.label, revenue: sales * 6000 , adsCost };
+    return { name: team.label, revenue: sales * 6000, adsCost };
   });
   // const teamChartDataNew = teams.map(team => {
   //   const teamEmps = employees.filter(emp => emp.position_team === "mkt" && emp.team_id === team.value);
@@ -933,20 +929,20 @@ const Dashboard = () => {
 
   const teamChartDataNew = teams2.map((team) => {
     const teamEmps = employees.filter(
-      (emp) => emp.position_team === "mkt" && emp.team_id === team.value
+      (emp) => emp.position_team === "mkt" && emp.team_id === team.value,
     );
     const teamEmps2 = employees.filter(
       (emp) =>
         emp.position_team === "mkt" &&
         emp.team_id === team.value &&
         emp.position !== "lead" &&
-        emp.position !== "managerMKT"
+        emp.position !== "managerMKT",
     );
     const sales = teamEmps.reduce((acc, emp) => {
       const empSales = filteredOrders
         .filter(
           (order) =>
-            order.mkt.trim().toLowerCase() === emp.name.trim().toLowerCase()
+            order.mkt.trim().toLowerCase() === emp.name.trim().toLowerCase(),
         )
         .reduce((sum, order) => sum + order.revenue, 0);
       return acc + empSales;
@@ -955,7 +951,7 @@ const Dashboard = () => {
       const empSales = filteredOrders
         .filter(
           (order) =>
-            order.mkt.trim().toLowerCase() === emp.name.trim().toLowerCase()
+            order.mkt.trim().toLowerCase() === emp.name.trim().toLowerCase(),
         )
         .reduce((sum, order) => sum + order.revenue, 0);
       return acc + empSales;
@@ -993,7 +989,7 @@ const Dashboard = () => {
       const adsCost = filteredAds
         .filter((ad) => ad.date === date)
         .reduce((sum, ad) => sum + (ad.request1 + ad.request2), 0);
-      return { name: date, revenue: sales * 6000 , adsCost };
+      return { name: date, revenue: sales * 6000, adsCost };
     });
   } else {
     const last30Days = getLast30Days();
@@ -1004,7 +1000,7 @@ const Dashboard = () => {
       const adsCost = adsMoneyData
         .filter((ad) => ad.date === date)
         .reduce((sum, ad) => sum + (ad.request1 + ad.request2), 0);
-      return { name: date, revenue: sales * 6000 , adsCost };
+      return { name: date, revenue: sales * 6000, adsCost };
     });
   }
 
@@ -1026,19 +1022,19 @@ const Dashboard = () => {
             emp.position_team === "mkt") ||
           (currentUser.team_id === "SON" &&
             ["Nguyễn Thị Xuân Diệu", "Nguyễn Bá Quân"].includes(
-              (emp.name || "").trim()
+              (emp.name || "").trim(),
             )) ||
           (currentUser.team_id === "PHONG" &&
-            ["Bùi Văn Phi"].includes((emp.name || "").trim()))
+            ["Bùi Văn Phi"].includes((emp.name || "").trim())),
       )
       .map((emp) => (emp.name || "").trim().toLowerCase());
 
     // Lọc đơn hàng và ads chỉ thuộc team đó
     filteredOrders = filteredOrders.filter((order) =>
-      teamEmployeeNames.includes(order.mkt.trim().toLowerCase())
+      teamEmployeeNames.includes(order.mkt.trim().toLowerCase()),
     );
     filteredAds = filteredAds.filter((ad) =>
-      teamEmployeeNames.includes(ad.name.trim().toLowerCase())
+      teamEmployeeNames.includes(ad.name.trim().toLowerCase()),
     );
   }
 
@@ -1066,7 +1062,7 @@ const Dashboard = () => {
       const adsCost = filteredAds
         .filter((ad) => ad.date === date)
         .reduce((sum, ad) => sum + (ad.request1 + ad.request2), 0);
-      return { name: date, revenue: sales * 6000 , adsCost };
+      return { name: date, revenue: sales * 6000, adsCost };
     });
   } else {
     const last30Days = getLast30Days();
@@ -1077,26 +1073,28 @@ const Dashboard = () => {
       const adsCost = adsMoneyData
         .filter((ad) => ad.date === date)
         .reduce((sum, ad) => sum + (ad.request1 + ad.request2), 0);
-      return { name: date, revenue: sales * 6000 , adsCost };
+      return { name: date, revenue: sales * 6000, adsCost };
     });
   }
 
   // === Biểu đồ phần trăm doanh số theo team (PieChart) ===
   const totalCompanyRevenue = filteredOrders.reduce(
     (sum, order) => sum + order.revenue,
-    0
+    0,
   );
   const tcp = Number(totalCompanyRevenue);
   const teamPieData = teamChartDataNew2.map((item) => ({
     ...item,
     percent:
-      totalCompanyRevenue > 0 ? Number((item.revenue / tcp) * 100).toFixed(2) : 0,
+      totalCompanyRevenue > 0
+        ? Number((item.revenue / tcp) * 100).toFixed(2)
+        : 0,
   }));
 
   // Tính tổng doanh số của các thành viên trong team
   const totalTeamRevenue = employeeChartDataNewTEAM.reduce(
     (sum, emp) => sum + emp.revenue,
-    0
+    0,
   );
 
   // Tạo dữ liệu cho PieChart dựa trên doanh số của từng thành viên
@@ -1114,36 +1112,36 @@ const Dashboard = () => {
       (emp) =>
         emp.position_team === "mkt" &&
         emp.team_id === team.value &&
-        emp.position !== "lead"
+        emp.position !== "lead",
     );
     const teamRevenue = teamEmps.reduce((acc, emp) => {
       const empSales = filteredOrders
         .filter(
           (order) =>
-            order.mkt.trim().toLowerCase() === emp.name.trim().toLowerCase()
+            order.mkt.trim().toLowerCase() === emp.name.trim().toLowerCase(),
         )
         .reduce((sum, order) => sum + order.revenue, 0);
       return acc + empSales;
     }, 0);
     const avgRevenue = teamEmps.length > 0 ? teamRevenue / teamEmps.length : 0;
-    return { name: team.label, revenue: avgRevenue * 6000  };
+    return { name: team.label, revenue: avgRevenue * 6000 };
   });
 
   // === Biểu đồ so sánh doanh số giữa leader và các nhân viên khác trong team (Grouped Bar Chart) ===
   // Công thức: leaderPercent = (leaderSales / othersSales) * 100
   const leaderComparisonChartData = teams.map((team) => {
     const teamEmps = employees.filter(
-      (emp) => emp.position_team === "mkt" && emp.team_id === team.value
+      (emp) => emp.position_team === "mkt" && emp.team_id === team.value,
     );
     const othersEmps = teamEmps.filter(
-      (emp) => emp.position !== "lead" && emp.position !== "managerMKT"
+      (emp) => emp.position !== "lead" && emp.position !== "managerMKT",
     );
 
     const leaderSales0 = teamEmps.reduce((acc, emp) => {
       const empSales = filteredOrders
         .filter(
           (order) =>
-            order.mkt.trim().toLowerCase() === emp.name.trim().toLowerCase()
+            order.mkt.trim().toLowerCase() === emp.name.trim().toLowerCase(),
         )
         .reduce((sum, order) => sum + order.revenue, 0);
       return acc + empSales;
@@ -1151,7 +1149,8 @@ const Dashboard = () => {
     const adsCost = teamEmps.reduce((acc, emp) => {
       const empAds = filteredAds
         .filter(
-          (ad) => ad.name.trim().toLowerCase() === emp.name.trim().toLowerCase()
+          (ad) =>
+            ad.name.trim().toLowerCase() === emp.name.trim().toLowerCase(),
         )
         .reduce((sum, ad) => sum + (ad.request1 + ad.request2), 0);
       return acc + empAds;
@@ -1159,7 +1158,8 @@ const Dashboard = () => {
     const adsCost2 = othersEmps.reduce((acc, emp) => {
       const empAds = filteredAds
         .filter(
-          (ad) => ad.name.trim().toLowerCase() === emp.name.trim().toLowerCase()
+          (ad) =>
+            ad.name.trim().toLowerCase() === emp.name.trim().toLowerCase(),
         )
         .reduce((sum, ad) => sum + (ad.request1 + ad.request2), 0);
       return acc + empAds;
@@ -1168,7 +1168,7 @@ const Dashboard = () => {
       const empSales = filteredOrders
         .filter(
           (order) =>
-            order.mkt.trim().toLowerCase() === emp.name.trim().toLowerCase()
+            order.mkt.trim().toLowerCase() === emp.name.trim().toLowerCase(),
         )
         .reduce((sum, order) => sum + order.revenue, 0);
       return acc + empSales;
@@ -1190,7 +1190,7 @@ const Dashboard = () => {
       .filter(
         (order) =>
           order.mkt.trim().toLowerCase() === emp.name.trim().toLowerCase() &&
-          order.paymentStatus === "ĐÃ THANH TOÁN"
+          order.paymentStatus === "ĐÃ THANH TOÁN",
       )
       .reduce((sum, order) => sum + order.revenue, 0);
     const unpaid = filteredOrders
@@ -1198,14 +1198,14 @@ const Dashboard = () => {
         (order) =>
           order.mkt.trim().toLowerCase() === emp.name.trim().toLowerCase() &&
           (order.paymentStatus === "CHƯA THANH TOÁN" ||
-            order.paymentStatus === "")
+            order.paymentStatus === ""),
       )
       .reduce((sum, order) => sum + order.revenue, 0);
     const total = paid + unpaid;
-    const tienVND = total * exchangeRate ;
+    const tienVND = total * exchangeRate;
     const totalAds = filteredAds
       .filter(
-        (ad) => ad.name.trim().toLowerCase() === emp.name.trim().toLowerCase()
+        (ad) => ad.name.trim().toLowerCase() === emp.name.trim().toLowerCase(),
       )
       .reduce((sum, ad) => sum + (ad.request1 + ad.request2), 0);
     const adsPercent = tienVND
@@ -1229,23 +1229,23 @@ const Dashboard = () => {
   const startOfToday = new Date(
     today2.getFullYear(),
     today2.getMonth(),
-    today2.getDate()
+    today2.getDate(),
   );
   const endOfToday = new Date(
     today2.getFullYear(),
     today2.getMonth(),
-    today2.getDate() + 1
+    today2.getDate() + 1,
   );
   const today3 = new Date();
   const startOfToday3 = new Date(
     today3.getFullYear(),
     today3.getMonth(),
-    today3.getDate() - 3
+    today3.getDate() - 3,
   );
   const endOfToday3 = new Date(
     today3.getFullYear(),
     today3.getMonth(),
-    today3.getDate() - 2
+    today3.getDate() - 2,
   );
 
   const marketingReportData1 = mktEmployees.map((emp, index) => {
@@ -1322,82 +1322,86 @@ const Dashboard = () => {
     // Lấy doanh số của nhân viên thứ 5 làm mức cắt
     const cutoffValue = sortedEmployees[4].total2;
     top5CriticismEmployees = sortedEmployees.filter(
-      (emp) => emp.total2 <= cutoffValue
+      (emp) => emp.total2 <= cutoffValue,
     );
   }
 
   // Tạo marketingReportData1 mới đúng điều kiện
- const marketingReportData3 = mktEmployees.map((emp, index) => {
-  const nameLC = emp.name.trim().toLowerCase();
+  const marketingReportData3 = mktEmployees.map((emp, index) => {
+    const nameLC = emp.name.trim().toLowerCase();
 
-  // 1️⃣ Doanh số hôm nay
-  const totalToday = orders
-    .filter((order) => {
-      const orderDate = new Date(order.createdAt);
-      return (
-        order.mkt.trim().toLowerCase() === nameLC &&
-        orderDate >= startOfToday &&
-        orderDate < endOfToday
-      );
-    })
-    .reduce((sum, order) => sum + order.revenue, 0);
+    // 1️⃣ Doanh số hôm nay
+    const totalToday = orders
+      .filter((order) => {
+        const orderDate = new Date(order.createdAt);
+        return (
+          order.mkt.trim().toLowerCase() === nameLC &&
+          orderDate >= startOfToday &&
+          orderDate < endOfToday
+        );
+      })
+      .reduce((sum, order) => sum + order.revenue, 0);
 
-  // 2️⃣ Doanh số từ đầu tháng đến nay
-  const now = new Date();
-  const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-  const endOfMonth = new Date(
-    now.getFullYear(),
-    now.getMonth() + 1,
-    0,
-    23,
-    59,
-    59,
-    999
+    // 2️⃣ Doanh số từ đầu tháng đến nay
+    const now = new Date();
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    const endOfMonth = new Date(
+      now.getFullYear(),
+      now.getMonth() + 1,
+      0,
+      23,
+      59,
+      59,
+      999,
+    );
+
+    const totalMonth = orders
+      .filter((order) => {
+        const orderDate = new Date(order.createdAt);
+        return (
+          order.mkt.trim().toLowerCase() === nameLC &&
+          orderDate >= startOfMonth &&
+          orderDate <= endOfMonth
+        );
+      })
+      .reduce((sum, order) => sum + order.revenue, 0);
+
+    // 3️⃣ Chi phí ads trong tháng hiện tại (giữ nguyên)
+    const adsThisMonth = adsMoneyData
+      .filter((ad) => {
+        const adDate = new Date(ad.createdAt);
+        return (
+          ad.name.trim().toLowerCase() === nameLC &&
+          adDate >= startOfMonth &&
+          adDate <= endOfMonth
+        );
+      })
+      .reduce((sum, ad) => sum + (ad.request1 + ad.request2), 0);
+
+    return { key: index, name: emp.name, totalToday, totalMonth, adsThisMonth };
+  });
+
+  // 🧩 Chọn người có doanh số thấp nhất từ đầu tháng
+  const warningEmployeesList = marketingReportData3.filter(
+    (emp) => emp.adsThisMonth > 0,
   );
 
-  const totalMonth = orders
-    .filter((order) => {
-      const orderDate = new Date(order.createdAt);
-      return (
-        order.mkt.trim().toLowerCase() === nameLC &&
-        orderDate >= startOfMonth &&
-        orderDate <= endOfMonth
-      );
-    })
-    .reduce((sum, order) => sum + order.revenue, 0);
+  const minMonthSales = Math.min(
+    ...warningEmployeesList.map((e) => e.totalMonth),
+  );
+  const lowestMonthEmployees = warningEmployeesList.filter(
+    (e) => e.totalMonth === minMonthSales,
+  );
 
-  // 3️⃣ Chi phí ads trong tháng hiện tại (giữ nguyên)
-  const adsThisMonth = adsMoneyData
-    .filter((ad) => {
-      const adDate = new Date(ad.createdAt);
-      return (
-        ad.name.trim().toLowerCase() === nameLC &&
-        adDate >= startOfMonth &&
-        adDate <= endOfMonth
-      );
-    })
-    .reduce((sum, ad) => sum + (ad.request1 + ad.request2), 0);
+  // Nếu nhiều người cùng doanh số thấp nhất → chọn ngẫu nhiên 1 người
+  const randomEmployee =
+    lowestMonthEmployees.length > 0
+      ? lowestMonthEmployees[
+          Math.floor(Math.random() * lowestMonthEmployees.length)
+        ]
+      : null;
 
-  return { key: index, name: emp.name, totalToday, totalMonth, adsThisMonth };
-});
-
-// 🧩 Chọn người có doanh số thấp nhất từ đầu tháng
-const warningEmployeesList = marketingReportData3.filter(
-  (emp) => emp.adsThisMonth > 0
-);
-
-const minMonthSales = Math.min(...warningEmployeesList.map(e => e.totalMonth));
-const lowestMonthEmployees = warningEmployeesList.filter(
-  e => e.totalMonth === minMonthSales
-);
-
-// Nếu nhiều người cùng doanh số thấp nhất → chọn ngẫu nhiên 1 người
-const randomEmployee =
-  lowestMonthEmployees.length > 0
-    ? lowestMonthEmployees[Math.floor(Math.random() * lowestMonthEmployees.length)]
-    : null;
-
-const top5Employees2 = randomEmployee ? [randomEmployee] : [];
+  const top5Employees2 = randomEmployee ? [randomEmployee] : [];
 
   // Lọc chỉ những người có ads tháng này > 0
   const top5Employees = marketingReportData3
@@ -1405,7 +1409,6 @@ const top5Employees2 = randomEmployee ? [randomEmployee] : [];
     .sort((a, b) => b.totalToday - a.totalToday)
     .slice(0, 2);
   // Lọc ra nhân viên có chi phí ads tháng này > 0
-
 
   const top1Employees = marketingReportData3
     .filter((emp) => emp.adsThisMonth > 0)
@@ -1419,20 +1422,20 @@ const top5Employees2 = randomEmployee ? [randomEmployee] : [];
       emp.team_id === currentUser.team_id ||
       (currentUser.team_id === "SON" &&
         ["Nguyễn Thị Xuân Diệu", "Nguyễn Bá Quân"].includes(emp.name.trim())) ||
-      (currentUser.team_id === "PHONG" && emp.name.trim() === "Bùi Văn Phi")
+      (currentUser.team_id === "PHONG" && emp.name.trim() === "Bùi Văn Phi"),
   );
 
   // Lọc riêng dữ liệu đơn hàng và ads của team (KHÔNG ghi đè biến gốc)
   const teamEmployeeNames = teamMktEmployees.map((e) =>
-    e.name.trim().toLowerCase()
+    e.name.trim().toLowerCase(),
   );
 
   const teamFilteredOrders = filteredOrders.filter((order) =>
-    teamEmployeeNames.includes(order.mkt.trim().toLowerCase())
+    teamEmployeeNames.includes(order.mkt.trim().toLowerCase()),
   );
 
   const teamFilteredAds = filteredAds.filter((ad) =>
-    teamEmployeeNames.includes(ad.name.trim().toLowerCase())
+    teamEmployeeNames.includes(ad.name.trim().toLowerCase()),
   );
 
   const marketingReportDataTEAM = teamMktEmployees.map((emp, index) => {
@@ -1440,7 +1443,7 @@ const top5Employees2 = randomEmployee ? [randomEmployee] : [];
       .filter(
         (order) =>
           order.mkt.trim().toLowerCase() === emp.name.trim().toLowerCase() &&
-          order.paymentStatus === "ĐÃ THANH TOÁN"
+          order.paymentStatus === "ĐÃ THANH TOÁN",
       )
       .reduce((sum, order) => sum + order.revenue, 0);
 
@@ -1449,16 +1452,16 @@ const top5Employees2 = randomEmployee ? [randomEmployee] : [];
         (order) =>
           order.mkt.trim().toLowerCase() === emp.name.trim().toLowerCase() &&
           (order.paymentStatus === "CHƯA THANH TOÁN" ||
-            order.paymentStatus === "")
+            order.paymentStatus === ""),
       )
       .reduce((sum, order) => sum + order.revenue, 0);
 
     const total = paid + unpaid;
-    const tienVND = total  * exchangeRate;
+    const tienVND = total * exchangeRate;
 
     const totalAds = teamFilteredAds
       .filter(
-        (ad) => ad.name.trim().toLowerCase() === emp.name.trim().toLowerCase()
+        (ad) => ad.name.trim().toLowerCase() === emp.name.trim().toLowerCase(),
       )
       .reduce((sum, ad) => sum + (ad.request1 + ad.request2), 0);
 
@@ -1574,7 +1577,7 @@ const top5Employees2 = randomEmployee ? [randomEmployee] : [];
         .filter(
           (order) =>
             order.sale.trim().toLowerCase() === emp.name.trim().toLowerCase() &&
-            order.paymentStatus === "ĐÃ THANH TOÁN"
+            order.paymentStatus === "ĐÃ THANH TOÁN",
         )
         .reduce((sum, order) => sum + order.revenue, 0);
       unpaid = filteredOrders
@@ -1582,7 +1585,7 @@ const top5Employees2 = randomEmployee ? [randomEmployee] : [];
           (order) =>
             order.sale.trim().toLowerCase() === emp.name.trim().toLowerCase() &&
             (order.paymentStatus === "CHƯA THANH TOÁN" ||
-              order.paymentStatus === "")
+              order.paymentStatus === ""),
         )
         .reduce((sum, order) => sum + order.revenue, 0);
     } else if (emp.position === "salexuly") {
@@ -1591,7 +1594,7 @@ const top5Employees2 = randomEmployee ? [randomEmployee] : [];
           (order) =>
             order.salexuly.trim().toLowerCase() ===
               emp.name.trim().toLowerCase() &&
-            order.paymentStatus === "ĐÃ THANH TOÁN"
+            order.paymentStatus === "ĐÃ THANH TOÁN",
         )
         .reduce((sum, order) => sum + order.revenue, 0);
       unpaid = filteredOrders
@@ -1600,7 +1603,7 @@ const top5Employees2 = randomEmployee ? [randomEmployee] : [];
             order.salexuly.trim().toLowerCase() ===
               emp.name.trim().toLowerCase() &&
             (order.paymentStatus === "CHƯA THANH TOÁN" ||
-              order.paymentStatus === "")
+              order.paymentStatus === ""),
         )
         .reduce((sum, order) => sum + order.revenue, 0);
     }
@@ -1625,7 +1628,7 @@ const top5Employees2 = randomEmployee ? [randomEmployee] : [];
         .filter(
           (order) =>
             order.sale.trim().toLowerCase() === emp.name.trim().toLowerCase() &&
-            order.paymentStatus === "ĐÃ THANH TOÁN"
+            order.paymentStatus === "ĐÃ THANH TOÁN",
         )
         .reduce((sum, order) => sum + order.revenue, 0);
       unpaid = filteredOrders
@@ -1633,7 +1636,7 @@ const top5Employees2 = randomEmployee ? [randomEmployee] : [];
           (order) =>
             order.sale.trim().toLowerCase() === emp.name.trim().toLowerCase() &&
             (order.paymentStatus === "CHƯA THANH TOÁN" ||
-              order.paymentStatus === "")
+              order.paymentStatus === ""),
         )
         .reduce((sum, order) => sum + order.revenue, 0);
     } else if (emp.position === "salexuly") {
@@ -1642,7 +1645,7 @@ const top5Employees2 = randomEmployee ? [randomEmployee] : [];
           (order) =>
             order.salexuly.trim().toLowerCase() ===
               emp.name.trim().toLowerCase() &&
-            order.paymentStatus === "ĐÃ THANH TOÁN"
+            order.paymentStatus === "ĐÃ THANH TOÁN",
         )
         .reduce((sum, order) => sum + order.revenue, 0);
       unpaid = filteredOrders
@@ -1651,7 +1654,7 @@ const top5Employees2 = randomEmployee ? [randomEmployee] : [];
             order.salexuly.trim().toLowerCase() ===
               emp.name.trim().toLowerCase() &&
             (order.paymentStatus === "CHƯA THANH TOÁN" ||
-              order.paymentStatus === "")
+              order.paymentStatus === ""),
         )
         .reduce((sum, order) => sum + order.revenue, 0);
     }
@@ -1676,7 +1679,7 @@ const top5Employees2 = randomEmployee ? [randomEmployee] : [];
         .filter(
           (order) =>
             order.sale.trim().toLowerCase() === emp.name.trim().toLowerCase() &&
-            order.paymentStatus === "ĐÃ THANH TOÁN"
+            order.paymentStatus === "ĐÃ THANH TOÁN",
         )
         .reduce((sum, order) => sum + order.revenue, 0);
       unpaid = filteredOrders
@@ -1684,7 +1687,7 @@ const top5Employees2 = randomEmployee ? [randomEmployee] : [];
           (order) =>
             order.sale.trim().toLowerCase() === emp.name.trim().toLowerCase() &&
             (order.paymentStatus === "CHƯA THANH TOÁN" ||
-              order.paymentStatus === "")
+              order.paymentStatus === ""),
         )
         .reduce((sum, order) => sum + order.revenue, 0);
     } else if (emp.position === "salexuly") {
@@ -1693,7 +1696,7 @@ const top5Employees2 = randomEmployee ? [randomEmployee] : [];
           (order) =>
             order.salexuly.trim().toLowerCase() ===
               emp.name.trim().toLowerCase() &&
-            order.paymentStatus === "ĐÃ THANH TOÁN"
+            order.paymentStatus === "ĐÃ THANH TOÁN",
         )
         .reduce((sum, order) => sum + order.revenue, 0);
       unpaid = filteredOrders
@@ -1702,7 +1705,7 @@ const top5Employees2 = randomEmployee ? [randomEmployee] : [];
             order.salexuly.trim().toLowerCase() ===
               emp.name.trim().toLowerCase() &&
             (order.paymentStatus === "CHƯA THANH TOÁN" ||
-              order.paymentStatus === "")
+              order.paymentStatus === ""),
         )
         .reduce((sum, order) => sum + order.revenue, 0);
     }
@@ -1727,7 +1730,7 @@ const top5Employees2 = randomEmployee ? [randomEmployee] : [];
         .filter(
           (order) =>
             order.sale.trim().toLowerCase() === emp.name.trim().toLowerCase() &&
-            order.paymentStatus === "ĐÃ THANH TOÁN"
+            order.paymentStatus === "ĐÃ THANH TOÁN",
         )
         .reduce((sum, order) => sum + order.revenue, 0);
       unpaid = filteredOrders
@@ -1735,7 +1738,7 @@ const top5Employees2 = randomEmployee ? [randomEmployee] : [];
           (order) =>
             order.sale.trim().toLowerCase() === emp.name.trim().toLowerCase() &&
             (order.paymentStatus === "CHƯA THANH TOÁN" ||
-              order.paymentStatus === "")
+              order.paymentStatus === ""),
         )
         .reduce((sum, order) => sum + order.revenue, 0);
     } else if (emp.position === "salexuly") {
@@ -1744,7 +1747,7 @@ const top5Employees2 = randomEmployee ? [randomEmployee] : [];
           (order) =>
             order.salexuly.trim().toLowerCase() ===
               emp.name.trim().toLowerCase() &&
-            order.paymentStatus === "ĐÃ THANH TOÁN"
+            order.paymentStatus === "ĐÃ THANH TOÁN",
         )
         .reduce((sum, order) => sum + order.revenue, 0);
       unpaid = filteredOrders
@@ -1753,7 +1756,7 @@ const top5Employees2 = randomEmployee ? [randomEmployee] : [];
             order.salexuly.trim().toLowerCase() ===
               emp.name.trim().toLowerCase() &&
             (order.paymentStatus === "CHƯA THANH TOÁN" ||
-              order.paymentStatus === "")
+              order.paymentStatus === ""),
         )
         .reduce((sum, order) => sum + order.revenue, 0);
     }
@@ -2039,7 +2042,7 @@ const top5Employees2 = randomEmployee ? [randomEmployee] : [];
         (order.paymentStatus === "CHƯA THANH TOÁN" ||
           order.paymentStatus === "") &&
         order.deliveryStatus === "GIAO THÀNH CÔNG" &&
-        order.saleReport === "DONE"
+        order.saleReport === "DONE",
     )
     .reduce((sum, order) => sum + order.revenue, 0);
   const daGuiHangKW = filteredOrders
@@ -2048,7 +2051,7 @@ const top5Employees2 = randomEmployee ? [randomEmployee] : [];
         (order.paymentStatus === "CHƯA THANH TOÁN" ||
           order.paymentStatus === "") &&
         order.deliveryStatus === "ĐÃ GỬI HÀNG" &&
-        order.saleReport === "DONE"
+        order.saleReport === "DONE",
     )
     .reduce((sum, order) => sum + order.revenue, 0);
   const chuaGuiHangKW = filteredOrders
@@ -2058,7 +2061,7 @@ const top5Employees2 = randomEmployee ? [randomEmployee] : [];
           order.paymentStatus === "") &&
         (order.deliveryStatus === "" ||
           order.deliveryStatus === "BỊ BẮT CHỜ GỬI LẠI") &&
-        order.saleReport === "DONE"
+        order.saleReport === "DONE",
     )
     .reduce((sum, order) => sum + order.revenue, 0);
   const SLgiaoThanhCongKW = filteredOrders.filter(
@@ -2066,7 +2069,7 @@ const top5Employees2 = randomEmployee ? [randomEmployee] : [];
       (order.paymentStatus === "CHƯA THANH TOÁN" ||
         order.paymentStatus === "") &&
       order.deliveryStatus === "GIAO THÀNH CÔNG" &&
-      order.saleReport === "DONE"
+      order.saleReport === "DONE",
   );
 
   const SLdaGuiHangKW = filteredOrders.filter(
@@ -2074,7 +2077,7 @@ const top5Employees2 = randomEmployee ? [randomEmployee] : [];
       (order.paymentStatus === "CHƯA THANH TOÁN" ||
         order.paymentStatus === "") &&
       order.deliveryStatus === "ĐÃ GỬI HÀNG" &&
-      order.saleReport === "DONE"
+      order.saleReport === "DONE",
   );
 
   const SLchuaGuiHangKW = filteredOrders.filter(
@@ -2083,7 +2086,7 @@ const top5Employees2 = randomEmployee ? [randomEmployee] : [];
         order.paymentStatus === "") &&
       (order.deliveryStatus === "" ||
         order.deliveryStatus === "BỊ BẮT CHỜ GỬI LẠI") &&
-      order.saleReport === "DONE"
+      order.saleReport === "DONE",
   );
 
   const tong = giaoThanhCongKW + daGuiHangKW + chuaGuiHangKW;
@@ -2160,14 +2163,14 @@ const top5Employees2 = randomEmployee ? [randomEmployee] : [];
   const chuaThanhToanKW3 = filteredOrders
     .filter(
       (order) =>
-        order.paymentStatus === "CHƯA THANH TOÁN" || order.paymentStatus === ""
+        order.paymentStatus === "CHƯA THANH TOÁN" || order.paymentStatus === "",
     )
     .reduce((sum, order) => sum + order.revenue, 0);
-  const tongKW3 = (daThanhToanKW3 + chuaThanhToanKW3) ;
+  const tongKW3 = daThanhToanKW3 + chuaThanhToanKW3;
 
   const totalAdsKW3 = filteredAds.reduce(
     (sum, ad) => sum + (ad.request1 + ad.request2),
-    0
+    0,
   );
   const percentAds3 =
     tongKW3 > 0
@@ -2180,14 +2183,14 @@ const top5Employees2 = randomEmployee ? [randomEmployee] : [];
   const chuaThanhToanKW = filteredOrders
     .filter(
       (order) =>
-        order.paymentStatus === "CHƯA THANH TOÁN" || order.paymentStatus === ""
+        order.paymentStatus === "CHƯA THANH TOÁN" || order.paymentStatus === "",
     )
     .reduce((sum, order) => sum + order.revenue, 0);
   const tongKW = daThanhToanKW + chuaThanhToanKW;
   const thanhToanDat = tongKW > 0 ? (daThanhToanKW / tongKW) * 100 : 0;
   const totalAdsKW = filteredAds.reduce(
     (sum, ad) => sum + (ad.request1 + ad.request2),
-    0
+    0,
   );
   const percentAds =
     tongKW > 0
@@ -2200,7 +2203,7 @@ const top5Employees2 = randomEmployee ? [randomEmployee] : [];
   const chuaThanhToanKWSALE = filteredOrders
     .filter(
       (order) =>
-        order.paymentStatus === "CHƯA THANH TOÁN" || order.paymentStatus === ""
+        order.paymentStatus === "CHƯA THANH TOÁN" || order.paymentStatus === "",
     )
     .reduce((sum, order) => sum + order.revenue, 0);
   const tongKWSALE = daThanhToanKWSALE + chuaThanhToanKWSALE;
@@ -2208,12 +2211,12 @@ const top5Employees2 = randomEmployee ? [randomEmployee] : [];
     tongKWSALE > 0 ? (daThanhToanKWSALE / tongKWSALE) * 100 : 0;
   const totalAdsKWSALE = filteredAds.reduce(
     (sum, ad) => sum + (ad.request1 + ad.request2),
-    0
+    0,
   );
   const percentAdsSALE =
     tongKWSALE > 0
       ? Number(
-          ((totalAdsKWSALE / (tongKWSALE * exchangeRate)) * 100).toFixed(2)
+          ((totalAdsKWSALE / (tongKWSALE * exchangeRate)) * 100).toFixed(2),
         )
       : 0;
 
@@ -2230,7 +2233,7 @@ const top5Employees2 = randomEmployee ? [randomEmployee] : [];
             ((emp.name || "").trim() === "Nguyễn Thị Xuân Diệu" ||
               (emp.name || "").trim() === "Nguyễn Bá Quân")) ||
           (currentUser.team_id === "PHONG" &&
-            (emp.name || "").trim() === "Bùi Văn Phi")
+            (emp.name || "").trim() === "Bùi Văn Phi"),
       )
       .map((emp) => (emp.name || "").trim().toLowerCase());
 
@@ -2238,14 +2241,14 @@ const top5Employees2 = randomEmployee ? [randomEmployee] : [];
     filteredOrders = filteredOrders.filter(
       (order) =>
         (order.mkt || "").trim().toLowerCase() &&
-        teamEmployeeNames.includes((order.mkt || "").trim().toLowerCase())
+        teamEmployeeNames.includes((order.mkt || "").trim().toLowerCase()),
     );
 
     // Lọc chi phí ads theo tên nhân viên thuộc team
     filteredAds = filteredAds.filter(
       (ad) =>
         (ad.name || "").trim().toLowerCase() &&
-        teamEmployeeNames.includes((ad.name || "").trim().toLowerCase())
+        teamEmployeeNames.includes((ad.name || "").trim().toLowerCase()),
     );
   }
 
@@ -2256,14 +2259,14 @@ const top5Employees2 = randomEmployee ? [randomEmployee] : [];
   const chuaThanhToanKW2 = filteredOrders
     .filter(
       (order) =>
-        order.paymentStatus === "CHƯA THANH TOÁN" || order.paymentStatus === ""
+        order.paymentStatus === "CHƯA THANH TOÁN" || order.paymentStatus === "",
     )
     .reduce((sum, order) => sum + order.revenue, 0);
   const tongKW2 = daThanhToanKW2 + chuaThanhToanKW2;
   const thanhToanDat2 = tongKW2 > 0 ? (daThanhToanKW2 / tongKW2) * 100 : 0;
   const totalAdsKW2 = filteredAds.reduce(
     (sum, ad) => sum + (ad.request1 + ad.request2),
-    0
+    0,
   );
   const percentAds2 =
     tongKW2 > 0
@@ -2314,7 +2317,7 @@ const top5Employees2 = randomEmployee ? [randomEmployee] : [];
       key: "VND",
       // daThanhToan: daThanhToanKW2*0.95 * exchangeRate,
       // chuaThanhToan: chuaThanhToanKW2*0.95 * exchangeRate,
-      tong: tongKW2  * exchangeRate,
+      tong: tongKW2 * exchangeRate,
       // thanhToanDat: thanhToanDat2,
       totalAds: totalAdsKW2,
       percentAds: percentAds2,
@@ -2435,11 +2438,11 @@ const top5Employees2 = randomEmployee ? [randomEmployee] : [];
   ];
   const totalSangSom = saleDailyData.reduce(
     (sum, item) => sum + item.sangSom,
-    0
+    0,
   );
   const totalHanhChinh = saleDailyData.reduce(
     (sum, item) => sum + item.hanhChinh,
-    0
+    0,
   );
   const totalToi = saleDailyData.reduce((sum, item) => sum + item.toi, 0);
   const totalSale = totalSangSom + totalHanhChinh + totalToi;
@@ -2471,7 +2474,7 @@ const top5Employees2 = randomEmployee ? [randomEmployee] : [];
 
   // Lọc các nhân viên có position là salenhapdon
   const salenhapdonEmployees = employees.filter(
-    (emp) => emp.position === "salenhapdon"
+    (emp) => emp.position === "salenhapdon",
   );
 
   // Tính tổng số đơn hôm nay của từng salenhapdon
@@ -2479,7 +2482,7 @@ const top5Employees2 = randomEmployee ? [randomEmployee] : [];
     const count = orders.filter(
       (order) =>
         order.sale?.trim().toLowerCase() === emp.name.trim().toLowerCase() &&
-        order.orderDate === todayDate
+        order.orderDate === todayDate,
     ).length;
     return {
       name: emp.name,
@@ -2492,54 +2495,54 @@ const top5Employees2 = randomEmployee ? [randomEmployee] : [];
     .sort((a, b) => b.orderCount - a.orderCount)
     .slice(0, 3);
 
- const now = new Date();
+  const now = new Date();
 
-// Hôm nay: từ 00:00 đến thời điểm hiện tại
-const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-const todayNow = now;
-const totalTodayProfit = orders
-  .filter((order) => {
-    const orderDate = new Date(order.createdAt);
-    return orderDate >= todayStart && orderDate <= todayNow;
-  })
-  .reduce((sum, order) => sum + order.revenue, 0);
+  // Hôm nay: từ 00:00 đến thời điểm hiện tại
+  const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const todayNow = now;
+  const totalTodayProfit = orders
+    .filter((order) => {
+      const orderDate = new Date(order.createdAt);
+      return orderDate >= todayStart && orderDate <= todayNow;
+    })
+    .reduce((sum, order) => sum + order.revenue, 0);
 
-// Hôm qua: từ 00:00 đến cùng giờ như hiện tại hôm nay
-const yesterdayStart = new Date(
-  now.getFullYear(),
-  now.getMonth(),
-  now.getDate() - 1
-);
-const yesterdaySameTime = new Date(
-  now.getFullYear(),
-  now.getMonth(),
-  now.getDate() - 1,
-  now.getHours(),
-  now.getMinutes(),
-  now.getSeconds()
-);
-const totalYesterdayProfit = orders
-  .filter((order) => {
-    const orderDate = new Date(order.createdAt);
-    return orderDate >= yesterdayStart && orderDate <= yesterdaySameTime;
-  })
-  .reduce((sum, order) => sum + order.revenue, 0);
+  // Hôm qua: từ 00:00 đến cùng giờ như hiện tại hôm nay
+  const yesterdayStart = new Date(
+    now.getFullYear(),
+    now.getMonth(),
+    now.getDate() - 1,
+  );
+  const yesterdaySameTime = new Date(
+    now.getFullYear(),
+    now.getMonth(),
+    now.getDate() - 1,
+    now.getHours(),
+    now.getMinutes(),
+    now.getSeconds(),
+  );
+  const totalYesterdayProfit = orders
+    .filter((order) => {
+      const orderDate = new Date(order.createdAt);
+      return orderDate >= yesterdayStart && orderDate <= yesterdaySameTime;
+    })
+    .reduce((sum, order) => sum + order.revenue, 0);
 
-// % hôm nay vs hôm qua
-const percentTodayVsYesterday =
-  totalYesterdayProfit > 0
-    ? ((totalTodayProfit / totalYesterdayProfit) * 100).toFixed(2)
-    : 0;
+  // % hôm nay vs hôm qua
+  const percentTodayVsYesterday =
+    totalYesterdayProfit > 0
+      ? ((totalTodayProfit / totalYesterdayProfit) * 100).toFixed(2)
+      : 0;
 
-// ===== Data cho bảng =====
-const summaryData = [
-  {
-    key: "1",
-    today: (totalTodayProfit * 6000).toLocaleString("vi-VN") + " VNĐ",
-    yesterday: (totalYesterdayProfit * 6000).toLocaleString("vi-VN") + " VNĐ",
-    percent: percentTodayVsYesterday + "%",
-  },
-];
+  // ===== Data cho bảng =====
+  const summaryData = [
+    {
+      key: "1",
+      today: (totalTodayProfit * 6000).toLocaleString("vi-VN") + " VNĐ",
+      yesterday: (totalYesterdayProfit * 6000).toLocaleString("vi-VN") + " VNĐ",
+      percent: percentTodayVsYesterday + "%",
+    },
+  ];
 
   const summaryColumns = [
     {
@@ -2561,107 +2564,107 @@ const summaryData = [
       ),
     },
     {
-  title: "Hôm nay đạt (%)",
-  dataIndex: "percent",
-  key: "percent",
-  align: "center",
-  render: (value) => {
-    const percent = parseFloat(value);
+      title: "Hôm nay đạt (%)",
+      dataIndex: "percent",
+      key: "percent",
+      align: "center",
+      render: (value) => {
+        const percent = parseFloat(value);
 
-    // Tính chênh lệch so với 100%
-    const diff = percent - 100;
-    const sign = diff >= 0 ? "+" : ""; // hiển thị dấu + nếu >=0
-    const displayText = `${sign}${diff.toFixed(2)}%`;
+        // Tính chênh lệch so với 100%
+        const diff = percent - 100;
+        const sign = diff >= 0 ? "+" : ""; // hiển thị dấu + nếu >=0
+        const displayText = `${sign}${diff.toFixed(2)}%`;
 
-    let bgColor;
-    if (percent > 100) {
-      bgColor = "#54DA1F"; // xanh lá khi vượt hôm qua
-    } else if (percent >= 80 && percent <= 100) {
-      bgColor = "#FF9501"; // vàng khi gần bằng hôm qua
-    } else {
-      bgColor = "#F999A8"; // đỏ khi thấp hơn nhiều
-    }
+        let bgColor;
+        if (percent > 100) {
+          bgColor = "#54DA1F"; // xanh lá khi vượt hôm qua
+        } else if (percent >= 80 && percent <= 100) {
+          bgColor = "#FF9501"; // vàng khi gần bằng hôm qua
+        } else {
+          bgColor = "#F999A8"; // đỏ khi thấp hơn nhiều
+        }
 
-    return (
-      <div
-        style={{
-          backgroundColor: bgColor,
-          padding: "10px 14px",
-          borderRadius: "6px",
-          textAlign: "center",
-          fontWeight: "bold",
-          fontSize: "20px",
-          color: "#0e0c0cff",
-          minWidth: "120px",
-        }}
-      >
-        {displayText}
-      </div>
-    );
-  },
-}
+        return (
+          <div
+            style={{
+              backgroundColor: bgColor,
+              padding: "10px 14px",
+              borderRadius: "6px",
+              textAlign: "center",
+              fontWeight: "bold",
+              fontSize: "20px",
+              color: "#0e0c0cff",
+              minWidth: "120px",
+            }}
+          >
+            {displayText}
+          </div>
+        );
+      },
+    },
   ];
 
- const DONE_REPORTS = ["DONE", "BOOK TB"];
-  const DONE_REPORTS2 = [ "BOOK TB"];
-const SENT_DELIVERY_STATUS = ["GIAO THÀNH CÔNG", "ĐÃ GỬI HÀNG"];
+  const DONE_REPORTS = ["DONE", "BOOK TB"];
+  const DONE_REPORTS2 = ["BOOK TB"];
+  const SENT_DELIVERY_STATUS = ["GIAO THÀNH CÔNG", "ĐÃ GỬI HÀNG"];
 
+  const shippingReport = useMemo(() => {
+    if (!filteredOrders?.length) return null;
 
-const shippingReport = useMemo(() => {
-  if (!filteredOrders?.length) return null;
+    let A = 0;
+    let B = 0;
+    let E = 0;
 
-  let A = 0;
-  let B = 0;
-  let E = 0;
+    for (const o of filteredOrders) {
+      const isDone = DONE_REPORTS.includes(o.saleReport);
+      const isSent = isDone && SENT_DELIVERY_STATUS.includes(o.deliveryStatus);
+      const isSent2 = DONE_REPORTS2.includes(o.saleReport);
 
-  for (const o of filteredOrders) {
-    const isDone = DONE_REPORTS.includes(o.saleReport);
-    const isSent =
-      isDone && SENT_DELIVERY_STATUS.includes(o.deliveryStatus);
-    const isSent2 =
-       DONE_REPORTS2.includes(o.saleReport);
+      if (isDone) A++;
+      if (isSent) B++;
+      if (isSent2) E++;
+    }
 
-    if (isDone) A++;
-    if (isSent) B++;
-    if (isSent2) E++;
-  }
+    const C = filteredOrders.length;
+    const notSent = A - B - E;
 
-  const C = filteredOrders.length;
-  const notSent = A - B-E;
+    return {
+      key: 1,
+      C,
+      A,
+      B,
+      notSent,
+      percentDoneText: C ? ((A / C) * 100).toFixed(2) + "%" : "0%",
+      percentSentText: A ? (((B + E) / A) * 100).toFixed(2) + "%" : "0%",
+      percentNotSentText: A ? ((notSent / A) * 100).toFixed(2) + "%" : "0%",
+    };
+  }, [filteredOrders]);
 
-  return {
-    key: 1,
-    C,
-    A,
-    B,
-    notSent,
-    percentDoneText: C ? ((A / C) * 100).toFixed(2) + "%" : "0%",
-    percentSentText: A ? (((B+E) / A) * 100).toFixed(2) + "%" : "0%",
-    percentNotSentText: A ? ((notSent / A) * 100).toFixed(2) + "%" : "0%",
-  };
-}, [filteredOrders]);
-
-const columns = useMemo(() => [
-  { title: "Tổng đơn (C)", dataIndex: "C" },
-  { title: "Đơn DONE (A)", dataIndex: "A" },
-  { title: "Đã gửi (B)", dataIndex: "B" },
-  { title: "Chưa gửi (A-B)", dataIndex: "notSent" },
-  {
-    title: "% DONE",
-    dataIndex: "percentDoneText",
-    render: t => <Tag color="green">{t}</Tag>,
-  },
-  {
-    title: "% ĐÃ GỬI",
-    dataIndex: "percentSentText",
-    render: t => <Tag color="blue">{t}</Tag>,
-  },
-  {
-    title: "% CHƯA GỬI",
-    dataIndex: "percentNotSentText",
-    render: t => <Tag color="red">{t}</Tag>,
-  },
-], []);
+  const columns = useMemo(
+    () => [
+      { title: "Tổng đơn (C)", dataIndex: "C" },
+      { title: "Đơn DONE (A)", dataIndex: "A" },
+      { title: "Đã gửi (B)", dataIndex: "B" },
+      { title: "Chưa gửi (A-B)", dataIndex: "notSent" },
+      {
+        title: "% DONE",
+        dataIndex: "percentDoneText",
+        render: (t) => <Tag color="green">{t}</Tag>,
+      },
+      {
+        title: "% ĐÃ GỬI",
+        dataIndex: "percentSentText",
+        render: (t) => <Tag color="blue">{t}</Tag>,
+      },
+      {
+        title: "% CHƯA GỬI",
+        dataIndex: "percentNotSentText",
+        render: (t) => <Tag color="red">{t}</Tag>,
+      },
+    ],
+    [],
+  );
   return (
     <div
       style={{
@@ -2682,10 +2685,10 @@ const columns = useMemo(() => [
                 index % top5Employees.length === 0
                   ? "top1"
                   : index % top5Employees.length === 1
-                  ? "top2"
-                  : index % top5Employees.length === 2
-                  ? "top3"
-                  : ""
+                    ? "top2"
+                    : index % top5Employees.length === 2
+                      ? "top3"
+                      : ""
               }`}
             >
               <img
@@ -2694,7 +2697,7 @@ const columns = useMemo(() => [
                 className="employee-image"
                 onError={(e) => {
                   e.currentTarget.onerror = null;
-                  e.currentTarget.src = "/ngockem.jpg";
+                  e.currentTarget.src = "/2.png";
                 }}
               />
               <span className="employee-name">{emp.name}</span>
@@ -2703,17 +2706,17 @@ const columns = useMemo(() => [
                 <span className="top-badge">🏆 TOP 1 SERVER</span>
               )}
               <br />
-              {emp.totalToday * 6000  > 15000000 && (
+              {emp.totalToday * 6000 > 15000000 && (
                 <span className="employee-name2">
-                  {(emp.totalToday * 6000 ).toLocaleString()} VNĐ
+                  {(emp.totalToday * 6000).toLocaleString()} VNĐ
                 </span>
               )}
             </div>
           ))}
-        
-        {/* Vinh danh TOP 3 SALE NHẬP ĐƠN */}
-      
-        {currentUser.name !== "Trần" &&
+
+          {/* Vinh danh TOP 3 SALE NHẬP ĐƠN */}
+
+          {/* {currentUser.name !== "Trần" &&
           (
             <div className="marquee">
               {top5Employees2.map((emp, index) => (
@@ -2749,8 +2752,8 @@ const columns = useMemo(() => [
                 </div>
               ))}
             </div>
-          )}
-          </div>
+          )} */}
+        </div>
         {/* {currentUser.name !== "Trần Ngọc Lâm" &&
           currentUser.name !== "Diệp Anh" &&
           currentUser.name !== "Hoàng Thị Trà My" && (
@@ -2890,38 +2893,38 @@ const columns = useMemo(() => [
           }
 
           .employee-item.top1bet {
-  position: relative;
-  border: 3px solid #f12d0f;
-  box-shadow: 0 0 20px 5px rgba(241, 15, 15, 0.6);
-  transform: scale(1.15);
-  overflow: hidden; /* để không bị tràn đường chéo */
-}
+            position: relative;
+            border: 3px solid #f12d0f;
+            box-shadow: 0 0 20px 5px rgba(241, 15, 15, 0.6);
+            transform: scale(1.15);
+            overflow: hidden; /* để không bị tràn đường chéo */
+          }
 
-/* thêm gạch chéo đỏ */
-.employee-item.top1bet::before {
-  content: "";
-  position: absolute;
-  top: 50%;
-  left: -10%;
-  width: 120%;
-  height: 6px;
-  background: #f12d0f;
-  transform: rotate(-25deg);
-  transform-origin: center;
-  box-shadow: 0 0 5px rgba(241, 15, 15, 0.8);
-}
-  .employee-item.top1bet::after {
-  content: "";
-  position: absolute;
-  top: 50%;
-  left: -10%;
-  width: 120%;
-  height: 6px;
-  background: #f12d0f;
-  transform: rotate(25deg);
-  transform-origin: center;
-  box-shadow: 0 0 5px rgba(241, 15, 15, 0.8);
-}
+          /* thêm gạch chéo đỏ */
+          .employee-item.top1bet::before {
+            content: "";
+            position: absolute;
+            top: 50%;
+            left: -10%;
+            width: 120%;
+            height: 6px;
+            background: #f12d0f;
+            transform: rotate(-25deg);
+            transform-origin: center;
+            box-shadow: 0 0 5px rgba(241, 15, 15, 0.8);
+          }
+          .employee-item.top1bet::after {
+            content: "";
+            position: absolute;
+            top: 50%;
+            left: -10%;
+            width: 120%;
+            height: 6px;
+            background: #f12d0f;
+            transform: rotate(25deg);
+            transform-origin: center;
+            box-shadow: 0 0 5px rgba(241, 15, 15, 0.8);
+          }
 
           /* TOP 2 – Viền bạc */
           .employee-item.top2 {
@@ -3195,15 +3198,17 @@ const columns = useMemo(() => [
             </Col>
             <Col xs={24} md={2}></Col>
             <Col xs={24} md={10}>
-            {(currentUser.position === "admin" ||
-                currentUser.position === "managerMKT"||currentUser.position === "managerSALE"||currentUser.position === "leadSALE" ) && (
+              {(currentUser.position === "admin" ||
+                currentUser.position === "managerMKT" ||
+                currentUser.position === "managerSALE" ||
+                currentUser.position === "leadSALE") && (
                 <>
-                  <h2 style={{  }}>Thống kê đơn hàng</h2>
+                  <h2 style={{}}>Thống kê đơn hàng</h2>
                   <Table
-  pagination={false}
-  dataSource={shippingReport ? [shippingReport] : []}
-  columns={columns}
-/>
+                    pagination={false}
+                    dataSource={shippingReport ? [shippingReport] : []}
+                    columns={columns}
+                  />
                 </>
               )}
               <h2 style={{ marginTop: "2rem" }}>
@@ -3233,207 +3238,213 @@ const columns = useMemo(() => [
 
       {(currentUser.position === "admin" && !selectedTeam) ||
       (currentUser.position === "managerMKT" && !selectedTeam) ||
-      (currentUser.position === "managerSALE" && !selectedTeam) ? (
-        (() => {
-          const mktTabContent = (
-            <>
-              <Row gutter={[16, 16]} style={{ marginTop: "2rem" }}>
-                <Col xs={24} md={24}>
-                  <h3>Doanh số Nhân viên MKT</h3>
-                  <GroupedDoubleBarChartComponent data={employeeChartDataNew} />
-                </Col>
-                <Col xs={24} md={24}>
-                  <h3 style={{ marginTop: "2rem" }}>Doanh số hàng ngày </h3>
-                  <GroupedDoubleBarChartComponent data={dailyChartDataNew} />
-                </Col>
-              </Row>
+      (currentUser.position === "managerSALE" && !selectedTeam)
+        ? (() => {
+            const mktTabContent = (
+              <>
+                <Row gutter={[16, 16]} style={{ marginTop: "2rem" }}>
+                  <Col xs={24} md={24}>
+                    <h3>Doanh số Nhân viên MKT</h3>
+                    <GroupedDoubleBarChartComponent
+                      data={employeeChartDataNew}
+                    />
+                  </Col>
+                  <Col xs={24} md={24}>
+                    <h3 style={{ marginTop: "2rem" }}>Doanh số hàng ngày </h3>
+                    <GroupedDoubleBarChartComponent data={dailyChartDataNew} />
+                  </Col>
+                </Row>
 
-              <Row gutter={[16, 16]}>
-                <Col xs={24} md={24}></Col>
-                <Col xs={24} md={24}></Col>
-              </Row>
-              <Row gutter={[16, 16]}>
-                <Col xs={24} md={24}></Col>
-              </Row>
+                <Row gutter={[16, 16]}>
+                  <Col xs={24} md={24}></Col>
+                  <Col xs={24} md={24}></Col>
+                </Row>
+                <Row gutter={[16, 16]}>
+                  <Col xs={24} md={24}></Col>
+                </Row>
 
-              <Row gutter={[16, 16]} style={{ marginTop: "2rem" }}>
-                <Col xs={24} md={14}>
-                  {/* <h3>Doanh số theo Team</h3>
+                <Row gutter={[16, 16]} style={{ marginTop: "2rem" }}>
+                  <Col xs={24} md={14}>
+                    {/* <h3>Doanh số theo Team</h3>
                   <GroupedDoubleBarChartComponent3 data={teamChartDataNew} /> */}
-                </Col>
-                <Col xs={24} md={2}></Col>
-                <Col xs={24} md={8}>
-                  <br></br>
-                  <br></br>
-                  {/* <h3>Phần trăm doanh số theo Team</h3>
+                  </Col>
+                  <Col xs={24} md={2}></Col>
+                  <Col xs={24} md={8}>
+                    <br></br>
+                    <br></br>
+                    {/* <h3>Phần trăm doanh số theo Team</h3>
                   <PieChartComponent data={teamPieData} /> */}
-                </Col>
-              </Row>
-              <Row gutter={[16, 16]} style={{ marginTop: "2rem" }}>
-                <Col xs={24} md={15}>
-                  {/* <h3 style={{ marginTop: "2rem" }}>
+                  </Col>
+                </Row>
+                <Row gutter={[16, 16]} style={{ marginTop: "2rem" }}>
+                  <Col xs={24} md={15}>
+                    {/* <h3 style={{ marginTop: "2rem" }}>
                     Doanh số trung bình theo Nhân viên theo Team
                   </h3>
                   <BarChartComponent data={averageTeamChartData} /> */}
-                </Col>
-                <Col xs={24} md={18}>
-                  <br></br>
-                </Col>
-              </Row>
-              <Row gutter={[16, 16]}>
-                <Col xs={24} md={5}></Col>
-                <Col xs={24} md={14}></Col>
-                <Col xs={24} md={5}></Col>
-              </Row>
-              <Row gutter={[16, 16]}>
-                <Col xs={24} md={24}>
-                  <h2>Báo cáo marketing</h2>
-                  <Table
-                    columns={marketingColumns}
-                    dataSource={marketingReportData}
-                    pagination={false}
-                  />
-                </Col>
-              </Row>
-            </>
-          );
+                  </Col>
+                  <Col xs={24} md={18}>
+                    <br></br>
+                  </Col>
+                </Row>
+                <Row gutter={[16, 16]}>
+                  <Col xs={24} md={5}></Col>
+                  <Col xs={24} md={14}></Col>
+                  <Col xs={24} md={5}></Col>
+                </Row>
+                <Row gutter={[16, 16]}>
+                  <Col xs={24} md={24}>
+                    <h2>Báo cáo marketing</h2>
+                    <Table
+                      columns={marketingColumns}
+                      dataSource={marketingReportData}
+                      pagination={false}
+                    />
+                  </Col>
+                </Row>
+              </>
+            );
 
-          const adminSaleTabContent = (
-            <>
-              <Row gutter={[16, 16]}>
-                <Col xs={24} md={24}>
+            const adminSaleTabContent = (
+              <>
+                <Row gutter={[16, 16]}>
+                  <Col xs={24} md={24}>
+                    <h3>Doanh số Nhân viên SALE</h3>
+                    <GroupedDoubleBarChartComponent2
+                      data={employeeChartDataNewsale}
+                    />
+                  </Col>
+                </Row>
+
+                <Row gutter={[16, 16]}>
+                  <Col xs={24} md={14}>
+                    <h2 style={{ marginTop: "2rem" }}>Báo cáo doanh số ngày</h2>
+                    <Table
+                      columns={dailySaleColumns}
+                      dataSource={[...saleDailyData].sort(
+                        (a, b) => new Date(b.date) - new Date(a.date),
+                      )}
+                      pagination={7}
+                    />
+                  </Col>
+                  <Col xs={24} md={1}></Col>
+                  <Col xs={24} md={9}>
+                    <br />
+                    <br />
+                    <br />
+                    <br />
+                    <br />
+                    <br />
+                    <PieChartComponent data={salePieData} />
+                  </Col>
+                </Row>
+
+                <Row gutter={[16, 16]}>
+                  <Col xs={24} md={15}></Col>
+                  <Col xs={24} md={7}></Col>
+                </Row>
+                <h2 style={{ marginTop: "2rem" }}>
+                  Báo cáo Doanh Số Nhân Viên Sale XỬ LÝ
+                </h2>
+                <Table
+                  columns={saleColumns}
+                  dataSource={saleReportDataXL}
+                  pagination={false}
+                />
+                <h2 style={{ marginTop: "2rem" }}>
+                  Báo cáo Doanh Số Nhân Viên Sale ONLINE
+                </h2>
+                <Table
+                  columns={saleColumnsOLND}
+                  dataSource={saleReportDataOL}
+                  pagination={false}
+                />
+                <h2 style={{ marginTop: "2rem" }}>
+                  Báo cáo Doanh Số Nhân Viên Sale NHẬP ĐƠN
+                </h2>
+                <Table
+                  columns={saleColumnsOLND}
+                  dataSource={saleReportDataND}
+                  pagination={false}
+                />
+              </>
+            );
+
+            const items = [
+              { key: "MKT", label: "MKT", children: mktTabContent },
+              { key: "SALE", label: "SALE", children: adminSaleTabContent },
+            ];
+
+            return <Tabs defaultActiveKey="MKT" items={items} />;
+          })()
+        : currentUser.position === "leadSALE" ||
+            currentUser.position === "managerSALE"
+          ? (() => {
+              const saleOnlyContent = (
+                <>
+                  <Row gutter={[16, 16]}>
+                    <Col xs={24} md={15}>
+                      <h2 style={{ marginTop: "2rem" }}>
+                        Báo cáo doanh số ngày
+                      </h2>
+                      <Table
+                        columns={dailySaleColumns}
+                        dataSource={[...saleDailyData].sort(
+                          (a, b) => new Date(b.date) - new Date(a.date),
+                        )}
+                        pagination={7}
+                      />
+
+                      <Row gutter={[16, 16]}>
+                        <Col xs={24} md={10}></Col>
+                        <Col xs={24} md={10}>
+                          <PieChartComponent data={salePieData} />
+                        </Col>
+                      </Row>
+                    </Col>
+                    <Col xs={24} md={9}>
+                      <br />
+
+                      <h2 style={{ marginTop: "2rem" }}>
+                        Báo cáo Doanh Số Nhân Viên Sale Vận Đơn
+                      </h2>
+                      <Table
+                        columns={saleColumns}
+                        dataSource={saleReportDataXL}
+                        pagination={false}
+                      />
+                      <h2 style={{ marginTop: "2rem" }}>
+                        Báo cáo Doanh Số Nhân Viên Sale ONLINE
+                      </h2>
+                      <Table
+                        columns={saleColumnsOLND}
+                        dataSource={saleReportDataOL}
+                        pagination={false}
+                      />
+                      <h2 style={{ marginTop: "2rem" }}>
+                        Báo cáo Doanh Số Nhân Viên Sale NHẬP ĐƠN
+                      </h2>
+                      <Table
+                        columns={saleColumnsOLND}
+                        dataSource={saleReportDataND}
+                        pagination={false}
+                      />
+                    </Col>
+                  </Row>
                   <h3>Doanh số Nhân viên SALE</h3>
                   <GroupedDoubleBarChartComponent2
                     data={employeeChartDataNewsale}
                   />
-                </Col>
-              </Row>
-
-              <Row gutter={[16, 16]}>
-                <Col xs={24} md={14}>
-                  <h2 style={{ marginTop: "2rem" }}>Báo cáo doanh số ngày</h2>
-                  <Table
-                    columns={dailySaleColumns}
-                    dataSource={[...saleDailyData].sort(
-                      (a, b) => new Date(b.date) - new Date(a.date)
-                    )}
-                    pagination={7}
-                  />
-                </Col>
-                <Col xs={24} md={1}></Col>
-                <Col xs={24} md={9}>
-                  <br />
-                  <br />
-                  <br />
-                  <br />
-                  <br />
-                  <br />
-                  <PieChartComponent data={salePieData} />
-                </Col>
-              </Row>
-
-              <Row gutter={[16, 16]}>
-                <Col xs={24} md={15}></Col>
-                <Col xs={24} md={7}></Col>
-              </Row>
-              <h2 style={{ marginTop: "2rem" }}>
-                Báo cáo Doanh Số Nhân Viên Sale XỬ LÝ
-              </h2>
-              <Table
-                columns={saleColumns}
-                dataSource={saleReportDataXL}
-                pagination={false}
-              />
-              <h2 style={{ marginTop: "2rem" }}>
-                Báo cáo Doanh Số Nhân Viên Sale ONLINE
-              </h2>
-              <Table
-                columns={saleColumnsOLND}
-                dataSource={saleReportDataOL}
-                pagination={false}
-              />
-              <h2 style={{ marginTop: "2rem" }}>
-                Báo cáo Doanh Số Nhân Viên Sale NHẬP ĐƠN
-              </h2>
-              <Table
-                columns={saleColumnsOLND}
-                dataSource={saleReportDataND}
-                pagination={false}
-              />
-            </>
-          );
-
-          const items = [
-            { key: "MKT", label: "MKT", children: mktTabContent },
-            { key: "SALE", label: "SALE", children: adminSaleTabContent },
-          ];
-
-          return <Tabs defaultActiveKey="MKT" items={items} />;
-        })()
-      ) : currentUser.position === "leadSALE" ||
-        currentUser.position === "managerSALE" ? (
-        (() => {
-          const saleOnlyContent = (
-            <>
-              <Row gutter={[16, 16]}>
-                <Col xs={24} md={15}>
-                  <h2 style={{ marginTop: "2rem" }}>Báo cáo doanh số ngày</h2>
-                  <Table
-                    columns={dailySaleColumns}
-                    dataSource={[...saleDailyData].sort(
-                      (a, b) => new Date(b.date) - new Date(a.date)
-                    )}
-                    pagination={7}
-                  />
-
-                  <Row gutter={[16, 16]}>
-                    <Col xs={24} md={10}></Col>
-                    <Col xs={24} md={10}>
-                      <PieChartComponent data={salePieData} />
-                    </Col>
-                  </Row>
-                </Col>
-                <Col xs={24} md={9}>
-                  <br />
-
-                  <h2 style={{ marginTop: "2rem" }}>
-                    Báo cáo Doanh Số Nhân Viên Sale Vận Đơn
-                  </h2>
-                  <Table
-                    columns={saleColumns}
-                    dataSource={saleReportDataXL}
-                    pagination={false}
-                  />
-                  <h2 style={{ marginTop: "2rem" }}>
-                    Báo cáo Doanh Số Nhân Viên Sale ONLINE
-                  </h2>
-                  <Table
-                    columns={saleColumnsOLND}
-                    dataSource={saleReportDataOL}
-                    pagination={false}
-                  />
-                  <h2 style={{ marginTop: "2rem" }}>
-                    Báo cáo Doanh Số Nhân Viên Sale NHẬP ĐƠN
-                  </h2>
-                  <Table
-                    columns={saleColumnsOLND}
-                    dataSource={saleReportDataND}
-                    pagination={false}
-                  />
-                </Col>
-              </Row>
-              <h3>Doanh số Nhân viên SALE</h3>
-              <GroupedDoubleBarChartComponent2 data={employeeChartDataNewsale} />
-              <h3 style={{ marginTop: "2rem" }}>Doanh số hàng ngày </h3>
-              <GroupedDoubleBarChartComponent data={dailyChartDataNew} />
-            </>
-          );
-          const items = [
-            { key: "SALE", label: "SALE", children: saleOnlyContent },
-          ];
-          return <Tabs items={items} />;
-        })()
-      ) : null}
+                  <h3 style={{ marginTop: "2rem" }}>Doanh số hàng ngày </h3>
+                  <GroupedDoubleBarChartComponent data={dailyChartDataNew} />
+                </>
+              );
+              const items = [
+                { key: "SALE", label: "SALE", children: saleOnlyContent },
+              ];
+              return <Tabs items={items} />;
+            })()
+          : null}
       {(currentUser.position === "lead" ||
         (currentUser.position === "admin" && selectedTeam) ||
         (currentUser.position === "managerMKT" && selectedTeam)) && (

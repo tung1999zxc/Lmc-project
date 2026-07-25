@@ -5106,36 +5106,27 @@ body .ant-table-wrapper .ant-table-tbody > tr > td {
   outline-offset: 2px;
 }
 
-/* Nút "Mở rộng" (mũi tên xuống) */
-.filter-toggle-expand svg {
+/* Nút toggle thu gọn / mở rộng (1 nút duy nhất, xoay theo trạng thái) */
+.filter-toggle-btn svg {
   filter: drop-shadow(0 0 4px rgba(245, 214, 122, 0.6));
+  transition: transform 0.25s ease;
 }
-.filter-toggle-expand:hover svg {
-  transform: translateY(3px) scale(1.3);
-}
-
-/* Nút "Thu gọn" (mũi tên lên) */
-.filter-toggle-collapse:hover svg {
-  transform: translateY(-3px) scale(1.3);
+.filter-toggle-btn:hover svg {
+  transform: scale(1.25);
 }
 
-/* Nút inactive: mờ + grayscale rõ rệt */
-.filter-card.is-collapsed .filter-toggle-collapse {
-  opacity: 0.32;
-  filter: grayscale(0.85) brightness(0.6);
-}
-.filter-card.is-expanded .filter-toggle-expand {
-  opacity: 0.32;
-  filter: grayscale(0.85) brightness(0.6);
-}
-/* Nút active: luôn sáng gold, có shimmer liên tục */
-.filter-card.is-expanded .filter-toggle-collapse,
-.filter-card.is-collapsed .filter-toggle-expand {
+/* Khi panel đang mở rộng: nút active, sáng gold */
+.filter-card.is-expanded .filter-toggle-btn {
   border: 1.5px solid #f5d680;
   color: #f5d680;
   background:
     linear-gradient(160deg, #0d1119 0%, #1a1f2b 45%, #0a0d14 100%);
   animation: filterBtnShimmer 2.4s ease-in-out infinite;
+}
+/* Khi panel đang thu gọn: nút dịu hơn */
+.filter-card.is-collapsed .filter-toggle-btn {
+  opacity: 0.65;
+  filter: grayscale(0.4);
 }
 @keyframes filterBtnShimmer {
   0%, 100% {

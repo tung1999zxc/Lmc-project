@@ -1133,7 +1133,6 @@ const Dashboard = () => {
     pvd: [
       { label: "TEAM DIỆU", value: "DIEU" },
       { label: "TEAM SƠN", value: "SON" },
-      { label: "TEAM QUÂN", value: "QUAN" },
       { label: "TEAM LẺ", value: "LE" },
       { label: "TEAM DIỆN ONLINE", value: "DIENON" },
       { label: "TEAM DIỆN", value: "DIEN" },
@@ -1145,7 +1144,6 @@ const Dashboard = () => {
       { label: "TEAM PHI", value: "PHI" },
       { label: "TEAM DIỆU", value: "DIEU" },
       { label: "TEAM SƠN", value: "SON" },
-      { label: "TEAM QUÂN", value: "QUAN" },
       { label: "TEAM LẺ", value: "LE" },
       { label: "TEAM TUẤN ANH", value: "TUANANH" },
       { label: "TEAM DIỆN ONLINE", value: "DIENON" },
@@ -1165,7 +1163,6 @@ const Dashboard = () => {
     pvd: [
       { label: "TEAM DIỆU", value: "DIEU" },
       { label: "TEAM SƠN", value: "SON" },
-      { label: "TEAM QUÂN", value: "QUAN" },
       { label: "TEAM LẺ", value: "LE" },
       { label: "TEAM DIỆN ONLINE", value: "DIENON" },
       { label: "TEAM DIỆN", value: "DIEN" },
@@ -3366,7 +3363,8 @@ const Dashboard = () => {
       }}
     >
       {/* VINH DANH TOP 3 - LEADERBOARD */}
-      {top5Employees.length > 0 && (
+    {currentUser.position_team !=="sale" && (<>
+     {top5Employees.length > 0 && (
         <div className="lb-wrap">
           <div className="lb-sub">
             🏆 Vinh danh hôm nay ·{" "}
@@ -3376,13 +3374,13 @@ const Dashboard = () => {
             </span>
           </div>
           <div className="lb-hl">
-            {top5Employees[0].totalToday * 17000 >= 15000000 ? (
+            {top5Employees[0].totalToday * 17000 >= 10000000 ? (
               <span>
                 Đội ngũ bùng nổ — <span>{top5Employees[0].nickname}!</span>
               </span>
             ) : (
               <span style={{ color: "rgba(255,255,255,0.5)", fontSize: 14 }}>
-                Hãy cố lên — chưa ai đạt 15 triệu hôm nay!
+                Hãy cố lên — chưa ai đạt 10 triệu hôm nay!
               </span>
             )}
           </div>
@@ -3392,7 +3390,7 @@ const Dashboard = () => {
               const ranks = ["r1", "r2", ""];
               const badges = ["bg-gold", "bg-silver", "bg-bronze"];
               const tops = ["TOP 1", "TOP 2", "TOP 3"];
-              const showDs = emp.totalToday * 17000 >= 15000000;
+              const showDs = emp.totalToday * 17000 >= 10000000;
               return (
                 <div key={index} className={`lb-card ${ranks[index] || ""}`}>
                   <div className="lb-rank">{medals[index]}</div>
@@ -3428,7 +3426,7 @@ const Dashboard = () => {
             })}
           </div>
         </div>
-      )}
+      )}</>)}
 
       {/* BỘ LỌC */}
       <div className="filter-bar-container">
@@ -3519,6 +3517,15 @@ const Dashboard = () => {
             >
               Tháng trước
             </div>
+            <div
+              className={`ltab ${selectedPreset === "twoMonthsAgo" ? "on" : ""}`}
+              onClick={() => {
+                setSelectedPreset("twoMonthsAgo");
+                setSelectedDate("");
+              }}
+            >
+              2 Tháng trước
+            </div>
           </div>
 
           {/* Team - chỉ hiện khi cần */}
@@ -3539,7 +3546,6 @@ const Dashboard = () => {
                     {currentUser.employee_code === 6518 && (
                       <>
                         <option value="SON">TEAM SƠN</option>
-                        <option value="QUAN">TEAM QUÂN</option>
                         <option value="DIEU">TEAM DIỆU</option>
                       </>
                     )}

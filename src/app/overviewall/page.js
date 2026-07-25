@@ -1017,7 +1017,6 @@ const Dashboard = () => {
     pvd: [
       { label: "TEAM DIỆU", value: "DIEU" },
       { label: "TEAM SƠN", value: "SON" },
-      { label: "TEAM QUÂN", value: "QUAN" },
       { label: "TEAM LẺ", value: "LE" },
       { label: "TEAM DIỆN ONLINE", value: "DIENON" },
       { label: "TEAM DIỆN", value: "DIEN" },
@@ -1029,7 +1028,6 @@ const Dashboard = () => {
       { label: "TEAM PHI", value: "PHI" },
       { label: "TEAM DIỆU", value: "DIEU" },
       { label: "TEAM SƠN", value: "SON" },
-      { label: "TEAM QUÂN", value: "QUAN" },
       { label: "TEAM LẺ", value: "LE" },
       { label: "TEAM TUẤN ANH", value: "TUANANH" },
       { label: "TEAM DIỆN ONLINE", value: "DIENON" },
@@ -1051,7 +1049,6 @@ const Dashboard = () => {
     pvd: [
       { label: "TEAM DIỆU", value: "DIEU" },
       { label: "TEAM SƠN", value: "SON" },
-      { label: "TEAM QUÂN", value: "QUAN" },
       { label: "TEAM LẺ", value: "LE" },
       { label: "TEAM DIỆN ONLINE", value: "DIENON" },
       { label: "TEAM DIỆN", value: "DIEN" },
@@ -3848,7 +3845,7 @@ const Dashboard = () => {
               <div className="lb-top10-row lb-top10-row-head">
                 <div className="lb-top10-rank">#</div>
                 <div className="lb-top10-name">Nhân viên</div>
-               
+
                 <div className="lb-top10-ds">Doanh thu</div>
                 <div className="lb-top10-count">Đơn</div>
               </div>
@@ -3869,7 +3866,7 @@ const Dashboard = () => {
                         {medal || `${idx + 1}`}
                       </div>
                       <div className="lb-top10-name">{emp.name}</div>
-                     
+
                       <div className="lb-top10-ds">
                         {ds.toLocaleString("vi-VN")} đ
                       </div>
@@ -4157,7 +4154,6 @@ const Dashboard = () => {
                             {currentUser.employee_code === 6518 && (
                               <>
                                 <option value="SON">TEAM SƠN</option>
-                                <option value="QUAN">TEAM QUÂN</option>
                                 <option value="DIEU">TEAM DIỆU</option>
                               </>
                             )}

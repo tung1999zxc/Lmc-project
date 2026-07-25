@@ -198,13 +198,7 @@ const deleteVia = async (id) => {
         .filter((employee) => employee.team_id === "SON")
         .map((employee) => employee.employee_code),
     },
-    {
-      id: 2,
-      name: `TEAM QUÂN `,
-      members: employees
-        .filter((employee) => employee.team_id === "QUAN")
-        .map((employee) => employee.employee_code),
-    },
+  
     // {
     //   id: 3,
     //   name: `TEAM CHI `,
@@ -992,7 +986,6 @@ const viaColumns = [
           onChange={(value) => setSelectedTeam(value)}
         >
           <Option value="SON">TEAM SƠN</Option>
-          <Option value="QUAN">TEAM QUÂN</Option>
           <Option value="LE">TEAM LE</Option>
           <Option value="TUANANH">TEAM TUẤN ANH</Option>
           <Option value="DIEN">TEAM DIỆN</Option>

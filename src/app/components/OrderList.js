@@ -457,19 +457,10 @@ const OrderList = () => {
   const [initialOrders6, setInitialOrders6] = useState([]);
   const [isdem, setIsdem] = useState(false);
 
-  // Bộ lọc mở rộng mặc định cho các vai trò sale
-  const saleRoles = [
-    "sale",
-    "salenhapdon",
-    "salefull",
-    "salexacnhan",
-    "salexuly",
-    "leadsale",
-    "managersale",
-    "lead",
-  ];
-  const isSaleRole = saleRoles.includes(currentUser.position);
-  const [isFilterExpanded, setIsFilterExpanded] = useState(isSaleRole);
+  // Bộ lọc mở rộng mặc định cho position_team === "sale"
+  const [isFilterExpanded, setIsFilterExpanded] = useState(
+    currentUser?.position_team === "sale",
+  );
   const [dataPagename, setdataPagename] = useState([]);
   const [searchCustomerName, setSearchCustomerName] = useState("");
   const [searchCustomerName2, setSearchCustomerName2] = useState("");
@@ -2054,6 +2045,25 @@ const OrderList = () => {
           },
         ]
       : []),
+    ...(currentUser.position === "kho1" || currentUser.position === "salexuly"
+      ? [
+          {
+            title: (
+              <Checkbox
+                checked={selectedColumns.includes("isShippingName")}
+                onChange={(e) =>
+                  handleColumnSelect("isShippingName", e.target.checked)
+                }
+              >
+                KHO ĐÓNG HÀNG
+              </Checkbox>
+            ),
+
+            key: "isShippingName",
+            dataIndex: "isShippingName",
+          },
+        ]
+      : []),
     ...(currentUser.position === "admin"
       ? [
           {
@@ -2295,16 +2305,7 @@ const OrderList = () => {
           },
         ]
       : []),
-    ...(currentUser.position === "kho1"
-      ? [
-          {
-            title: " Kho Đóng Hàng",
 
-            key: "isShippingName",
-            dataIndex: "isShippingName",
-          },
-        ]
-      : []),
     {
       title: (
         <Checkbox
@@ -2427,7 +2428,7 @@ const OrderList = () => {
     },
     ...(currentUser.position !== "salexuly" &&
     currentUser.position !== "salenhapdon" &&
-    currentUser.position !== "leadSALE" 
+    currentUser.position !== "leadSALE"
       ? [
           {
             title: (
@@ -2879,34 +2880,21 @@ const OrderList = () => {
   );
   const columnsMKT = [
     {
-      title: (
-        <Checkbox
-          checked={selectedColumns.includes("orderDate")}
-          onChange={(e) => handleColumnSelect("orderDate", e.target.checked)}
-        >
-          NGÀY ĐẶT
-        </Checkbox>
-      ),
-      dataIndex: "orderDate4",
-      key: "orderDate",
-      sorter: (a, b) => {
-        const dateA = a.orderDate4 || a.orderDate;
-        const dateB = b.orderDate4 || b.orderDate;
-        return dayjs(dateA).valueOf() - dayjs(dateB).valueOf();
-      },
-      render: (text, record) => {
-        const dateValue = text || record.orderDate;
-        if (!dateValue) return "N/A";
-        const date = dayjs(dateValue);
-        return (
-          <div className="date-cell">
-            <span className="date-main">{date.format("DD/MM/YYYY")}</span>
-            <span className="date-time">{date.format("HH:mm:ss")}</span>
-          </div>
-        );
-      },
-      width: 90,
+      title: "TÊN PAGE",
+      dataIndex: "pageName",
+      key: "pageName",
+      width: 100,
+      sorter: (a, b) => (a.pageName || "").localeCompare(b.pageName || ""),
     },
+    {
+      title: "TÊN KHÁCH",
+      width: 100,
+      dataIndex: "customerName",
+      key: "customerName",
+      sorter: (a, b) =>
+        (a.customerName || "").localeCompare(b.customerName || ""),
+    },
+
     {
       title: (
         <Checkbox
@@ -2946,47 +2934,23 @@ const OrderList = () => {
         </div>
       ),
     },
-    {
-      title: "TỔNG KL",
-      key: "totalWeight",
-      width: 80,
-      render: (_, record) => {
-        const totalWeight = (record.products || []).reduce((sum, item) => {
-          const productInfo = products2.find((p) => p.name === item.product);
-          const weight = productInfo?.weight || 0;
-          return sum + item.quantity * weight;
-        }, 0);
-        return totalWeight > 0 ? (
-          <span className="weight-cell">{totalWeight}g</span>
-        ) : (
-          "-"
-        );
-      },
-      sorter: (a, b) => {
-        const calcWeight = (products) =>
-          (products || []).reduce((sum, item) => {
-            const productInfo = products2.find((p) => p.name === item.product);
-            return sum + item.quantity * (productInfo?.weight || 0);
-          }, 0);
-        return calcWeight(a.products) - calcWeight(b.products);
-      },
-    },
-    {
-      title: "DOANH SỐ SALE",
-      width: 100,
-      dataIndex: "revenue",
-      key: "revenue",
-      sorter: (a, b) =>
-        (parseFloat(a.revenue) || 0) - (parseFloat(b.revenue) || 0),
-    },
-    {
-      title: "DOANH THU SALE",
-      dataIndex: "profit",
-      key: "profit",
-      width: 20,
-      sorter: (a, b) =>
-        (parseFloat(a.profit) || 0) - (parseFloat(b.profit) || 0),
-    },
+
+    // {
+    //   title: "DOANH SỐ SALE",
+    //   width: 100,
+    //   dataIndex: "revenue",
+    //   key: "revenue",
+    //   sorter: (a, b) =>
+    //     (parseFloat(a.revenue) || 0) - (parseFloat(b.revenue) || 0),
+    // },
+    // {
+    //   title: "DOANH THU SALE",
+    //   dataIndex: "profit",
+    //   key: "profit",
+    //   width: 20,
+    //   sorter: (a, b) =>
+    //     (parseFloat(a.profit) || 0) - (parseFloat(b.profit) || 0),
+    // },
     {
       title: "DOANH SỐ MKT",
       width: 100,
@@ -3073,22 +3037,36 @@ const OrderList = () => {
       },
       width: 90,
     },
+    {
+      title: (
+        <Checkbox
+          checked={selectedColumns.includes("orderDate")}
+          onChange={(e) => handleColumnSelect("orderDate", e.target.checked)}
+        >
+          NGÀY ĐẶT
+        </Checkbox>
+      ),
+      dataIndex: "orderDate4",
+      key: "orderDate",
+      sorter: (a, b) => {
+        const dateA = a.orderDate4 || a.orderDate;
+        const dateB = b.orderDate4 || b.orderDate;
+        return dayjs(dateA).valueOf() - dayjs(dateB).valueOf();
+      },
+      render: (text, record) => {
+        const dateValue = text || record.orderDate;
+        if (!dateValue) return "N/A";
+        const date = dayjs(dateValue);
+        return (
+          <div className="date-cell">
+            <span className="date-main">{date.format("DD/MM/YYYY")}</span>
+            <span className="date-time">{date.format("HH:mm:ss")}</span>
+          </div>
+        );
+      },
+      width: 90,
+    },
 
-    {
-      title: "TÊN PAGE",
-      dataIndex: "pageName",
-      key: "pageName",
-      width: 100,
-      sorter: (a, b) => (a.pageName || "").localeCompare(b.pageName || ""),
-    },
-    {
-      title: "TÊN KHÁCH",
-      width: 100,
-      dataIndex: "customerName",
-      key: "customerName",
-      sorter: (a, b) =>
-        (a.customerName || "").localeCompare(b.customerName || ""),
-    },
     // ...(currentUser.position === "mkt"
     //   ? [
     {
@@ -4503,15 +4481,32 @@ const OrderList = () => {
       <div
         className={`filter-card ${isFilterExpanded ? "is-expanded" : "is-collapsed"}`}
       >
-        <div className="filter-card-header">
+        <div
+          className="filter-card-header"
+          onClick={() => setIsFilterExpanded((prev) => !prev)}
+          role="button"
+          tabIndex={0}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" || e.key === " ") {
+              e.preventDefault();
+              setIsFilterExpanded((prev) => !prev);
+            }
+          }}
+          aria-expanded={isFilterExpanded}
+          aria-label={isFilterExpanded ? "Thu gọn bộ lọc" : "Mở rộng bộ lọc"}
+          style={{ cursor: "pointer", userSelect: "none" }}
+        >
           <span className="filter-card-icon">🔍</span>
           <span className="filter-card-title">Bộ lọc & Tìm kiếm</span>
           <div className="filter-card-actions">
             <button
               type="button"
-              className="filter-toggle-btn filter-toggle-expand"
-              onClick={() => setIsFilterExpanded(true)}
-              aria-label="Mở rộng"
+              className="filter-toggle-btn"
+              onClick={(e) => {
+                e.stopPropagation();
+                setIsFilterExpanded((prev) => !prev);
+              }}
+              aria-label={isFilterExpanded ? "Thu gọn" : "Mở rộng"}
             >
               <svg
                 viewBox="0 0 24 24"
@@ -4522,27 +4517,14 @@ const OrderList = () => {
                 strokeWidth="2.2"
                 strokeLinecap="round"
                 strokeLinejoin="round"
+                style={{
+                  transition: "transform 0.25s ease",
+                  transform: isFilterExpanded
+                    ? "rotate(180deg)"
+                    : "rotate(0deg)",
+                }}
               >
                 <path d="M4 9 L12 17 L20 9" />
-              </svg>
-            </button>
-            <button
-              type="button"
-              className="filter-toggle-btn filter-toggle-collapse"
-              onClick={() => setIsFilterExpanded(false)}
-              aria-label="Thu gọn"
-            >
-              <svg
-                viewBox="0 0 24 24"
-                width="16"
-                height="16"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2.2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="M4 15 L12 7 L20 15" />
               </svg>
             </button>
           </div>
@@ -4823,7 +4805,6 @@ const OrderList = () => {
                       allowClear
                     >
                       <Option value="SON">TEAM SƠN</Option>
-                      <Option value="QUAN">TEAM QUÂN</Option>
                       <Option value="LE">TEAM LẺ</Option>
                       <Option value="TUANANH">TEAM TUẤN ANH</Option>
                       <Option value="DIEN">TEAM DIỆN</Option>
