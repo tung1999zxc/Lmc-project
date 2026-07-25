@@ -3947,7 +3947,7 @@ const Dashboard = () => {
                               marginBottom: "4px",
                             }}
                           >
-                            TỔNG ĐƠN
+                            TỔNG
                           </div>
                           <div style={{ fontSize: "20px", fontWeight: "bold" }}>
                             {marketingReportData

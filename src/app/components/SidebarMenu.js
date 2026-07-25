@@ -495,6 +495,8 @@ const SidebarMenu = ({ isOpen, onToggle }) => {
     setXinResult("");
   };
 
+  const isTranNgocLam = currentUser?.name === "Trần Ngọc Lâm";
+
   const isToMyHanh = currentUser?.name === "Tô Mỹ Hạnh";
   const isLeTuyetKha = currentUser?.name === "Lê Tuyết Kha";
   const isNguyenThiHuyen = currentUser?.name === "Nguyễn Thị Huyền";
@@ -869,11 +871,9 @@ const SidebarMenu = ({ isOpen, onToggle }) => {
   const getOverviewMenu = () => {
     if (isMarketing) return [overviewItems[userCountryKey]];
     if (isLeadSale) {
-      // Leader SALE: xem Tổng Quan Hàn
       return [overviewItems.kr];
     }
     if (isManagerSale) {
-      // Manager Sale: xem Tổng Quan Hàn + Malaysia, mặc định vào Hàn
       return [overviewItems.kr, overviewItems.jp];
     }
     if (isSales) {
@@ -884,17 +884,19 @@ const SidebarMenu = ({ isOpen, onToggle }) => {
         overviewItems.all,
         overviewItems.kr,
         overviewItems.jp,
-        overviewItems.tw,
+        ...(isTranNgocLam ? [] : [overviewItems.tw]),
       ];
     if (isKRTW) return [overviewItems.kr];
-    if (isJP) return [overviewItems.jp, overviewItems.tw];
+    if (isJP)
+      return isTranNgocLam
+        ? [overviewItems.jp]
+        : [overviewItems.jp, overviewItems.tw];
     if (isTW) return [overviewItems.tw];
     return [overviewItems.kr];
   };
 
   const getOrderMenu = () => {
     if (isManagerSale) {
-      // Manager Sale: xem đơn Hàn + Malaysia
       return [orderItems.kr, orderItems.jp];
     }
     if (isSales) {
@@ -906,24 +908,33 @@ const SidebarMenu = ({ isOpen, onToggle }) => {
       return Array.from(new Set(list));
     }
     if (isMarketing) return [orderItems[userCountryKey]];
-    if (isAdmin) return [orderItems.kr, orderItems.jp, orderItems.tw];
+    if (isAdmin)
+      return isTranNgocLam
+        ? [orderItems.kr, orderItems.jp]
+        : [orderItems.kr, orderItems.jp, orderItems.tw];
     if (isKRTW) return [orderItems.kr];
-    if (isJP) return [orderItems.jp, orderItems.tw];
+    if (isJP)
+      return isTranNgocLam ? [orderItems.jp] : [orderItems.jp, orderItems.tw];
     if (isTW) return [orderItems.tw];
     return [orderItems.kr];
   };
 
   const getMktMenu = () => {
     if (isManagerSale) {
-      // Manager Sale: xem Báo cáo MKT Malaysia
       return [mktChildren.jp];
     }
     if (isSales) return [];
     if (isMarketing) return [mktChildren[userCountryKey]];
     if (khohq1) return [];
-    if (isAdmin) return [mktChildren.kr, mktChildren.jp, mktChildren.tw];
+    if (isAdmin)
+      return isTranNgocLam
+        ? [mktChildren.kr, mktChildren.jp]
+        : [mktChildren.kr, mktChildren.jp, mktChildren.tw];
     if (isKRTW) return [mktChildren.kr];
-    if (isJP) return [mktChildren.jp, mktChildren.tw];
+    if (isJP)
+      return isTranNgocLam
+        ? [mktChildren.jp]
+        : [mktChildren.jp, mktChildren.tw];
     if (isTW) return [mktChildren.tw];
     return [
       {
@@ -941,9 +952,14 @@ const SidebarMenu = ({ isOpen, onToggle }) => {
       return [productChildren.kr, productChildren.jp, productChildren.tw];
     if (isMarketing) return [productChildren[userCountryKey]];
     if (isAdmin)
-      return [productChildren.kr, productChildren.jp, productChildren.tw];
+      return isTranNgocLam
+        ? [productChildren.kr, productChildren.jp]
+        : [productChildren.kr, productChildren.jp, productChildren.tw];
     if (isKRTW) return [productChildren.kr];
-    if (isJP) return [productChildren.jp, productChildren.tw];
+    if (isJP)
+      return isTranNgocLam
+        ? [productChildren.jp]
+        : [productChildren.jp, productChildren.tw];
     if (isTW) return [productChildren.tw];
     return [
       {
@@ -995,16 +1011,16 @@ const SidebarMenu = ({ isOpen, onToggle }) => {
       ? []
       : [{ key: "sub7", icon: "📄", label: "Tên page", href: "/pagesName" }]),
     { key: "sub5", icon: "👤", label: "Quản lý tài khoản", href: "/accounts" },
-    ...(isAdmin || isToMyHanh || isLeTuyetKha || isNguyenThiHuyen
-      ? [
+    ...(isTranNgocLam
+      ? []
+      : [
           {
             key: "sub8",
             icon: "📅",
             label: "Chấm công SALE",
             href: "/attendance",
           },
-        ]
-      : []),
+        ]),
     ...(isMarketing || isSales
       ? []
       : isEmployee
@@ -1216,65 +1232,67 @@ const SidebarMenu = ({ isOpen, onToggle }) => {
           ))}
         </nav>
 
-        <div className="quick-panel">
-          <div className="qp-title">⚡ Thao tác nhanh</div>
-          {isSales ? (
-            <>
-              <button
-                type="button"
-                className="qp-btn"
-                onClick={() => setShowCheckPopup(true)}
-              >
-                🔍 Check khách
-              </button>
-              <button
-                type="button"
-                className="qp-btn"
-                onClick={() => setShowDonePanel(true)}
-              >
-                ✅ Done đơn nhanh
-              </button>
-              <button
-                type="button"
-                className="qp-btn"
-                onClick={() => router.push("/LastDeleteOrder")}
-              >
-                🗑 Đơn xóa DONE
-              </button>
-            </>
-          ) : (
-            <>
-              <button
-                type="button"
-                className="qp-btn"
-                onClick={() => setShowXinPopup(true)}
-              >
-                💰 Xin Ads nhanh
-              </button>
-              <button
-                type="button"
-                className="qp-btn"
-                onClick={() => router.push("/LockProduct")}
-              >
-                🔒 SP bị khóa
-              </button>
-              <button
-                type="button"
-                className="qp-btn"
-                onClick={() => router.push("/Best-sellingProducts")}
-              >
-                🔥 SP bán chạy
-              </button>
-              <button
-                type="button"
-                className="qp-btn"
-                onClick={() => router.push("/LastDeleteOrder")}
-              >
-                🗑 Đơn xóa DONE
-              </button>
-            </>
-          )}
-        </div>
+        {!isTranNgocLam && (
+          <div className="quick-panel">
+            <div className="qp-title">⚡ Thao tác nhanh</div>
+            {isSales ? (
+              <>
+                <button
+                  type="button"
+                  className="qp-btn"
+                  onClick={() => setShowCheckPopup(true)}
+                >
+                  🔍 Check khách
+                </button>
+                <button
+                  type="button"
+                  className="qp-btn"
+                  onClick={() => setShowDonePanel(true)}
+                >
+                  ✅ Done đơn nhanh
+                </button>
+                <button
+                  type="button"
+                  className="qp-btn"
+                  onClick={() => router.push("/LastDeleteOrder")}
+                >
+                  🗑 Đơn xóa DONE
+                </button>
+              </>
+            ) : (
+              <>
+                <button
+                  type="button"
+                  className="qp-btn"
+                  onClick={() => setShowXinPopup(true)}
+                >
+                  💰 Xin Ads nhanh
+                </button>
+                <button
+                  type="button"
+                  className="qp-btn"
+                  onClick={() => router.push("/LockProduct")}
+                >
+                  🔒 SP bị khóa
+                </button>
+                <button
+                  type="button"
+                  className="qp-btn"
+                  onClick={() => router.push("/Best-sellingProducts")}
+                >
+                  🔥 SP bán chạy
+                </button>
+                <button
+                  type="button"
+                  className="qp-btn"
+                  onClick={() => router.push("/LastDeleteOrder")}
+                >
+                  🗑 Đơn xóa DONE
+                </button>
+              </>
+            )}
+          </div>
+        )}
 
         <div className="sb-bot">
           <button type="button" className="sb-out" onClick={handleLogout}>
@@ -1283,734 +1301,747 @@ const SidebarMenu = ({ isOpen, onToggle }) => {
         </div>
 
         {/* Mobile quick panel - fixed bottom bar above mobile nav */}
-        <div id="mobile-quick-panel">
-          {isSales ? (
-            <>
-              <button
-                type="button"
-                className="mq-btn"
-                onClick={() => setShowCheckPopup(true)}
-              >
-                🔍 Check khách
-              </button>
-              <button
-                type="button"
-                className="mq-btn"
-                onClick={() => setShowDonePanel(true)}
-              >
-                ✅ Done đơn nhanh
-              </button>
-              <button
-                type="button"
-                className="mq-btn"
-                onClick={() => router.push("/LastDeleteOrder")}
-              >
-                🗑 Đơn xóa
-              </button>
-            </>
-          ) : (
-            <>
-              <button
-                type="button"
-                className="mq-btn"
-                onClick={() => setShowXinPopup(true)}
-              >
-                💰 Xin Ads nhanh
-              </button>
-              <button
-                type="button"
-                className="mq-btn"
-                onClick={() => router.push("/LockProduct")}
-              >
-                🔒 SP bị khóa
-              </button>
-              <button
-                type="button"
-                className="mq-btn"
-                onClick={() => router.push("/Best-sellingProducts")}
-              >
-                🔥 SP bán chạy
-              </button>
-              <button
-                type="button"
-                className="mq-btn"
-                onClick={() => router.push("/LastDeleteOrder")}
-              >
-                🗑 Đơn xóa
-              </button>
-            </>
-          )}
-        </div>
-      </aside>
+        {!isTranNgocLam && (
+          <div id="mobile-quick-panel">
+            {isSales ? (
+              <>
+                <button
+                  type="button"
+                  className="mq-btn"
+                  onClick={() => setShowCheckPopup(true)}
+                >
+                  🔍 Check khách
+                </button>
+                <button
+                  type="button"
+                  className="mq-btn"
+                  onClick={() => setShowDonePanel(true)}
+                >
+                  ✅ Done đơn nhanh
+                </button>
+                <button
+                  type="button"
+                  className="mq-btn"
+                  onClick={() => router.push("/LastDeleteOrder")}
+                >
+                  🗑 Đơn xóa
+                </button>
+              </>
+            ) : (
+              <>
+                <button
+                  type="button"
+                  className="mq-btn"
+                  onClick={() => setShowXinPopup(true)}
+                >
+                  💰 Xin Ads nhanh
+                </button>
+                <button
+                  type="button"
+                  className="mq-btn"
+                  onClick={() => router.push("/LockProduct")}
+                >
+                  🔒 SP bị khóa
+                </button>
+                <button
+                  type="button"
+                  className="mq-btn"
+                  onClick={() => router.push("/Best-sellingProducts")}
+                >
+                  🔥 SP bán chạy
+                </button>
+                <button
+                  type="button"
+                  className="mq-btn"
+                  onClick={() => router.push("/LastDeleteOrder")}
+                >
+                  🗑 Đơn xóa
+                </button>
+              </>
+            )}
+          </div>
+        )}
 
-      {isSales && showCheckPopup && (
-        <div
-          className="sale-quick-modal-overlay show"
-          role="presentation"
-          onMouseDown={(event) => {
-            if (event.target === event.currentTarget) closeCheckPopup();
-          }}
-        >
-          <section
-            className="sale-quick-modal"
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="check-customer-title"
-          >
-            <div className="sale-quick-modal-title" id="check-customer-title">
-              <span>🔍 Check khách</span>
-              <button
-                type="button"
-                className="sale-quick-close"
-                onClick={closeCheckPopup}
-                aria-label="Đóng popup"
-              >
-                ×
-              </button>
-            </div>
-            <div className="sale-quick-search-row">
-              <input
-                type="text"
-                className="sale-quick-input"
-                placeholder="Nhập tên khách, SĐT, link Facebook hoặc STT..."
-                value={checkQuery}
-                autoFocus
-                onChange={(event) => setCheckQuery(event.target.value)}
-                onKeyDown={(event) => {
-                  if (event.key === "Enter") handleCheckSearch();
-                }}
-              />
-              <button
-                type="button"
-                className="sale-quick-primary"
-                onClick={handleCheckSearch}
-                disabled={!checkQuery.trim() || checkLoading}
-              >
-                {checkLoading ? "Đang tìm..." : "Check"}
-              </button>
-            </div>
-            <div className="sale-quick-helper">
-              Tìm lịch sử khách trên dữ liệu Hàn Quốc, Malaysia và Đài Loan.
-            </div>
-            <div className="sale-check-results" aria-live="polite">
-              {checkError && (
-                <div className="sale-quick-alert error">{checkError}</div>
-              )}
-              {!checkError && checkSearched && checkResults.length === 0 && (
-                <div className="sale-quick-alert success">
-                  ✅ Không tìm thấy lịch sử — Khách mới, có thể chốt đơn!
-                </div>
-              )}
-              {!checkError && checkSearched && checkResults.length > 0 && (
-                <div className="sale-quick-alert success">
-                  ✅ Tìm thấy {checkResults.length} đơn hàng — xem chi tiết
-                  trong bảng!
-                </div>
-              )}
-            </div>
-          </section>
-        </div>
-      )}
-
-      {customerHistoryVisible && (
-        <CustomerHistoryModal
-          visible={customerHistoryVisible}
-          orders={customerHistoryOrders}
-          onClose={closeCustomerHistoryModal}
-          onEdit={null}
-          onDelete={null}
-          currentUser={currentUser}
-        />
-      )}
-
-      {isSales && (
-        <>
+        {isSales && showCheckPopup && (
           <div
-            className={`sale-done-backdrop${showDonePanel ? " show" : ""}`}
-            onClick={closeDoneQuickPanel}
-          />
-          <section
-            className={`sale-done-panel${showDonePanel ? " open" : ""}`}
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="quick-done-title"
+            className="sale-quick-modal-overlay show"
+            role="presentation"
+            onMouseDown={(event) => {
+              if (event.target === event.currentTarget) closeCheckPopup();
+            }}
           >
-            <div className="sale-done-head">
-              <span className="sale-done-title" id="quick-done-title">
-                ✅ Done đơn nhanh
-              </span>
-              <button
-                type="button"
-                className="sale-quick-close"
-                onClick={closeDoneQuickPanel}
-                aria-label="Đóng bảng Done đơn"
-              >
-                ×
-              </button>
-            </div>
-            <div className="sale-done-body">
-              <label className="sale-quick-label" htmlFor="done-order-search">
-                Tìm đơn (STT hoặc tên khách)
-              </label>
+            <section
+              className="sale-quick-modal"
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="check-customer-title"
+            >
+              <div className="sale-quick-modal-title" id="check-customer-title">
+                <span>🔍 Check khách</span>
+                <button
+                  type="button"
+                  className="sale-quick-close"
+                  onClick={closeCheckPopup}
+                  aria-label="Đóng popup"
+                >
+                  ×
+                </button>
+              </div>
               <div className="sale-quick-search-row">
                 <input
-                  id="done-order-search"
                   type="text"
                   className="sale-quick-input"
-                  placeholder="Nhập STT hoặc tên khách..."
-                  value={doneQuery}
-                  onChange={(event) => setDoneQuery(event.target.value)}
+                  placeholder="Nhập tên khách, SĐT, link Facebook hoặc STT..."
+                  value={checkQuery}
+                  autoFocus
+                  onChange={(event) => setCheckQuery(event.target.value)}
                   onKeyDown={(event) => {
-                    if (event.key === "Enter") handleDoneSearch();
+                    if (event.key === "Enter") handleCheckSearch();
                   }}
                 />
                 <button
                   type="button"
                   className="sale-quick-primary"
-                  onClick={handleDoneSearch}
-                  disabled={!doneQuery.trim() || doneLoading}
+                  onClick={handleCheckSearch}
+                  disabled={!checkQuery.trim() || checkLoading}
                 >
-                  {doneLoading ? "Tìm..." : "Tìm"}
+                  {checkLoading ? "Đang tìm..." : "Check"}
                 </button>
               </div>
+              <div className="sale-quick-helper">
+                Tìm lịch sử khách trên dữ liệu Hàn Quốc, Malaysia và Đài Loan.
+              </div>
+              <div className="sale-check-results" aria-live="polite">
+                {checkError && (
+                  <div className="sale-quick-alert error">{checkError}</div>
+                )}
+                {!checkError && checkSearched && checkResults.length === 0 && (
+                  <div className="sale-quick-alert success">
+                    ✅ Không tìm thấy lịch sử — Khách mới, có thể chốt đơn!
+                  </div>
+                )}
+                {!checkError && checkSearched && checkResults.length > 0 && (
+                  <div className="sale-quick-alert success">
+                    ✅ Tìm thấy {checkResults.length} đơn hàng — xem chi tiết
+                    trong bảng!
+                  </div>
+                )}
+              </div>
+            </section>
+          </div>
+        )}
 
-              <div
-                className={`sale-done-filters${showDoneFilters ? " expanded" : ""}`}
-              >
+        {customerHistoryVisible && (
+          <CustomerHistoryModal
+            visible={customerHistoryVisible}
+            orders={customerHistoryOrders}
+            onClose={closeCustomerHistoryModal}
+            onEdit={null}
+            onDelete={null}
+            currentUser={currentUser}
+          />
+        )}
+
+        {isSales && (
+          <>
+            <div
+              className={`sale-done-backdrop${showDonePanel ? " show" : ""}`}
+              onClick={closeDoneQuickPanel}
+            />
+            <section
+              className={`sale-done-panel${showDonePanel ? " open" : ""}`}
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="quick-done-title"
+            >
+              <div className="sale-done-head">
+                <span className="sale-done-title" id="quick-done-title">
+                  ✅ Done đơn nhanh
+                </span>
                 <button
                   type="button"
-                  className="sale-done-filter-toggle"
-                  onClick={() => setShowDoneFilters((open) => !open)}
-                  aria-expanded={showDoneFilters}
+                  className="sale-quick-close"
+                  onClick={closeDoneQuickPanel}
+                  aria-label="Đóng bảng Done đơn"
                 >
-                  <span>
-                    <span className="sale-done-filter-icon">⚙</span> Bộ lọc
-                  </span>
-                  <span className="sale-done-filter-summary">
-                    {doneDatePreset === "all"
-                      ? "Mọi ngày"
-                      : doneDatePreset === "custom"
-                        ? `${doneDateFrom || "..."} → ${doneDateTo || "..."}`
-                        : {
-                            today: "Hôm nay",
-                            yesterday: "Hôm qua",
-                            week: "7 ngày",
-                            month: "1 tháng",
-                          }[doneDatePreset]}
-                    {doneMktFilter !== "all"
-                      ? ` · ${doneMktFilter}`
-                      : " · Tất cả MKT"}
-                    <span className="sale-done-filter-chevron">⌄</span>
-                  </span>
+                  ×
                 </button>
-                {showDoneFilters && (
-                  <div className="sale-done-filter-content">
-                    <div className="sale-date-tabs">
-                      {[
-                        { val: "all", label: "Tất cả" },
-                        { val: "today", label: "Hôm nay" },
-                        { val: "yesterday", label: "Hôm qua" },
-                        { val: "week", label: "7 ngày" },
-                        { val: "month", label: "1 tháng" },
-                        { val: "custom", label: "Tùy chỉnh" },
-                      ].map((option) => (
-                        <button
-                          key={option.val}
-                          type="button"
-                          className={`sale-date-tab${doneDatePreset === option.val ? " active" : ""}`}
-                          onClick={() => setDoneDatePreset(option.val)}
-                        >
-                          {option.label}
-                        </button>
-                      ))}
-                    </div>
-                    {doneDatePreset === "custom" && (
-                      <div className="sale-date-custom">
-                        <div className="sale-date-custom-group">
-                          <label htmlFor="done-date-from">Từ ngày</label>
-                          <input
-                            id="done-date-from"
-                            type="date"
-                            className="sale-quick-input"
-                            value={doneDateFrom}
-                            onChange={(event) =>
-                              setDoneDateFrom(event.target.value)
-                            }
-                          />
-                        </div>
-                        <div className="sale-date-custom-group">
-                          <label htmlFor="done-date-to">Đến ngày</label>
-                          <input
-                            id="done-date-to"
-                            type="date"
-                            className="sale-quick-input"
-                            value={doneDateTo}
-                            onChange={(event) =>
-                              setDoneDateTo(event.target.value)
-                            }
-                          />
-                        </div>
-                      </div>
-                    )}
-                    <div className="sale-date-mkt">
-                      <label htmlFor="done-mkt-filter">MKT phụ trách</label>
-                      <select
-                        id="done-mkt-filter"
-                        className="sale-quick-input"
-                        value={doneMktFilter}
-                        onChange={(event) =>
-                          setDoneMktFilter(event.target.value)
-                        }
-                      >
-                        <option value="all">Tất cả MKT</option>
-                        {getDoneMktOptions().map((mkt) => (
-                          <option key={mkt} value={mkt}>
-                            {mkt}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-                  </div>
-                )}
               </div>
-
-              {doneError && (
-                <div className="sale-quick-alert error">{doneError}</div>
-              )}
-              {doneSearched &&
-                !doneLoading &&
-                doneResults.length === 0 &&
-                !selectedDoneOrder &&
-                !doneError && (
-                  <div className="sale-quick-empty">
-                    Không tìm thấy đơn chưa Done phù hợp.
-                  </div>
-                )}
-              {doneSearched && !doneLoading && doneResults.length > 0 && (
-                <div className="sale-done-results-head">
-                  <span>Đơn phù hợp</span>
-                  <strong>{doneResults.length}</strong>
-                </div>
-              )}
-              <div className="sale-done-order-list">
-                {doneResults.map((order) => (
-                  <button
-                    type="button"
-                    className="sale-done-order-option"
-                    key={`${order._regionKey}-${order.id}-${order.stt}`}
-                    onClick={() => selectDoneOrder(order)}
-                  >
-                    <div className="sale-done-option-head">
-                      <strong>
-                        #{order.stt || "—"} ·{" "}
-                        {order.customerName || "Khách chưa có tên"}
-                      </strong>
-                      <span className="sale-quick-tag region">
-                        {order._regionLabel}
-                      </span>
-                    </div>
-                    <div className="sale-done-option-products">
-                      {getOrderProductsLabel(order.products)}
-                    </div>
-                    <div className="sale-done-option-meta">
-                      <span>{order.orderDate || "Chưa có ngày"}</span>
-                      <span className="sale-done-option-mkt">
-                        MKT: {order.mkt || "Chưa phân công"}
-                      </span>
-                      <strong>
-                        {Number(order.revenue || 0).toLocaleString("vi-VN")}
-                      </strong>
-                    </div>
-                  </button>
-                ))}
-              </div>
-
-              {selectedDoneOrder && (
-                <div className="sale-done-detail">
-                  <div className="sale-done-order-title">
-                    <span>
-                      Đơn #{selectedDoneOrder.stt || "—"} —{" "}
-                      {selectedDoneOrder.customerName || "Khách chưa có tên"}
-                    </span>
-                    <span className="sale-quick-tag region">
-                      {selectedDoneOrder._regionLabel}
-                    </span>
-                  </div>
-                  <div className="sale-done-summary">
-                    <span>
-                      {getOrderProductsLabel(selectedDoneOrder.products)}
-                    </span>
-                    <strong>
-                      {Number(selectedDoneOrder.revenue || 0).toLocaleString(
-                        "vi-VN",
-                      )}
-                    </strong>
-                  </div>
-                  <label
-                    className="sale-quick-label"
-                    htmlFor="quick-done-tracking"
-                  >
-                    Mã vận đơn
-                  </label>
+              <div className="sale-done-body">
+                <label className="sale-quick-label" htmlFor="done-order-search">
+                  Tìm đơn (STT hoặc tên khách)
+                </label>
+                <div className="sale-quick-search-row">
                   <input
-                    id="quick-done-tracking"
+                    id="done-order-search"
                     type="text"
                     className="sale-quick-input"
-                    placeholder="Nhập mã vận đơn..."
-                    value={doneForm.trackingCode}
-                    onChange={(event) =>
-                      setDoneForm((form) => ({
-                        ...form,
-                        trackingCode: event.target.value,
-                      }))
-                    }
-                    disabled={doneSuccess}
+                    placeholder="Nhập STT hoặc tên khách..."
+                    value={doneQuery}
+                    onChange={(event) => setDoneQuery(event.target.value)}
+                    onKeyDown={(event) => {
+                      if (event.key === "Enter") handleDoneSearch();
+                    }}
                   />
-                  <label
-                    className="sale-quick-label"
-                    htmlFor="quick-done-shipping-date"
+                  <button
+                    type="button"
+                    className="sale-quick-primary"
+                    onClick={handleDoneSearch}
+                    disabled={!doneQuery.trim() || doneLoading}
                   >
-                    Ngày gửi
-                  </label>
-                  <input
-                    id="quick-done-shipping-date"
-                    type="date"
-                    className="sale-quick-input"
-                    value={doneForm.shippingDate1}
-                    onChange={(event) =>
-                      setDoneForm((form) => ({
-                        ...form,
-                        shippingDate1: event.target.value,
-                      }))
-                    }
-                    disabled={doneSuccess}
-                  />
-                  <label
-                    className="sale-quick-label"
-                    htmlFor="quick-done-delivery-status"
-                  >
-                    Tình trạng giao hàng
-                  </label>
-                  <select
-                    id="quick-done-delivery-status"
-                    className="sale-quick-input"
-                    value={doneForm.deliveryStatus}
-                    onChange={(event) =>
-                      setDoneForm((form) => ({
-                        ...form,
-                        deliveryStatus: event.target.value,
-                      }))
-                    }
-                    disabled={doneSuccess}
-                  >
-                    <option value="">Chưa cập nhật</option>
-                    <option value="ĐÃ GỬI HÀNG">Đã gửi hàng</option>
-                    <option value="GIAO THÀNH CÔNG">Giao thành công</option>
-                    <option value="BỊ BẮT CHỜ GỬI LẠI">
-                      Bị bắt chờ gửi lại
-                    </option>
-                    <option value="CHECK ĐỊA CHỈ">Check địa chỉ</option>
-                  </select>
-                  <label className="sale-quick-label" htmlFor="quick-done-note">
-                    Ghi chú kho
-                  </label>
-                  <textarea
-                    id="quick-done-note"
-                    className="sale-quick-input sale-quick-textarea"
-                    rows={3}
-                    placeholder="Ghi chú thêm..."
-                    value={doneForm.noteKHO}
-                    onChange={(event) =>
-                      setDoneForm((form) => ({
-                        ...form,
-                        noteKHO: event.target.value,
-                      }))
-                    }
-                    disabled={doneSuccess}
-                  />
+                    {doneLoading ? "Tìm..." : "Tìm"}
+                  </button>
                 </div>
-              )}
-              {doneSuccess && (
-                <div className="sale-quick-alert success">✅ {doneSuccess}</div>
-              )}
-            </div>
-            <div className="sale-done-footer">
-              <button
-                type="button"
-                className="sale-quick-secondary"
-                onClick={closeDoneQuickPanel}
-              >
-                Huỷ
-              </button>
-              <button
-                type="button"
-                className="sale-quick-confirm"
-                onClick={handleDoneSubmit}
-                disabled={
-                  !selectedDoneOrder || doneSubmitting || Boolean(doneSuccess)
-                }
-              >
-                {doneSubmitting
-                  ? "Đang xử lý..."
-                  : doneSuccess
-                    ? "Đã Done"
-                    : "✅ Xác nhận Done"}
-              </button>
-            </div>
-          </section>
-        </>
-      )}
 
-      {/* Xin Ads popup */}
-      <div
-        id="xin-overlay"
-        className={showXinPopup ? "show" : ""}
-        onClick={closeXinPopup}
-      />
-      <div id="xin-popup" className={showXinPopup ? "show" : ""}>
+                <div
+                  className={`sale-done-filters${showDoneFilters ? " expanded" : ""}`}
+                >
+                  <button
+                    type="button"
+                    className="sale-done-filter-toggle"
+                    onClick={() => setShowDoneFilters((open) => !open)}
+                    aria-expanded={showDoneFilters}
+                  >
+                    <span>
+                      <span className="sale-done-filter-icon">⚙</span> Bộ lọc
+                    </span>
+                    <span className="sale-done-filter-summary">
+                      {doneDatePreset === "all"
+                        ? "Mọi ngày"
+                        : doneDatePreset === "custom"
+                          ? `${doneDateFrom || "..."} → ${doneDateTo || "..."}`
+                          : {
+                              today: "Hôm nay",
+                              yesterday: "Hôm qua",
+                              week: "7 ngày",
+                              month: "1 tháng",
+                            }[doneDatePreset]}
+                      {doneMktFilter !== "all"
+                        ? ` · ${doneMktFilter}`
+                        : " · Tất cả MKT"}
+                      <span className="sale-done-filter-chevron">⌄</span>
+                    </span>
+                  </button>
+                  {showDoneFilters && (
+                    <div className="sale-done-filter-content">
+                      <div className="sale-date-tabs">
+                        {[
+                          { val: "all", label: "Tất cả" },
+                          { val: "today", label: "Hôm nay" },
+                          { val: "yesterday", label: "Hôm qua" },
+                          { val: "week", label: "7 ngày" },
+                          { val: "month", label: "1 tháng" },
+                          { val: "custom", label: "Tùy chỉnh" },
+                        ].map((option) => (
+                          <button
+                            key={option.val}
+                            type="button"
+                            className={`sale-date-tab${doneDatePreset === option.val ? " active" : ""}`}
+                            onClick={() => setDoneDatePreset(option.val)}
+                          >
+                            {option.label}
+                          </button>
+                        ))}
+                      </div>
+                      {doneDatePreset === "custom" && (
+                        <div className="sale-date-custom">
+                          <div className="sale-date-custom-group">
+                            <label htmlFor="done-date-from">Từ ngày</label>
+                            <input
+                              id="done-date-from"
+                              type="date"
+                              className="sale-quick-input"
+                              value={doneDateFrom}
+                              onChange={(event) =>
+                                setDoneDateFrom(event.target.value)
+                              }
+                            />
+                          </div>
+                          <div className="sale-date-custom-group">
+                            <label htmlFor="done-date-to">Đến ngày</label>
+                            <input
+                              id="done-date-to"
+                              type="date"
+                              className="sale-quick-input"
+                              value={doneDateTo}
+                              onChange={(event) =>
+                                setDoneDateTo(event.target.value)
+                              }
+                            />
+                          </div>
+                        </div>
+                      )}
+                      <div className="sale-date-mkt">
+                        <label htmlFor="done-mkt-filter">MKT phụ trách</label>
+                        <select
+                          id="done-mkt-filter"
+                          className="sale-quick-input"
+                          value={doneMktFilter}
+                          onChange={(event) =>
+                            setDoneMktFilter(event.target.value)
+                          }
+                        >
+                          <option value="all">Tất cả MKT</option>
+                          {getDoneMktOptions().map((mkt) => (
+                            <option key={mkt} value={mkt}>
+                              {mkt}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {doneError && (
+                  <div className="sale-quick-alert error">{doneError}</div>
+                )}
+                {doneSearched &&
+                  !doneLoading &&
+                  doneResults.length === 0 &&
+                  !selectedDoneOrder &&
+                  !doneError && (
+                    <div className="sale-quick-empty">
+                      Không tìm thấy đơn chưa Done phù hợp.
+                    </div>
+                  )}
+                {doneSearched && !doneLoading && doneResults.length > 0 && (
+                  <div className="sale-done-results-head">
+                    <span>Đơn phù hợp</span>
+                    <strong>{doneResults.length}</strong>
+                  </div>
+                )}
+                <div className="sale-done-order-list">
+                  {doneResults.map((order) => (
+                    <button
+                      type="button"
+                      className="sale-done-order-option"
+                      key={`${order._regionKey}-${order.id}-${order.stt}`}
+                      onClick={() => selectDoneOrder(order)}
+                    >
+                      <div className="sale-done-option-head">
+                        <strong>
+                          #{order.stt || "—"} ·{" "}
+                          {order.customerName || "Khách chưa có tên"}
+                        </strong>
+                        <span className="sale-quick-tag region">
+                          {order._regionLabel}
+                        </span>
+                      </div>
+                      <div className="sale-done-option-products">
+                        {getOrderProductsLabel(order.products)}
+                      </div>
+                      <div className="sale-done-option-meta">
+                        <span>{order.orderDate || "Chưa có ngày"}</span>
+                        <span className="sale-done-option-mkt">
+                          MKT: {order.mkt || "Chưa phân công"}
+                        </span>
+                        <strong>
+                          {Number(order.revenue || 0).toLocaleString("vi-VN")}
+                        </strong>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+
+                {selectedDoneOrder && (
+                  <div className="sale-done-detail">
+                    <div className="sale-done-order-title">
+                      <span>
+                        Đơn #{selectedDoneOrder.stt || "—"} —{" "}
+                        {selectedDoneOrder.customerName || "Khách chưa có tên"}
+                      </span>
+                      <span className="sale-quick-tag region">
+                        {selectedDoneOrder._regionLabel}
+                      </span>
+                    </div>
+                    <div className="sale-done-summary">
+                      <span>
+                        {getOrderProductsLabel(selectedDoneOrder.products)}
+                      </span>
+                      <strong>
+                        {Number(selectedDoneOrder.revenue || 0).toLocaleString(
+                          "vi-VN",
+                        )}
+                      </strong>
+                    </div>
+                    <label
+                      className="sale-quick-label"
+                      htmlFor="quick-done-tracking"
+                    >
+                      Mã vận đơn
+                    </label>
+                    <input
+                      id="quick-done-tracking"
+                      type="text"
+                      className="sale-quick-input"
+                      placeholder="Nhập mã vận đơn..."
+                      value={doneForm.trackingCode}
+                      onChange={(event) =>
+                        setDoneForm((form) => ({
+                          ...form,
+                          trackingCode: event.target.value,
+                        }))
+                      }
+                      disabled={doneSuccess}
+                    />
+                    <label
+                      className="sale-quick-label"
+                      htmlFor="quick-done-shipping-date"
+                    >
+                      Ngày gửi
+                    </label>
+                    <input
+                      id="quick-done-shipping-date"
+                      type="date"
+                      className="sale-quick-input"
+                      value={doneForm.shippingDate1}
+                      onChange={(event) =>
+                        setDoneForm((form) => ({
+                          ...form,
+                          shippingDate1: event.target.value,
+                        }))
+                      }
+                      disabled={doneSuccess}
+                    />
+                    <label
+                      className="sale-quick-label"
+                      htmlFor="quick-done-delivery-status"
+                    >
+                      Tình trạng giao hàng
+                    </label>
+                    <select
+                      id="quick-done-delivery-status"
+                      className="sale-quick-input"
+                      value={doneForm.deliveryStatus}
+                      onChange={(event) =>
+                        setDoneForm((form) => ({
+                          ...form,
+                          deliveryStatus: event.target.value,
+                        }))
+                      }
+                      disabled={doneSuccess}
+                    >
+                      <option value="">Chưa cập nhật</option>
+                      <option value="ĐÃ GỬI HÀNG">Đã gửi hàng</option>
+                      <option value="GIAO THÀNH CÔNG">Giao thành công</option>
+                      <option value="BỊ BẮT CHỜ GỬI LẠI">
+                        Bị bắt chờ gửi lại
+                      </option>
+                      <option value="CHECK ĐỊA CHỈ">Check địa chỉ</option>
+                    </select>
+                    <label
+                      className="sale-quick-label"
+                      htmlFor="quick-done-note"
+                    >
+                      Ghi chú kho
+                    </label>
+                    <textarea
+                      id="quick-done-note"
+                      className="sale-quick-input sale-quick-textarea"
+                      rows={3}
+                      placeholder="Ghi chú thêm..."
+                      value={doneForm.noteKHO}
+                      onChange={(event) =>
+                        setDoneForm((form) => ({
+                          ...form,
+                          noteKHO: event.target.value,
+                        }))
+                      }
+                      disabled={doneSuccess}
+                    />
+                  </div>
+                )}
+                {doneSuccess && (
+                  <div className="sale-quick-alert success">
+                    ✅ {doneSuccess}
+                  </div>
+                )}
+              </div>
+              <div className="sale-done-footer">
+                <button
+                  type="button"
+                  className="sale-quick-secondary"
+                  onClick={closeDoneQuickPanel}
+                >
+                  Huỷ
+                </button>
+                <button
+                  type="button"
+                  className="sale-quick-confirm"
+                  onClick={handleDoneSubmit}
+                  disabled={
+                    !selectedDoneOrder || doneSubmitting || Boolean(doneSuccess)
+                  }
+                >
+                  {doneSubmitting
+                    ? "Đang xử lý..."
+                    : doneSuccess
+                      ? "Đã Done"
+                      : "✅ Xác nhận Done"}
+                </button>
+              </div>
+            </section>
+          </>
+        )}
+
+        {/* Xin Ads popup */}
         <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            marginBottom: 12,
-          }}
-        >
+          id="xin-overlay"
+          className={showXinPopup ? "show" : ""}
+          onClick={closeXinPopup}
+        />
+        <div id="xin-popup" className={showXinPopup ? "show" : ""}>
           <div
             style={{
-              fontSize: 12,
-              fontWeight: 700,
-              color: "var(--gold-light)",
-              letterSpacing: 1,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              marginBottom: 12,
             }}
           >
-            ⚡ Xin Ads nhanh
+            <div
+              style={{
+                fontSize: 12,
+                fontWeight: 700,
+                color: "var(--gold-light)",
+                letterSpacing: 1,
+              }}
+            >
+              ⚡ Xin Ads nhanh
+            </div>
+            <button
+              onClick={closeXinPopup}
+              style={{
+                width: 24,
+                height: 24,
+                borderRadius: 6,
+                border: "none",
+                background: "rgba(255,255,255,0.08)",
+                color: "rgba(255,255,255,0.5)",
+                cursor: "pointer",
+                fontSize: 14,
+              }}
+            >
+              ×
+            </button>
           </div>
+          <div style={{ marginBottom: 10 }}>
+            <div
+              style={{
+                fontSize: 10,
+                color: "rgba(255,255,255,0.38)",
+                letterSpacing: 1.5,
+                textTransform: "uppercase",
+                marginBottom: 5,
+              }}
+            >
+              Ngày
+            </div>
+            <input
+              id="xin-date"
+              type="date"
+              value={xinDate}
+              onChange={(e) => {
+                setXinDate(e.target.value);
+                updateXinHint(e.target.value);
+              }}
+              style={{
+                width: "100%",
+                background: "rgba(255,255,255,0.08)",
+                border: "1px solid rgba(255,255,255,0.15)",
+                borderRadius: 9,
+                padding: "10px 12px",
+                fontSize: 14,
+                color: "#fff",
+                outline: "none",
+                minHeight: 44,
+              }}
+            />
+          </div>
+          <div style={{ marginBottom: 10 }}>
+            <div
+              style={{
+                fontSize: 10,
+                color: "rgba(255,255,255,0.38)",
+                letterSpacing: 1.5,
+                textTransform: "uppercase",
+                marginBottom: 5,
+              }}
+            >
+              Số tiền xin
+            </div>
+            <input
+              id="xin-amount"
+              type="number"
+              placeholder="1.500.000"
+              step="500000"
+              min="0"
+              value={xinAmount}
+              onChange={(e) => {
+                const v = e.target.value;
+                setXinAmount(v === "" ? "" : Number(v));
+              }}
+              onFocus={(e) => e.target.select()}
+              style={{
+                width: "100%",
+                background: "rgba(255,255,255,0.08)",
+                border: "1px solid rgba(255,255,255,0.15)",
+                borderRadius: 9,
+                padding: "10px 12px",
+                fontSize: 16,
+                color: "#fff",
+                outline: "none",
+                minHeight: 46,
+                textAlign: "center",
+              }}
+            />
+          </div>
+          <div style={{ display: "flex", gap: 6, marginBottom: 8 }}>
+            {[
+              { val: "sang", icon: "☀️", label: "Sáng" },
+              { val: "chieu", icon: "🌤️", label: "Chiều" },
+              { val: "gap", icon: "🚨", label: "Gấp" },
+            ].map((opt) => {
+              const available = isTypeAvailable(opt.val);
+              const isSelected = xinType === opt.val;
+              return (
+                <label
+                  key={opt.val}
+                  style={{
+                    flex: 1,
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                    gap: 3,
+                    cursor: available || isSelected ? "pointer" : "not-allowed",
+                    padding: "9px 4px",
+                    border: `1px solid ${isSelected ? "var(--gold)" : available ? "rgba(255,255,255,0.12)" : "rgba(255,255,255,0.06)"}`,
+                    borderRadius: 9,
+                    color: isSelected
+                      ? "var(--gold-light)"
+                      : available
+                        ? "rgba(255,255,255,0.55)"
+                        : "rgba(255,255,255,0.2)",
+                    fontSize: 12,
+                    background: isSelected
+                      ? "rgba(201,149,42,0.12)"
+                      : "rgba(255,255,255,0.04)",
+                    minHeight: 52,
+                    justifyContent: "center",
+                    opacity: available || isSelected ? 1 : 0.5,
+                  }}
+                >
+                  <input
+                    type="radio"
+                    name="xin-type"
+                    value={opt.val}
+                    checked={isSelected}
+                    onChange={() => handleXinTypeChange(opt.val)}
+                    style={{
+                      accentColor: "var(--gold)",
+                      width: 16,
+                      height: 16,
+                    }}
+                  />
+                  <span>
+                    {opt.icon} {opt.label}
+                  </span>
+                </label>
+              );
+            })}
+          </div>
+          {xinWarning && (
+            <div
+              style={{
+                fontSize: 11,
+                color: "#ff9f43",
+                textAlign: "center",
+                marginBottom: 8,
+                padding: "6px 8px",
+                background: "rgba(255,159,67,0.1)",
+                borderRadius: 6,
+                lineHeight: 1.4,
+              }}
+            >
+              {xinWarning}
+            </div>
+          )}
           <button
-            onClick={closeXinPopup}
+            onClick={handleXinSubmit}
+            disabled={xinSubmitting}
             style={{
-              width: 24,
-              height: 24,
-              borderRadius: 6,
+              width: "100%",
+              padding: 12,
+              background: xinSubmitting
+                ? "rgba(201,149,42,0.4)"
+                : "var(--gold)",
+              color: "#3a2000",
               border: "none",
-              background: "rgba(255,255,255,0.08)",
-              color: "rgba(255,255,255,0.5)",
-              cursor: "pointer",
-              fontSize: 14,
-            }}
-          >
-            ×
-          </button>
-        </div>
-        <div style={{ marginBottom: 10 }}>
-          <div
-            style={{
-              fontSize: 10,
-              color: "rgba(255,255,255,0.38)",
-              letterSpacing: 1.5,
-              textTransform: "uppercase",
-              marginBottom: 5,
-            }}
-          >
-            Ngày
-          </div>
-          <input
-            id="xin-date"
-            type="date"
-            value={xinDate}
-            onChange={(e) => {
-              setXinDate(e.target.value);
-              updateXinHint(e.target.value);
-            }}
-            style={{
-              width: "100%",
-              background: "rgba(255,255,255,0.08)",
-              border: "1px solid rgba(255,255,255,0.15)",
               borderRadius: 9,
-              padding: "10px 12px",
-              fontSize: 14,
-              color: "#fff",
-              outline: "none",
-              minHeight: 44,
-            }}
-          />
-        </div>
-        <div style={{ marginBottom: 10 }}>
-          <div
-            style={{
-              fontSize: 10,
-              color: "rgba(255,255,255,0.38)",
-              letterSpacing: 1.5,
-              textTransform: "uppercase",
-              marginBottom: 5,
-            }}
-          >
-            Số tiền xin
-          </div>
-          <input
-            id="xin-amount"
-            type="number"
-            placeholder="1.500.000"
-            step="500000"
-            min="0"
-            value={xinAmount}
-            onChange={(e) => {
-              const v = e.target.value;
-              setXinAmount(v === "" ? "" : Number(v));
-            }}
-            onFocus={(e) => e.target.select()}
-            style={{
-              width: "100%",
-              background: "rgba(255,255,255,0.08)",
-              border: "1px solid rgba(255,255,255,0.15)",
-              borderRadius: 9,
-              padding: "10px 12px",
-              fontSize: 16,
-              color: "#fff",
-              outline: "none",
+              fontSize: 15,
+              fontWeight: 700,
+              cursor: xinSubmitting ? "not-allowed" : "pointer",
               minHeight: 46,
-              textAlign: "center",
             }}
-          />
-        </div>
-        <div style={{ display: "flex", gap: 6, marginBottom: 8 }}>
-          {[
-            { val: "sang", icon: "☀️", label: "Sáng" },
-            { val: "chieu", icon: "🌤️", label: "Chiều" },
-            { val: "gap", icon: "🚨", label: "Gấp" },
-          ].map((opt) => {
-            const available = isTypeAvailable(opt.val);
-            const isSelected = xinType === opt.val;
-            return (
-              <label
-                key={opt.val}
-                style={{
-                  flex: 1,
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "center",
-                  gap: 3,
-                  cursor: available || isSelected ? "pointer" : "not-allowed",
-                  padding: "9px 4px",
-                  border: `1px solid ${isSelected ? "var(--gold)" : available ? "rgba(255,255,255,0.12)" : "rgba(255,255,255,0.06)"}`,
-                  borderRadius: 9,
-                  color: isSelected
-                    ? "var(--gold-light)"
-                    : available
-                      ? "rgba(255,255,255,0.55)"
-                      : "rgba(255,255,255,0.2)",
-                  fontSize: 12,
-                  background: isSelected
-                    ? "rgba(201,149,42,0.12)"
-                    : "rgba(255,255,255,0.04)",
-                  minHeight: 52,
-                  justifyContent: "center",
-                  opacity: available || isSelected ? 1 : 0.5,
-                }}
-              >
-                <input
-                  type="radio"
-                  name="xin-type"
-                  value={opt.val}
-                  checked={isSelected}
-                  onChange={() => handleXinTypeChange(opt.val)}
-                  style={{ accentColor: "var(--gold)", width: 16, height: 16 }}
-                />
-                <span>
-                  {opt.icon} {opt.label}
-                </span>
-              </label>
-            );
-          })}
-        </div>
-        {xinWarning && (
+          >
+            {xinSubmitting ? "⏳ Đang xử lý..." : "💰 Xin ngay"}
+          </button>
           <div
             style={{
               fontSize: 11,
-              color: "#ff9f43",
               textAlign: "center",
-              marginBottom: 8,
-              padding: "6px 8px",
-              background: "rgba(255,159,67,0.1)",
-              borderRadius: 6,
-              lineHeight: 1.4,
+              marginTop: 8,
+              color: "rgba(255,255,255,0.5)",
             }}
           >
-            {xinWarning}
+            → Sẽ cộng{" "}
+            <span style={{ color: "var(--gold-light)", fontWeight: 600 }}>
+              {xinAmount ? Number(xinAmount).toLocaleString("vi-VN") : "?"}đ
+            </span>{" "}
+            vào:{" "}
+            <span style={{ color: "var(--gold-light)", fontWeight: 600 }}>
+              {xinDate
+                ? (() => {
+                    const [y, m, d] = xinDate.split("-");
+                    return `${d}/${m}/${y}`;
+                  })()
+                : "?"}
+            </span>{" "}
+            ·{" "}
+            {xinType === "sang"
+              ? "☀️ Sáng"
+              : xinType === "chieu"
+                ? "🌤️ Chiều"
+                : "🚨 Gấp"}
           </div>
-        )}
-        <button
-          onClick={handleXinSubmit}
-          disabled={xinSubmitting}
-          style={{
-            width: "100%",
-            padding: 12,
-            background: xinSubmitting ? "rgba(201,149,42,0.4)" : "var(--gold)",
-            color: "#3a2000",
-            border: "none",
-            borderRadius: 9,
-            fontSize: 15,
-            fontWeight: 700,
-            cursor: xinSubmitting ? "not-allowed" : "pointer",
-            minHeight: 46,
-          }}
-        >
-          {xinSubmitting ? "⏳ Đang xử lý..." : "💰 Xin ngay"}
-        </button>
-        <div
-          style={{
-            fontSize: 11,
-            textAlign: "center",
-            marginTop: 8,
-            color: "rgba(255,255,255,0.5)",
-          }}
-        >
-          → Sẽ cộng{" "}
-          <span style={{ color: "var(--gold-light)", fontWeight: 600 }}>
-            {xinAmount ? Number(xinAmount).toLocaleString("vi-VN") : "?"}đ
-          </span>{" "}
-          vào:{" "}
-          <span style={{ color: "var(--gold-light)", fontWeight: 600 }}>
-            {xinDate
-              ? (() => {
-                  const [y, m, d] = xinDate.split("-");
-                  return `${d}/${m}/${y}`;
-                })()
-              : "?"}
-          </span>{" "}
-          ·{" "}
-          {xinType === "sang"
-            ? "☀️ Sáng"
-            : xinType === "chieu"
-              ? "🌤️ Chiều"
-              : "🚨 Gấp"}
+          <div
+            id="xin-hint"
+            style={{
+              fontSize: 10.5,
+              textAlign: "center",
+              marginTop: 6,
+              color: "rgba(255,255,255,0.35)",
+              fontStyle: "italic",
+            }}
+          >
+            {xinHint}
+          </div>
+          <div
+            id="xin-result"
+            style={{
+              fontSize: 12,
+              textAlign: "center",
+              marginTop: 6,
+              minHeight: 20,
+              color: "#4ade80",
+              fontWeight: 600,
+            }}
+          >
+            {xinResult}
+          </div>
         </div>
-        <div
-          id="xin-hint"
-          style={{
-            fontSize: 10.5,
-            textAlign: "center",
-            marginTop: 6,
-            color: "rgba(255,255,255,0.35)",
-            fontStyle: "italic",
-          }}
-        >
-          {xinHint}
-        </div>
-        <div
-          id="xin-result"
-          style={{
-            fontSize: 12,
-            textAlign: "center",
-            marginTop: 6,
-            minHeight: 20,
-            color: "#4ade80",
-            fontWeight: 600,
-          }}
-        >
-          {xinResult}
-        </div>
-      </div>
+      </aside>
     </>
   );
 };

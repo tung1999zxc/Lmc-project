@@ -75,9 +75,7 @@ const Dashboard = () => {
     return orders.map((o) => ({
       ...o,
       revenue: (o.revenue || 0) * rate,
-      profit: useRevenue
-        ? (o.revenue || 0) * rate
-        : (o.profit || 0) * rate,
+      profit: useRevenue ? (o.revenue || 0) * rate : (o.profit || 0) * rate,
       totalAmount: o.totalAmount ? o.totalAmount * rate : 0,
     }));
   };
@@ -3709,181 +3707,181 @@ const Dashboard = () => {
       }}
     >
       {/* <PraiseBanner top5Employees={top1Employees} /> */}
-
-      {/* TOP ROW: Vinh danh (thu nhỏ + bình thường) + 3 bảng tổng hợp KR/MY/TW (chỉ khi Team = Tất cả) */}
-      <div className={selectedTeam === "" ? "top-row" : ""}>
-        {/* Luôn hiển thị phần Vinh danh, hiện "Đang tải..." khi chưa có dữ liệu */}
-        <div
-          className={`lb-wrap ${selectedTeam === "" ? "lb-wrap-all" : "lb-wrap-sm"}`}
-        >
-          <div className="lb-sub">
-            🏆 Vinh danh hôm nay ·{" "}
-            <span id="lb-date">
-              {new Date().getDate().toString().padStart(2, "0")}/
-              {new Date().getMonth() + 1}/{new Date().getFullYear()}
-            </span>
-          </div>
-          {top5Employees.length > 0 && selectedTeam !== "" && (
-            <div className="lb-hl">
-              {top5Employees[0].totalToday * 1 * 0.95 >= 10000000 ? (
-                <span>
-                  Đội ngũ bùng nổ — <span>{top5Employees[0].name}!</span>
-                </span>
-              ) : (
-                <span style={{ color: "rgba(255,255,255,0.5)", fontSize: 14 }}>
-                  Hãy cố lên — chưa ai đạt 10 triệu hôm nay!
-                </span>
-              )}
-            </div>
-          )}
-          {top5Employees.length === 0 ? (
-            // === Loading state ===
-            <div
-              className="lb-list"
-              style={{
-                justifyContent: "center",
-                alignItems: "center",
-                minHeight: 120,
-              }}
-            >
-              <div
-                style={{
-                  color: "rgba(255,255,255,0.7)",
-                  fontSize: 14,
-                  textAlign: "center",
-                }}
-              >
-                Đang tải dữ liệu...
-              </div>
-            </div>
-          ) : selectedTeam === "" ? (
-            // === Layout Tất cả: cup trái · avatar · tên+vị trí giữa · số đơn phải ===
-            <div className="lb-list">
-              {top5Employees.slice(0, 3).map((emp, index) => {
-                const ranks = ["r1", "r2", "r3"];
-                const tops = ["TOP 1", "TOP 2", "TOP 3"];
-                const cups = ["🥇", "🥈", "🥉"];
-                return (
-                  <div key={index} className={`lb-row ${ranks[index]}`}>
-                    <div className={`lb-row-rank ${ranks[index]}`}>
-                      <span className="lb-row-cup">{cups[index]}</span>
-                    </div>
-                    <img
-                      src={`/${emp.name.trim()}.jpg`}
-                      alt={emp.name.trim()}
-                      className={`lb-row-av ${ranks[index]}`}
-                      onError={(e) => {
-                        e.currentTarget.onerror = null;
-                        e.currentTarget.src = "/ngockem.jpg";
-                      }}
-                    />
-                    <div className="lb-row-info">
-                      <div className="lb-row-name">{emp.name}</div>
-                      <div className={`lb-row-tag ${ranks[index]}`}>
-                        {tops[index]}
-                      </div>
-                    </div>
-                    <div className="lb-row-count">
-                      <div className={`lb-row-count-num ${ranks[index]}`}>
-                        {emp.orderCountToday || 0}
-                      </div>
-                      <div className="lb-row-count-lbl">Số đơn</div>
-                      <div className="lb-row-count-sales">
-                        {(emp.totalToday * 1 * 0.95 || 0).toLocaleString("vi-VN")}đ
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          ) : (
-            <div className="lb-grid">
-              {top5Employees.slice(0, 3).map((emp, index) => {
-                const medals = ["🥇", "🥈", "🥉"];
-                const ranks = ["r1", "r2", ""];
-                const badges = ["bg-gold", "bg-silver", "bg-bronze"];
-                const tops = ["TOP 1", "TOP 2", "TOP 3"];
-                const showDs = emp.totalToday * 1 * 0.95 >= 15000000;
-                return (
-                  <div key={index} className={`lb-card ${ranks[index] || ""}`}>
-                    <div className="lb-rank">{medals[index]}</div>
-                    <img
-                      src={`/${emp.name.trim()}.jpg`}
-                      alt={emp.name.trim()}
-                      className={`lb-av ${ranks[index] || ""}`}
-                      style={{
-                        width: 54,
-                        height: 54,
-                        borderRadius: "50%",
-                        objectFit: "cover",
-                      }}
-                      onError={(e) => {
-                        e.currentTarget.onerror = null;
-                        e.currentTarget.src = "/ngockem.jpg";
-                      }}
-                    />
-                    <div className="lb-name">{emp.name}</div>
-                    <div className={`lb-badge ${badges[index]}`}>
-                      {tops[index]}
-                    </div>
-                    {showDs && (
-                      <div className="lb-stat">
-                        <strong>
-                          {(emp.totalToday * 1 * 0.95).toLocaleString("vi-VN")}{" "}
-                          VNĐ
-                        </strong>
-                        DS hôm nay
-                      </div>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-          )}
+      {/* DÒNG 1: 🏆 Vinh danh hôm nay — 3 nhân viên xếp ngang
+      <div
+        className={`lb-wrap ${selectedTeam === "" ? "lb-wrap-all" : "lb-wrap-sm"}`}
+      >
+        <div className="lb-sub">
+          🏆 Vinh danh hôm nay ·
+          <span id="lb-date">
+            {new Date().getDate().toString().padStart(2, "0")}/
+            {new Date().getMonth() + 1}/{new Date().getFullYear()}
+          </span>
         </div>
-
-        {/* Bảng Top 10 doanh thu hôm nay */}
-        <div className="lb-top10-card">
-          <div className="lb-top10-header">📊 Top 10 doanh thu hôm nay</div>
-          <div className="lb-top10-body">
-            <div className="lb-top10-row lb-top10-row-head">
-              <div className="lb-top10-rank">#</div>
-              <div className="lb-top10-name">Nhân viên</div>
-              <div className="lb-top10-team">Team</div>
-              <div className="lb-top10-ds">Doanh thu</div>
-              <div className="lb-top10-count">Đơn</div>
-            </div>
-            {top10RevenueEmployees.length === 0 ? (
-              <div className="lb-top10-empty">Chưa có dữ liệu</div>
+        {top5Employees.length > 0 && selectedTeam !== "" && (
+          <div className="lb-hl">
+            {top5Employees[0].totalToday * 1 * 0.95 >= 10000000 ? (
+              <span>
+                Đội ngũ bùng nổ — <span>{top5Employees[0].name}!</span>
+              </span>
             ) : (
-              top10RevenueEmployees.map((emp, idx) => {
-                const ds = Math.round((emp.totalToday || 0) * 1 * 0.95);
-                const orderCount = emp.orderCountToday || 0;
-                const medal =
-                  idx === 0 ? "🥇" : idx === 1 ? "🥈" : idx === 2 ? "🥉" : "";
-                return (
-                  <div
-                    key={emp.name}
-                    className={`lb-top10-row ${idx < 3 ? "lb-top10-row-podium" : ""}`}
-                  >
-                    <div className="lb-top10-rank">{medal || `${idx + 1}`}</div>
-                    <div className="lb-top10-name">{emp.name}</div>
-                    <div className="lb-top10-team">
-                      {emp.team_name || emp.position_team || ""}
-                    </div>
-                    <div className="lb-top10-ds">
-                      {ds.toLocaleString("vi-VN")} đ
-                    </div>
-                    <div className="lb-top10-count">{orderCount}</div>
-                  </div>
-                );
-              })
+              <span style={{ color: "rgba(255,255,255,0.5)", fontSize: 14 }}>
+                Hãy cố lên — chưa ai đạt 10 triệu hôm nay!
+              </span>
             )}
           </div>
-        </div>
+        )}
+        {top5Employees.length === 0 ? (
+          <div
+            className="lb-list lb-list-loading"
+            style={{
+              justifyContent: "center",
+              alignItems: "center",
+              minHeight: 120,
+            }}
+          >
+            <div
+              style={{
+                color: "rgba(255,255,255,0.7)",
+                fontSize: 14,
+                textAlign: "center",
+              }}
+            >
+              Đang tải dữ liệu...
+            </div>
+          </div>
+        ) : selectedTeam === "" ? (
+          <div className="lb-list lb-list-horizontal">
+            {top5Employees.slice(0, 3).map((emp, index) => {
+              const ranks = ["r1", "r2", "r3"];
+              const tops = ["TOP 1", "TOP 2", "TOP 3"];
+              const cups = ["🥇", "🥈", "🥉"];
+              return (
+                <div
+                  key={index}
+                  className={`lb-row lb-row-horizontal ${ranks[index]}`}
+                >
+                  <div className={`lb-row-rank ${ranks[index]}`}>
+                    <span className="lb-row-cup">{cups[index]}</span>
+                  </div>
+                  <img
+                    src={`/${emp.name.trim()}.jpg`}
+                    alt={emp.name.trim()}
+                    className={`lb-row-av ${ranks[index]}`}
+                    onError={(e) => {
+                      e.currentTarget.onerror = null;
+                      e.currentTarget.src = "/ngockem.jpg";
+                    }}
+                  />
+                  <div className="lb-row-info">
+                    <div className="lb-row-name">{emp.name}</div>
+                    <div className={`lb-row-tag ${ranks[index]}`}>
+                      {tops[index]}
+                    </div>
+                  </div>
+                  <div className="lb-row-count">
+                    <div className={`lb-row-count-num ${ranks[index]}`}>
+                      {emp.orderCountToday || 0}
+                    </div>
+                    <div className="lb-row-count-lbl">Số đơn</div>
+                    <div className="lb-row-count-sales">
+                      {(emp.totalToday * 1 * 0.95 || 0).toLocaleString("vi-VN")}
+                      đ
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        ) : (
+          <div className="lb-grid">
+            {top5Employees.slice(0, 3).map((emp, index) => {
+              const medals = ["🥇", "🥈", "🥉"];
+              const ranks = ["r1", "r2", ""];
+              const badges = ["bg-gold", "bg-silver", "bg-bronze"];
+              const tops = ["TOP 1", "TOP 2", "TOP 3"];
+              const showDs = emp.totalToday * 1 * 0.95 >= 15000000;
+              return (
+                <div key={index} className={`lb-card ${ranks[index] || ""}`}>
+                  <div className="lb-rank">{medals[index]}</div>
+                  <img
+                    src={`/${emp.name.trim()}.jpg`}
+                    alt={emp.name.trim()}
+                    className={`lb-av ${ranks[index] || ""}`}
+                    style={{
+                      width: 54,
+                      height: 54,
+                      borderRadius: "50%",
+                      objectFit: "cover",
+                    }}
+                    onError={(e) => {
+                      e.currentTarget.onerror = null;
+                      e.currentTarget.src = "/ngockem.jpg";
+                    }}
+                  />
+                  <div className="lb-name">{emp.name}</div>
+                  <div className={`lb-badge ${badges[index]}`}>
+                    {tops[index]}
+                  </div>
+                  {showDs && (
+                    <div className="lb-stat">
+                      <strong>
+                        {(emp.totalToday * 1 * 0.95).toLocaleString("vi-VN")}{" "}
+                        VNĐ
+                      </strong>
+                      DS hôm nay
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div> */}
+      {/* DÒNG 2: Top 10 + 3 bảng KR/MY/TW (chỉ khi Team = Tất cả) */}
+      {selectedTeam === "" && (
+        <div className="top-row">
+          {/* Bảng Top 10 doanh thu hôm nay */}
+          <div className="lb-top10-card">
+            <div className="lb-top10-header">📊 Top 10 doanh thu hôm nay</div>
+            <div className="lb-top10-body">
+              <div className="lb-top10-row lb-top10-row-head">
+                <div className="lb-top10-rank">#</div>
+                <div className="lb-top10-name">Nhân viên</div>
+               
+                <div className="lb-top10-ds">Doanh thu</div>
+                <div className="lb-top10-count">Đơn</div>
+              </div>
+              {top10RevenueEmployees.length === 0 ? (
+                <div className="lb-top10-empty">Chưa có dữ liệu</div>
+              ) : (
+                top10RevenueEmployees.map((emp, idx) => {
+                  const ds = Math.round((emp.totalToday || 0) * 1 * 0.95);
+                  const orderCount = emp.orderCountToday || 0;
+                  const medal =
+                    idx === 0 ? "🥇" : idx === 1 ? "🥈" : idx === 2 ? "🥉" : "";
+                  return (
+                    <div
+                      key={emp.name}
+                      className={`lb-top10-row ${idx < 3 ? "lb-top10-row-podium" : ""}`}
+                    >
+                      <div className="lb-top10-rank">
+                        {medal || `${idx + 1}`}
+                      </div>
+                      <div className="lb-top10-name">{emp.name}</div>
+                     
+                      <div className="lb-top10-ds">
+                        {ds.toLocaleString("vi-VN")} đ
+                      </div>
+                      <div className="lb-top10-count">{orderCount}</div>
+                    </div>
+                  );
+                })
+              )}
+            </div>
+          </div>
 
-        {/* 3 bảng tổng hợp KR / MY / TW bên phải Vinh danh - chỉ hiện khi Team = Tất cả */}
-        {selectedTeam === "" && (
+          {/* 3 bảng tổng hợp KR / MY / TW */}
           <div className="team-stats">
             <div className="team-stat-card">
               <div className="team-stat-left">
@@ -4011,9 +4009,8 @@ const Dashboard = () => {
               </div>
             </div>
           </div>
-        )}
-      </div>
-
+        </div>
+      )}
       {/* BỘ LỌC */}
       {(currentUser.position === "lead" ||
         (currentUser.position === "admin" && selectedTeam) ||
@@ -5186,39 +5183,45 @@ const Dashboard = () => {
                     </div>
                   </div>
                   <div className="fin-stat-rows">
-                    {transferData.filter(r => r.currency !== "KW").map((r, idx) => (
-                      <div className="fin-row" key={idx}>
-                        <span className="fin-row-label">
-                          <span className="fin-row-sub">{r.currency}</span>
-                          Đã gửi
-                        </span>
-                        <span className="fin-row-value green">
-                          {Number(r.daGuiHang).toLocaleString()}
-                        </span>
-                      </div>
-                    ))}
-                    {transferData.filter(r => r.currency !== "KW").map((r, idx) => (
-                      <div className="fin-row" key={"c-" + idx}>
-                        <span className="fin-row-label">
-                          <span className="fin-row-sub">{r.currency}</span>
-                          Chưa gửi
-                        </span>
-                        <span className="fin-row-value red">
-                          {Number(r.chuaGuiHang).toLocaleString()}
-                        </span>
-                      </div>
-                    ))}
-                    {transferData.filter(r => r.currency !== "KW").map((r, idx) => (
-                      <div className="fin-row" key={"t-" + idx}>
-                        <span className="fin-row-label">
-                          <span className="fin-row-sub">{r.currency}</span>
-                          Tổng
-                        </span>
-                        <span className="fin-row-value">
-                          {Number(r.tong).toLocaleString()}
-                        </span>
-                      </div>
-                    ))}
+                    {transferData
+                      .filter((r) => r.currency !== "KW")
+                      .map((r, idx) => (
+                        <div className="fin-row" key={idx}>
+                          <span className="fin-row-label">
+                            <span className="fin-row-sub">{r.currency}</span>
+                            Đã gửi
+                          </span>
+                          <span className="fin-row-value green">
+                            {Number(r.daGuiHang).toLocaleString()}
+                          </span>
+                        </div>
+                      ))}
+                    {transferData
+                      .filter((r) => r.currency !== "KW")
+                      .map((r, idx) => (
+                        <div className="fin-row" key={"c-" + idx}>
+                          <span className="fin-row-label">
+                            <span className="fin-row-sub">{r.currency}</span>
+                            Chưa gửi
+                          </span>
+                          <span className="fin-row-value red">
+                            {Number(r.chuaGuiHang).toLocaleString()}
+                          </span>
+                        </div>
+                      ))}
+                    {transferData
+                      .filter((r) => r.currency !== "KW")
+                      .map((r, idx) => (
+                        <div className="fin-row" key={"t-" + idx}>
+                          <span className="fin-row-label">
+                            <span className="fin-row-sub">{r.currency}</span>
+                            Tổng
+                          </span>
+                          <span className="fin-row-value">
+                            {Number(r.tong).toLocaleString()}
+                          </span>
+                        </div>
+                      ))}
                   </div>
                 </div>
               </div>
@@ -5227,7 +5230,6 @@ const Dashboard = () => {
         </>
       )}
       <br></br>
-
       {(currentUser.position === "admin" && !selectedTeam) ||
       (currentUser.position === "managerMKT" && !selectedTeam) ||
       (currentUser.position === "managerSALE" && !selectedTeam)

@@ -458,7 +458,16 @@ const OrderList = () => {
   const [isdem, setIsdem] = useState(false);
 
   // Bộ lọc mở rộng mặc định cho các vai trò sale
-  const saleRoles = ["sale", "salenhapdon", "salefull", "salexacnhan", "salexuly", "leadsale", "managersale", "lead"];
+  const saleRoles = [
+    "sale",
+    "salenhapdon",
+    "salefull",
+    "salexacnhan",
+    "salexuly",
+    "leadsale",
+    "managersale",
+    "lead",
+  ];
   const isSaleRole = saleRoles.includes(currentUser.position);
   const [isFilterExpanded, setIsFilterExpanded] = useState(isSaleRole);
   const [dataPagename, setdataPagename] = useState([]);
@@ -2045,37 +2054,36 @@ const OrderList = () => {
           },
         ]
       : []),
-    ...(currentUser.position === "admin" ||
-      currentUser.position === "managerSALE"
-        ? [
-            {
-              title: (
-                <>
-                  <Checkbox
-                    checked={allRowsSelected6}
-                    onChange={(e) => handleSelectAllIstick6(e.target.checked)}
-                  >
-                    KHO HẠNH
-                  </Checkbox>
-                  <Button type="primary" onClick={handleSaveIstick6}>
-                    Lưu
-                  </Button>
-                </>
-              ),
-              key: "istick6",
-              dataIndex: "istick6",
-              width: 50,
-              render: (_, record) => (
+    ...(currentUser.position === "admin"
+      ? [
+          {
+            title: (
+              <>
                 <Checkbox
-                  checked={record.istick6 || false}
-                  onChange={(e) =>
-                    handleIstickChange6(record.id, e.target.checked)
-                  }
-                />
-              ),
-            },
-          ]
-        : []),
+                  checked={allRowsSelected6}
+                  onChange={(e) => handleSelectAllIstick6(e.target.checked)}
+                >
+                  KHO HẠNH
+                </Checkbox>
+                <Button type="primary" onClick={handleSaveIstick6}>
+                  Lưu
+                </Button>
+              </>
+            ),
+            key: "istick6",
+            dataIndex: "istick6",
+            width: 50,
+            render: (_, record) => (
+              <Checkbox
+                checked={record.istick6 || false}
+                onChange={(e) =>
+                  handleIstickChange6(record.id, e.target.checked)
+                }
+              />
+            ),
+          },
+        ]
+      : []),
     ...(currentUser.position_team === "kho"
       ? [
           {
@@ -3147,9 +3155,8 @@ const OrderList = () => {
     //   : []),
     { title: "MKT", dataIndex: "mkt", key: "mkt" },
     // ===== Cột Đơn cần xử lý (istick5) - Hiển thị cho salexuly và admin =====
-    
+
     // ===== Cột KHO HẠNH (istick6) - Hiển thị cho admin và managerSALE =====
-    
   ];
 
   const allRowsSelected4 =
@@ -4008,10 +4015,10 @@ const OrderList = () => {
     let profitmkt = profit;
 
     if (diffDays <= 4) {
-      revenuemkt = revenue * 1;
+      revenuemkt = revenue * 0.9;
       profitmkt = revenuemkt === 0 ? 0 : Math.max(revenuemkt - 5, 0);
     } else if (diffDays > 4 && diffDays <= 9) {
-      revenuemkt = revenue * 1;
+      revenuemkt = revenue * 0.9;
       profitmkt = revenuemkt === 0 ? 0 : Math.max(revenuemkt - 5, 0);
     } else {
       revenuemkt = revenue;
@@ -4027,6 +4034,23 @@ const OrderList = () => {
     );
 
     if (isFullCommission2) {
+      revenuemkt = revenue;
+      profitmkt = profit;
+    }
+
+    const isSameTeamWithMkttest = fullProducts.some((p) => {
+      if (!p?.mkttest || p.mkttest === "SP MỚI" || p.mkttest === "SP CHUNG") {
+        return false;
+      }
+      const mkttestEmployee = employees.find((e) => e.name === p.mkttest);
+      const currentMktEmployee = employees.find((e) => e.name === values.mkt);
+      if (!mkttestEmployee || !currentMktEmployee) {
+        return false;
+      }
+      return mkttestEmployee.team_id === currentMktEmployee.team_id;
+    });
+
+    if (isSameTeamWithMkttest) {
       revenuemkt = revenue;
       profitmkt = profit;
     }
@@ -4389,7 +4413,7 @@ const OrderList = () => {
                     />
                   </span>
                 </div>
-                {currentUser.position !== "salenhapdon" && (
+                {true && (
                   <div className="order-summary-pill order-summary-pill-wide">
                     <span className="order-summary-icon">💰</span>
                     <span className="order-summary-content">
@@ -4852,9 +4876,8 @@ const OrderList = () => {
                     <Button
                       type="primary"
                       onClick={() => {
-                        const el = document.getElementById(
-                          "check-lichsu-input",
-                        );
+                        const el =
+                          document.getElementById("check-lichsu-input");
                         const v = el ? el.value.trim() : "";
                         handleSearchCustomerModalLS(v);
                       }}

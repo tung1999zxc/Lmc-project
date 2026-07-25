@@ -6861,7 +6861,7 @@ body .ant-table-wrapper .ant-table-tbody > tr > td {
   margin-bottom: 0;
 }
 .top-row > .team-stats {
-  flex: 1;
+  flex: 0 0 48%;
   display: flex;
   flex-direction: column;
   gap: 10px;
@@ -6870,6 +6870,11 @@ body .ant-table-wrapper .ant-table-tbody > tr > td {
 }
 .top-row > .team-stats > .lb-top10-card {
   flex-shrink: 0;
+}
+.top-row > .lb-top10-card {
+  flex: 0 0 50%;
+  max-width: 50%;
+  min-width: 0;
 }
 .lb-wrap-sm .lb-grid { grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
 .lb-wrap-sm .lb-card { padding: 10px 8px 12px; gap: 5px; border-radius: 10px; }
@@ -7011,6 +7016,24 @@ body .ant-table-wrapper .ant-table-tbody > tr > td {
 @media (max-width: 1100px) {
   .top-row { flex-direction: column; }
   .top-row > .lb-wrap { flex: 1 1 auto; max-width: 100%; }
+}
+
+@media (max-width: 900px) {
+  .lb-wrap-all .lb-list-horizontal {
+    flex-direction: column;
+    gap: 12px;
+  }
+  .lb-wrap-all .lb-card-horizontal {
+    max-width: 100%;
+    flex-direction: row;
+    padding: 12px 16px;
+    gap: 12px;
+  }
+  .lb-wrap-all .lb-card-cup { font-size: 28px; }
+  .lb-wrap-all .lb-card-av { width: 50px; height: 50px; }
+  .lb-wrap-all .lb-card-info { align-items: flex-start; }
+  .lb-wrap-all .lb-card-name { font-size: 14px; text-align: left; }
+  .lb-wrap-all .lb-card-orders { margin-top: 0; }
 }
 
 @media (max-width: 768px) {
@@ -8250,11 +8273,120 @@ body .ant-table-wrapper .ant-table-tbody > tr > td {
   }
 }
 
-/* === VINH DANH — Layout "Tất cả" (avatar trái, tên+rank giữa, số đơn phải) === */
-.lb-wrap-all .lb-list {
+/* === VINH DANH — Layout "Tất cả" (3 nhân viên xếp NGANG) === */
+.lb-wrap-all .lb-list-horizontal {
+  display: flex;
+  flex-direction: row !important;
+  gap: 16px;
+  justify-content: center;
+  align-items: stretch;
+  flex-wrap: wrap;
+}
+.lb-wrap-all .lb-card-horizontal {
+  flex: 1 1 220px;
+  max-width: 280px;
+  min-width: 180px;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  align-items: center;
+  padding: 16px 14px 14px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 14px;
+  position: relative;
+  gap: 8px;
+  transition: all 0.25s ease;
+}
+.lb-wrap-all .lb-card-horizontal:hover {
+  background: rgba(255, 255, 255, 0.1);
+  transform: translateY(-3px);
+}
+.lb-wrap-all .lb-card-horizontal.r1 {
+  border-color: rgba(201, 149, 42, 0.5);
+  background: linear-gradient(180deg, rgba(201, 149, 42, 0.15), rgba(201, 149, 42, 0.05));
+  box-shadow: 0 4px 20px rgba(201, 149, 42, 0.2);
+}
+.lb-wrap-all .lb-card-horizontal.r2 {
+  border-color: rgba(148, 163, 184, 0.4);
+  background: linear-gradient(180deg, rgba(148, 163, 184, 0.1), rgba(148, 163, 184, 0.03));
+}
+.lb-wrap-all .lb-card-horizontal.r3 {
+  border-color: rgba(201, 149, 42, 0.3);
+  background: linear-gradient(180deg, rgba(201, 149, 42, 0.08), rgba(201, 149, 42, 0.02));
+}
+.lb-wrap-all .lb-card-cup {
+  font-size: 32px;
+  line-height: 1;
+}
+.lb-wrap-all .lb-card-av {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid rgba(255, 255, 255, 0.2);
+}
+.lb-wrap-all .lb-card-av.r1 { border-color: #c9952a; box-shadow: 0 0 16px rgba(201, 149, 42, 0.5); }
+.lb-wrap-all .lb-card-av.r2 { border-color: #94a3b8; box-shadow: 0 0 12px rgba(148, 163, 184, 0.4); }
+.lb-wrap-all .lb-card-av.r3 { border-color: #c9952a; box-shadow: 0 0 10px rgba(201, 149, 42, 0.3); }
+.lb-wrap-all .lb-card-info {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+.lb-wrap-all .lb-card-name {
+  font-size: 15px;
+  font-weight: 700;
+  color: #fff;
+  text-align: center;
+}
+.lb-wrap-all .lb-card-tag {
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 10px;
+  border-radius: 10px;
+  letter-spacing: 0.3px;
+}
+.lb-wrap-all .lb-card-tag.r1 {
+  background: linear-gradient(90deg, #c9952a, #fde68a);
+  color: #3a2000;
+}
+.lb-wrap-all .lb-card-tag.r2 {
+  background: rgba(148, 163, 184, 0.2);
+  color: #cbd5e1;
+  border: 1px solid rgba(148, 163, 184, 0.3);
+}
+.lb-wrap-all .lb-card-tag.r3 {
+  background: rgba(201, 149, 42, 0.15);
+  color: #fde68a;
+  border: 1px solid rgba(201, 149, 42, 0.25);
+}
+.lb-wrap-all .lb-card-orders {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 8px 16px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  margin-top: 4px;
+}
+.lb-wrap-all .lb-card-orders-num {
+  font-size: 24px;
+  font-weight: 800;
+  line-height: 1;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+.lb-wrap-all .lb-card-orders.r1 .lb-card-orders-num { color: #fde68a; }
+.lb-wrap-all .lb-card-orders.r2 .lb-card-orders-num { color: #e2e8f0; }
+.lb-wrap-all .lb-card-orders.r3 .lb-card-orders-num { color: #fde68a; }
+.lb-wrap-all .lb-card-orders-lbl {
+  font-size: 10px;
+  color: rgba(255, 255, 255, 0.55);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  margin-top: 2px;
 }
 .lb-row {
   display: grid;
