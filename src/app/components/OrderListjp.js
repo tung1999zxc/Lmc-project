@@ -3163,7 +3163,7 @@ const OrderListjp = () => {
 
   const handleSubmit = async (values) => {
     const revenue = Number(values.revenue) || 0;
-    const profit = revenue === 0 ? 0 : Math.max(revenue - 699, 0);
+    const profit = revenue === 0 ? 0 : Math.max(revenue - 0, 0);
     const products = values.products || [];
 
     let stt;
