@@ -1106,12 +1106,12 @@ const OrderList = () => {
     const totals2 = calculateTotalQuantities(tickedOrders);
     setTotalQuantitiesINDON(totals2);
 
-    const CTYDONGOrders = filteredOrders.filter((order) => order.isShipping === false);
+    const CTYDONGOrders = filteredOrders.filter(
+      (order) => order.isShipping === false,
+    );
     const totals3 = calculateTotalQuantities(CTYDONGOrders);
     setTotalQuantitiesCTYDONG(totals3);
-    const KHODONGOrders = filteredOrders.filter(
-      (order) => order.isShipping,
-    );
+    const KHODONGOrders = filteredOrders.filter((order) => order.isShipping);
     const totals4 = calculateTotalQuantities(KHODONGOrders);
     setTotalQuantitiesKHODONG(totals4);
     setIsdem(true);
@@ -1973,38 +1973,59 @@ const OrderList = () => {
       ? [
           {
             title: (
-              <>
+              <Checkbox
+                checked={selectedColumns.includes("isShipping")}
+                onChange={(e) =>
+                  handleColumnSelect("isShipping", e.target.checked)
+                }
+              >
                 <div
-                  style={{ display: "flex", alignItems: "center", gap: "10px" }}
+                  style={{
+                    whiteSpace: "normal",
+                    fontSize: "9px",
+                    textAlign: "center",
+                  }}
                 >
                   <div
-                    style={{ display: "flex", gap: 10, alignItems: "center" }}
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "10px",
+                    }}
                   >
-                    <Checkbox.Group
-                      options={[
-                        { label: "CHỌN KHO ĐÓNG HÀNG", value: "istick2" },
-                      ]}
-                      value={allRowsSelected2 ? ["istick2"] : []}
-                      onChange={(checkedValues) =>
-                        handleSelectAllIstick2(checkedValues.length > 0)
-                      }
-                    />
+                    <div
+                      style={{ display: "flex", gap: 10, alignItems: "center" }}
+                    >
+                      <Checkbox.Group
+                        options={[
+                          { label: "CHỌN KHO ĐÓNG HÀNG", value: "istick2" },
+                        ]}
+                        value={allRowsSelected2 ? ["istick2"] : []}
+                        onChange={(checkedValues) =>
+                          handleSelectAllIstick2(checkedValues.length > 0)
+                        }
+                      />
 
-                    <Select
-                      placeholder="Chọn kho đóng"
-                      style={{ width: 180 }}
-                      value={selectedKhoDong}
-                      onChange={setSelectedKhoDong}
-                      options={kho2Options}
-                    />
+                      <Select
+                        placeholder="Chọn kho đóng"
+                        style={{ width: 100, fontSize: "10px" }}
+                        value={selectedKhoDong}
+                        onChange={setSelectedKhoDong}
+                        options={kho2Options}
+                      />
+                    </div>
                   </div>
+                  <Button
+                    type="primary"
+                    size="small"
+                    onClick={handleSaveIstick2}
+                  >
+                    Lưu
+                  </Button>
                 </div>
-                <Button type="primary" onClick={handleSaveIstick2}>
-                  Lưu
-                </Button>
-              </>
+              </Checkbox>
             ),
-
+            width: 40,
             key: "isShipping",
             dataIndex: "isShipping",
             render: (_, record) => (
@@ -2024,7 +2045,9 @@ const OrderList = () => {
             title: (
               <Checkbox
                 checked={selectedColumns.includes("isShippingName")}
-                onChange={(e) => handleColumnSelect("isShippingName", e.target.checked)}
+                onChange={(e) =>
+                  handleColumnSelect("isShippingName", e.target.checked)
+                }
               >
                 KHO ĐÓNG HÀNG
               </Checkbox>
@@ -2788,7 +2811,9 @@ const OrderList = () => {
     },
     {
       title: (
-        <div style={{ whiteSpace: 'normal', fontSize: '9px', textAlign: 'center' }}>
+        <div
+          style={{ whiteSpace: "normal", fontSize: "9px", textAlign: "center" }}
+        >
           <Checkbox
             checked={selectedColumns.includes("istick")}
             onChange={(e) => handleColumnSelect("istick", e.target.checked)}
@@ -2818,7 +2843,9 @@ const OrderList = () => {
 
     {
       title: (
-        <div style={{ whiteSpace: 'normal', fontSize: '9px', textAlign: 'center' }}>
+        <div
+          style={{ whiteSpace: "normal", fontSize: "9px", textAlign: "center" }}
+        >
           <Checkbox
             checked={allRowsSelected4}
             onChange={(e) => handleSelectAllIstick4(e.target.checked)}
@@ -2843,7 +2870,9 @@ const OrderList = () => {
 
     {
       title: (
-        <div style={{ whiteSpace: 'normal', fontSize: '9px', textAlign: 'center' }}>
+        <div
+          style={{ whiteSpace: "normal", fontSize: "9px", textAlign: "center" }}
+        >
           <Checkbox
             checked={allRowsSelectedDONE}
             onChange={(e) => handleSelectAllIstickDONE(e.target.checked)}
@@ -2869,32 +2898,57 @@ const OrderList = () => {
       ? [
           {
             title: (
-              <div style={{ whiteSpace: 'normal', fontSize: '9px', textAlign: 'center' }}>
-                <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-                  <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
-                    <Checkbox.Group
-                      options={[
-                        { label: "CHỌN KHO ĐÓNG HÀNG", value: "istick2" },
-                      ]}
-                      value={allRowsSelected2 ? ["istick2"] : []}
-                      onChange={(checkedValues) =>
-                        handleSelectAllIstick2(checkedValues.length > 0)
-                      }
-                    />
+              <Checkbox
+                checked={selectedColumns.includes("isShipping")}
+                onChange={(e) =>
+                  handleColumnSelect("isShipping", e.target.checked)
+                }
+              >
+                <div
+                  style={{
+                    whiteSpace: "normal",
+                    fontSize: "9px",
+                    textAlign: "center",
+                  }}
+                >
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "10px",
+                    }}
+                  >
+                    <div
+                      style={{ display: "flex", gap: 10, alignItems: "center" }}
+                    >
+                      <Checkbox.Group
+                        options={[
+                          { label: "CHỌN KHO ĐÓNG HÀNG", value: "istick2" },
+                        ]}
+                        value={allRowsSelected2 ? ["istick2"] : []}
+                        onChange={(checkedValues) =>
+                          handleSelectAllIstick2(checkedValues.length > 0)
+                        }
+                      />
 
-                    <Select
-                      placeholder="Chọn kho đóng"
-                      style={{ width: 100, fontSize: '10px' }}
-                      value={selectedKhoDong}
-                      onChange={setSelectedKhoDong}
-                      options={kho2Options}
-                    />
+                      <Select
+                        placeholder="Chọn kho đóng"
+                        style={{ width: 100, fontSize: "10px" }}
+                        value={selectedKhoDong}
+                        onChange={setSelectedKhoDong}
+                        options={kho2Options}
+                      />
+                    </div>
                   </div>
+                  <Button
+                    type="primary"
+                    size="small"
+                    onClick={handleSaveIstick2}
+                  >
+                    Lưu
+                  </Button>
                 </div>
-                <Button type="primary" size="small" onClick={handleSaveIstick2}>
-                  Lưu
-                </Button>
-              </div>
+              </Checkbox>
             ),
             width: 40,
             key: "isShipping",
@@ -2916,7 +2970,9 @@ const OrderList = () => {
             title: (
               <Checkbox
                 checked={selectedColumns.includes("isShippingName")}
-                onChange={(e) => handleColumnSelect("isShippingName", e.target.checked)}
+                onChange={(e) =>
+                  handleColumnSelect("isShippingName", e.target.checked)
+                }
               >
                 KHO ĐÓNG HÀNG
               </Checkbox>
