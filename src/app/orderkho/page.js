@@ -127,6 +127,12 @@ input,textarea,select{font-family:inherit}
 .prod-search-wrap input{width:100%;background:var(--bg);border:1.5px solid var(--line);border-radius:8px;padding:7px 10px 7px 30px;font-size:12.5px;outline:none;color:var(--ink)}
 .prod-search-wrap input:focus{border-color:var(--accent);background:#fff}
 .prod-chips{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:9px;max-height:68px;overflow-y:auto}
+.order-filter-fields{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:10px 0 9px;padding-top:10px;border-top:1px solid var(--line2)}
+.order-filter-field label{font-size:10.5px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:5px}
+.order-filter-field input,.order-filter-field select{width:100%;height:34px;background:var(--bg);border:1.5px solid var(--line);border-radius:8px;padding:6px 9px;font-size:12px;outline:none;color:var(--ink)}
+.order-filter-field input:focus,.order-filter-field select:focus{border-color:var(--accent);background:#fff;box-shadow:0 0 0 3px var(--accent-s)}
+.order-filter-summary{display:flex;align-items:center;gap:6px;flex-wrap:wrap;background:var(--accent-s);color:var(--accent);border-radius:8px;padding:7px 10px;margin-bottom:8px;font-size:11.5px;font-weight:600}
+.order-filter-summary strong{margin-left:auto;font-size:11px}
 .pchip{padding:4px 11px;border-radius:20px;font-size:11.5px;font-weight:600;cursor:pointer;
   border:1.5px solid var(--line);color:var(--ink2);background:var(--bg);transition:.12s;white-space:nowrap;
   display:inline-flex;align-items:center;gap:5px}
@@ -244,6 +250,22 @@ td.ctr{text-align:center}
   padding:10px 16px;box-shadow:0 8px 32px rgba(10,15,30,.35);opacity:0;pointer-events:none;
   transition:.22s;z-index:200;white-space:nowrap;border:1px solid #2a3a5a;min-width:360px}
 .bulk-bar.show{opacity:1;pointer-events:all;transform:translateX(-50%) translateY(0)}
+
+/* Floating save button (needprocess) */
+.save-fab{position:fixed;right:22px;bottom:24px;z-index:210;display:inline-flex;align-items:center;gap:6px;
+  padding:10px 16px;border-radius:999px;font-size:12.5px;font-weight:700;
+  background:var(--amber);color:#fff;box-shadow:0 8px 24px rgba(217,138,0,.35),0 2px 6px rgba(0,0,0,.18);
+  border:none;cursor:pointer;font-family:inherit;transition:.18s;opacity:0;pointer-events:none;transform:translateY(12px)}
+.save-fab.show{opacity:1;pointer-events:all;transform:translateY(0)}
+.save-fab:hover{background:#b87400;transform:translateY(-1px);box-shadow:0 10px 28px rgba(217,138,0,.45),0 2px 6px rgba(0,0,0,.2)}
+.save-fab svg{width:14px;height:14px;stroke-width:2.4}
+.save-fab .n{background:#fff;color:var(--amber);border-radius:999px;padding:1px 8px;font-size:11px;font-weight:800;margin-left:2px}
+@media (max-width:1024px){
+  .save-fab{right:14px;bottom:14px;padding:9px 14px;font-size:12px}
+}
+@media (max-width:640px){
+  .save-fab{right:10px;bottom:10px;padding:8px 12px;font-size:11.5px;border-radius:10px}
+}
 .bulk-count{display:flex;align-items:center;gap:7px;font-size:13px;font-weight:700;padding-right:10px;border-right:1px solid #2a3a5a;margin-right:2px}
 .bulk-count .n{background:var(--accent);color:#fff;border-radius:6px;padding:2px 9px;font-size:13px;font-weight:800}
 .bulk-actions{display:flex;align-items:center;gap:7px;flex:1}
@@ -284,6 +306,65 @@ td.ctr{text-align:center}
   border-top-color:#fff;border-radius:50%;animation:spin .8s linear infinite}
 .kho-loading p{color:#fff;font-size:13px;font-weight:600}
 @keyframes spin{to{transform:rotate(360deg)}}
+
+/* ── Marketing modal ── */
+.mkt-overlay{position:fixed;inset:0;background:rgba(15,22,40,.55);backdrop-filter:blur(2px);z-index:400;display:flex;align-items:center;justify-content:center;padding:18px}
+.mkt-modal{background:#fff;border-radius:14px;box-shadow:0 20px 60px rgba(0,0,0,.3);width:min(640px,100%);max-height:90vh;display:flex;flex-direction:column;overflow:hidden;animation:mkt-in .18s ease}
+@keyframes mkt-in{from{opacity:0;transform:translateY(8px) scale(.98)}to{opacity:1;transform:none}}
+.mkt-head{padding:14px 18px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:10px}
+.mkt-head h3{font-size:15px;font-weight:700;color:var(--ink);margin:0;flex:1}
+.mkt-head .close{width:28px;height:28px;border-radius:6px;display:flex;align-items:center;justify-content:center;color:var(--muted);cursor:pointer;background:none;border:none}
+.mkt-head .close:hover{background:var(--line2);color:var(--ink)}
+.mkt-body{padding:16px 18px;overflow:auto;flex:1}
+.mkt-section{margin-bottom:14px}
+.mkt-section h4{font-size:11.5px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:7px}
+.mkt-list{display:flex;flex-direction:column;gap:7px;max-height:200px;overflow:auto}
+.mkt-item{display:flex;align-items:flex-start;gap:9px;padding:10px 12px;border:1.5px solid var(--line);border-radius:9px;cursor:pointer;transition:.12s;background:#fff}
+.mkt-item:hover{border-color:var(--accent)}
+.mkt-item.sel{background:var(--accent-s);border-color:var(--accent)}
+.mkt-item .dot{flex-shrink:0;width:16px;height:16px;border-radius:50%;border:2px solid var(--line);display:flex;align-items:center;justify-content:center;margin-top:1px}
+.mkt-item.sel .dot{background:var(--accent);border-color:var(--accent)}
+.mkt-item.sel .dot::after{content:"✓";color:#fff;font-size:10px;font-weight:800}
+.mkt-item .ti{flex:1;min-width:0}
+.mkt-item .tt{font-size:13px;font-weight:700;color:var(--ink);margin-bottom:2px}
+.mkt-item .tb{font-size:11.5px;color:var(--ink2);line-height:1.45;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.mkt-item .acts{display:flex;gap:4px;flex-shrink:0}
+.mkt-item .acts button{width:24px;height:24px;border-radius:5px;color:var(--muted);background:none;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.mkt-item .acts button:hover{background:var(--line2);color:var(--ink)}
+.mkt-item .acts svg{width:13px;height:13px}
+.mkt-add{padding:9px 12px;border:1.5px dashed var(--line);border-radius:9px;color:var(--muted);font-size:12px;font-weight:600;cursor:pointer;background:none;width:100%;display:flex;align-items:center;justify-content:center;gap:6px}
+.mkt-add:hover{border-color:var(--accent);color:var(--accent)}
+.mkt-preview{background:var(--bg);border:1px solid var(--line);border-radius:9px;padding:12px;font-size:12.5px;color:var(--ink);line-height:1.55;white-space:pre-wrap;min-height:60px}
+.mkt-foot{padding:13px 18px;border-top:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;gap:10px;background:#f8fafd}
+.mkt-foot .info{font-size:11.5px;color:var(--muted)}
+.mkt-foot .info b{color:var(--accent)}
+.mkt-progress-overlay{position:fixed;bottom:24px;right:24px;background:#16203a;color:#fff;border-radius:12px;padding:12px 16px;box-shadow:0 10px 30px rgba(0,0,0,.3);z-index:250;min-width:280px;border:1px solid #2a3a5a;animation:mkt-in .18s ease}
+.mkt-progress-overlay .ph{display:flex;align-items:center;justify-content:space-between;margin-bottom:7px;font-size:12px;font-weight:600}
+.mkt-progress-overlay .ph b{color:var(--accent)}
+.mkt-progress-overlay .now{font-size:11px;color:#9baec8;margin-bottom:8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mkt-progress-overlay .bar{height:6px;background:#2a3a5a;border-radius:3px;overflow:hidden;margin-bottom:9px}
+.mkt-progress-overlay .bar-fill{height:100%;background:linear-gradient(90deg,#1d63ed,#3b7fff);transition:width .3s}
+.mkt-progress-overlay .stats{display:flex;gap:8px;margin-bottom:10px;font-size:11px}
+.mkt-progress-overlay .stats .sp{padding:3px 8px;border-radius:5px;font-weight:600}
+.mkt-progress-overlay .stats .ok{background:#0d2e1e;color:#34d399}
+.mkt-progress-overlay .stats .er{background:#3a1010;color:#f87171}
+.mkt-progress-overlay .stats .rm{background:#3a2800;color:#fbbf24}
+.mkt-progress-overlay .acts{display:flex;gap:6px}
+.mkt-progress-overlay .acts button{flex:1;padding:6px 10px;border-radius:7px;font-size:11.5px;font-weight:700;cursor:pointer;border:none;font-family:inherit}
+.mkt-progress-overlay .acts .stop{background:#e0524d;color:#fff}
+.mkt-progress-overlay .acts .stop:hover{background:#c63d38}
+.mkt-progress-overlay .acts .close{background:#2a3a5a;color:#cbd5e8}
+.mkt-progress-overlay .acts .close:hover{background:#38496a}
+.mkt-edit-area{display:flex;flex-direction:column;gap:7px;margin-top:6px}
+.mkt-edit-area input,.mkt-edit-area textarea{background:var(--bg);border:1.5px solid var(--line);border-radius:7px;padding:7px 9px;font-size:12.5px;outline:none;font-family:inherit;color:var(--ink)}
+.mkt-edit-area input:focus,.mkt-edit-area textarea:focus{border-color:var(--accent);background:#fff}
+.mkt-edit-area textarea{min-height:80px;resize:vertical;line-height:1.5}
+.mkt-edit-actions{display:flex;gap:6px;margin-top:4px}
+.mkt-edit-actions button{padding:5px 11px;border-radius:6px;font-size:11.5px;font-weight:600;cursor:pointer;border:none}
+.mkt-edit-actions .ok{background:var(--accent);color:#fff}
+.mkt-edit-actions .cn{background:var(--line2);color:var(--ink2)}
+.mkt-helper{font-size:10.5px;color:var(--muted);margin-top:4px}
+.mkt-helper code{background:var(--line2);padding:1px 5px;border-radius:4px;font-size:10.5px;color:var(--ink2)}
 
 /* ── RESPONSIVE ── */
 @media (max-width: 1024px) {
@@ -483,6 +564,9 @@ td.ctr{text-align:center}
   .bulk-bar {
     padding-bottom: calc(10px + env(safe-area-inset-bottom));
   }
+  .save-fab {
+    bottom: calc(24px + env(safe-area-inset-bottom));
+  }
   .content {
     padding-bottom: calc(80px + env(safe-area-inset-bottom));
   }
@@ -541,6 +625,8 @@ function mapOrder(o) {
     ngayDat,
     ngayGui,
     ngayNhan,
+    shippingDate1Raw: o.shippingDate1 || null,
+    shippingDate2Raw: o.shippingDate2 || null,
     daysShipping,
     delivered,
     reconciled,
@@ -669,12 +755,56 @@ export default function KhoOrderList() {
   const [toast, setToast] = useState({ msg: "", show: false });
   const toastTimer = useRef(null);
 
+  // ── Marketing (gửi tiếp thị lại) ──
+  // Danh sách câu tiếp thị có sẵn + cho phép chỉnh sửa
+  const [marketingTemplates, setMarketingTemplates] = useState([
+    {
+      id: "t1",
+      title: "Nhắc đơn chưa gửi",
+      body:
+        "Chào {ten}, đơn {stt} của anh/chị hiện chưa được gửi đi. LMC xin lỗi vì sự chậm trễ. Anh/chị có muốn shop hỗ trợ gì thêm không ạ? 🙏",
+    },
+    {
+      id: "t2",
+      title: "Xin lỗi + đền bù",
+      body:
+        "Chào {ten}, đơn {stt} của anh/chị đang gặp sự cố. Shop xin lỗi và sẽ gửi lại mã vận đơn mới trong hôm nay ạ. Mong anh/chị thông cảm! 💚",
+    },
+    {
+      id: "t3",
+      title: "CSKH chăm sóc",
+      body:
+        "Chào {ten}, LMC gọi xác nhận đơn {stt}. Anh/chị vẫn còn nhu cầu dùng sản phẩm không ạ? Nếu cần shop gửi ngay trong hôm nay nhé!",
+    },
+  ]);
+  const [showMarketingModal, setShowMarketingModal] = useState(false);
+  const [selectedTemplateId, setSelectedTemplateId] = useState("t1");
+  const [editingTemplate, setEditingTemplate] = useState(null); // {id,title,body} đang sửa
+  const [newTemplate, setNewTemplate] = useState({ title: "", body: "" });
+  const [showAddTemplate, setShowAddTemplate] = useState(false);
+  // Tiến trình gửi
+  const [sendingState, setSendingState] = useState({
+    running: false,
+    total: 0,
+    sent: 0,
+    failed: 0,
+    currentName: "",
+    queue: [], // danh sách order id đang chờ
+    done: [], // danh sách order id đã gửi
+  });
+  const sendingRef = useRef(null); // { cancelled: bool }
+
   // Panel ghép mã
   const [bulkStt, setBulkStt] = useState("");
   const [bulkTrack, setBulkTrack] = useState("");
   const [matchPreview, setMatchPreview] = useState(null); // null | array
   const [trackNote, setTrackNote] = useState("");
   const [sttDoneInput, setSttDoneInput] = useState("");
+
+  // Bộ lọc nâng cao: ngày gửi hàng & mã vận đơn
+  const [shipDateFrom, setShipDateFrom] = useState("");
+  const [shipDateTo, setShipDateTo] = useState("");
+  const [trackFilter, setTrackFilter] = useState("all"); // all | with | without
 
   // Đơn cần xử lý form
   const [needProcessForm, setNeedProcessForm] = useState({});
@@ -835,10 +965,28 @@ export default function KhoOrderList() {
     );
   }, [viewList, searchQ]);
 
+  // ── Lọc theo khoảng ngày gửi & trạng thái mã vận đơn ──
+  const dateFilteredList = useMemo(() => {
+    if (!shipDateFrom && !shipDateTo && trackFilter === "all")
+      return searchedList;
+    const from = shipDateFrom ? dayjs(shipDateFrom).startOf("day") : null;
+    const to = shipDateTo ? dayjs(shipDateTo).endOf("day") : null;
+    return searchedList.filter((o) => {
+      if (trackFilter === "with" && !o.track) return false;
+      if (trackFilter === "without" && o.track) return false;
+      if (!from && !to) return true;
+      if (!o.shippingDate1Raw) return false;
+      const sent = dayjs(o.shippingDate1Raw);
+      if (from && sent.isBefore(from)) return false;
+      if (to && sent.isAfter(to)) return false;
+      return true;
+    });
+  }, [searchedList, shipDateFrom, shipDateTo, trackFilter]);
+
   // ── Lọc sản phẩm ──
   const filteredList = useMemo(() => {
-    if (activeProds.size === 0) return searchedList;
-    const matched = searchedList.filter((o) =>
+    if (activeProds.size === 0) return dateFilteredList;
+    const matched = dateFilteredList.filter((o) =>
       o.prods.some((p) => activeProds.has(p)),
     );
     // sort: nhóm theo SP được chọn đầu tiên
@@ -848,7 +996,13 @@ export default function KhoOrderList() {
       const bi = prodOrder.findIndex((p) => b.prods.includes(p));
       return ai - bi;
     });
-  }, [searchedList, activeProds]);
+  }, [dateFilteredList, activeProds]);
+
+  function clearOrderFilter() {
+    setShipDateFrom("");
+    setShipDateTo("");
+    setTrackFilter("all");
+  }
 
   // ── Pill counts ──
   const pillCounts = useMemo(
@@ -1450,6 +1604,181 @@ export default function KhoOrderList() {
       showToast("Lỗi khi bỏ trạng thái gửi hàng");
     }
   }
+
+  // ── Gửi tiếp thị lại (queue 1s/người) ──
+  /**
+   * Hook gửi tin nhắn thật đến 1 khách.
+   * Hiện đang là MOCK — ghi log + lưu localStorage làm "đã gửi".
+   * Khi tích hợp Zalo OA / SMS / Email thật, chỉ cần thay axios.post(...) bên trong.
+   */
+  async function sendMessageToCustomer(order, message) {
+    // ── TODO: Thay đoạn này bằng API gửi thật ──
+    // Ví dụ Zalo OA ZNS:
+    //   await axios.post("/api/zalo/send", { phone: order.sdt, message });
+    // Ví dụ SMS:
+    //   await axios.post("/api/sms/send", { phone: order.sdt, message });
+    console.log(`[Mock] Gửi tới ${order.cust} (${order.sdt}):`, message);
+    await new Promise((r) => setTimeout(r, 250)); // giả lập độ trễ mạng
+    return { ok: true };
+  }
+
+  function buildMessage(template, order) {
+    const ten = (order.cust || "").trim() || "anh/chị";
+    const stt = order.stt ? `#${order.stt}` : "";
+    return template.body
+      .replaceAll("{ten}", ten)
+      .replaceAll("{stt}", stt)
+      .replaceAll("{sdt}", order.sdt || "")
+      .replaceAll("{sp}", (order.prods || []).join(", "));
+  }
+
+  function getMarketingTargets() {
+    // Lấy từ view hiện tại nếu đang ở "needprocess", fallback tất cả istick5 chưa xử lý.
+    let pool;
+    if (currentView === "needprocess") {
+      pool = filteredList;
+    } else {
+      pool = ordersWithState.filter(
+        (o) => o.istick5 === true && o.daXuLy === false,
+      );
+    }
+    // Loại những đơn đã gửi tiếp thị rồi (theo localStorage)
+    const sentKey = "marketingSentIds";
+    let sentIds = new Set();
+    try {
+      const raw = localStorage.getItem(sentKey);
+      if (raw) sentIds = new Set(JSON.parse(raw));
+    } catch (e) {
+      /* ignore */
+    }
+    return pool.filter(
+      (o) => o.sdt && !sentIds.has(o.id) && !sendingState.done.includes(o.id),
+    );
+  }
+
+  function persistSentIds(ids) {
+    try {
+      const sentKey = "marketingSentIds";
+      const raw = localStorage.getItem(sentKey);
+      const cur = new Set(raw ? JSON.parse(raw) : []);
+      ids.forEach((id) => cur.add(id));
+      localStorage.setItem(sentKey, JSON.stringify([...cur]));
+    } catch (e) {
+      /* ignore */
+    }
+  }
+
+  async function startMarketingSend(templateId) {
+    const template = marketingTemplates.find((t) => t.id === templateId);
+    if (!template) return;
+    const targets = getMarketingTargets();
+    if (!targets.length) {
+      showToast("Không còn khách nào chưa gửi tiếp thị trong mục này");
+      return;
+    }
+
+    sendingRef.current = { cancelled: false };
+    setShowMarketingModal(false);
+    setSendingState({
+      running: true,
+      total: targets.length,
+      sent: 0,
+      failed: 0,
+      currentName: targets[0].cust,
+      queue: targets.map((o) => o.id),
+      done: [],
+    });
+    showToast(
+      `Bắt đầu gửi tiếp thị cho ${targets.length} khách · 1s/người`,
+    );
+
+    const sentInBatch = [];
+    for (let i = 0; i < targets.length; i++) {
+      if (sendingRef.current?.cancelled) break;
+      const o = targets[i];
+      const msg = buildMessage(template, o);
+      setSendingState((s) => ({ ...s, currentName: o.cust || `#${o.stt}` }));
+      try {
+        const res = await sendMessageToCustomer(o, msg);
+        if (res?.ok) {
+          sentInBatch.push(o.id);
+          setSendingState((s) => ({
+            ...s,
+            sent: s.sent + 1,
+            done: [...s.done, o.id],
+            queue: s.queue.slice(1),
+          }));
+        } else {
+          setSendingState((s) => ({
+            ...s,
+            failed: s.failed + 1,
+            queue: s.queue.slice(1),
+          }));
+        }
+      } catch (err) {
+        console.error(err);
+        setSendingState((s) => ({
+          ...s,
+          failed: s.failed + 1,
+          queue: s.queue.slice(1),
+        }));
+      }
+      // delay 1s/người trừ người cuối cùng
+      if (i < targets.length - 1) {
+        await new Promise((r) => setTimeout(r, 1000));
+      }
+    }
+    persistSentIds(sentInBatch);
+    setSendingState((s) => ({ ...s, running: false, queue: [] }));
+    showToast(
+      `Hoàn tất: gửi thành công ${sentInBatch.length}/${targets.length}`,
+    );
+  }
+
+  function cancelMarketingSend() {
+    sendingRef.current = { cancelled: true };
+    setSendingState((s) => ({ ...s, running: false }));
+    showToast("Đã dừng gửi tiếp thị");
+  }
+
+  function saveTemplateEdit() {
+    if (!editingTemplate) return;
+    setMarketingTemplates((arr) =>
+      arr.map((t) =>
+        t.id === editingTemplate.id ? { ...editingTemplate } : t,
+      ),
+    );
+    setEditingTemplate(null);
+    showToast("Đã lưu câu tiếp thị");
+  }
+
+  function deleteTemplate(id) {
+    if (marketingTemplates.length <= 1) {
+      showToast("Cần giữ ít nhất 1 câu");
+      return;
+    }
+    setMarketingTemplates((arr) => arr.filter((t) => t.id !== id));
+    if (selectedTemplateId === id) {
+      setSelectedTemplateId(marketingTemplates[0].id);
+    }
+  }
+
+  function addNewTemplate() {
+    if (!newTemplate.title.trim() || !newTemplate.body.trim()) {
+      showToast("Nhập đầy đủ tiêu đề và nội dung");
+      return;
+    }
+    const id = `t${Date.now()}`;
+    setMarketingTemplates((arr) => [
+      ...arr,
+      { id, title: newTemplate.title.trim(), body: newTemplate.body.trim() },
+    ]);
+    setSelectedTemplateId(id);
+    setNewTemplate({ title: "", body: "" });
+    setShowAddTemplate(false);
+    showToast("Đã thêm câu tiếp thị mới");
+  }
+
   // ── Export Excel (CSV) ──
   function exportExcel() {
     if (!filteredList.length) {
@@ -1905,11 +2234,13 @@ export default function KhoOrderList() {
                     </svg>
                   </div>
                   <div>
-                    <h3>Lọc sản phẩm</h3>
+                    <h3>Lọc sản phẩm & đơn hàng</h3>
                     <p>
                       {activeProds.size > 0
                         ? `Đang lọc: ${[...activeProds].join(", ")} — ${filteredList.length} đơn`
-                        : "Chọn SP → lọc bảng → xuất Excel"}
+                        : trackFilter !== "all" || shipDateFrom || shipDateTo
+                          ? `Đang lọc ngày/mã vận đơn — ${filteredList.length} đơn`
+                          : "Chọn SP → lọc bảng → xuất Excel"}
                     </p>
                   </div>
                   <div className="chevron">
@@ -1957,6 +2288,75 @@ export default function KhoOrderList() {
                     )}
                   </div>
 
+                  <div className="order-filter-fields">
+                    <div className="order-filter-field">
+                      <label>Từ ngày gửi</label>
+                      <input
+                        type="date"
+                        value={shipDateFrom}
+                        onChange={(e) => setShipDateFrom(e.target.value)}
+                      />
+                    </div>
+                    <div className="order-filter-field">
+                      <label>Đến ngày gửi</label>
+                      <input
+                        type="date"
+                        value={shipDateTo}
+                        onChange={(e) => setShipDateTo(e.target.value)}
+                      />
+                    </div>
+                    <div className="order-filter-field">
+                      <label>Mã vận đơn</label>
+                      <select
+                        value={trackFilter}
+                        onChange={(e) => setTrackFilter(e.target.value)}
+                      >
+                        <option value="all">Tất cả</option>
+                        <option value="without">Đã gửi – chưa có mã</option>
+                        <option value="with">Đã gửi – có mã</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  {(trackFilter !== "all" || shipDateFrom || shipDateTo) && (
+                    <div className="order-filter-summary">
+                      <svg
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        style={{ width: 13, height: 13, strokeWidth: 2 }}
+                      >
+                        <rect x="3" y="4" width="18" height="18" rx="2" />
+                        <line x1="16" y1="2" x2="16" y2="6" />
+                        <line x1="8" y1="2" x2="8" y2="6" />
+                        <line x1="3" y1="10" x2="21" y2="10" />
+                      </svg>
+                      <span>
+                        {[
+                          shipDateFrom &&
+                            `Từ ${dayjs(shipDateFrom).format("DD/MM/YYYY")}`,
+                          shipDateTo &&
+                            `Đến ${dayjs(shipDateTo).format("DD/MM/YYYY")}`,
+                          trackFilter === "with" && "Có mã VĐ",
+                          trackFilter === "without" && "Chưa có mã VĐ",
+                        ]
+                          .filter(Boolean)
+                          .join(" · ")}
+                      </span>
+                      <strong>{filteredList.length} đơn</strong>
+                      <button
+                        onClick={clearOrderFilter}
+                        style={{
+                          color: "var(--muted)",
+                          fontSize: 11,
+                          fontWeight: 600,
+                        }}
+                      >
+                        ✕
+                      </button>
+                    </div>
+                  )}
+
                   {activeProds.size > 0 && (
                     <div className="sp-summary show">
                       <svg
@@ -1991,7 +2391,10 @@ export default function KhoOrderList() {
                         {filteredList.length} đơn
                       </span>
                       <button
-                        onClick={clearProdFilter}
+                        onClick={() => {
+                          clearProdFilter();
+                          clearOrderFilter();
+                        }}
                         style={{
                           color: "var(--muted)",
                           fontSize: 11,
@@ -2006,7 +2409,10 @@ export default function KhoOrderList() {
                   <div className="panel-actions">
                     <button
                       className="btn btn-ghost btn-sm"
-                      onClick={clearProdFilter}
+                      onClick={() => {
+                        clearProdFilter();
+                        clearOrderFilter();
+                      }}
                     >
                       Bỏ lọc
                     </button>
@@ -2368,6 +2774,21 @@ export default function KhoOrderList() {
                           <path d="M14 2v6h6" />
                         </svg>
                         Xuất Excel
+                      </button>
+                      <button
+                        className="btn btn-amber btn-sm"
+                        onClick={() => setShowMarketingModal(true)}
+                        title="Gửi tiếp thị lại lần lượt cho từng khách (1s/người)"
+                      >
+                        <svg
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                        >
+                          <path d="M22 2 11 13" />
+                          <path d="M22 2 15 22 11 13 2 9 22 2z" />
+                        </svg>
+                        Gửi tiếp thị lại
                       </button>
                     </>
                   )}
@@ -3065,6 +3486,315 @@ export default function KhoOrderList() {
             </svg>
           </button>
         </div>
+
+        {/* ═══ FLOATING SAVE (needprocess) ═══ */}
+        {(() => {
+          const dirtyCount = Object.values(needProcessForm).filter((v) => {
+            const lyDo = (v?.lyDo || "").toString();
+            return lyDo.trim() && lyDo !== (v?.savedLyDo || "");
+          }).length;
+          const showFab = currentView === "needprocess" && dirtyCount > 0;
+          return (
+            <button
+              className={`save-fab${showFab ? " show" : ""}`}
+              onClick={showFab ? saveNeedProcessForm : undefined}
+              title="Lưu Đơn cần xử lý"
+            >
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" />
+                <polyline points="17 21 17 13 7 13 7 21" />
+                <polyline points="7 3 7 8 15 8" />
+              </svg>
+              Lưu Đơn cần xử lý
+              <span className="n">{dirtyCount}</span>
+            </button>
+          );
+        })()}
+
+        {/* ═══ MARKETING MODAL ═══ */}
+        {showMarketingModal && (
+          <div className="mkt-overlay" onClick={() => setShowMarketingModal(false)}>
+            <div className="mkt-modal" onClick={(e) => e.stopPropagation()}>
+              <div className="mkt-head">
+                <svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  style={{ color: "var(--amber)" }}
+                >
+                  <path d="M22 2 11 13" />
+                  <path d="M22 2 15 22 11 13 2 9 22 2z" />
+                </svg>
+                <h3>Gửi tiếp thị lại</h3>
+                <button
+                  className="close"
+                  onClick={() => setShowMarketingModal(false)}
+                >
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2">
+                    <path d="M18 6 6 18M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+
+              <div className="mkt-body">
+                <div className="mkt-section">
+                  <h4>Chọn câu tiếp thị</h4>
+                  <div className="mkt-list">
+                    {marketingTemplates.map((t) => (
+                      <div
+                        key={t.id}
+                        className={`mkt-item${selectedTemplateId === t.id ? " sel" : ""}`}
+                        onClick={() => setSelectedTemplateId(t.id)}
+                      >
+                        <div className="dot" />
+                        <div className="ti">
+                          <div className="tt">{t.title}</div>
+                          <div className="tb">{t.body}</div>
+                          {editingTemplate?.id === t.id ? (
+                            <div className="mkt-edit-area">
+                              <input
+                                value={editingTemplate.title}
+                                onChange={(e) =>
+                                  setEditingTemplate({
+                                    ...editingTemplate,
+                                    title: e.target.value,
+                                  })
+                                }
+                                placeholder="Tiêu đề"
+                              />
+                              <textarea
+                                value={editingTemplate.body}
+                                onChange={(e) =>
+                                  setEditingTemplate({
+                                    ...editingTemplate,
+                                    body: e.target.value,
+                                  })
+                                }
+                                placeholder="Nội dung (hỗ trợ biến {ten}, {stt}, {sdt}, {sp})"
+                              />
+                              <div className="mkt-edit-actions">
+                                <button className="ok" onClick={saveTemplateEdit}>
+                                  Lưu
+                                </button>
+                                <button
+                                  className="cn"
+                                  onClick={() => setEditingTemplate(null)}
+                                >
+                                  Huỷ
+                                </button>
+                              </div>
+                            </div>
+                          ) : null}
+                        </div>
+                        {editingTemplate?.id !== t.id && (
+                          <div className="acts">
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setEditingTemplate({ ...t });
+                              }}
+                              title="Sửa"
+                            >
+                              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                <path d="M12 20h9" />
+                                <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z" />
+                              </svg>
+                            </button>
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                deleteTemplate(t.id);
+                              }}
+                              title="Xoá"
+                            >
+                              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                <polyline points="3 6 5 6 21 6" />
+                                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                              </svg>
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                  {showAddTemplate ? (
+                    <div className="mkt-edit-area" style={{ marginTop: 8 }}>
+                      <input
+                        value={newTemplate.title}
+                        onChange={(e) =>
+                          setNewTemplate({ ...newTemplate, title: e.target.value })
+                        }
+                        placeholder="Tiêu đề câu mới"
+                      />
+                      <textarea
+                        value={newTemplate.body}
+                        onChange={(e) =>
+                          setNewTemplate({ ...newTemplate, body: e.target.value })
+                        }
+                        placeholder="Nội dung..."
+                      />
+                      <div className="mkt-edit-actions">
+                        <button className="ok" onClick={addNewTemplate}>
+                          Thêm
+                        </button>
+                        <button
+                          className="cn"
+                          onClick={() => {
+                            setShowAddTemplate(false);
+                            setNewTemplate({ title: "", body: "" });
+                          }}
+                        >
+                          Huỷ
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <button
+                      className="mkt-add"
+                      onClick={() => setShowAddTemplate(true)}
+                      style={{ marginTop: 8 }}
+                    >
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" style={{ width: 13, height: 13 }}>
+                        <line x1="12" y1="5" x2="12" y2="19" />
+                        <line x1="5" y1="12" x2="19" y2="12" />
+                      </svg>
+                      Thêm câu mới
+                    </button>
+                  )}
+                  <div className="mkt-helper">
+                    Hỗ trợ biến: <code>{"{ten}"}</code> <code>{"{stt}"}</code>{" "}
+                    <code>{"{sdt}"}</code> <code>{"{sp}"}</code>
+                  </div>
+                </div>
+
+                <div className="mkt-section">
+                  <h4>Xem trước (với khách đầu tiên)</h4>
+                  <div className="mkt-preview">
+                    {(() => {
+                      const tpl = marketingTemplates.find(
+                        (t) => t.id === selectedTemplateId,
+                      );
+                      const target = getMarketingTargets()[0];
+                      if (!tpl) return "Chọn một câu tiếp thị.";
+                      if (!target)
+                        return "Không còn khách nào chưa gửi trong mục này.";
+                      return buildMessage(tpl, target);
+                    })()}
+                  </div>
+                </div>
+              </div>
+
+              <div className="mkt-foot">
+                <div className="info">
+                  Sẽ gửi cho <b>{getMarketingTargets().length}</b> khách chưa
+                  gửi · 1s/người
+                </div>
+                <div style={{ display: "flex", gap: 8 }}>
+                  <button
+                    className="btn btn-ghost btn-sm"
+                    onClick={() => setShowMarketingModal(false)}
+                  >
+                    Huỷ
+                  </button>
+                  <button
+                    className="btn btn-amber btn-sm"
+                    disabled={getMarketingTargets().length === 0}
+                    style={{
+                      opacity:
+                        getMarketingTargets().length === 0 ? 0.5 : 1,
+                      cursor:
+                        getMarketingTargets().length === 0
+                          ? "not-allowed"
+                          : "pointer",
+                    }}
+                    onClick={() => startMarketingSend(selectedTemplateId)}
+                  >
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                      <line x1="22" y1="2" x2="11" y2="13" />
+                      <polygon points="22 2 15 22 11 13 2 9 22 2" />
+                    </svg>
+                    Bắt đầu gửi
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ═══ MARKETING PROGRESS ═══ */}
+        {(sendingState.running || sendingState.sent > 0) &&
+          (sendingState.total > 0 || sendingState.running) && (
+            <div className="mkt-progress-overlay">
+              <div className="ph">
+                <span>
+                  Tiếp thị lại · <b>{sendingState.sent}</b>/
+                  <b>{sendingState.total}</b>
+                </span>
+                {sendingState.running && (
+                  <span style={{ color: "#fbbf24", fontSize: 11 }}>đang gửi…</span>
+                )}
+              </div>
+              <div className="now">
+                {sendingState.running
+                  ? `→ ${sendingState.currentName || "..."}`
+                  : sendingState.failed > 0
+                    ? `Xong · ${sendingState.failed} lỗi`
+                    : "Hoàn tất"}
+              </div>
+              <div className="bar">
+                <div
+                  className="bar-fill"
+                  style={{
+                    width: `${
+                      sendingState.total > 0
+                        ? Math.round(
+                            ((sendingState.sent + sendingState.failed) /
+                              sendingState.total) *
+                              100,
+                          )
+                        : 0
+                    }%`,
+                  }}
+                />
+              </div>
+              <div className="stats">
+                <span className="sp ok">✓ {sendingState.sent}</span>
+                {sendingState.failed > 0 && (
+                  <span className="sp er">✕ {sendingState.failed}</span>
+                )}
+                <span className="sp rm">
+                  ⏱ {sendingState.queue.length} còn
+                </span>
+              </div>
+              <div className="acts">
+                {sendingState.running ? (
+                  <button className="stop" onClick={cancelMarketingSend}>
+                    Dừng lại
+                  </button>
+                ) : (
+                  <button
+                    className="close"
+                    onClick={() =>
+                      setSendingState({
+                        running: false,
+                        total: 0,
+                        sent: 0,
+                        failed: 0,
+                        currentName: "",
+                        queue: [],
+                        done: [],
+                      })
+                    }
+                  >
+                    Đóng
+                  </button>
+                )}
+              </div>
+            </div>
+          )}
 
         {/* ═══ TOAST ═══ */}
         <div className={`kho-toast${toast.show ? " show" : ""}`}>
