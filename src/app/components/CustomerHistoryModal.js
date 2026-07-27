@@ -126,6 +126,7 @@ const CustomerHistoryModal = ({
     "products",
     "customerName",
     "pageName",
+    "phone",
     "revenue",
     "phone",
     "orderDate",
@@ -203,6 +204,11 @@ const CustomerHistoryModal = ({
       title: "Tên Khách",
       dataIndex: "customerName",
       key: "customerName",
+    },
+    {
+      title: "SĐT",
+      dataIndex: "phone",
+      key: "phone",
     },
     ...(currentUser.position_team !== "mkt"
       ? [

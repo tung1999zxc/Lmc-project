@@ -280,7 +280,7 @@ const Dashboard = () => {
                   fontWeight: 600,
                 }}
                 formatter={(value) =>
-                  value === "profit" ? "Doanh thu" : value
+                  value === "profit" ? "Doanh thu" : value 
                 }
               />
             </PieChart>
@@ -936,9 +936,9 @@ const Dashboard = () => {
             <div className="sale-pie-total">
               <span className="sale-pie-total-label">Tổng doanh số</span>
               <span className="sale-pie-total-value">
-                {(total || 0).toLocaleString("en-US")}
+                {(total || 0).toLocaleString("vi-VN")}
               </span>
-              <span className="sale-pie-total-unit">KRW</span>
+              <span className="sale-pie-total-unit">VND</span>
             </div>
             <ResponsiveContainer width="100%" height={300}>
               <PieChart>
@@ -1296,7 +1296,7 @@ const Dashboard = () => {
     }, 0);
     return {
       name: team.label,
-      profit: totalProfit,
+      profit: totalProfit * 17000 * 0.95,
       team_id: team.value,
     };
   });
@@ -3127,12 +3127,12 @@ const Dashboard = () => {
   const totalSangSom = saleDailyData.reduce(
     (sum, item) => sum + item.sangSom,
     0,
-  );
+  ) * 17000;
   const totalHanhChinh = saleDailyData.reduce(
     (sum, item) => sum + item.hanhChinh,
     0,
-  );
-  const totalToi = saleDailyData.reduce((sum, item) => sum + item.toi, 0);
+  ) * 17000;
+  const totalToi = saleDailyData.reduce((sum, item) => sum + item.toi, 0) * 17000;
   const totalSale = totalSangSom + totalHanhChinh + totalToi;
 
   const salePieData =

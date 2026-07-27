@@ -8674,6 +8674,7 @@ body .ant-table-wrapper .ant-table-tbody > tr > td {
   .lb-top10-row-head > .lb-top10-team { display: none; }
   .lb-top10-team { display: none; }
   .lb-top10-card { padding: 8px 6px 4px; }
+  .top-row > .lb-top10-card { flex: 0 0 100%; max-width: 100%; }
 }
 
 /* Mobile cho layout Tất cả */

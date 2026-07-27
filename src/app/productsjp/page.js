@@ -629,68 +629,68 @@ useEffect(() => {
           </Popover>
         ),
       },
-      {
-        title: "Đáp Nhật",
-        key: "importedQty",
-        render: (_, record) => {
-          const agg = getAggregatesFor(record.name);
-          const totalImported =
-            (record.imports || []).reduce((acc, cur) => {
-              return (
-                acc +
-                (Number(cur.importedQty) || 0) 
-              );
-            }, 0) ;
+      // {
+      //   title: "Đáp Nhật",
+      //   key: "importedQty",
+      //   render: (_, record) => {
+      //     const agg = getAggregatesFor(record.name);
+      //     const totalImported =
+      //       (record.imports || []).reduce((acc, cur) => {
+      //         return (
+      //           acc +
+      //           (Number(cur.importedQty) || 0) 
+      //         );
+      //       }, 0) ;
 
-          const historyContent =
-            record.imports && record.imports.length > 0 ? (
-              <ul style={{ padding: 0, margin: 0, listStyle: "none" }}>
-                {record.imports.map((imp, index) => (
-                  <li key={index}>
-                    <strong>Ngày:</strong> {imp.importDate} - <strong>SL tổng:</strong>{" "}
-                    {Number(imp.importedQty || 0)}
+      //     const historyContent =
+      //       record.imports && record.imports.length > 0 ? (
+      //         <ul style={{ padding: 0, margin: 0, listStyle: "none" }}>
+      //           {record.imports.map((imp, index) => (
+      //             <li key={index}>
+      //               <strong>Ngày:</strong> {imp.importDate} - <strong>SL tổng:</strong>{" "}
+      //               {Number(imp.importedQty || 0)}
                     
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              "Chưa có lịch sử nhập"
-            );
+      //             </li>
+      //           ))}
+      //         </ul>
+      //       ) : (
+      //         "Chưa có lịch sử nhập"
+      //       );
 
-          return (
-            <Popover content={historyContent} title="Lịch sử nhập hàng" trigger="hover">
-              <span>{totalImported}</span>
-            </Popover>
-          );
-        },
-      },
-      {
-        title: "Đáp Việt",
-        key: "importedQtyVN",
-        render: (_, record) => {
-          const totalImported = (record.imports || []).reduce(
-            (acc, cur) => acc + (Number(cur.importVN) || 0),
-            0
-          );
-          const historyContent =
-            record.imports && record.imports.length > 0 ? (
-              <ul style={{ padding: 0, margin: 0, listStyle: "none" }}>
-                {record.imports.map((imp, index) => (
-                  <li key={index}>
-                    <strong>Ngày:</strong> {imp.importDate} - VN: {imp.importVN || 0}
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              "Chưa có lịch sử nhập"
-            );
-          return (
-            <Popover content={historyContent} title="Lịch sử nhập hàng" trigger="hover">
-              <span>{totalImported}</span>
-            </Popover>
-          );
-        },
-      },
+      //     return (
+      //       <Popover content={historyContent} title="Lịch sử nhập hàng" trigger="hover">
+      //         <span>{totalImported}</span>
+      //       </Popover>
+      //     );
+      //   },
+      // },
+      // {
+      //   title: "Đáp Việt",
+      //   key: "importedQtyVN",
+      //   render: (_, record) => {
+      //     const totalImported = (record.imports || []).reduce(
+      //       (acc, cur) => acc + (Number(cur.importVN) || 0),
+      //       0
+      //     );
+      //     const historyContent =
+      //       record.imports && record.imports.length > 0 ? (
+      //         <ul style={{ padding: 0, margin: 0, listStyle: "none" }}>
+      //           {record.imports.map((imp, index) => (
+      //             <li key={index}>
+      //               <strong>Ngày:</strong> {imp.importDate} - VN: {imp.importVN || 0}
+      //             </li>
+      //           ))}
+      //         </ul>
+      //       ) : (
+      //         "Chưa có lịch sử nhập"
+      //       );
+      //     return (
+      //       <Popover content={historyContent} title="Lịch sử nhập hàng" trigger="hover">
+      //         <span>{totalImported}</span>
+      //       </Popover>
+      //     );
+      //   },
+      // },
       {
         title: "Báo Nhập",
         key: "importedQtyKR",
@@ -1303,11 +1303,11 @@ const calculateStats2Days = useCallback(() => {
         footer={null}
       >
         <Form form={addImportForm} onFinish={handleAddImportFinish} layout="vertical">
-          <Form.Item name="importedQty" label="Đáp Nhật">
+          <Form.Item name="importedQty" label="Đáp Nhật" hidden>
             <InputNumber style={{ width: "100%" }}  onFocus={() => setActiveField("KR")}/>
           </Form.Item>
 
-          <Form.Item name="importVN" label="Đáp Việt">
+          <Form.Item name="importVN" label="Đáp Việt" hidden>
             <InputNumber style={{ width: "100%" }} 
              onFocus={() => setActiveField("VN")}/>
           </Form.Item>

@@ -467,7 +467,9 @@ const OrderList = () => {
   const [specificDate, setSpecificDate] = useState(null); // Ngày cụ thể
   const [sttSearch, setSttSearch] = useState("");
   const [exportDisabled, setExportDisabled] = useState(true);
-  const [filterType, setFilterType] = useState("failed"); // default: chưa thành công
+  const [filterType, setFilterType] = useState(
+    currentUser?.position_team === "mkt" ? "all" : "failed",
+  );
   const [modalCustomerOrders, setModalCustomerOrders] = useState([]);
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedKhoDong, setSelectedKhoDong] = useState();
@@ -4470,6 +4472,27 @@ const handleSaveIstick5 = async () => {
                                 0)
                             );
                           }, 0) * 17000
+                        ).toLocaleString()}
+                      </span>
+                    </span>
+                  </div>
+                )}
+                {currentUser.position_team === "mkt" && (
+                  <div className="order-summary-pill order-summary-pill-wide">
+                    <span className="order-summary-icon">💰</span>
+                    <span className="order-summary-content">
+                      <span className="order-summary-label">
+                        Tổng DS MKT(ĐÃ TRỪ 5%)
+                      </span>
+                      <span className="order-summary-value">
+                        {(
+                          filteredOrders.reduce((acc, order) => {
+                            return (
+                              acc +
+                              (Number(order.profitmkt ?? order.profit ?? 0) ||
+                                0)
+                            );
+                          }, 0) * 17000 * 0.95
                         ).toLocaleString()}
                       </span>
                     </span>
