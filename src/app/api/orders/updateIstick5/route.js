@@ -1,4 +1,4 @@
-import { connectToDatabase } from '../../../lib/mongodb.js';
+import { connectToDatabase } from "../../../lib/mongodb.js";
 
 export async function POST(req) {
   try {
@@ -13,7 +13,7 @@ export async function POST(req) {
           JSON.stringify({
             error: `Đơn ${order.id}: Bắt buộc phải ghi lý do trước khi tích "Đơn cần xử lý"`,
           }),
-          { status: 400 }
+          { status: 400 },
         );
       }
     }
@@ -27,7 +27,7 @@ export async function POST(req) {
 
       // Đọc bản ghi hiện tại để lấy lịch sử cũ
       const currentDoc = await db
-        .collection('orders')
+        .collection("orders")
         .findOne({ id: order.id }, { projection: { istickHistory: 1 } });
       const oldHistory = Array.isArray(currentDoc?.istickHistory)
         ? currentDoc.istickHistory
@@ -42,10 +42,7 @@ export async function POST(req) {
         lyDoMoi.trim().length > 0 &&
         lyDoMoi !== oldLyDo
       ) {
-        newHistory = [
-          ...oldHistory,
-          { at: nowIso, lyDo: lyDoMoi },
-        ];
+        newHistory = [...oldHistory, { at: nowIso, lyDo: lyDoMoi }];
       }
 
       let update;
@@ -64,14 +61,14 @@ export async function POST(req) {
         update = {
           $set: {
             istick5: false,
-            istickLyDo: '',
+            istickLyDo: "",
             istickDate: null,
             istickHistory: newHistory,
           },
         };
       }
 
-      await db.collection('orders').updateOne({ id: order.id }, update);
+      await db.collection("orders").updateOne({ id: order.id }, update);
     }
 
     return new Response(
@@ -79,13 +76,12 @@ export async function POST(req) {
         message:
           "Đã cập nhật trạng thái Đơn cần xử lý cho các đơn hàng thành công",
       }),
-      { status: 200 }
+      { status: 200 },
     );
   } catch (error) {
     console.error("Lỗi POST /api/orders/updateIstick5:", error);
-    return new Response(
-      JSON.stringify({ error: "Lỗi server nội bộ" }),
-      { status: 500 }
-    );
+    return new Response(JSON.stringify({ error: "Lỗi server nội bộ" }), {
+      status: 500,
+    });
   }
 }

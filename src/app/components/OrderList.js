@@ -1806,80 +1806,109 @@ const OrderList = () => {
     }
   };
 
-  // ===== Đơn cần xử lý (istick5) =====
-  const allRowsSelected5 =
-    filteredOrders.length > 0 && filteredOrders.every((order) => order.istick5);
+ // ===== Đơn cần xử lý (istick5) =====
+ const allRowsSelected5 =
+ filteredOrders.length > 0 && filteredOrders.every((order) => order.istick5);
+const handleSelectAllIstick5 = (value) => {
+ setOrders((prevOrders) =>
+   prevOrders.map((order) =>
+     filteredOrders.some((fOrder) => fOrder.id === order.id)
+       ? { ...order, istick5: value }
+       : order,
+   ),
+ );
+};
 
-  const handleSelectAllIstick5 = (value) => {
-    setOrders((prevOrders) =>
-      prevOrders.map((order) =>
-        filteredOrders.some((fOrder) => fOrder.id === order.id)
-          ? { ...order, istick5: value }
-          : order,
-      ),
-    );
-  };
+const handleIstickChange5 = (orderId, value) => {
+ setOrders((prevOrders) =>
+   prevOrders.map((order) => {
+     if (order.id !== orderId) return order;
+     // Nếu tick thành true mà chưa có lý do thì vẫn cho tick nhưng sẽ chặn khi Lưu
+     return { ...order, istick5: value };
+   }),
+ );
+};
 
-  const handleIstickChange5 = (orderId, value) => {
-    setOrders((prevOrders) =>
-      prevOrders.map((order) => {
-        if (order.id !== orderId) return order;
-        return { ...order, istick5: value };
-      }),
-    );
-  };
+const handleIstick5NoteChange = (orderId, value) => {
+ setOrders((prevOrders) =>
+   prevOrders.map((order) =>
+     order.id === orderId ? { ...order, istickLyDo: value } : order,
+   ),
+ );
+};
 
-  const handleIstick5NoteChange = (orderId, value) => {
-    setOrders((prevOrders) =>
-      prevOrders.map((order) =>
-        order.id === orderId ? { ...order, istickLyDo: value } : order,
-      ),
-    );
-  };
+// Khi focus vào ô lý do: tự động chèn [DD/MM/YYYY HH:mm] vào đầu (chỉ 1 lần mỗi lần focus)
+const handleIstick5NoteFocus = (orderId, e) => {
+ const target = e?.target;
+ if (!target) return;
+ const cursor = target.selectionStart ?? 0;
+ const order = orders.find((o) => o.id === orderId);
+ const current = order?.istickLyDo || "";
+ const timestamp = `[${dayjs().format("DD/MM/YYYY HH:mm")}] `;
 
-  const handleSaveIstick5 = async () => {
-    const ordersToUpdate = orders.filter((order) => {
-      const originalOrder = initialOrders5.find((o) => o.id === order.id);
-      if (!originalOrder) return true;
-      return (
-        order.istick5 !== originalOrder.istick5 ||
-        (order.istickLyDo || "") !== (originalOrder.istickLyDo || "")
-      );
-    });
+ // Không chèn nếu đầu chuỗi đã có timestamp (tránh chèn chồng khi focus lại)
+ if (current.trimStart().startsWith("[")) return;
 
-    if (ordersToUpdate.length === 0) {
-      messageApi.info("Không có đơn hàng nào thay đổi");
-      return;
-    }
+ const newValue = timestamp + current;
+ setOrders((prevOrders) =>
+   prevOrders.map((o) =>
+     o.id === orderId ? { ...o, istickLyDo: newValue } : o,
+   ),
+ );
+ // Đặt lại con trỏ ngay sau timestamp vừa chèn
+ requestAnimationFrame(() => {
+   try {
+     target.setSelectionRange(timestamp.length, timestamp.length);
+   } catch (_) {}
+ });
+ void cursor;
+};
 
-    const missingReason = ordersToUpdate.find(
-      (o) => o.istick5 === true && !(o.istickLyDo || "").toString().trim(),
-    );
-    if (missingReason) {
-      messageApi.error(
-        `Đơn ${missingReason.id}: Bắt buộc phải ghi lý do trước khi tích "Đơn cần xử lý"`,
-      );
-      return;
-    }
+const handleSaveIstick5 = async () => {
+ // Validate phía client: tick=true mà chưa có lý do thì không cho lưu
+ const ordersToUpdate = orders.filter((order) => {
+   const originalOrder = initialOrders5.find((o) => o.id === order.id);
+   if (!originalOrder) return true;
+   return (
+     order.istick5 !== originalOrder.istick5 ||
+     (order.istickLyDo || "") !== (originalOrder.istickLyDo || "")
+   );
+ });
 
-    try {
-      const response = await axios.post("/api/orders/updateIstick5", {
-        orders: ordersToUpdate.map(({ id, istick5, istickLyDo }) => ({
-          id,
-          istick5,
-          istickLyDo: (istickLyDo || "").toString().trim(),
-        })),
-      });
-      messageApi.success(response.data.message || "Đã lưu cập nhật các đơn");
-      alert("Thao tác thành công!");
-      setInitialOrders5(orders);
-      fetchOrders();
-    } catch (error) {
-      console.error(error);
-      const errMsg = error?.response?.data?.error || "Lỗi khi lưu các đơn";
-      messageApi.error(errMsg);
-    }
-  };
+ if (ordersToUpdate.length === 0) {
+   messageApi.info("Không có đơn hàng nào thay đổi");
+   return;
+ }
+
+ // Bắt buộc có lý do trước khi tick
+ const missingReason = ordersToUpdate.find(
+   (o) => o.istick5 === true && !(o.istickLyDo || "").toString().trim(),
+ );
+ if (missingReason) {
+   messageApi.error(
+     `Đơn ${missingReason.id}: Bắt buộc phải ghi lý do trước khi tích "Đơn cần xử lý"`,
+   );
+   return;
+ }
+
+ try {
+   const response = await axios.post("/api/orders/updateIstick5", {
+     orders: ordersToUpdate.map(({ id, istick5, istickLyDo }) => ({
+       id,
+       istick5,
+       istickLyDo: (istickLyDo || "").toString().trim(),
+     })),
+   });
+   messageApi.success(response.data.message || "Đã lưu cập nhật các đơn");
+   alert("Thao tác thành công!");
+   setInitialOrders5(orders);
+   fetchOrders();
+ } catch (error) {
+   console.error(error);
+   const errMsg = error?.response?.data?.error || "Lỗi khi lưu các đơn";
+   messageApi.error(errMsg);
+ }
+};
 
   // ===== KHO HẠNH (istick6) =====
   const allRowsSelected6 =
@@ -1997,6 +2026,9 @@ const OrderList = () => {
             width: 260,
             render: (_, record) => {
               const lyDo = (record.istickLyDo || "").toString();
+              const history = Array.isArray(record.istickHistory)
+                ? record.istickHistory
+                : [];
               const showError = record.istick5 && lyDo.trim().length === 0;
               return (
                 <div
@@ -2028,16 +2060,46 @@ const OrderList = () => {
                       onChange={(e) =>
                         handleIstick5NoteChange(record.id, e.target.value)
                       }
-                      style={{
-                        flex: 1,
-                        borderColor: showError ? "red" : undefined,
-                      }}
+                      // onFocus={(e) =>
+                      //   handleIstick5NoteFocus(record.id, e)
+                      // }
+                      status={showError ? "error" : ""}
+                      style={{ flex: 1, minWidth: 150 }}
                     />
                   </div>
-                  {showError && (
-                    <span style={{ color: "red", fontSize: 11 }}>
-                      Vui lòng ghi lý do!
-                    </span>
+                  {history.length > 0 && (
+                    <div
+                      style={{
+                        fontSize: 11,
+                        color: "#666",
+                        background: "#fafafa",
+                        border: "1px solid #f0f0f0",
+                        borderRadius: 4,
+                        padding: "4px 6px",
+                        maxHeight: 110,
+                        overflowY: "auto",
+                        whiteSpace: "pre-wrap",
+                        lineHeight: 1.4,
+                      }}
+                    >
+                      <div
+                        style={{
+                          fontWeight: 600,
+                          color: "#999",
+                          marginBottom: 2,
+                        }}
+                      >
+                        Lịch sử ({history.length}):
+                      </div>
+                      {history.map((h, idx) => (
+                        <div key={idx} style={{ marginBottom: 2 }}>
+                          <span style={{ color: "#1677ff" }}>
+                            [{dayjs(h.at).format("DD/MM/YYYY HH:mm")}]
+                          </span>{" "}
+                          {h.lyDo}
+                        </div>
+                      ))}
+                    </div>
                   )}
                 </div>
               );
