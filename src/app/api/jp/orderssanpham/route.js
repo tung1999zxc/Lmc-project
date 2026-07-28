@@ -7,7 +7,7 @@ export async function GET(req) {
 
     // Chỉ lấy đơn có saleReport = DONE
     const query = {
-      saleReport: "DONE",
+      saleReport: { $in: ["DONE", "HOÀN"] },
     };
 
     // Chỉ lấy các field cần thiết
@@ -29,13 +29,12 @@ export async function GET(req) {
         message: "Lấy danh sách đơn hàng DONE thành công",
         data: orders,
       }),
-      { status: 200 }
+      { status: 200 },
     );
   } catch (error) {
     console.error("Lỗi GET /api/orders:", error);
-    return new Response(
-      JSON.stringify({ error: "Lỗi server nội bộ" }),
-      { status: 500 }
-    );
+    return new Response(JSON.stringify({ error: "Lỗi server nội bộ" }), {
+      status: 500,
+    });
   }
 }
