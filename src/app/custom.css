@@ -7012,6 +7012,8 @@ body .ant-table-wrapper .ant-table-tbody > tr > td {
 @media (max-width: 1100px) {
   .top-row { flex-direction: column; }
   .top-row > .lb-wrap { flex: 1 1 auto; max-width: 100%; }
+  .top-row > .lb-top10-card { flex: 1 1 auto; max-width: 100%; width: 100%; min-width: 0; }
+  .top-row > .team-stats { flex: 1 1 auto; max-width: 100%; width: 100%; min-width: 0; }
 }
 
 @media (max-width: 900px) {
