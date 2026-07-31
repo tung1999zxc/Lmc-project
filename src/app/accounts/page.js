@@ -79,11 +79,18 @@ export default function EmployeeManagement() {
     { label: "Online Tối", value: "onlinetoi" },
     { label: "Hành chính", value: "hanhchinh" },
   ];
+  const team_tp = [
+    { label: "PHI", value: "PHI" },
+    { label: "DIỆN", value: "DIEN" },
+  
+  ];
   const teams = [
     { label: "TEAM PHI", value: "PHI" },
     { label: "TEAM DIỆU", value: "DIEU" },
     { label: "TEAM SƠN", value: "SON" },
-    { label: "TEAM QUÂN", value: "QUAN" },
+    
+    { label: "TEAM HIỆP ", value: "HIEP" },
+    { label: "TEAM MẠNH ", value: "MANH" },
     // { label: 'TEAM CHI', value: 'CHI' },
     { label: "TEAM LẺ", value: "LE" },
     { label: "TEAM TUẤN ANH", value: "TUANANH" },

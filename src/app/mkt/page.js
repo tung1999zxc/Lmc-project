@@ -133,7 +133,7 @@ const Dashboard = () => {
         .filter((employee) => employee.team_id === "SON")
         .map((employee) => employee.employee_code),
     },
-  
+
     // {
     //   id: 3,
     //   name: `TEAM CHI `,
@@ -196,6 +196,20 @@ const Dashboard = () => {
       name: `TEAM TÙNG`,
       members: safeEmployees
         .filter((employee) => employee.team_id === "TUNG")
+        .map((employee) => employee.employee_code),
+    },
+    {
+      id: 12,
+      name: `TEAM HIỆP`,
+      members: safeEmployees
+        .filter((employee) => employee.team_id === "HIEP")
+        .map((employee) => employee.employee_code),
+    },
+    {
+      id: 13,
+      name: `TEAM MẠNH`,
+      members: safeEmployees
+        .filter((employee) => employee.team_id === "MANH")
         .map((employee) => employee.employee_code),
     },
   ];
@@ -876,7 +890,53 @@ const Dashboard = () => {
         <div className="mkt-sc-content">
           <div className="mkt-sc-label">TIỀN THỪA TẤT CẢ</div>
           <div className="mkt-sc-value">
-            {totalTienThua.toLocaleString("vi-VN")}
+            {(() => {
+              const now = dayjs();
+              const currentMonth = now.month() + 1;
+              const currentYear = now.year();
+
+              const lastMonth = now.subtract(1, "month");
+              const lastMonthNumber = lastMonth.month() + 1;
+              const lastMonthYear = lastMonth.year();
+
+              const twoMonthsAgo = now.subtract(2, "month");
+              const twoMonthsAgoMonth = twoMonthsAgo.month() + 1;
+              const twoMonthsAgoYear = twoMonthsAgo.year();
+
+              let month = currentMonth;
+              let year = currentYear;
+
+              if (period === "lastMonth") {
+                month = lastMonthNumber;
+                year = lastMonthYear;
+              }
+
+              if (period === "twoMonthsAgo") {
+                month = twoMonthsAgoMonth;
+                year = twoMonthsAgoYear;
+              }
+
+              let minusAmount = 0;
+
+              if (month === 4 && year === 2026 && selectedTeam === "all") {
+                minusAmount = 0;
+              }
+
+              if (month === 5 && year === 2026 && selectedTeam === "all") {
+                minusAmount = 0;
+              }
+
+              if (month === 6 && year === 2026 && selectedTeam === "all") {
+                minusAmount = 0;
+              }
+              if (month === 7 && year === 2026 && selectedTeam === "all") {
+                minusAmount = 27000000;
+              }
+
+              return ((totalTienThua || 0) - minusAmount).toLocaleString(
+                "vi-VN",
+              );
+            })()}
           </div>
           <div className="mkt-sc-sub">Tiền còn dư</div>
         </div>
@@ -1411,25 +1471,21 @@ const Dashboard = () => {
     const p = parseFloat(computePercentADS(employeeName));
     if (isNaN(p))
       return {
-       
         border: "2px solid #8c8c8c",
         color: "#595959",
       };
     if (p < 30)
       return {
-        
         border: "2px solid #2e9c0f",
         color: "#0f3d04",
       }; // xanh lá
     if (p >= 30 && p < 35)
       return {
-       
         border: "2px solid #b35a00",
         color: "#3d1f00",
       }; // cam
     if (p >= 35)
       return {
-        
         border: "2px solid #c4394f",
         color: "#5a0d1a",
       }; // hồng
@@ -1713,7 +1769,6 @@ const Dashboard = () => {
           .map(([userId, userRecords]) => (
             <Row gutter={[16, 16]} key={userId} style={{ marginBottom: 24 }}>
               <Col xs={24}>
-               
                 <div
                   style={{
                     minWidth: "800px",

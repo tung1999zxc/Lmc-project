@@ -4897,12 +4897,14 @@ const OrderList = () => {
                       <Option value="LE">TEAM LẺ</Option>
                       <Option value="TUANANH">TEAM TUẤN ANH</Option>
                       <Option value="DIEN">TEAM DIỆN</Option>
-                      <Option value="DIEU">TEAM DIỆU</Option>
-                      <Option value="PHI">TEAM PHI</Option>
+                      {/* <Option value="DIEU">TEAM DIỆU</Option> */}
+                      {/* <Option value="PHI">TEAM PHI</Option> */}
                       <Option value="DIENON">TEAM DIỆN ON</Option>
                       <Option value="ANH">TEAM ÁNH</Option>
                       <Option value="PHUTHANH">TEAM Phú Thành</Option>
                       <Option value="TUNG">TEAM TÙNG</Option>
+                      <Option value="HIEP">TEAM HIỆP</Option>
+                      <Option value="MANH">TEAM MẠNH</Option>
                     </Select>
                   )}
                 <div className="check-customer-box">

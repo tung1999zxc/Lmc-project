@@ -8,7 +8,7 @@ export async function POST(req) {
     if (!Array.isArray(orders) || orders.length === 0) {
       return new Response(
         JSON.stringify({ error: "Không có đơn để cập nhật" }),
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -23,6 +23,13 @@ export async function POST(req) {
                   { $eq: ["$deliveryStatus", "ĐÃ GỬI HÀNG"] },
                   "",
                   "ĐÃ GỬI HÀNG",
+                ],
+              },
+              isShippingName: {
+                $cond: [
+                  { $eq: ["$deliveryStatus", "ĐÃ GỬI HÀNG"] },
+                  "",
+                  order.isShippingName,
                 ],
               },
               shippingDate1: {
@@ -46,14 +53,13 @@ export async function POST(req) {
         matched: result.matchedCount,
         modified: result.modifiedCount,
       }),
-      { status: 200 }
+      { status: 200 },
     );
   } catch (error) {
     console.error("Lỗi POST /api/orders/updateIstick:", error);
 
-    return new Response(
-      JSON.stringify({ error: "Lỗi server nội bộ" }),
-      { status: 500 }
-    );
+    return new Response(JSON.stringify({ error: "Lỗi server nội bộ" }), {
+      status: 500,
+    });
   }
 }

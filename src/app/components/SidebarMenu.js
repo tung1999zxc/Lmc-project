@@ -498,10 +498,12 @@ const SidebarMenu = ({ isOpen, onToggle }) => {
   const isTranNgocLam = currentUser?.name === "Trần Ngọc Lâm";
 
   const isToMyHanh = currentUser?.name === "Tô Mỹ Hạnh";
+  const isTranMyHanh = currentUser?.position === "managerSALE";
+  const isdiepanh = currentUser?.name === "Diệp Anh";
   const isLeTuyetKha = currentUser?.name === "Lê Tuyết Kha";
   const isNguyenThiHuyen = currentUser?.name === "Nguyễn Thị Huyền";
   const isAdmin =
-    currentUser?.position === "admin" || currentUser?.name === "Trần Mỹ Hạnh";
+    currentUser?.position === "admin" ;
   const khohq1 = currentUser?.position === "kho2";
   const isJP = currentUser?.quocgia === "jp";
   const isTW = currentUser?.quocgia === "tw";
@@ -874,18 +876,25 @@ const SidebarMenu = ({ isOpen, onToggle }) => {
       return [overviewItems.kr];
     }
     if (isManagerSale) {
+      // Trần Mỹ Hạnh không thấy Malaysia (jp)
+      if (isTranMyHanh) return [overviewItems.kr];
       return [overviewItems.kr, overviewItems.jp];
     }
     if (isSales) {
       return [];
     }
-    if (isAdmin)
-      return [
+    if (isAdmin) {
+      const items = [
         overviewItems.all,
         overviewItems.kr,
-        overviewItems.jp,
         ...(isTranNgocLam ? [] : [overviewItems.tw]),
       ];
+      // Trần Mỹ Hạnh không thấy mục Malaysia (jp)
+      if (!isTranMyHanh) {
+        items.push(overviewItems.jp);
+      }
+      return items;
+    }
     if (isKRTW) return [overviewItems.kr];
     if (isJP)
       return isTranNgocLam
@@ -897,6 +906,8 @@ const SidebarMenu = ({ isOpen, onToggle }) => {
 
   const getOrderMenu = () => {
     if (isManagerSale) {
+      // Trần Mỹ Hạnh không thấy Malaysia (jp)
+      if (isTranMyHanh) return [orderItems.kr, ];
       return [orderItems.kr, orderItems.jp];
     }
     if (isSales) {
@@ -908,10 +919,12 @@ const SidebarMenu = ({ isOpen, onToggle }) => {
       return Array.from(new Set(list));
     }
     if (isMarketing) return [orderItems[userCountryKey]];
-    if (isAdmin)
-      return isTranNgocLam
-        ? [orderItems.kr, orderItems.jp]
-        : [orderItems.kr, orderItems.jp, orderItems.tw];
+    if (isAdmin) {
+      if (isTranNgocLam) return [orderItems.kr, orderItems.jp];
+      // Trần Mỹ Hạnh không thấy Malaysia (jp)
+      if (isTranMyHanh) return [orderItems.kr,];
+      return [orderItems.kr, orderItems.jp, orderItems.tw];
+    }
     if (isKRTW) return [orderItems.kr];
     if (isJP)
       return isTranNgocLam ? [orderItems.jp] : [orderItems.jp, orderItems.tw];
@@ -921,15 +934,19 @@ const SidebarMenu = ({ isOpen, onToggle }) => {
 
   const getMktMenu = () => {
     if (isManagerSale) {
+      // Trần Mỹ Hạnh không thấy mục MKT nào
+      if (isTranMyHanh) return [];
       return [mktChildren.jp];
     }
     if (isSales) return [];
     if (isMarketing) return [mktChildren[userCountryKey]];
     if (khohq1) return [];
-    if (isAdmin)
-      return isTranNgocLam
-        ? [mktChildren.kr, mktChildren.jp]
-        : [mktChildren.kr, mktChildren.jp, mktChildren.tw];
+    if (isAdmin) {
+      if (isTranNgocLam) return [mktChildren.kr, mktChildren.jp];
+      // Trần Mỹ Hạnh không thấy Malaysia (jp)
+      if (isTranMyHanh) return [];
+      return [mktChildren.kr, mktChildren.jp, mktChildren.tw];
+    }
     if (isKRTW) return [mktChildren.kr];
     if (isJP)
       return isTranNgocLam
@@ -948,13 +965,21 @@ const SidebarMenu = ({ isOpen, onToggle }) => {
 
   const getProductMenu = () => {
     if (isSale) return [];
-    if (isSales) return [productChildren.kr, productChildren.jp];
+    if (isSales) {
+      // Trần Mỹ Hạnh không thấy Malaysia (jp)
+      if (isTranMyHanh) return [productChildren.kr];
+      if (isdiepanh) return [productChildren.kr];
+      return [productChildren.kr, productChildren.jp];
+    }
     if (isMarketing)
       return userCountryKey === "tw" ? [] : [productChildren[userCountryKey]];
-    if (isAdmin)
-      return isTranNgocLam
-        ? [productChildren.kr, productChildren.jp]
-        : [productChildren.kr, productChildren.jp];
+    if (isAdmin) {
+      if (isTranNgocLam) return [productChildren.kr, productChildren.jp];
+      // Trần Mỹ Hạnh không thấy Malaysia (jp)
+      if (isTranMyHanh) return [productChildren.kr];
+      if (isdiepanh) return [productChildren.kr];
+      return [productChildren.kr, productChildren.jp];
+    }
     if (isKRTW) return [productChildren.kr];
     if (isJP)
       return isTranNgocLam ? [productChildren.jp] : [productChildren.jp];

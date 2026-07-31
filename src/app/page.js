@@ -1127,11 +1127,11 @@ const Dashboard = () => {
   // Dữ liệu teams
   const teamsByArea = {
     da: [
-      { label: "TEAM PHI", value: "PHI" },
+      // { label: "TEAM PHI", value: "PHI" },
       { label: "TEAM TUẤN ANH", value: "TUANANH" },
     ],
     pvd: [
-      { label: "TEAM DIỆU", value: "DIEU" },
+      // { label: "TEAM DIỆU", value: "DIEU" },
       { label: "TEAM SƠN", value: "SON" },
       { label: "TEAM LẺ", value: "LE" },
       { label: "TEAM DIỆN ONLINE", value: "DIENON" },
@@ -1139,10 +1139,12 @@ const Dashboard = () => {
       { label: "TEAM PHÚ THÀNH", value: "PHUTHANH" },
       { label: "TEAM ÁNH ", value: "ANH" },
       { label: "TEAM TÙNG ", value: "TUNG" },
+      { label: "TEAM HIỆP ", value: "HIEP" },
+      { label: "TEAM MẠNH ", value: "MANH" },
     ],
     all: [
-      { label: "TEAM PHI", value: "PHI" },
-      { label: "TEAM DIỆU", value: "DIEU" },
+      // { label: "TEAM PHI", value: "PHI" },
+      // { label: "TEAM DIỆU", value: "DIEU" },
       { label: "TEAM SƠN", value: "SON" },
       { label: "TEAM LẺ", value: "LE" },
       { label: "TEAM TUẤN ANH", value: "TUANANH" },
@@ -1151,17 +1153,19 @@ const Dashboard = () => {
       { label: "TEAM PHÚ THÀNH", value: "PHUTHANH" },
       { label: "TEAM ÁNH ", value: "ANH" },
       { label: "TEAM TÙNG ", value: "TUNG" },
+      { label: "TEAM HIỆP ", value: "HIEP" },
+      { label: "TEAM MẠNH ", value: "MANH" },
     ],
   };
 
   const teams = teamsByArea[selectedArea] || [];
   const teamsByArea2 = {
     da: [
-      { label: "TEAM PHI", value: "PHI" },
+    
       { label: "TEAM TUẤN ANH", value: "TUANANH" },
     ],
     pvd: [
-      { label: "TEAM DIỆU", value: "DIEU" },
+      // { label: "TEAM DIỆU", value: "DIEU" },
       { label: "TEAM SƠN", value: "SON" },
       { label: "TEAM LẺ", value: "LE" },
       { label: "TEAM DIỆN ONLINE", value: "DIENON" },
@@ -1169,12 +1173,14 @@ const Dashboard = () => {
       { label: "TEAM PHÚ THÀNH", value: "PHUTHANH" },
       { label: "TEAM ÁNH ", value: "ANH" },
       { label: "TEAM TÙNG ", value: "TUNG" },
+      { label: "TEAM HIỆP ", value: "HIEP" },
+      { label: "TEAM MẠNH ", value: "MANH" },
     ],
     all: [
-      { label: "TEAM PHI", value: "PHI" },
-      { label: "TEAM DIỆU", value: "DIEU" },
+      // { label: "TEAM PHI", value: "PHI" },
+      // { label: "TEAM DIỆU", value: "DIEU" },
       { label: "TEAM SƠN", value: "SON" },
-      { label: "TEAM QUÂN", value: "QUAN" },
+      // { label: "TEAM QUÂN", value: "QUAN" },
       { label: "TEAM LẺ", value: "LE" },
       { label: "TEAM TUẤN ANH", value: "TUANANH" },
       { label: "TEAM DIỆN ONLINE", value: "DIENON" },
@@ -1182,6 +1188,8 @@ const Dashboard = () => {
       { label: "TEAM PHÚ THÀNH", value: "PHUTHANH" },
       { label: "TEAM ÁNH ", value: "ANH" },
       { label: "TEAM TÙNG ", value: "TUNG" },
+      { label: "TEAM HIỆP ", value: "HIEP" },
+      { label: "TEAM MẠNH ", value: "MANH" },
     ],
   };
 
@@ -3602,37 +3610,7 @@ const Dashboard = () => {
               <span className="dn">▼ Trên doanh số</span>: {selectedTeam}
             </div>
           </div>
-          <div className="kpi-card purple">
-            <div className="kpi-lbl">
-              <span>👥</span> DS / Ads toàn Nhân viên
-            </div>
-            <div className="kpi-val" style={{ color: "#722ed1" }}>
-              {(() => {
-                const nvData = marketingReportDataTEAM.filter(
-                  (r) => !r.isLeader,
-                );
-                const dsNV = nvData.reduce(
-                  (sum, r) => sum + Number(r.tienVND || 0),
-                  0,
-                );
-                const adsNV = nvData.reduce(
-                  (sum, r) => sum + Number(r.totalAds || 0),
-                  0,
-                );
-                return (
-                  <div>
-                    <div style={{ fontSize: "18px", fontWeight: "bold" }}>
-                      {dsNV.toLocaleString()} đ
-                    </div>
-                    <div className="kpi-sub">
-                      <span className="dn">Ads NV:</span>{" "}
-                      {adsNV.toLocaleString()} đ
-                    </div>
-                  </div>
-                );
-              })()}
-            </div>
-          </div>
+          
         </div>
       )}
       {((currentUser.position === "admin" && !selectedTeam) ||

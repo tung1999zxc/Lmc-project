@@ -1023,6 +1023,8 @@ const Dashboard = () => {
       { label: "TEAM PHÚ THÀNH", value: "PHUTHANH" },
       { label: "TEAM ÁNH ", value: "ANH" },
       { label: "TEAM TÙNG ", value: "TUNG" },
+      { label: "TEAM HIỆP ", value: "HIEP" },
+      { label: "TEAM MẠNH ", value: "MANH" },
     ],
     all: [
       { label: "TEAM PHI", value: "PHI" },
@@ -1035,6 +1037,8 @@ const Dashboard = () => {
       { label: "TEAM PHÚ THÀNH", value: "PHUTHANH" },
       { label: "TEAM ÁNH ", value: "ANH" },
       { label: "TEAM TÙNG ", value: "TUNG" },
+      { label: "TEAM HIỆP ", value: "HIEP" },
+      { label: "TEAM MẠNH ", value: "MANH" },
       //  { label: "TEAM NHẬT", value: "JP" },
       // { label: "TEAM ĐÀI", value: "TW" },
     ],
@@ -1043,11 +1047,11 @@ const Dashboard = () => {
   const teams = teamsByArea[selectedArea] || [];
   const teamsByArea2 = {
     da: [
-      { label: "TEAM PHI", value: "PHI" },
+      // { label: "TEAM PHI", value: "PHI" },
       { label: "TEAM TUẤN ANH", value: "TUANANH" },
     ],
     pvd: [
-      { label: "TEAM DIỆU", value: "DIEU" },
+      // { label: "TEAM DIỆU", value: "DIEU" },
       { label: "TEAM SƠN", value: "SON" },
       { label: "TEAM LẺ", value: "LE" },
       { label: "TEAM DIỆN ONLINE", value: "DIENON" },
@@ -1055,12 +1059,15 @@ const Dashboard = () => {
       { label: "TEAM PHÚ THÀNH", value: "PHUTHANH" },
       { label: "TEAM ÁNH ", value: "ANH" },
       { label: "TEAM TÙNG ", value: "TUNG" },
+      { label: "TEAM HIỆP ", value: "HIEP" },
+      { label: "TEAM MẠNH ", value: "MANH" },
     ],
     all: [
-      { label: "TEAM PHI", value: "PHI" },
-      { label: "TEAM DIỆU", value: "DIEU" },
+      // { label: "TEAM PHI", value: "PHI" },
+      // { label: "TEAM DIỆU", value: "DIEU" },
       { label: "TEAM SƠN", value: "SON" },
-      { label: "TEAM QUÂN", value: "QUAN" },
+      { label: "TEAM HIỆP ", value: "HIEP" },
+      { label: "TEAM MẠNH ", value: "MANH" },
       { label: "TEAM LẺ", value: "LE" },
       { label: "TEAM TUẤN ANH", value: "TUANANH" },
       { label: "TEAM DIỆN ONLINE", value: "DIENON" },
@@ -5344,77 +5351,7 @@ const Dashboard = () => {
                       Trên doanh số
                     </div>
                   </div>
-                  <div className="kpi-card-grad grad-purple">
-                    <div
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "space-between",
-                      }}
-                    >
-                      <div className="kpi-lbl" style={{ marginBottom: 0 }}>
-                        <span>👥</span> DS / Ads NV
-                      </div>
-                      <div className="kpi-icon-box">👥</div>
-                    </div>
-                    <div className="kpi-val" style={{ color: "#fff" }}>
-                      {(() => {
-                        const nvData = marketingReportData.filter(
-                          (r) => !r.isLeader,
-                        );
-                        const dsNV = nvData.reduce(
-                          (sum, r) => sum + Number(r.tienVND || 0),
-                          0,
-                        );
-                        const adsNV = nvData.reduce(
-                          (sum, r) => sum + Number(r.totalAds || 0),
-                          0,
-                        );
-                        return (
-                          <div>
-                            <div
-                              style={{
-                                fontSize: "22px",
-                                fontWeight: 800,
-                                color: "#fff",
-                                lineHeight: 1.15,
-                              }}
-                            >
-                              {Math.round(dsNV).toLocaleString("vi-VN")}
-                              <span
-                                style={{
-                                  fontSize: "12px",
-                                  fontWeight: 700,
-                                  opacity: 0.75,
-                                  marginLeft: 2,
-                                }}
-                              >
-                                đ
-                              </span>
-                            </div>
-                            <div className="kpi-sub">
-                              <span>Ads:</span>{" "}
-                              {Math.round(adsNV).toLocaleString("vi-VN")}
-                              <span
-                                style={{
-                                  fontSize: "10px",
-                                  fontWeight: 700,
-                                  opacity: 0.75,
-                                  marginLeft: 1,
-                                }}
-                              >
-                                đ
-                              </span>
-                            </div>
-                          </div>
-                        );
-                      })()}
-                    </div>
-                    <div className="kpi-sub">
-                      {marketingReportData.filter((r) => !r.isLeader).length}{" "}
-                      nhân viên
-                    </div>
-                  </div>
+                  
                 </div>
 
                 <Row gutter={[16, 16]} style={{ marginTop: "2rem" }}>

@@ -195,7 +195,7 @@ const Dashboard = () => {
             p.mkt.trim().toLowerCase() === employeeName.trim().toLowerCase() &&
             filterSampleOrdersByPeriod(p)
         )
-        .reduce((sum, p) => sum + p.profit, 0) * 6000;
+        .reduce((sum, p) => sum + p.revenue, 0) * 6000;
     return totalProfit ;
   };
   const computeTotalADS = (employeeName) => {
@@ -434,7 +434,7 @@ const Dashboard = () => {
           );
           return matchedEmployee && isMatchTeam(matchedEmployee.employee_code);
         })
-        .reduce((sum, order) => sum + order.profit, 0) * 6000;
+        .reduce((sum, order) => sum + order.revenue, 0) * 6000;
 
     const adsSang = records
       .filter((r) => r.date === date && isMatchTeam(r.userId))
@@ -705,7 +705,7 @@ const Dashboard = () => {
               p.orderDate === date &&
               p.mkt.trim().toLowerCase() === recordname.trim().toLowerCase()
           )
-          .reduce((sum, p) => sum + p.profit, 0)
+          .reduce((sum, p) => sum + p.revenue, 0)
       : 0;
   };
 

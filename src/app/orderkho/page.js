@@ -43,7 +43,14 @@ input,textarea,select{font-family:inherit}
 
 /* SIDEBAR */
 .sb{width:248px;flex-shrink:0;background:linear-gradient(180deg,var(--sb) 0%,var(--sb2) 100%);
-  color:var(--sb-txt);display:flex;flex-direction:column;height:100vh;border-right:1px solid #090e1a}
+  color:var(--sb-txt);display:flex;flex-direction:column;height:100vh;border-right:1px solid #090e1a;transition:width .25s ease;position:relative}
+.sb.collapsed{width:0 !important;min-width:0 !important;border-right:none;overflow:hidden}
+.sb.collapsed .brand,.sb.collapsed .nav,.sb.collapsed .sb-qa{display:none}
+.sb-toggle{width:28px;height:28px;border-radius:6px;display:flex;align-items:center;justify-content:center;cursor:pointer;border:none;background:var(--sb-hover);color:var(--sb-txt);transition:.12s;position:fixed;top:18px;z-index:100}
+.sb-toggle:hover{background:var(--sb-active);color:#fff}
+.sb-toggle:not(.collapsed){left:216px}
+.sb-toggle.collapsed{background:var(--accent);color:#fff;border:none;left:4px}
+.sb-toggle svg{width:16px;height:16px;stroke-width:2.5}
 .brand{display:flex;align-items:center;gap:11px;padding:18px 16px 14px}
 .brand .ico{width:36px;height:36px;border-radius:9px;flex-shrink:0;
   background:linear-gradient(135deg,#3b7fff,#1d63ed);display:flex;align-items:center;
@@ -102,6 +109,10 @@ input,textarea,select{font-family:inherit}
 .cnt{display:flex;align-items:center;gap:6px;background:var(--accent-s);color:var(--accent);font-size:12px;font-weight:700;padding:6px 12px;border-radius:8px}
 .cnt b{font-size:13px}
 .av{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,#3b7fff,#1d63ed);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px}
+.right-panel-toggle-btn{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;cursor:pointer;border:1px solid var(--line);background:var(--bg);color:var(--muted);transition:.12s}
+.right-panel-toggle-btn:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-s)}
+.right-panel-toggle-btn.active{border-color:var(--accent);color:var(--accent);background:var(--accent-s)}
+.right-panel-toggle-btn svg{width:15px;height:15px;stroke-width:2}
 .uname{font-size:12px;font-weight:600}.urole{font-size:10px;color:var(--muted)}
 
 /* CONTENT */
@@ -277,6 +288,31 @@ td.ctr{text-align:center}
 .bb-ghost{background:#ffffff18;color:#cbd5e8}.bb-ghost:hover{background:#ffffff28}
 .bulk-close{width:28px;height:28px;border-radius:7px;display:flex;align-items:center;justify-content:center;color:#8ba3c0;transition:.12s;cursor:pointer;border:none;background:none;margin-left:2px}
 .bulk-close svg{width:14px;height:14px;stroke-width:2.5}
+
+/* RIGHT PANEL - Order Details Sidebar */
+.right-panel{width:300px;flex-shrink:0;background:var(--card);border-left:1px solid var(--line);display:flex;flex-direction:column;height:100vh;transition:width .25s ease,margin .25s ease;overflow:hidden}
+.right-panel.collapsed{width:0;border-left:none}
+.right-panel-header{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:1px solid var(--line);flex-shrink:0}
+.right-panel-title{font-size:14px;font-weight:700;color:var(--ink);display:flex;align-items:center;gap:8px}
+.right-panel-title svg{width:18px;height:18px;color:var(--accent)}
+.right-panel-toggle{width:30px;height:30px;border-radius:7px;display:flex;align-items:center;justify-content:center;cursor:pointer;border:none;background:var(--bg);color:var(--ink2);transition:.12s}
+.right-panel-toggle:hover{background:var(--line);color:var(--ink)}
+.right-panel-toggle svg{width:16px;height:16px;stroke-width:2.2;transition:transform .25s ease}
+.right-panel-toggle.collapsed svg{transform:rotate(180deg)}
+.right-panel-body{flex:1;overflow-y:auto;padding:16px}
+.right-panel-empty{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;color:var(--muted);text-align:center;gap:10px}
+.right-panel-empty svg{width:40px;height:40px;opacity:.4}
+.right-panel-empty p{font-size:13px}
+.detail-section{margin-bottom:16px}
+.detail-section-title{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid var(--line2)}
+.detail-row{display:flex;justify-content:space-between;align-items:flex-start;padding:5px 0;font-size:12.5px}
+.detail-label{color:var(--ink2);flex-shrink:0}
+.detail-value{color:var(--ink);font-weight:600;text-align:right;word-break:break-word;max-width:60%}
+@media (max-width:1200px){.right-panel{width:260px}}@media (max-width:1024px){.right-panel{position:fixed;right:0;top:0;z-index:300;box-shadow:-4px 0 20px rgba(0,0,0,.15)}.right-panel.collapsed{width:0}}
+
+/* Selected row highlight */
+tr.selected-row{background:var(--accent-s) !important}
+tr.selected-row:hover{background:var(--accent-s) !important}
 
 /* step flow */
 .flow-hint{display:flex;align-items:center;gap:0;margin-bottom:12px;overflow-x:auto;padding:2px 0}
@@ -761,20 +797,17 @@ export default function KhoOrderList() {
     {
       id: "t1",
       title: "Nhắc đơn chưa gửi",
-      body:
-        "Chào {ten}, đơn {stt} của anh/chị hiện chưa được gửi đi. LMC xin lỗi vì sự chậm trễ. Anh/chị có muốn shop hỗ trợ gì thêm không ạ? 🙏",
+      body: "Chào {ten}, đơn {stt} của anh/chị hiện chưa được gửi đi. LMC xin lỗi vì sự chậm trễ. Anh/chị có muốn shop hỗ trợ gì thêm không ạ? 🙏",
     },
     {
       id: "t2",
       title: "Xin lỗi + đền bù",
-      body:
-        "Chào {ten}, đơn {stt} của anh/chị đang gặp sự cố. Shop xin lỗi và sẽ gửi lại mã vận đơn mới trong hôm nay ạ. Mong anh/chị thông cảm! 💚",
+      body: "Chào {ten}, đơn {stt} của anh/chị đang gặp sự cố. Shop xin lỗi và sẽ gửi lại mã vận đơn mới trong hôm nay ạ. Mong anh/chị thông cảm! 💚",
     },
     {
       id: "t3",
       title: "CSKH chăm sóc",
-      body:
-        "Chào {ten}, LMC gọi xác nhận đơn {stt}. Anh/chị vẫn còn nhu cầu dùng sản phẩm không ạ? Nếu cần shop gửi ngay trong hôm nay nhé!",
+      body: "Chào {ten}, LMC gọi xác nhận đơn {stt}. Anh/chị vẫn còn nhu cầu dùng sản phẩm không ạ? Nếu cần shop gửi ngay trong hôm nay nhé!",
     },
   ]);
   const [showMarketingModal, setShowMarketingModal] = useState(false);
@@ -813,6 +846,13 @@ export default function KhoOrderList() {
   const [p1collapsed, setP1collapsed] = useState(false);
   const [p2collapsed, setP2collapsed] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  // Right panel collapse
+  const [rightPanelCollapsed, setRightPanelCollapsed] = useState(false);
+  const [selectedDetailOrder, setSelectedDetailOrder] = useState(null);
+
+  // Left sidebar collapse
+  const [leftSidebarCollapsed, setLeftSidebarCollapsed] = useState(false);
 
   // ── Auth guard ──
   useEffect(() => {
@@ -1688,9 +1728,7 @@ export default function KhoOrderList() {
       queue: targets.map((o) => o.id),
       done: [],
     });
-    showToast(
-      `Bắt đầu gửi tiếp thị cho ${targets.length} khách · 1s/người`,
-    );
+    showToast(`Bắt đầu gửi tiếp thị cho ${targets.length} khách · 1s/người`);
 
     const sentInBatch = [];
     for (let i = 0; i < targets.length; i++) {
@@ -2032,13 +2070,40 @@ export default function KhoOrderList() {
         {sidebarOpen && (
           <div className="sb-overlay" onClick={() => setSidebarOpen(false)} />
         )}
-        <aside className={`sb${sidebarOpen ? " open" : ""}`}>
+        {/* Toggle button - outside sidebar so it's always visible */}
+        {!leftSidebarCollapsed && (
+          <button
+            className="sb-toggle"
+            onClick={() => setLeftSidebarCollapsed(!leftSidebarCollapsed)}
+            title="Thu gọn menu"
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <path d="M15 18l-6-6 6-6" />
+            </svg>
+          </button>
+        )}
+        {leftSidebarCollapsed && (
+          <button
+            className="sb-toggle collapsed"
+            onClick={() => setLeftSidebarCollapsed(!leftSidebarCollapsed)}
+            title="Mở rộng menu"
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <path d="M9 18l6-6-6-6" />
+            </svg>
+          </button>
+        )}
+        <aside
+          className={`sb${sidebarOpen ? " open" : ""}${leftSidebarCollapsed ? " collapsed" : ""}`}
+        >
           <div className="brand">
             <div className="ico">LMC</div>
-            <div>
-              <div className="nm">QLKHO</div>
-              <div className="sub">Quản lý đơn hàng</div>
-            </div>
+            {!leftSidebarCollapsed && (
+              <div>
+                <div className="nm">QLKHO</div>
+                <div className="sub">Quản lý đơn hàng</div>
+              </div>
+            )}
           </div>
 
           <nav className="nav">
@@ -2181,6 +2246,20 @@ export default function KhoOrderList() {
               <div className="cnt">
                 SL ĐƠN: <b>{filteredList.length}</b>
               </div>
+              <button
+                className={`right-panel-toggle-btn${rightPanelCollapsed ? "" : " active"}`}
+                onClick={() => setRightPanelCollapsed(!rightPanelCollapsed)}
+                title={
+                  rightPanelCollapsed ? "Mở rộng chi tiết" : "Thu gọn chi tiết"
+                }
+              >
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                  <polyline points="14 2 14 8 20 8" />
+                  <line x1="16" y1="13" x2="8" y2="13" />
+                  <line x1="16" y1="17" x2="8" y2="17" />
+                </svg>
+              </button>
               <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                 <div className="av">{currentUser?.name?.[0] || "K"}</div>
                 <div>
@@ -2995,7 +3074,15 @@ export default function KhoOrderList() {
                         return (
                           <tr
                             key={o.id}
-                            className={late && !isDelivered ? "late-row" : ""}
+                            className={`${late && !isDelivered ? "late-row" : ""}${selectedDetailOrder?.id === o.id ? " selected-row" : ""}`}
+                            onClick={() => {
+                              if (rightPanelCollapsed)
+                                setRightPanelCollapsed(false);
+                              setSelectedDetailOrder(
+                                selectedDetailOrder?.id === o.id ? null : o,
+                              );
+                            }}
+                            style={{ cursor: "pointer" }}
                           >
                             {/* Checkbox chọn */}
                             <td className="ctr" data-label="">
@@ -3404,6 +3491,175 @@ export default function KhoOrderList() {
           </main>
         </div>
 
+        {/* ═══ RIGHT PANEL - ORDER DETAILS ═══ */}
+        <div
+          className={`right-panel${rightPanelCollapsed ? " collapsed" : ""}`}
+        >
+          <div className="right-panel-header">
+            <div className="right-panel-title">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                <polyline points="14 2 14 8 20 8" />
+                <line x1="16" y1="13" x2="8" y2="13" />
+                <line x1="16" y1="17" x2="8" y2="17" />
+                <polyline points="10 9 9 9 8 9" />
+              </svg>
+              Chi tiết đơn hàng
+            </div>
+            <button
+              className={`right-panel-toggle${rightPanelCollapsed ? " collapsed" : ""}`}
+              onClick={() => setRightPanelCollapsed(!rightPanelCollapsed)}
+              title={rightPanelCollapsed ? "Mở rộng" : "Thu gọn"}
+            >
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <path d="M15 18l-6-6 6-6" />
+              </svg>
+            </button>
+          </div>
+          <div className="right-panel-body">
+            {selectedDetailOrder ? (
+              <>
+                <div className="detail-section">
+                  <div className="detail-section-title">
+                    Thông tin khách hàng
+                  </div>
+                  <div className="detail-row">
+                    <span className="detail-label">Tên khách</span>
+                    <span className="detail-value">
+                      {selectedDetailOrder.cust ||
+                        selectedDetailOrder.customerName ||
+                        "-"}
+                    </span>
+                  </div>
+                  <div className="detail-row">
+                    <span className="detail-label">SĐT</span>
+                    <span className="detail-value">
+                      {selectedDetailOrder.sdt ||
+                        selectedDetailOrder.phone ||
+                        "-"}
+                    </span>
+                  </div>
+                  <div className="detail-row">
+                    <span className="detail-label">Địa chỉ</span>
+                    <span className="detail-value">
+                      {selectedDetailOrder.addr ||
+                        selectedDetailOrder.address ||
+                        "-"}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="detail-section">
+                  <div className="detail-section-title">Thông tin đơn hàng</div>
+                  <div className="detail-row">
+                    <span className="detail-label">STT</span>
+                    <span className="detail-value">
+                      {selectedDetailOrder.stt || "-"}
+                    </span>
+                  </div>
+                  <div className="detail-row">
+                    <span className="detail-label">Sản phẩm</span>
+                    <span className="detail-value">
+                      {selectedDetailOrder.prods &&
+                      selectedDetailOrder.prods.length > 0
+                        ? selectedDetailOrder.prods.join(", ")
+                        : "-"}
+                    </span>
+                  </div>
+                  <div className="detail-row">
+                    <span className="detail-label">Số lượng</span>
+                    <span className="detail-value">
+                      {selectedDetailOrder.qty &&
+                      selectedDetailOrder.qty.length > 0
+                        ? selectedDetailOrder.qty.join(", ")
+                        : "-"}
+                    </span>
+                  </div>
+                  <div className="detail-row">
+                    <span className="detail-label">Quà</span>
+                    <span className="detail-value">
+                      {selectedDetailOrder.qua || "-"}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="detail-section">
+                  <div className="detail-section-title">Ngày tháng</div>
+                  <div className="detail-row">
+                    <span className="detail-label">Ngày đặt</span>
+                    <span className="detail-value">
+                      {selectedDetailOrder.ngayDat ||
+                        selectedDetailOrder.orderDate ||
+                        "-"}
+                    </span>
+                  </div>
+                  <div className="detail-row">
+                    <span className="detail-label">Ngày gửi</span>
+                    <span className="detail-value">
+                      {selectedDetailOrder.ngayGui ||
+                        selectedDetailOrder.shippingDate1 ||
+                        "-"}
+                    </span>
+                  </div>
+                  <div className="detail-row">
+                    <span className="detail-label">Ngày nhận</span>
+                    <span className="detail-value">
+                      {selectedDetailOrder.ngayNhan ||
+                        selectedDetailOrder.shippingDate2 ||
+                        "-"}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="detail-section">
+                  <div className="detail-section-title">Vận đơn</div>
+                  <div className="detail-row">
+                    <span className="detail-label">Mã vận đơn</span>
+                    <span className="detail-value">
+                      {selectedDetailOrder.track || "-"}
+                    </span>
+                  </div>
+                  <div className="detail-row">
+                    <span className="detail-label">Tình trạng</span>
+                    <span className="detail-value">
+                      {selectedDetailOrder.istick5
+                        ? "Cần xử lý"
+                        : "Bình thường"}
+                    </span>
+                  </div>
+                </div>
+
+                {selectedDetailOrder.istickLyDo && (
+                  <div className="detail-section">
+                    <div className="detail-section-title">Ghi chú</div>
+                    <div
+                      style={{
+                        fontSize: 12.5,
+                        color: "var(--ink)",
+                        lineHeight: 1.5,
+                      }}
+                    >
+                      {selectedDetailOrder.istickLyDo}
+                    </div>
+                  </div>
+                )}
+              </>
+            ) : (
+              <div className="right-panel-empty">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                  <polyline points="14 2 14 8 20 8" />
+                </svg>
+                <p>
+                  Nhấp vào một đơn hàng
+                  <br />
+                  để xem chi tiết
+                </p>
+              </div>
+            )}
+          </div>
+        </div>
+
         {/* ═══ BULK FLOAT BAR ═══ */}
         <div className={`bulk-bar${selectedCount > 0 ? " show" : ""}`}>
           <div className="bulk-count">
@@ -3513,7 +3769,10 @@ export default function KhoOrderList() {
 
         {/* ═══ MARKETING MODAL ═══ */}
         {showMarketingModal && (
-          <div className="mkt-overlay" onClick={() => setShowMarketingModal(false)}>
+          <div
+            className="mkt-overlay"
+            onClick={() => setShowMarketingModal(false)}
+          >
             <div className="mkt-modal" onClick={(e) => e.stopPropagation()}>
               <div className="mkt-head">
                 <svg
@@ -3533,7 +3792,12 @@ export default function KhoOrderList() {
                   className="close"
                   onClick={() => setShowMarketingModal(false)}
                 >
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2">
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2.2"
+                  >
                     <path d="M18 6 6 18M6 6l12 12" />
                   </svg>
                 </button>
@@ -3576,7 +3840,10 @@ export default function KhoOrderList() {
                                 placeholder="Nội dung (hỗ trợ biến {ten}, {stt}, {sdt}, {sp})"
                               />
                               <div className="mkt-edit-actions">
-                                <button className="ok" onClick={saveTemplateEdit}>
+                                <button
+                                  className="ok"
+                                  onClick={saveTemplateEdit}
+                                >
                                   Lưu
                                 </button>
                                 <button
@@ -3598,7 +3865,12 @@ export default function KhoOrderList() {
                               }}
                               title="Sửa"
                             >
-                              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                              <svg
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                strokeWidth="2"
+                              >
                                 <path d="M12 20h9" />
                                 <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z" />
                               </svg>
@@ -3610,7 +3882,12 @@ export default function KhoOrderList() {
                               }}
                               title="Xoá"
                             >
-                              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                              <svg
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                strokeWidth="2"
+                              >
                                 <polyline points="3 6 5 6 21 6" />
                                 <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
                               </svg>
@@ -3625,14 +3902,20 @@ export default function KhoOrderList() {
                       <input
                         value={newTemplate.title}
                         onChange={(e) =>
-                          setNewTemplate({ ...newTemplate, title: e.target.value })
+                          setNewTemplate({
+                            ...newTemplate,
+                            title: e.target.value,
+                          })
                         }
                         placeholder="Tiêu đề câu mới"
                       />
                       <textarea
                         value={newTemplate.body}
                         onChange={(e) =>
-                          setNewTemplate({ ...newTemplate, body: e.target.value })
+                          setNewTemplate({
+                            ...newTemplate,
+                            body: e.target.value,
+                          })
                         }
                         placeholder="Nội dung..."
                       />
@@ -3657,7 +3940,13 @@ export default function KhoOrderList() {
                       onClick={() => setShowAddTemplate(true)}
                       style={{ marginTop: 8 }}
                     >
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" style={{ width: 13, height: 13 }}>
+                      <svg
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2.2"
+                        style={{ width: 13, height: 13 }}
+                      >
                         <line x1="12" y1="5" x2="12" y2="19" />
                         <line x1="5" y1="12" x2="19" y2="12" />
                       </svg>
@@ -3703,8 +3992,7 @@ export default function KhoOrderList() {
                     className="btn btn-amber btn-sm"
                     disabled={getMarketingTargets().length === 0}
                     style={{
-                      opacity:
-                        getMarketingTargets().length === 0 ? 0.5 : 1,
+                      opacity: getMarketingTargets().length === 0 ? 0.5 : 1,
                       cursor:
                         getMarketingTargets().length === 0
                           ? "not-allowed"
@@ -3734,7 +4022,9 @@ export default function KhoOrderList() {
                   <b>{sendingState.total}</b>
                 </span>
                 {sendingState.running && (
-                  <span style={{ color: "#fbbf24", fontSize: 11 }}>đang gửi…</span>
+                  <span style={{ color: "#fbbf24", fontSize: 11 }}>
+                    đang gửi…
+                  </span>
                 )}
               </div>
               <div className="now">
@@ -3765,9 +4055,7 @@ export default function KhoOrderList() {
                 {sendingState.failed > 0 && (
                   <span className="sp er">✕ {sendingState.failed}</span>
                 )}
-                <span className="sp rm">
-                  ⏱ {sendingState.queue.length} còn
-                </span>
+                <span className="sp rm">⏱ {sendingState.queue.length} còn</span>
               </div>
               <div className="acts">
                 {sendingState.running ? (

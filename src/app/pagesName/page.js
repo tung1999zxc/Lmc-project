@@ -986,11 +986,15 @@ const viaColumns = [
           onChange={(value) => setSelectedTeam(value)}
         >
           <Option value="SON">TEAM SƠN</Option>
+          <Option value="HIEP">TEAM HIỆP</Option>
+          <Option value="MANH">TEAM MẠNH</Option>
           <Option value="LE">TEAM LE</Option>
           <Option value="TUANANH">TEAM TUẤN ANH</Option>
           <Option value="DIEN">TEAM DIỆN</Option>
           <Option value="HIEU">TEAM HIẾU</Option>
           <Option value="DIEU">TEAM DIỆU</Option>
+          <Option value="TUNG">TEAM TÙNG</Option>
+          <Option value="ANH">TEAM ÁNH</Option>
         </Select>
       </div>
 

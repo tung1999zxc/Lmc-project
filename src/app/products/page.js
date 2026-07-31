@@ -55,6 +55,10 @@ const getBase64 = (file) =>
     reader.onerror = (error) => reject(error);
   });
 
+/** Utility: normalize product name for safe comparison */
+const normalizeName = (name) =>
+  String(name || "").trim().toLowerCase();
+
 /**
  * InventoryPage (Optimized)
  * - Pre-aggregates orders per product to avoid per-row heavy computations
@@ -304,8 +308,10 @@ const rowSelection = {
       const productsInOrder = Array.isArray(order.products) ? order.products : [];
 
       for (const item of productsInOrder) {
-        const pname = item.product;
+        const pnameRaw = item.product;
         const qty = Number(item.quantity || 0);
+        if (!pnameRaw) continue;
+        const pname = normalizeName(pnameRaw);
         if (!pname) continue;
         if (!map[pname]) {
           map[pname] = {
@@ -351,10 +357,10 @@ const filteredProducts = useMemo(() => {
   let data = products || [];
 
   // 🔍 Filter theo search
-  const q = (searchText || "").trim().toLowerCase();
+  const q = normalizeName(searchText);
   if (q) {
     data = data.filter((p) =>
-      String(p.name || "").toLowerCase().includes(q)
+      normalizeName(p.name).includes(q)
     );
   }
 
@@ -428,19 +434,19 @@ else if (lastFilterType === "createdAt" && createdAtRange?.length === 2) {
   /** totalRevenue logic (keeps original behavior: calculate only when searchText not empty) */
   const totalRevenue = useMemo(() => {
     if (!searchText || searchText.trim() === "") return 0;
-    const q = (searchText || "").trim().toLowerCase();
+    const q = normalizeName(searchText);
     const targetProducts = (products || []).filter((p) =>
-      String(p.name || "").toLowerCase().includes(q)
+      normalizeName(p.name).includes(q)
     );
     if (targetProducts.length === 0) return 0;
 
     // For efficiency, use ordersAggMap? Original sums order.profit for orders that include product.
     // We'll compute by iterating orders2 once and checking inclusion with a Set per product name.
     let total = 0;
-    const productNames = new Set(targetProducts.map((p) => p.name));
+    const productNames = new Set(targetProducts.map((p) => normalizeName(p.name)));
     for (const order of orders2) {
       if (!order.products || !Array.isArray(order.products)) continue;
-      const includes = order.products.some((it) => productNames.has(it.product));
+      const includes = order.products.some((it) => productNames.has(normalizeName(it.product)));
       if (includes) total += Number(order.profit || 0);
     }
     return total;
@@ -452,7 +458,7 @@ else if (lastFilterType === "createdAt" && createdAtRange?.length === 2) {
    */
   const getAggregatesFor = useCallback(
     (productName) => {
-      return ordersAggMap[productName] || {
+      return ordersAggMap[normalizeName(productName)] || {
         ordersDone: 0,
         deliveredQty: 0,
         ordersNotDone: 0,
@@ -465,19 +471,19 @@ else if (lastFilterType === "createdAt" && createdAtRange?.length === 2) {
   // Name-specific manual adjustments from original file
   const nameAdjustments = useMemo(
     () => ({
-      "KEM NỀN THỎI": { slAmAdd: 2 },
-      "MẶT NẠ BONG BÓNG": { slAmAdd: 28 }, // original subtracted 28 from ordersDone — original behavior had `ordersDone - 28`
-      "KÍNH NỮ": { slAmAdd: 1 },
-      "TAI NGHE AI - TRẮNG": { slAmAdd: 2 },
-      "TAI NGHE AI - TÍM": { slAmAdd: 2 },
-      "GÓI NHUỘM TÓC - ĐEN": { slAmAdd: 2 },
-      "ĐỒNG HỒ CẢM ỨNG MẶT VUÔNG - ĐEN": { slAmAdd: 2 },
-      "ĐỒNG HỒ CẢM ỨNG MẶT VUÔNG - CAM": { slAmAdd: 1 },
-      "ĐỒNG HỒ CẢM ỨNG MẶT VUÔNG - VÀNG": { slAmAdd: 1 },
-     
-      // "THỎI NÉN NHUỘM TÓC - NÂU": { slAmAdd: 10 },
-      
-      "VIÊN TINH CHẤT HÀU": { slAmAdd: 6 },
+      "kem nền thỏi": { slAmAdd: 2 },
+      "mặt nạ bong bóng": { slAmAdd: 28 }, // original subtracted 28 from ordersDone — original behavior had `ordersDone - 28`
+      "kính nữ": { slAmAdd: 1 },
+      "tai nghe ai - trắng": { slAmAdd: 2 },
+      "tai nghe ai - tím": { slAmAdd: 2 },
+      "gói nhuộm tóc - đen": { slAmAdd: 2 },
+      "đồng hồ cảm ứng mặt vuông - đen": { slAmAdd: 2 },
+      "đồng hồ cảm ứng mặt vuông - cam": { slAmAdd: 1 },
+      "đồng hồ cảm ứng mặt vuông - vàng": { slAmAdd: 1 },
+
+      // "thỏi nén nhuộm tóc - nâu": { slAmAdd: 10 },
+
+      "viên tinh chất hàu": { slAmAdd: 6 },
     }),
     []
   );
@@ -782,27 +788,28 @@ else if (lastFilterType === "createdAt" && createdAtRange?.length === 2) {
         width: 100,
         sorter: (a, b) => {
           // Use precomputed map for sorting
-          const aAgg = ordersAggMap[a.name] || { ordersDone: 0 };
-          const bAgg = ordersAggMap[b.name] || { ordersDone: 0 };
+          const aAgg = ordersAggMap[normalizeName(a.name)] || { ordersDone: 0 };
+          const bAgg = ordersAggMap[normalizeName(b.name)] || { ordersDone: 0 };
           return aAgg.ordersDone - bAgg.ordersDone;
         },
         render: (_, record) => {
           const agg = getAggregatesFor(record.name);
           // original had special-case subtractions for a few product names
           let value = agg.ordersDone;
-          if (record.name === "KEM NỀN THỎI") value = value - 2;
-          if (record.name === "MẶT NẠ BONG BÓNG") value = value - 28;
-          if (record.name === "ĐỒNG HỒ CẢM ỨNG MẶT VUÔNG - ĐEN") value = value - 2;
-          if (record.name === "ĐỒNG HỒ CẢM ỨNG MẶT VUÔNG - CAM") value = value - 1;
-          if (record.name === "ĐỒNG HỒ CẢM ỨNG MẶT VUÔNG - VÀNG") value = value - 1;
-          if (record.name === "KÍNH NỮ") value = value - 1;
-          if (record.name === "TAI NGHE AI - TRẮNG") value = value - 2;
-          if (record.name === "TAI NGHE AI - TÍM") value = value - 2;
-          if (record.name === "GÓI NHUỘM TÓC - ĐEN") value = value - 2;
-         
-         
-          // if (record.name === "THỎI NÉN NHUỘM TÓC - NÂU") value = value - 10;
-          if (record.name === "VIÊN TINH CHẤT HÀU") value = value - 6;
+          const rName = normalizeName(record.name);
+          if (rName === "kem nền thỏi") value = value - 2;
+          if (rName === "mặt nạ bong bóng") value = value - 28;
+          if (rName === "đồng hồ cảm ứng mặt vuông - đen") value = value - 2;
+          if (rName === "đồng hồ cảm ứng mặt vuông - cam") value = value - 1;
+          if (rName === "đồng hồ cảm ứng mặt vuông - vàng") value = value - 1;
+          if (rName === "kính nữ") value = value - 1;
+          if (rName === "tai nghe ai - trắng") value = value - 2;
+          if (rName === "tai nghe ai - tím") value = value - 2;
+          if (rName === "gói nhuộm tóc - đen") value = value - 2;
+
+
+          // if (rName === "thỏi nén nhuộm tóc - nâu") value = value - 10;
+          if (rName === "viên tinh chất hàu") value = value - 6;
           return value;
         },
       },
@@ -862,7 +869,7 @@ else if (lastFilterType === "createdAt" && createdAtRange?.length === 2) {
 
           const slAm = totalImported - (agg.ordersDone || 0) - (agg.deliveredQty || 0);
 
-          const adjust = nameAdjustments[record.name]?.slAmAdd || 0;
+          const adjust = nameAdjustments[normalizeName(record.name)]?.slAmAdd || 0;
           const finalSlAm = slAm + adjust;
 
           let bgColor = "";
@@ -1249,7 +1256,7 @@ const calculateStats2Days = useCallback(() => {
     if (!Array.isArray(order.products)) return;
 
     order.products.forEach((item) => {
-      const name = item.product?.trim();
+      const name = normalizeName(item.product);
       const qty = Number(item.quantity) || 0;
       const mkt = order.mkt?.trim() || "Không rõ";
 
@@ -1257,7 +1264,7 @@ const calculateStats2Days = useCallback(() => {
 
       if (!stats[name]) {
         stats[name] = {
-          product: name,
+          product: item.product || name,
           quantity: 0,
           mkts: new Set(),
         };
