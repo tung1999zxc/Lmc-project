@@ -1,6 +1,6 @@
 // pages/dashboard.js
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import {
   Table,
   Form,
@@ -43,12 +43,14 @@ const Dashboard = () => {
   const [safeEmployees, setSafeEmployees] = useState([]);
   const [editingRecord, setEditingRecord] = useState(null);
   const [messageApi, contextHolder] = message.useMessage();
+  const [selectedTeam, setSelectedTeam] = useState("all");
+  const [displayedTienThua, setDisplayedTienThua] = useState(0);
+
   // Bộ lọc theo khoảng thời gian (mặc định 7 ngày)
   // const [filterOption, setFilterOption] = useState("7"); // Đã loại bỏ
   // Nếu là manager, có thêm bộ lọc để chọn team (default "all" hiển thị tất cả các team)
   const [isPopupOpen, setIsPopupOpen] = useState(false);
   const [popupData, setPopupData] = useState([]);
-  const [selectedTeam, setSelectedTeam] = useState("all");
 
   const fetchEmployees = async () => {
     try {
@@ -736,6 +738,59 @@ const Dashboard = () => {
   const totalTienThua =
     adminSummaryData.reduce((sum, row) => sum + row.tienThua, 0) +
     totalTienDuThangNay;
+
+  // Tính giá trị hiển thị TIỀN THỪA TẤT CẢ (trừ theo rule tháng/năm/team)
+  const totalTienThuaDisplay = useMemo(() => {
+    const now = dayjs();
+    const currentMonth = now.month() + 1;
+    const currentYear = now.year();
+
+    const lastMonth = now.subtract(1, "month");
+    const lastMonthNumber = lastMonth.month() + 1;
+    const lastMonthYear = lastMonth.year();
+
+    const twoMonthsAgo = now.subtract(2, "month");
+    const twoMonthsAgoMonth = twoMonthsAgo.month() + 1;
+    const twoMonthsAgoYear = twoMonthsAgo.year();
+
+    let month = currentMonth;
+    let year = currentYear;
+
+    if (period === "lastMonth") {
+      month = lastMonthNumber;
+      year = lastMonthYear;
+    }
+
+    if (period === "twoMonthsAgo") {
+      month = twoMonthsAgoMonth;
+      year = twoMonthsAgoYear;
+    }
+
+    let minusAmount = 0;
+
+    if (month === 4 && year === 2026 && selectedTeam === "all") {
+      minusAmount = 0;
+    }
+    if (month === 5 && year === 2026 && selectedTeam === "all") {
+      minusAmount = 0;
+    }
+    if (month === 6 && year === 2026 && selectedTeam === "all") {
+      minusAmount = 0;
+    }
+    if (month === 7 && year === 2026 && selectedTeam === "all") {
+      minusAmount = 27000000;
+    }
+
+    return (totalTienThua || 0) - minusAmount;
+  }, [period, selectedTeam, totalTienThua]);
+
+  // Delay hiển thị 1200ms mỗi khi giá trị thay đổi
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDisplayedTienThua(totalTienThuaDisplay);
+    }, 1200);
+    return () => clearTimeout(timer);
+  }, [totalTienThuaDisplay]);
   const totalPercentAds =
     totalDSTong > 0
       ? (
@@ -890,53 +945,7 @@ const Dashboard = () => {
         <div className="mkt-sc-content">
           <div className="mkt-sc-label">TIỀN THỪA TẤT CẢ</div>
           <div className="mkt-sc-value">
-            {(() => {
-              const now = dayjs();
-              const currentMonth = now.month() + 1;
-              const currentYear = now.year();
-
-              const lastMonth = now.subtract(1, "month");
-              const lastMonthNumber = lastMonth.month() + 1;
-              const lastMonthYear = lastMonth.year();
-
-              const twoMonthsAgo = now.subtract(2, "month");
-              const twoMonthsAgoMonth = twoMonthsAgo.month() + 1;
-              const twoMonthsAgoYear = twoMonthsAgo.year();
-
-              let month = currentMonth;
-              let year = currentYear;
-
-              if (period === "lastMonth") {
-                month = lastMonthNumber;
-                year = lastMonthYear;
-              }
-
-              if (period === "twoMonthsAgo") {
-                month = twoMonthsAgoMonth;
-                year = twoMonthsAgoYear;
-              }
-
-              let minusAmount = 0;
-
-              if (month === 4 && year === 2026 && selectedTeam === "all") {
-                minusAmount = 0;
-              }
-
-              if (month === 5 && year === 2026 && selectedTeam === "all") {
-                minusAmount = 0;
-              }
-
-              if (month === 6 && year === 2026 && selectedTeam === "all") {
-                minusAmount = 0;
-              }
-              if (month === 7 && year === 2026 && selectedTeam === "all") {
-                minusAmount = 27000000;
-              }
-
-              return ((totalTienThua || 0) - minusAmount).toLocaleString(
-                "vi-VN",
-              );
-            })()}
+            {(displayedTienThua || 0).toLocaleString("vi-VN")}
           </div>
           <div className="mkt-sc-sub">Tiền còn dư</div>
         </div>
