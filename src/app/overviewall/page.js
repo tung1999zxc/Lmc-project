@@ -1011,11 +1011,11 @@ const Dashboard = () => {
   // Dữ liệu teams
   const teamsByArea = {
     da: [
-      { label: "TEAM PHI", value: "PHI" },
+      // { label: "TEAM PHI", value: "PHI" },
       { label: "TEAM TUẤN ANH", value: "TUANANH" },
     ],
     pvd: [
-      { label: "TEAM DIỆU", value: "DIEU" },
+      // { label: "TEAM DIỆU", value: "DIEU" },
       { label: "TEAM SƠN", value: "SON" },
       { label: "TEAM LẺ", value: "LE" },
       { label: "TEAM DIỆN ONLINE", value: "DIENON" },
@@ -1027,8 +1027,8 @@ const Dashboard = () => {
       { label: "TEAM MẠNH ", value: "MANH" },
     ],
     all: [
-      { label: "TEAM PHI", value: "PHI" },
-      { label: "TEAM DIỆU", value: "DIEU" },
+      // { label: "TEAM PHI", value: "PHI" },
+      // { label: "TEAM DIỆU", value: "DIEU" },
       { label: "TEAM SƠN", value: "SON" },
       { label: "TEAM LẺ", value: "LE" },
       { label: "TEAM TUẤN ANH", value: "TUANANH" },
