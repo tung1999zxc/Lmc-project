@@ -14,6 +14,7 @@ export async function POST(req) {
       username,
       password,
       stk,
+      team_tp,
       nh,
       name,
       position,
@@ -29,7 +30,7 @@ export async function POST(req) {
     if (!username || !password || !name || !position) {
       return new Response(
         JSON.stringify({ error: "Thiếu thông tin bắt buộc" }),
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -60,6 +61,7 @@ export async function POST(req) {
       nh,
       stk,
       position,
+      team_tp,
       status,
       quocgia: normalizedQuocgia,
       khuvuc,
@@ -76,7 +78,7 @@ export async function POST(req) {
         message: "Đăng ký thành công",
         data: newEmployee,
       }),
-      { status: 201 }
+      { status: 201 },
     );
   } catch (error) {
     console.error("Lỗi trong POST /api/employees:", error);
@@ -103,14 +105,14 @@ export async function PUT(req) {
       .collection("employees")
       .updateMany(
         { position_team: "sale" },
-        { $set: { password: hashedPassword } }
+        { $set: { password: hashedPassword } },
       );
 
     return new Response(
       JSON.stringify({
         message: `Đã reset ${result.modifiedCount} tài khoản sale về mật khẩu '1'`,
       }),
-      { status: 200 }
+      { status: 200 },
     );
   } catch (error) {
     console.error("Lỗi trong PUT /api/employees/reset-sale-passwords:", error);
@@ -134,7 +136,7 @@ export async function GET(req) {
         message: "Danh sách nhân viên",
         data: employeesWithDefaultCountry,
       }),
-      { status: 200 }
+      { status: 200 },
     );
   } catch (error) {
     console.error("Lỗi trong GET /api/employees:", error);
@@ -147,20 +149,18 @@ export async function GET(req) {
 export async function PATCH(req) {
   try {
     const { db } = await connectToDatabase();
-    
+
     // Cập nhật trường khuvuc = 'pvd' cho TẤT CẢ document trong collection "employees"
-    const result = await db
-      .collection("employees")
-      .updateMany(
-        {}, // Bộ lọc rỗng áp dụng cho tất cả
-        { $set: { khuvuc: "pvd" } } // Đặt khuvuc = 'pvd'
-      );
+    const result = await db.collection("employees").updateMany(
+      {}, // Bộ lọc rỗng áp dụng cho tất cả
+      { $set: { khuvuc: "pvd" } }, // Đặt khuvuc = 'pvd'
+    );
 
     return new Response(
       JSON.stringify({
         message: `Đã cập nhật ${result.modifiedCount} nhân viên về khu vực 'Phạm Văn Đồng'`,
       }),
-      { status: 200 }
+      { status: 200 },
     );
   } catch (error) {
     console.error("Lỗi trong PATCH /api/employees:", error);

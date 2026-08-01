@@ -16,13 +16,12 @@ export async function GET(req) {
 
     const searchTerm = customerName.trim();
     const escapedSearchTerm = searchTerm.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-    const searchRegex = new RegExp(escapedSearchTerm, 'i');
+    const exactNameRegex = new RegExp(`^${escapedSearchTerm}$`, 'i');
+    const numericStt = Number(searchTerm);
     const query = {
       $or: [
-        { customerName: { $regex: searchRegex } },
-        { phone: { $regex: searchRegex } },
-        { fb: { $regex: searchRegex } },
-        ...(Number.isNaN(Number(searchTerm)) ? [] : [{ stt: Number(searchTerm) }]),
+        { customerName: { $regex: exactNameRegex } },
+        ...(Number.isNaN(numericStt) ? [] : [{ stt: numericStt }]),
       ],
     };
 

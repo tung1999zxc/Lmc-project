@@ -233,6 +233,11 @@ const handleMassUpdateKhuvuc = async () => {
       width: 120,
     },
     {
+      title: "Quản lý",
+      dataIndex: "team_tp",
+      width: 120,
+    },
+    {
       title: "Trạng thái",
       key: "status2",
       width: 100,
@@ -342,6 +347,7 @@ const handleMassUpdateKhuvuc = async () => {
       status: employee.status,
       quocgia: employee.quocgia || "kr",
       khuvuc: employee.khuvuc,
+      team_tp: employee.team_tp,
       stk: employee.stk,
       nh: employee.nh,
     });
@@ -362,6 +368,7 @@ const handleMassUpdateKhuvuc = async () => {
       position_team2: values.position_team2,
       quocgia: values.quocgia,
       khuvuc: values.khuvuc,
+      team_tp: values.team_tp,
       stk: values.stk,
       nh: values.nh,
       status: values.status,
@@ -572,6 +579,18 @@ const visibleEmployees =
                 name="nh"
               >
                 <Input />
+              </Form.Item>
+              <Form.Item
+                label="Quản lý"
+                name="team_tp"
+              >
+                <Select
+                 disabled={currentUser.position !== "admin" && currentUser.position !== "managerSALE"}
+                  options={team_tp.map((p) => ({
+                    label: p.label,
+                    value: p.value,
+                  }))}
+                />
               </Form.Item>
 
         <div className="accounts-modal-footer">
@@ -812,7 +831,16 @@ const visibleEmployees =
                 />
               </Form.Item>
             </div>
-
+            <div className="accounts-form-item">
+              <label>Quản lý</label>
+              <Form.Item name="team_tp">
+                <Select
+                  options={team_tp.map((p) => ({ label: p.label, value: p.value }))}
+                  placeholder="Chọn quản lý"
+                  allowClear
+                />
+              </Form.Item>
+            </div>
             <div className="accounts-form-item">
               <label>STK ADS</label>
               <Form.Item name="stk">

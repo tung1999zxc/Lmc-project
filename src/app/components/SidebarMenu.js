@@ -502,6 +502,7 @@ const SidebarMenu = ({ isOpen, onToggle }) => {
   const isdiepanh = currentUser?.name === "Diệp Anh";
   const isLeTuyetKha = currentUser?.name === "Lê Tuyết Kha";
   const isNguyenThiHuyen = currentUser?.name === "Nguyễn Thị Huyền";
+  const isPhiNavy = currentUser?.name === "Phi Navy";
   const isAdmin =
     currentUser?.position === "admin" ;
   const khohq1 = currentUser?.position === "kho2";
@@ -994,10 +995,15 @@ const SidebarMenu = ({ isOpen, onToggle }) => {
     ];
   };
 
+  const hideTaiwanItems = (items) =>
+    isPhiNavy
+      ? items.filter((item) => !["/overviewtw", "/orderstw", "/mkttw"].includes(item.href))
+      : items;
+
   const navItems = flattenNavItems([
-    ...getOverviewMenu(),
-    ...getOrderMenu(),
-    ...getMktMenu(),
+    ...hideTaiwanItems(getOverviewMenu()),
+    ...hideTaiwanItems(getOrderMenu()),
+    ...hideTaiwanItems(getMktMenu()),
     ...(isMarketing || isKRTW
       ? []
       : [
