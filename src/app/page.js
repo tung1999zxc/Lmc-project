@@ -34,6 +34,8 @@ const Dashboard = () => {
   const [selectedDate, setSelectedDate] = useState(today);
   const [selectedPreset, setSelectedPreset] = useState("null");
   const [selectedArea, setSelectedArea] = useState("all");
+  // Bộ lọc nhân viên MKT (áp dụng ngay từ đầu cho các bảng MKT)
+  const [selectedMktName, setSelectedMktName] = useState("all");
 
   // Ngày hiện tại định dạng YYYY-MM-DD
 
@@ -50,6 +52,36 @@ const Dashboard = () => {
       team_id: selectedTeam,
     };
   }, [reduxCurrentUser, selectedTeam]);
+
+  // Ràng buộc team_tp dựa trên user đăng nhập (chỉ áp dụng cho 2 case đặc biệt)
+  const restrictedTeamTp = useMemo(() => {
+    const userName = (currentUser.name || "").trim();
+    if (currentUser.position === "managerMKT" && userName === "Trần Ngọc Diện") {
+      return "DIEN";
+    }
+    if (currentUser.position === "admin" && userName === "Phi Navy") {
+      return "PHI";
+    }
+    return null;
+  }, [currentUser]);
+
+  // Nick Diện (managerMKT + Trần Ngọc Diện) chỉ được xem 5 team: DIENON, DIEN, ANH, TUNG, HIEP
+  const isNickDien = useMemo(
+    () =>
+      currentUser.position === "managerMKT" &&
+      (currentUser.name || "").trim() === "Trần Ngọc Diện",
+    [currentUser],
+  );
+  const DIEN_TEAMS = ["DIENON", "DIEN", "ANH", "TUNG", "HIEP"];
+
+  // Nick Phi (admin + Phi Navy) chỉ được xem 5 team: SON, LE, TUANANH, PHUTHANH, MANH
+  const isNickPhi = useMemo(
+    () =>
+      currentUser.position === "admin" &&
+      (currentUser.name || "").trim() === "Phi Navy",
+    [currentUser],
+  );
+  const PHI_TEAMS = ["SON", "LE", "TUANANH", "PHUTHANH", "MANH"];
 
   // Track initial load to prevent duplicate calls
   const isInitialLoadRef = useRef(false);
@@ -1148,17 +1180,25 @@ const Dashboard = () => {
       { label: "TEAM SƠN", value: "SON" },
       { label: "TEAM LẺ", value: "LE" },
       { label: "TEAM TUẤN ANH", value: "TUANANH" },
-      { label: "TEAM DIỆN ONLINE", value: "DIENON" },
-      { label: "TEAM DIỆN", value: "DIEN" },
       { label: "TEAM PHÚ THÀNH", value: "PHUTHANH" },
+      { label: "TEAM MẠNH ", value: "MANH" },
+      { label: "TEAM DIỆN", value: "DIEN" },
+      { label: "TEAM DIỆN ONLINE", value: "DIENON" },
       { label: "TEAM ÁNH ", value: "ANH" },
       { label: "TEAM TÙNG ", value: "TUNG" },
       { label: "TEAM HIỆP ", value: "HIEP" },
-      { label: "TEAM MẠNH ", value: "MANH" },
     ],
   };
 
-  const teams = teamsByArea[selectedArea] || [];
+  const teams = isNickDien
+    ? (teamsByArea[selectedArea] || []).filter((t) =>
+        DIEN_TEAMS.includes(t.value),
+      )
+    : isNickPhi
+      ? (teamsByArea[selectedArea] || []).filter((t) =>
+          PHI_TEAMS.includes(t.value),
+        )
+      : teamsByArea[selectedArea] || [];
   const teamsByArea2 = {
     da: [
     
@@ -1168,13 +1208,14 @@ const Dashboard = () => {
       // { label: "TEAM DIỆU", value: "DIEU" },
       { label: "TEAM SƠN", value: "SON" },
       { label: "TEAM LẺ", value: "LE" },
+      { label: "TEAM MẠNH ", value: "MANH" },
+      { label: "TEAM PHÚ THÀNH", value: "PHUTHANH" },
       { label: "TEAM DIỆN ONLINE", value: "DIENON" },
       { label: "TEAM DIỆN", value: "DIEN" },
-      { label: "TEAM PHÚ THÀNH", value: "PHUTHANH" },
       { label: "TEAM ÁNH ", value: "ANH" },
       { label: "TEAM TÙNG ", value: "TUNG" },
       { label: "TEAM HIỆP ", value: "HIEP" },
-      { label: "TEAM MẠNH ", value: "MANH" },
+
     ],
     all: [
       // { label: "TEAM PHI", value: "PHI" },
@@ -1193,7 +1234,15 @@ const Dashboard = () => {
     ],
   };
 
-  const teams2 = teamsByArea2[selectedArea] || [];
+  const teams2 = isNickDien
+    ? (teamsByArea2[selectedArea] || []).filter((t) =>
+        DIEN_TEAMS.includes(t.value),
+      )
+    : isNickPhi
+      ? (teamsByArea2[selectedArea] || []).filter((t) =>
+          PHI_TEAMS.includes(t.value),
+        )
+      : teamsByArea2[selectedArea] || [];
 
   // Dữ liệu nhân viên (mẫu)
 
@@ -1250,20 +1299,28 @@ const Dashboard = () => {
         });
   // === Biểu đồ doanh số theo nhân viên (Grouped Double Bar Chart) ===
   const mktEmployees = filteredEmployeesByArea.filter(
-    (emp) => emp.position_team === "mkt" && emp.quocgia === "kr",
+    (emp) =>
+      emp.position_team === "mkt" &&
+      emp.quocgia === "kr" &&
+      (!restrictedTeamTp || emp.team_tp === restrictedTeamTp) &&
+      (selectedMktName === "all" || emp.name.trim() === selectedMktName),
   );
   const mktEmployeesPVD = filteredEmployeesByArea.filter(
     (emp) =>
       emp.position_team === "mkt" &&
       emp.quocgia === "kr" &&
-      emp.khuvuc === "pvd",
+      emp.khuvuc === "pvd" &&
+      (!restrictedTeamTp || emp.team_tp === restrictedTeamTp) &&
+      (selectedMktName === "all" || emp.name.trim() === selectedMktName),
   );
 
   // Thêm 2 thành viên đặc biệt cho team DIEN (không giới hạn quocgia)
   const specialDIENMembers = filteredEmployeesByArea.filter(
     (emp) =>
       currentUser.team_id === "DIEN" &&
-      ["Hoàng Ngọc Ánh", "Nguyễn Mạnh Tùng"].includes(emp.name.trim()),
+      ["Hoàng Ngọc Ánh", "Nguyễn Mạnh Tùng","Nguyễn Thế Hiệp"].includes(emp.name.trim()) &&
+      (!restrictedTeamTp || emp.team_tp === restrictedTeamTp) &&
+      (selectedMktName === "all" || emp.name.trim() === selectedMktName),
   );
   const mktEmployeesWithSpecial = [...mktEmployees, ...specialDIENMembers];
 
@@ -1325,7 +1382,7 @@ const Dashboard = () => {
         (emp.name.trim() === "Nguyễn Thị Xuân Diệu" ||
           emp.name.trim() === "Nguyễn Bá Quân")) ||
       (currentUser.team_id === "DIEN" &&
-        (emp.name.trim() === "Hoàng Ngọc Ánh" ||
+        (emp.name.trim() === "Hoàng Ngọc Ánh" ||emp.name.trim() === "Nguyễn Thế Hiệp" ||
           emp.name.trim() === "Nguyễn Mạnh Tùng")),
   );
 
@@ -1548,7 +1605,7 @@ const Dashboard = () => {
               (emp.name || "").trim(),
             )) ||
           (currentUser.team_id === "DIEN" &&
-            ["Hoàng Ngọc Ánh", "Nguyễn Mạnh Tùng"].includes(
+            ["Hoàng Ngọc Ánh", "Nguyễn Mạnh Tùng","Nguyễn Thế Hiệp"].includes(
               (emp.name || "").trim(),
             )),
 
@@ -2033,7 +2090,7 @@ const Dashboard = () => {
     }
     if (
       currentUser.team_id === "DIEN" &&
-      ["Hoàng Ngọc Ánh", "Nguyễn Mạnh Tùng"].includes(emp.name.trim())
+      ["Hoàng Ngọc Ánh", "Nguyễn Mạnh Tùng","Nguyễn Thế Hiệp"].includes(emp.name.trim())
     ) {
       return true;
     }
@@ -2916,7 +2973,8 @@ const Dashboard = () => {
               (emp.name || "").trim() === "Nguyễn Bá Quân")) ||
           (currentUser.team_id === "DIEN" &&
             (emp.name.trim() === "Hoàng Ngọc Ánh" ||
-              emp.name.trim() === "Nguyễn Mạnh Tùng")),
+              emp.name.trim() === "Nguyễn Mạnh Tùng" ||
+              emp.name.trim() === "Nguyễn Thế Hiệp")),
         //     ||
         // (currentUser.team_id === "PHONG" &&
         //   (emp.name || "").trim() === "Bùi Văn Phi")

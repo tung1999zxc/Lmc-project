@@ -875,6 +875,9 @@ const OrderList = () => {
 
   const filteredOrders = useMemo(() => {
     let roleFilteredOrders = [...orders];
+    const normalizedCurrentUserName = currentUser.name
+      ?.trim()
+      .toLocaleLowerCase("vi-VN");
 
     if (currentUser.position === "kho2") {
       roleFilteredOrders = roleFilteredOrders.filter(
@@ -885,6 +888,31 @@ const OrderList = () => {
         (order) =>
           order.mkt.trim().toLowerCase() ===
           currentUser.name.trim().toLowerCase(),
+      );
+    } else if (
+      (currentUser.position === "managerMKT" &&
+        normalizedCurrentUserName === "trần ngọc diện") ||
+      (currentUser.position === "admin" &&
+        normalizedCurrentUserName === "phi navy")
+    ) {
+      const managerTeamTp =
+        normalizedCurrentUserName === "trần ngọc diện" ? "DIEN" : "PHI";
+
+      const mktNamesInTeam = new Set(
+        employees
+          .filter(
+            (employee) =>
+              employee.position_team === "mkt" &&
+              employee.team_tp?.trim().toUpperCase() === managerTeamTp,
+          )
+          .map((employee) =>
+            employee.name?.trim().toLocaleLowerCase("vi-VN"),
+          )
+          .filter(Boolean),
+      );
+
+      roleFilteredOrders = roleFilteredOrders.filter((order) =>
+        mktNamesInTeam.has(order.mkt?.trim().toLocaleLowerCase("vi-VN")),
       );
     }
     // else if (currentUser.position === "salenhapdon") {
@@ -1255,6 +1283,7 @@ const OrderList = () => {
     selectedSale,
     selectedMKT,
     currentUser,
+    employees,
     leadTeamMembers,
     searchCustomerName,
     searchCustomerName2,
