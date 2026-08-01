@@ -788,7 +788,7 @@ const Dashboard = () => {
   useEffect(() => {
     const timer = setTimeout(() => {
       setDisplayedTienThua(totalTienThuaDisplay);
-    }, 1200);
+    }, 2500);
     return () => clearTimeout(timer);
   }, [totalTienThuaDisplay]);
   const totalPercentAds =
