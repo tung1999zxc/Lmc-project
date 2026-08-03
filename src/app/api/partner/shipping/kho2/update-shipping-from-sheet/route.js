@@ -147,3 +147,7 @@ export async function PUT(req) {
 export async function POST(req) {
   return PUT(req);
 }
+
+export async function GET(req) {
+  return PUT(req);
+}
