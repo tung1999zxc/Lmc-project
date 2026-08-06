@@ -251,6 +251,8 @@ export async function PUT(req) {
         updateData.deliveryStatus = "GIAO THÀNH CÔNG";
       } else {
         updateData.deliveryStatus = "ĐÃ GỬI HÀNG";
+        // Chỉ xóa shippingDate2 khi deliveryStatus KHÔNG phải "ĐÃ NHẬN HÀNG"
+        delete updateData.shippingDate2;
       }
     }
 
