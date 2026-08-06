@@ -242,6 +242,18 @@ export async function PUT(req) {
     }
     // =========================================================
 
+    // Chuẩn hóa deliveryStatus theo yêu cầu
+    if (
+      Object.prototype.hasOwnProperty.call(updateData, "deliveryStatus") &&
+      updateData.deliveryStatus !== ""
+    ) {
+      if (updateData.deliveryStatus === "ĐÃ NHẬN HÀNG") {
+        updateData.deliveryStatus = "GIAO THÀNH CÔNG";
+      } else {
+        updateData.deliveryStatus = "ĐÃ GỬI HÀNG";
+      }
+    }
+
     updateData.updatedAt = new Date();
 
     const result = await db.collection("orders").updateOne(
