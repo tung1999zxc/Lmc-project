@@ -1,47 +1,47 @@
 // src/app/api/orders/search-by-customer/route.js
-import { connectToDatabase } from '../../../../../app/lib/mongodb2.js';
+import { connectToDatabase } from "../../../../../app/lib/mongodb2.js";
 
 export async function GET(req) {
   try {
     const { db } = await connectToDatabase();
     const url = new URL(req.url);
-    const customerName = url.searchParams.get('name');
+    const customerName = url.searchParams.get("name");
 
-    if (!customerName || customerName.trim() === '') {
-      return new Response(
-        JSON.stringify({ error: 'Thiếu tên khách hàng' }),
-        { status: 400 }
-      );
+    if (!customerName || customerName.trim() === "") {
+      return new Response(JSON.stringify({ error: "Thiếu tên khách hàng" }), {
+        status: 400,
+      });
     }
 
     const searchTerm = customerName.trim();
-    const escapedSearchTerm = searchTerm.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-    const searchRegex = new RegExp(escapedSearchTerm, 'i');
+    const escapedSearchTerm = searchTerm.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    const exactNameRegex = new RegExp(`^${escapedSearchTerm}$`, "i");
+    const numericStt = Number(searchTerm);
     const query = {
       $or: [
-        { customerName: { $regex: searchRegex } },
-        { phone: { $regex: searchRegex } },
-        { fb: { $regex: searchRegex } },
-        ...(Number.isNaN(Number(searchTerm)) ? [] : [{ stt: Number(searchTerm) }]),
+        { customerName: { $regex: exactNameRegex } },
+        ...(Number.isNaN(numericStt) ? [] : [{ stt: numericStt }]),
       ],
     };
 
     const orders = await db
-      .collection('orders')
+      .collection("orders")
       .find(query)
       .sort({ createdAt: -1 })
       .limit(50)
       .toArray();
 
     return new Response(
-      JSON.stringify({ message: 'Tìm đơn theo tên khách thành công', data: orders }),
-      { status: 200 }
+      JSON.stringify({
+        message: "Tìm đơn theo tên khách thành công",
+        data: orders,
+      }),
+      { status: 200 },
     );
   } catch (error) {
     console.error("Lỗi /api/orders/search-by-customer:", error);
-    return new Response(
-      JSON.stringify({ error: 'Lỗi server nội bộ' }),
-      { status: 500 }
-    );
+    return new Response(JSON.stringify({ error: "Lỗi server nội bộ" }), {
+      status: 500,
+    });
   }
 }
