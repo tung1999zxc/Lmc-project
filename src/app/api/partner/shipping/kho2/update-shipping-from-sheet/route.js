@@ -62,9 +62,7 @@ function formatDateToYMD(value) {
   }
 
   // Trường hợp dd/MM/yyyy hoặc dd-MM-yyyy.
-  const dayFirstMatch = rawValue.match(
-    /^(\d{1,2})[/-](\d{1,2})[/-](\d{4})$/,
-  );
+  const dayFirstMatch = rawValue.match(/^(\d{1,2})[/-](\d{1,2})[/-](\d{4})$/);
 
   if (dayFirstMatch) {
     const day = Number(dayFirstMatch[1]);
@@ -209,26 +207,12 @@ export async function PUT(req) {
     // CHỖ CẦN SỬA: chuẩn hóa 2 trường ngày về yyyy-MM-dd
     // =========================================================
     try {
-      if (
-        Object.prototype.hasOwnProperty.call(
-          updateData,
-          "shippingDate1",
-        )
-      ) {
-        updateData.shippingDate1 = formatDateToYMD(
-          updateData.shippingDate1,
-        );
+      if (Object.prototype.hasOwnProperty.call(updateData, "shippingDate1")) {
+        updateData.shippingDate1 = formatDateToYMD(updateData.shippingDate1);
       }
 
-      if (
-        Object.prototype.hasOwnProperty.call(
-          updateData,
-          "shippingDate2",
-        )
-      ) {
-        updateData.shippingDate2 = formatDateToYMD(
-          updateData.shippingDate2,
-        );
+      if (Object.prototype.hasOwnProperty.call(updateData, "shippingDate2")) {
+        updateData.shippingDate2 = formatDateToYMD(updateData.shippingDate2);
       }
     } catch (dateError) {
       return createJsonResponse(
@@ -247,7 +231,7 @@ export async function PUT(req) {
       Object.prototype.hasOwnProperty.call(updateData, "deliveryStatus") &&
       updateData.deliveryStatus !== ""
     ) {
-      if (updateData.deliveryStatus === "ĐÃ NHẬN HÀNG") {
+      if (updateData.deliveryStatus === "Đã nhận hàng") {
         updateData.deliveryStatus = "GIAO THÀNH CÔNG";
       } else {
         updateData.deliveryStatus = "ĐÃ GỬI HÀNG";
