@@ -28,7 +28,7 @@ export async function GET(req) {
         category: 1,
         trackingCode: 1,
         deliveryStatus: 1,
-        note: 1,
+        // note: 0,
       })
       .toArray();
 
@@ -37,14 +37,13 @@ export async function GET(req) {
         message: "Lấy danh sách đơn hàng thành công",
         data: orders,
       }),
-      { status: 200 }
+      { status: 200 },
     );
   } catch (error) {
     console.error(error);
 
-    return new Response(
-      JSON.stringify({ error: "Lỗi server" }),
-      { status: 500 }
-    );
+    return new Response(JSON.stringify({ error: "Lỗi server" }), {
+      status: 500,
+    });
   }
 }

@@ -1611,6 +1611,43 @@ export default function KhoOrderList() {
       showToast("Lỗi khi bỏ trạng thái gửi hàng");
     }
   }
+  async function unmarkSentSelectedOrders2() {
+    const sel = filteredList.filter((o) => selectedIds.has(o.id));
+
+    if (!sel.length) {
+      showToast("Vui lòng chọn đơn cần bỏ trạng thái đã gửi");
+      return;
+    }
+
+    const ordersToUnmarkSent = sel.filter(
+      (o) =>( o.deliveryStatus === "ĐÃ GỬI HÀNG" || o.deliveryStatus === ""),
+    );
+
+    if (!ordersToUnmarkSent.length) {
+      showToast("Không có đơn nào đang ở trạng thái ĐÃ GỬI HÀNG");
+      return;
+    }
+
+    try {
+      await axios.post("/api/orders/updateIstickkhohq2", {
+        orders: ordersToUnmarkSent.map((o) => ({
+          stt: o.stt,
+          shippingDate1: "",
+        })),
+      });
+
+      showToast(
+        `✓ Đã bỏ trạng thái gửi hàng cho ${ordersToUnmarkSent.length} đơn`,
+      );
+
+      fetchOrders();
+      clearSelection();
+      setTimeout(() => setCurrentView("unsent"), 700);
+    } catch (err) {
+      console.error("Lỗi khi bỏ trạng thái gửi hàng:", err);
+      showToast("Lỗi khi bỏ trạng thái gửi hàng");
+    }
+  }
 
   // ── Gửi tiếp thị lại (queue 1s/người) ──
   /**
@@ -2693,7 +2730,7 @@ export default function KhoOrderList() {
                       </button>
                       <button
                         className="btn btn-green btn-sm"
-                        onClick={unmarkSentSelectedOrders}
+                        onClick={unmarkSentSelectedOrders2}
                       >
                         <svg
                           viewBox="0 0 24 24"
