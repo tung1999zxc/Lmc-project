@@ -420,6 +420,19 @@ const OrderList = () => {
   const [editingOrder, setEditingOrder] = useState(null);
   const [orders, setOrders] = useState([]);
   const [currentEditId, setCurrentEditId] = useState(null);
+  // State cho chuẩn hóa địa chỉ hàng loạt
+  const [isNormalizing, setIsNormalizing] = useState(false);
+  const [normalizeProgress, setNormalizeProgress] = useState({
+    total: 0,
+    done: 0,
+    success: 0,
+    fail: 0,
+    current: "",
+  });
+  const [normalizeLogs, setNormalizeLogs] = useState([]);
+  const stopNormalizationRef = useRef(false);
+  // Lưu id đơn fail cuối cùng của handleNormalizeAddresses, dùng cho phase analyze-failed-addresses
+  const lastFailedIdsRef = useRef([]);
   const [formVisible, setFormVisible] = useState(false);
   const [dateRange2, setDateRange2] = useState("today");
   const [dateRange, setDateRange] = useState("undefined");
@@ -905,9 +918,7 @@ const OrderList = () => {
               employee.position_team === "mkt" &&
               employee.team_tp?.trim().toUpperCase() === managerTeamTp,
           )
-          .map((employee) =>
-            employee.name?.trim().toLocaleLowerCase("vi-VN"),
-          )
+          .map((employee) => employee.name?.trim().toLocaleLowerCase("vi-VN"))
           .filter(Boolean),
       );
 
@@ -1292,6 +1303,329 @@ const OrderList = () => {
     weightFilter,
     products2,
   ]);
+  // ==== Chuẩn hóa địa chỉ hàng loạt cho các đơn saleReport = DONE chưa có normalizedAddress ====
+  const handleNormalizeAddresses = useCallback(async () => {
+    // Lấy danh sách đơn saleReport = "DONE" và chưa có normalizedAddress
+    const candidates = (filteredOrders || []).filter(
+      (order) =>
+        order.saleReport === "DONE" &&
+        (!order.normalizedAddress || order.normalizedAddress === ""),
+    );
+
+    if (candidates.length === 0) {
+      messageApi.warning(
+        "Không có đơn saleReport = DONE nào thiếu normalizedAddress để chuẩn hóa",
+      );
+      return;
+    }
+
+    const orderIds = candidates.map((order) => order.id).filter(Boolean);
+
+    if (orderIds.length === 0) {
+      messageApi.warning("Danh sách đơn không có id hợp lệ");
+      return;
+    }
+
+    stopNormalizationRef.current = false;
+    setIsNormalizing(true);
+    setNormalizeLogs([]);
+    setNormalizeProgress({
+      total: orderIds.length,
+      done: 0,
+      success: 0,
+      fail: 0,
+      current: "Đang chuẩn bị...",
+    });
+
+    const pushLog = (entry) => {
+      setNormalizeLogs((prev) => [entry, ...prev].slice(0, 200));
+    };
+
+    // Cập nhật đơn local ngay khi server trả về normalizedAddress
+    // Chỉ set normalizedAddress — giữ nguyên address (text gốc)
+    const applyLocalUpdate = (id, normalizedAddress) => {
+      if (!normalizedAddress) return;
+      setOrders((prev) =>
+        prev.map((o) =>
+          o.id === id ? { ...o, normalizedAddress } : o,
+        ),
+      );
+    };
+
+    const BATCH_SIZE = 5;
+    const MAX_RETRY_ROUNDS = 5; // chạy tối đa 5 vòng retry cho đơn lỗi
+    let success = 0;
+    let fail = 0;
+    let done = 0;
+    let retryRound = 0;
+
+    // Hàm xử lý 1 batch — trả về { okIds, failIds } để retry vòng sau
+    const runBatch = async (batchIds, label) => {
+      try {
+        const res = await axios.post("/api/orders/normalize-addresses", {
+          orderIds: batchIds,
+        });
+
+        if (res.data?.success && Array.isArray(res.data.results)) {
+          const okIds = [];
+          const failIds = [];
+          res.data.results.forEach((r) => {
+            done += 1;
+            if (r.ok) {
+              success += 1;
+              okIds.push(r.id);
+              applyLocalUpdate(r.id, r.newNormalizedAddress);
+              pushLog({
+                id: r.id,
+                ok: true,
+                oldAddress: r.oldAddress,
+                newNormalizedAddress: r.newNormalizedAddress,
+                ts: Date.now(),
+              });
+            } else {
+              fail += 1;
+              failIds.push(r.id);
+              pushLog({
+                id: r.id,
+                ok: false,
+                oldAddress: r.oldAddress,
+                message: r.message || r.reason || "Lỗi",
+                ts: Date.now(),
+              });
+            }
+          });
+          return { okIds, failIds };
+        }
+        // Response không hợp lệ → coi tất cả là fail để retry
+        const failIds = [...batchIds];
+        fail += batchIds.length;
+        done += batchIds.length;
+        return { okIds: [], failIds };
+      } catch (err) {
+        console.error("Lỗi lô chuẩn hóa:", err);
+        const failIds = [...batchIds];
+        fail += batchIds.length;
+        done += batchIds.length;
+        batchIds.forEach((id) => {
+          pushLog({
+            id,
+            ok: false,
+            message: err?.response?.data?.message || err?.message || "Lỗi mạng",
+            ts: Date.now(),
+          });
+        });
+        return { okIds: [], failIds };
+      }
+    };
+
+    let currentIds = [...orderIds];
+    while (currentIds.length > 0 && retryRound < MAX_RETRY_ROUNDS) {
+      if (stopNormalizationRef.current) break;
+      const totalBatches = Math.ceil(currentIds.length / BATCH_SIZE);
+      const roundFailStart = fail;
+      retryRound += 1;
+      const roundFailIds = [];
+
+      for (let i = 0; i < currentIds.length; i += BATCH_SIZE) {
+        if (stopNormalizationRef.current) break;
+        const batchIds = currentIds.slice(i, i + BATCH_SIZE);
+        const label =
+          retryRound === 1
+            ? `Lô ${Math.floor(i / BATCH_SIZE) + 1}/${totalBatches}`
+            : `Retry vòng ${retryRound}/${MAX_RETRY_ROUNDS} - lô ${Math.floor(i / BATCH_SIZE) + 1}/${totalBatches}`;
+        setNormalizeProgress((prev) => ({
+          ...prev,
+          current: label,
+        }));
+        const { failIds } = await runBatch(batchIds, label);
+        if (failIds.length > 0) roundFailIds.push(...failIds);
+
+        setNormalizeProgress((prev) => ({
+          ...prev,
+          done,
+          success,
+          fail,
+        }));
+      }
+
+      // Sau mỗi vòng: nếu vòng này không còn fail nào → dừng
+      // Ngược lại: gom failIds làm input vòng tiếp theo (tối đa 5 vòng)
+      if (roundFailIds.length === 0) {
+        console.log(`[normalize] Vòng ${retryRound}: hết lỗi → dừng sớm`);
+        lastFailedIdsRef.current = []; // không cần analyze-failed
+        break;
+      }
+      if (retryRound >= MAX_RETRY_ROUNDS) {
+        console.log(
+          `[normalize] Đã chạy đủ ${MAX_RETRY_ROUNDS} vòng, dừng (còn ${roundFailIds.length} đơn lỗi)${
+            ENABLE_ANALYZE_FAILED_PHASE
+              ? " — sẽ phân tích thiếu field để hỏi khách"
+              : ""
+          }`,
+        );
+        // Lưu lại để runAnalyzeFailedAddresses dùng (nếu ENABLE)
+        lastFailedIdsRef.current = [...roundFailIds];
+        break;
+      }
+      currentIds = roundFailIds;
+      lastFailedIdsRef.current = [...roundFailIds]; // cập nhật liên tục
+      // Nghỉ giữa các vòng retry để tránh rate limit OpenAI
+      await new Promise((r) => setTimeout(r, 3000));
+    }
+
+    // PHASE SAU 5 VÒNG RETRY (Aug 2026):
+    // Thay vì sửa chính tả (OpenAI dễ hallucinate), ta gọi OpenAI phân tích
+    // xem địa chỉ THIẾU field gì → lưu `addressMissing` + `addressError` vào DB
+    // để user hỏi khách bổ sung.
+    const ENABLE_ANALYZE_FAILED_PHASE = true;
+
+    if (
+      !stopNormalizationRef.current &&
+      ENABLE_ANALYZE_FAILED_PHASE &&
+      lastFailedIdsRef.current.length > 0
+    ) {
+      await runAnalyzeFailedAddresses(lastFailedIdsRef.current);
+      lastFailedIdsRef.current = []; // reset
+    }
+
+    setIsNormalizing(false);
+    setNormalizeProgress((prev) => ({
+      ...prev,
+      current: stopNormalizationRef.current
+        ? "Đã dừng theo yêu cầu"
+        : !ENABLE_ANALYZE_FAILED_PHASE && fail > 0
+          ? `Hoàn tất (còn ${fail} lỗi sau ${retryRound} vòng — đã dừng ở 5 vòng retry, đã phân tích thiếu field)`
+          : fail > 0
+            ? `Hoàn tất (còn ${fail} lỗi sau ${retryRound} vòng — đã phân tích thiếu field, xem cột "Thiếu")`
+            : "Hoàn tất",
+      done,
+      success,
+      fail,
+    }));
+
+    if (stopNormalizationRef.current) {
+      messageApi.warning(`Đã dừng. Thành công ${success}/${orderIds.length}`);
+    } else if (fail === 0) {
+      messageApi.success(`Chuẩn hóa xong ${success}/${orderIds.length} đơn`);
+    } else {
+      messageApi.warning(
+        `Hoàn tất: ${success} thành công, ${fail} lỗi (đã chạy ${retryRound} vòng${
+          ENABLE_ANALYZE_FAILED_PHASE
+            ? `, đã phân tích thiếu field cho ${fail} đơn lỗi`
+            : ""
+        })`,
+      );
+    }
+  }, [filteredOrders, messageApi]);
+
+  const handleStopNormalization = () => {
+    stopNormalizationRef.current = true;
+    setNormalizeProgress((prev) => ({ ...prev, current: "Đang dừng..." }));
+  };
+
+  /**
+   * Phase phân tích đơn lỗi (sau 5 vòng retry):
+   * Gọi OpenAI để phân tích địa chỉ → chỉ ra field thiếu + lý do fail Kakao.
+   * Lưu `addressMissing` (string) + `addressError` (JSON) vào DB.
+   * @param {string[]} failedIds
+   */
+  const runAnalyzeFailedAddresses = async (failedIds) => {
+    if (!Array.isArray(failedIds) || failedIds.length === 0) return;
+    console.log(
+      `[analyze-failed] Phân tích ${failedIds.length} đơn lỗi sau 5 vòng retry`,
+    );
+
+    setNormalizeProgress((prev) => ({
+      ...prev,
+      current: `Phân tích ${failedIds.length} đơn lỗi để chỉ ra field thiếu...`,
+    }));
+
+    let res;
+    try {
+      res = await axios.post("/api/orders/analyze-failed-addresses", {
+        orderIds: failedIds,
+      });
+    } catch (err) {
+      console.error("[analyze-failed] Lỗi gọi API:", err?.message);
+      setNormalizeLogs((prev) =>
+        [
+          {
+            id: "analyze-failed",
+            ok: false,
+            oldAddress: "(phân tích đơn lỗi)",
+            message: err?.response?.data?.message || err?.message || "Lỗi mạng",
+            ts: Date.now(),
+          },
+          ...prev,
+        ].slice(0, 200),
+      );
+      return;
+    }
+
+    if (!res.data?.success || !Array.isArray(res.data.results)) {
+      console.error("[analyze-failed] Response không hợp lệ:", res.data);
+      return;
+    }
+
+    // Cập nhật local state + log cho mỗi đơn
+    let analyzedCount = 0;
+    for (const r of res.data.results) {
+      if (!r.ok) {
+        setNormalizeLogs((prev) =>
+          [
+            {
+              id: r.id,
+              ok: false,
+              oldAddress: r.oldAddress || "",
+              message: r.message || "Lỗi phân tích",
+              ts: Date.now(),
+            },
+            ...prev,
+          ].slice(0, 200),
+        );
+        continue;
+      }
+      analyzedCount += 1;
+      // Cập nhật local orders (badge cột "Thiếu")
+      if (r.addressMissing && r.addressMissing.length > 0) {
+        setOrders((prev) =>
+          prev.map((o) =>
+            o.id === r.id
+              ? {
+                  ...o,
+                  addressMissing: r.addressMissing,
+                  addressError: JSON.stringify({
+                    missingFields: r.missingFields,
+                    reason: r.reason,
+                    hasCustomerName: r.hasCustomerName,
+                    hasPhone: r.hasPhone,
+                    explanation: r.explanation,
+                  }),
+                }
+              : o,
+          ),
+        );
+      }
+      setNormalizeLogs((prev) =>
+        [
+          {
+            id: r.id,
+            ok: false, // vẫn fail Kakao
+            oldAddress: r.oldAddress,
+            message:
+              `Thiếu: ${r.addressMissing || "(không rõ)"} — ${r.explanation || ""}`.trim(),
+            ts: Date.now(),
+          },
+          ...prev,
+        ].slice(0, 200),
+      );
+    }
+
+    console.log(
+      `[analyze-failed] Đã phân tích ${analyzedCount}/${res.data.results.length} đơn`,
+    );
+  };
+
   const customerNameCountMap = useMemo(() => {
     if (currentUser.name !== "Tung99" && currentUser.name !== "test") return [];
     const map = new Map();
@@ -2761,18 +3095,69 @@ const OrderList = () => {
     },
     {
       title: (
-        <Checkbox
-          checked={selectedColumns.includes("address")}
-          onChange={(e) => handleColumnSelect("address", e.target.checked)}
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 8,
+            flexWrap: "wrap",
+          }}
         >
-          ĐỊA CHỈ
-        </Checkbox>
+          <Checkbox
+            checked={selectedColumns.includes("address")}
+            onChange={(e) => handleColumnSelect("address", e.target.checked)}
+          >
+            ĐỊA CHỈ
+          </Checkbox>
+          <Button
+            size="small"
+            type="primary"
+            loading={isNormalizing}
+            disabled={isNormalizing}
+            onClick={handleNormalizeAddresses}
+            style={{ fontSize: 11, height: 22, padding: "0 8px" }}
+          >
+            Chuẩn hóa
+          </Button>
+          {isNormalizing && (
+            <Button
+              size="small"
+              danger
+              onClick={handleStopNormalization}
+              style={{ fontSize: 11, height: 22, padding: "0 8px" }}
+            >
+              Dừng
+            </Button>
+          )}
+        </div>
       ),
       dataIndex: "address",
       key: "address",
       width: 260,
-      sorter: (a, b) => (a.address || "").localeCompare(b.address || ""),
-      render: (text) => <AddressCell text={text} maxHeight={120} />,
+    },
+    {
+      title: (
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 8,
+            flexWrap: "wrap",
+          }}
+        >
+          <Checkbox
+            checked={selectedColumns.includes("normalizedAddress")}
+            onChange={(e) =>
+              handleColumnSelect("normalizedAddress", e.target.checked)
+            }
+          >
+            ĐỊA CHỈ CHUẨN HÓA
+          </Checkbox>
+        </div>
+      ),
+      dataIndex: "normalizedAddress",
+      key: "normalizedAddress",
+      width: 260,
     },
     {
       title: (
@@ -4168,6 +4553,7 @@ const OrderList = () => {
       salexuly: values.salexuly || "",
       phone: values.phone || "",
       address: values.address || "",
+      normalizedAddress: values.normalizedAddress || "",
       fb: values.fb || "",
       note: values.note || "",
       noteKHO: values.noteKHO || "",
@@ -5209,7 +5595,121 @@ const OrderList = () => {
               />
             </>
           )}
+          {(isNormalizing || normalizeLogs.length > 0) && (
+            <div
+              style={{
+                marginTop: 12,
+                padding: 12,
+                border: "1px solid #d9d9d9",
+                borderRadius: 6,
+                background: "#fafafa",
+              }}
+            >
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 12,
+                  marginBottom: 8,
+                  flexWrap: "wrap",
+                }}
+              >
+                <strong>Chuẩn hóa địa chỉ hàng loạt</strong>
+                <span style={{ color: "#666" }}>
+                  {normalizeProgress.current}
+                </span>
+                <span style={{ color: "#389e0d" }}>
+                  Thành công: {normalizeProgress.success}
+                </span>
+              
+                <span style={{ color: "#888" }}>
+                  {normalizeProgress.done}/{normalizeProgress.total}
+                </span>
+                {isNormalizing && (
+                  <Button size="small" danger onClick={handleStopNormalization}>
+                    Dừng
+                  </Button>
+                )}
+              </div>
 
+              {normalizeLogs.length > 0 && (
+                <div
+                  style={{
+                    maxHeight: 240,
+                    overflowY: "auto",
+                    background: "#fff",
+                    border: "1px solid #f0f0f0",
+                    borderRadius: 4,
+                    padding: 8,
+                    fontSize: 12,
+                    fontFamily: "monospace",
+                  }}
+                >
+                  {normalizeLogs.map((log, idx) => {
+                    const isMissing =
+                      typeof log.message === "string" &&
+                      log.message.startsWith("Thiếu:");
+                    return (
+                      <div
+                        key={`${log.id || "log"}-${log.ts || idx}`}
+                        style={{
+                          padding: "2px 0",
+                          borderBottom: "1px dashed #f0f0f0",
+                          color: log.ok
+                            ? "#389e0d"
+                            : isMissing
+                              ? "#d48806"
+                              : "#cf1322",
+                        }}
+                      >
+                        <span style={{ fontWeight: 600 }}>
+                          [{log.ok ? "OK" : isMissing ? "WARN" : "FAIL"}]{" "}
+                          {log.id}
+                        </span>{" "}
+                        {log.ok ? (
+                          <span>
+                            → {log.newNormalizedAddress}
+                            {log.oldAddress &&
+                              log.oldAddress !== log.newNormalizedAddress && (
+                                <span style={{ color: "#888" }}>
+                                  {" "}
+                                  (từ: {log.oldAddress})
+                                </span>
+                              )}
+                          </span>
+                        ) : (
+                          <span>
+                            {log.message || "Lỗi"}
+                            {log.oldAddress && (
+                              <span style={{ color: "#888" }}>
+                                {" "}
+                                — gốc: {log.oldAddress}
+                              </span>
+                            )}
+                            {isMissing && (
+                              <span
+                                style={{
+                                  marginLeft: 6,
+                                  padding: "1px 6px",
+                                  background: "#fff7e6",
+                                  border: "1px solid #ffd591",
+                                  borderRadius: 3,
+                                  fontSize: 11,
+                                  color: "#d46b08",
+                                }}
+                              >
+                                Hỏi khách
+                              </span>
+                            )}
+                          </span>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          )}
           <Table
             className={`order-table-wrapper ${isMobile ? "mobile-view" : ""}`}
             scroll={{ x: isMobile ? 800 : "max-content" }}

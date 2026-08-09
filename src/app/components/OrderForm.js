@@ -17,6 +17,7 @@ import {
   Col,
   Modal,
   Space,
+  message,
 } from "antd";
 import {
   MinusCircleOutlined,
@@ -45,6 +46,8 @@ const OrderForm = ({
   // Giả sử: nếu mã nhân viên là 1 thì isEmployee1 = true
 
   const [loading2, setLoading2] = useState(false);
+  const [checkingAddress, setCheckingAddress] = useState(false);
+  const [addressCheck, setAddressCheck] = useState(null);
 
   const revenue = Form.useWatch("revenue", form);
   const saleReport = Form.useWatch("saleReport", form);
@@ -236,17 +239,84 @@ const OrderForm = ({
         shippingDate2: initialValues.shippingDate2
           ? dayjs(initialValues.shippingDate2)
           : null,
-        // orderDate5: initialValues.orderDate5 ? dayjs(initialValues.orderDate5) : null,
+        normalizedAddress: initialValues.normalizedAddress || "",
       });
+      setAddressCheck(
+        initialValues.address && initialValues.normalizedAddress
+          ? {
+              input: String(initialValues.address).trim(),
+              normalizedAddress: initialValues.normalizedAddress,
+            }
+          : null,
+      );
     } else {
       form.resetFields();
+      setAddressCheck(null);
     }
   }, [initialValues, form]);
 
+  const handleCheckAddress = async () => {
+    const address = String(form.getFieldValue("address") || "").trim();
+
+    if (!address) {
+      setAddressCheck(null);
+      form.setFieldsValue({ normalizedAddress: "" });
+      message.warning("Vui lòng nhập địa chỉ trước khi kiểm tra");
+      return;
+    }
+
+    setCheckingAddress(true);
+    try {
+      const { data } = await axios.post("/api/address", { input: address });
+
+      if (data.exists === true && data.normalizedAddress) {
+        const normalizedAddress = String(data.normalizedAddress).trim();
+        // Không tự ghi đè field "address" — giữ nguyên text user nhập
+        form.setFieldsValue({ normalizedAddress });
+        setAddressCheck({ input: normalizedAddress, normalizedAddress });
+        message.success("Địa chỉ hợp lệ");
+      } else {
+        form.setFieldsValue({ normalizedAddress: "" });
+        setAddressCheck(null);
+        message.error("Địa chỉ không đúng, cần check lại địa chỉ");
+      }
+    } catch (error) {
+      console.error("Lỗi kiểm tra địa chỉ:", error);
+      form.setFieldsValue({ normalizedAddress: "" });
+      setAddressCheck(null);
+      message.error(
+        error?.response?.data?.message ||
+          "Không thể kiểm tra địa chỉ. Vui lòng thử lại",
+      );
+    } finally {
+      setCheckingAddress(false);
+    }
+  };
+
   // Khi submit form, chuyển các giá trị ngày về chuỗi định dạng 'YYYY-MM-DD'
   const onFinish = (values) => {
+    const address = String(values.address || "").trim();
+    const isOrderEntryForm =
+      currentUser.position !== "kho1" && currentUser.position !== "kho2";
+
+    if (isOrderEntryForm) {
+      if (!address) {
+        message.error("Vui lòng nhập địa chỉ");
+        return;
+      }
+      // Không bắt buộc check địa chỉ trước khi submit — user có thể tự lưu thẳng
+      // (giữ logic check ở nút "Check địa chỉ" như tự gợi ý)
+    }
+
     const submitValues = {
       ...values,
+      address,
+      // Chỉ gửi normalizedAddress khi đã check (tránh lưu "" thừa vào DB)
+      ...(addressCheck?.normalizedAddress
+        ? { normalizedAddress: addressCheck.normalizedAddress }
+        : isOrderEntryForm
+          ? {}
+          : { normalizedAddress: values.normalizedAddress || "" }),
       orderDate: values.orderDate
         ? values.orderDate.format("YYYY-MM-DD")
         : null,
@@ -260,6 +330,7 @@ const OrderForm = ({
     };
     onSubmit(submitValues);
     form.resetFields();
+    setAddressCheck(null);
   };
 
   return (
@@ -876,8 +947,38 @@ const OrderForm = ({
                   <Form.Item label="SỐ ĐIỆN THOẠI" name="phone">
                     <Input type="tel" />
                   </Form.Item>
-                  <Form.Item label="ĐỊA CHỈ" name="address">
-                    <Input.TextArea rows={2} />
+                  <Form.Item label="ĐỊA CHỈ">
+                    <Form.Item name="address" noStyle>
+                      <Input.TextArea
+                        rows={2}
+                        onChange={() => {
+                          setAddressCheck(null);
+                          form.setFieldsValue({ normalizedAddress: "" });
+                        }}
+                      />
+                    </Form.Item>
+                    <Button
+                      type="default"
+                      loading={checkingAddress}
+                      onClick={handleCheckAddress}
+                      style={{ marginTop: 8 }}
+                    >
+                      Check địa chỉ
+                    </Button>
+                    {addressCheck?.normalizedAddress && (
+                      <div
+                        style={{
+                          color: "#389e0d",
+                          marginTop: 6,
+                          fontSize: 12,
+                        }}
+                      >
+                        Địa chỉ hợp lệ: {addressCheck.normalizedAddress}
+                      </div>
+                    )}
+                  </Form.Item>
+                  <Form.Item name="normalizedAddress" hidden>
+                    <Input />
                   </Form.Item>
                   <Form.Item
                     label="MKT"
