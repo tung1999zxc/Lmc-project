@@ -22,6 +22,7 @@ export async function GET(req) {
       $or: [
         { customerName: { $regex: exactNameRegex } },
         ...(Number.isNaN(numericStt) ? [] : [{ stt: numericStt }]),
+        { trackingCode: { $regex: exactNameRegex } },
       ],
     };
 

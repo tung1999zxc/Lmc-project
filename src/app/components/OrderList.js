@@ -40,6 +40,30 @@ import ExportExcelButton from "./exportOrdersToExcel.js";
 dayjs.extend(isBetween);
 import { useRouter } from "next/navigation";
 
+// Istick5 Cell Component - tách riêng để tránh re-render toàn bộ table
+const Istick5Cell = ({ record, onChange, onBlur }) => {
+  const [lyDo, setLyDo] = useState(record.istickLyDo || "");
+  const showError = record.istick5 && !lyDo.trim();
+
+  const handleChange = (value) => {
+    setLyDo(value);
+    onChange(record.id, value);
+  };
+
+  return (
+    <Input.TextArea
+      size="small"
+      autoSize={{ minRows: 1, maxRows: 4 }}
+      placeholder="Lý do cần xử lý"
+      value={lyDo}
+      onChange={(e) => handleChange(e.target.value)}
+      onBlur={() => onBlur(record.id)}
+      status={showError ? "error" : ""}
+      style={{ flex: 1, minWidth: 150 }}
+    />
+  );
+};
+
 // Address Cell Component with expand/collapse
 const AddressCell = ({ text, maxHeight = 60 }) => {
   const [expanded, setExpanded] = useState(false);
@@ -433,6 +457,8 @@ const OrderList = () => {
   const stopNormalizationRef = useRef(false);
   // Lưu id đơn fail cuối cùng của handleNormalizeAddresses, dùng cho phase analyze-failed-addresses
   const lastFailedIdsRef = useRef([]);
+  // Ref lưu tạm giá trị nhập lý do istick5 (chỉ dùng khi ấn Lưu mà chưa blur)
+  const istick5DraftRef = useRef({});
   const [formVisible, setFormVisible] = useState(false);
   const [dateRange2, setDateRange2] = useState("today");
   const [dateRange, setDateRange] = useState("undefined");
@@ -1080,6 +1106,12 @@ const OrderList = () => {
                 );
               case "delivered":
                 return order.deliveryStatus === "GIAO THÀNH CÔNG";
+              case "khovn1":
+                return order.isShippingName === "KHOVN1";
+              case "khovn2":
+                return order.isShippingName === "KHOVN2";
+              case "khotq1":
+                return order.isShippingName === "KHOTQ1";
               case "unpaid_success":
                 return (
                   (order.paymentStatus === "CHƯA THANH TOÁN" ||
@@ -2196,12 +2228,22 @@ const OrderList = () => {
     );
   };
 
+  const handleIstick5NoteBlur = (orderId) => {
+    // Khi blur: cập nhật orders từ draft và xóa draft
+    const draftValue = istick5DraftRef.current[orderId];
+    if (draftValue !== undefined) {
+      setOrders((prevOrders) =>
+        prevOrders.map((order) =>
+          order.id === orderId ? { ...order, istickLyDo: draftValue } : order,
+        ),
+      );
+      delete istick5DraftRef.current[orderId];
+    }
+  };
+
+  // Lưu tạm giá trị nhập vào draft ref (không re-render toàn bộ table)
   const handleIstick5NoteChange = (orderId, value) => {
-    setOrders((prevOrders) =>
-      prevOrders.map((order) =>
-        order.id === orderId ? { ...order, istickLyDo: value } : order,
-      ),
-    );
+    istick5DraftRef.current[orderId] = value;
   };
 
   // Khi focus vào ô lý do: tự động chèn [DD/MM/YYYY HH:mm] vào đầu (chỉ 1 lần mỗi lần focus)
@@ -2232,8 +2274,14 @@ const OrderList = () => {
   };
 
   const handleSaveIstick5 = async () => {
+    // Merge draft notes vào orders trước khi validate/save
+    const mergedOrders = orders.map((order) => ({
+      ...order,
+      istickLyDo: istick5DraftRef.current[order.id] ?? order.istickLyDo,
+    }));
+
     // Validate phía client: tick=true mà chưa có lý do thì không cho lưu
-    const ordersToUpdate = orders.filter((order) => {
+    const ordersToUpdate = mergedOrders.filter((order) => {
       const originalOrder = initialOrders5.find((o) => o.id === order.id);
       if (!originalOrder) return true;
       return (
@@ -2268,6 +2316,8 @@ const OrderList = () => {
       });
       messageApi.success(response.data.message || "Đã lưu cập nhật các đơn");
       alert("Thao tác thành công!");
+      // Xóa draft sau khi lưu thành công
+      istick5DraftRef.current = {};
       setInitialOrders5(orders);
       fetchOrders();
     } catch (error) {
@@ -2392,11 +2442,9 @@ const OrderList = () => {
             dataIndex: "istick5",
             width: 260,
             render: (_, record) => {
-              const lyDo = (record.istickLyDo || "").toString();
               const history = Array.isArray(record.istickHistory)
                 ? record.istickHistory
                 : [];
-              const showError = record.istick5 && lyDo.trim().length === 0;
               return (
                 <div
                   style={{
@@ -2419,19 +2467,10 @@ const OrderList = () => {
                         handleIstickChange5(record.id, e.target.checked)
                       }
                     />
-                    <Input.TextArea
-                      size="small"
-                      autoSize={{ minRows: 1, maxRows: 4 }}
-                      placeholder="Lý do cần xử lý"
-                      value={lyDo}
-                      onChange={(e) =>
-                        handleIstick5NoteChange(record.id, e.target.value)
-                      }
-                      // onFocus={(e) =>
-                      //   handleIstick5NoteFocus(record.id, e)
-                      // }
-                      status={showError ? "error" : ""}
-                      style={{ flex: 1, minWidth: 150 }}
+                    <Istick5Cell
+                      record={record}
+                      onChange={handleIstick5NoteChange}
+                      onBlur={handleIstick5NoteBlur}
                     />
                   </div>
                   {history.length > 0 && (
@@ -2474,7 +2513,7 @@ const OrderList = () => {
           },
         ]
       : []),
-    ...(currentUser.position === "kho1" || currentUser.position === "salexuly"
+    ...(currentUser.position === "kho1" || currentUser.position === "salexuly"||currentUser.position === "managerSALE" 
       ? [
           {
             title: (
@@ -3664,6 +3703,7 @@ const OrderList = () => {
     } catch (error) {
       console.error(error);
       messageApi.error("Lỗi khi lưu các đơn");
+      
     }
   };
 
@@ -5236,7 +5276,16 @@ const OrderList = () => {
                     placeholder="Chọn bộ lọc"
                     allowClear
                     options={[
+                      ...(currentUser.name === "Trần Mỹ Hạnh" || currentUser.position === "salexuly" ? [
+                        { value: "khovn1", label: "KHO VN1" },
+                        { value: "khovn2", label: "KHO VN2" },
+                        { value: "khotq1", label: "KHO TQ1" },
+                        
+                      ] : []),
+                      
+                      
                       { value: "done", label: "Đơn Done" },
+                      
                       {
                         value: "unpaid_success",
                         label: "Chưa thanh toán & Giao Thành công",

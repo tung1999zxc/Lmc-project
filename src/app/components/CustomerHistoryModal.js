@@ -200,11 +200,16 @@ const CustomerHistoryModal = ({
           ?.map((p) => `${p.product} - SL: ${p.quantity}`)
           .join(", "),
     },
+    {  title: "DOANH SỐ",
+    dataIndex: "revenue",
+    key: "revenue",
+  },
     {
       title: "Tên Khách",
       dataIndex: "customerName",
       key: "customerName",
     },
+   
     {
       title: "SĐT",
       dataIndex: "phone",
@@ -280,12 +285,12 @@ const CustomerHistoryModal = ({
       },
     },
 
-    {
-      title: "TT XỬ LÍ",
+    // {
+    //   title: "TT XỬ LÍ",
 
-      dataIndex: "processStatus",
-      key: "processStatus",
-    },
+    //   dataIndex: "processStatus",
+    //   key: "processStatus",
+    // },
     {
       title: "ĐƠN",
 
