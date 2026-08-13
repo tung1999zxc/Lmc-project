@@ -12,6 +12,7 @@ import {
   Button,
   Popconfirm,
   message,
+  notification,
   DatePicker,
   Input,
   Select,
@@ -513,6 +514,10 @@ const OrderList = () => {
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedKhoDong, setSelectedKhoDong] = useState();
   const [isMobile, setIsMobile] = useState(false);
+  // State cho modal báo cáo đơn muộn chưa done
+  const [lateOrdersModalVisible, setLateOrdersModalVisible] = useState(false);
+  const [lateOrdersData, setLateOrdersData] = useState([]);
+  const [lateOrdersLoading, setLateOrdersLoading] = useState(false);
 
   // Detect mobile screen
   useEffect(() => {
@@ -589,6 +594,211 @@ const OrderList = () => {
       console.error("Lỗi khi lấy đơn hàng:", error);
     } finally {
       setLoading(false); // Tắt xoay sau 0.5s
+    }
+  };
+
+  // Hàm xử lý báo cáo đơn muộn chưa done
+  const handleOpenLateOrdersReport = async () => {
+    setLateOrdersLoading(true);
+    setLateOrdersModalVisible(true);
+
+    try {
+      // Lấy danh sách nhân viên sale (position === "salenhapdon")
+      const saleEmployees = employees.filter(
+        (emp) => emp.position === "salenhapdon",
+      );
+
+      // Lấy 3 ngày gần nhất (Hôm nay, Hôm qua, Hôm kia)
+      const targetDates = [
+        dayjs().format("YYYY-MM-DD"),
+        dayjs().subtract(1, "day").format("YYYY-MM-DD"),
+        dayjs().subtract(2, "day").format("YYYY-MM-DD"),
+      ];
+
+      // Debug: log thông tin
+      console.log("=== DEBUG BAO CAO DON MUON ===");
+      console.log("Tong so don (orders):", orders.length);
+      console.log(
+        "Tong so don da loc (filteredOrders):",
+        filteredOrders.length,
+      );
+      console.log("So luong sale nhan don:", saleEmployees.length);
+      console.log("Target dates:", targetDates);
+      console.log(
+        "Sale employees:",
+        saleEmployees.map((e) => e.name),
+      );
+
+      // Debug: xem vài đơn mẫu trong filteredOrders
+      if (filteredOrders.length > 0) {
+        const getOrderDateTime = (order) => order.orderDate4 || order.orderDate;
+
+        // Đếm đơn muộn (hiện tại - orderDate4 > 20 tiếng)
+        const now = dayjs();
+        const lateOrders = filteredOrders.filter((o) => {
+          const orderTime = dayjs(getOrderDateTime(o));
+          const hoursDiff = now.diff(orderTime, "hour");
+          return hoursDiff > 20;
+        });
+        console.log(
+          "Don muon (>20h tu khi tao, chua loc saleReport):",
+          lateOrders.length,
+        );
+
+        // Log 5 đơn muộn đầu tiên
+        lateOrders.slice(0, 5).forEach((o, i) => {
+          const hoursAgo = now.diff(dayjs(getOrderDateTime(o)), "hour");
+          console.log(
+            `Don ${i + 1}: sale="${o.sale}", orderDate4="${o.orderDate4}", ${hoursAgo}h ago, saleReport="${o.saleReport}"`,
+          );
+        });
+
+        // Đếm đơn DONE
+        const doneOrders = filteredOrders.filter(
+          (o) => o.saleReport === "DONE",
+        );
+        console.log("Don DONE:", doneOrders.length);
+      }
+
+      const reportData = [];
+
+      for (const emp of saleEmployees) {
+        const empName = emp.name?.trim();
+        if (!empName) continue;
+
+        // Lọc đơn của sale này trong filteredOrders (đã respect bộ lọc)
+        const empOrders = filteredOrders.filter((order) => {
+          // Kiểm tra cả order.sale và order.salexuly
+          const orderSale = (order.sale || "").trim();
+          const orderSalexuly = (order.salexuly || "").trim();
+
+          // So sánh không phân biệt hoa thường
+          const isOwnOrder =
+            orderSale.toLowerCase() === empName.toLowerCase() ||
+            orderSalexuly.toLowerCase() === empName.toLowerCase();
+          if (!isOwnOrder) return false;
+
+          // Dùng orderDate4 nếu có, không thì dùng orderDate
+          const orderDateTime = order.orderDate4 || order.orderDate;
+
+          // Kiểm tra ngày trong 3 ngày gần nhất
+          const orderDate = dayjs(orderDateTime).format("YYYY-MM-DD");
+          const isRecentDate = targetDates.includes(orderDate);
+          if (!isRecentDate) return false;
+
+          // Kiểm tra đơn muộn: thời gian hiện tại - orderDate4 > 20 tiếng
+          const now = dayjs();
+          const orderTime = dayjs(orderDateTime);
+          const hoursDiff = now.diff(orderTime, "hour");
+          const isLate = hoursDiff > 20;
+          if (!isLate) return false;
+
+          // Kiểm tra saleReport không phải BOOK TB, CHUYỂN ĐƠN, HỦY, DONE
+          const validStatuses = ["BOOK TB", "CHUYỂN ĐƠN", "HỦY", "DONE"];
+          const isNotDone = !validStatuses.includes(order.saleReport);
+          if (!isNotDone) return false;
+
+          return true;
+        });
+
+        console.log(`Sale "${empName}": ${empOrders.length} don muon`);
+
+        if (empOrders.length > 0) {
+          // Lấy danh sách STT và thông tin chi tiết của các đơn muộn
+          const lateOrderDetails = empOrders.map((order) => {
+            const orderTime = dayjs(order.orderDate4 || order.orderDate);
+            const hoursDiff = dayjs().diff(orderTime, "hour");
+            return {
+              stt: order.stt || order.id,
+              orderTime: orderTime.format("HH:mm"),
+              orderDate: orderTime.format("DD/MM"),
+              hoursDiff,
+              saleReport: order.saleReport,
+            };
+          });
+
+          reportData.push({
+            key: emp.employee_code || empName,
+            saleName: empName,
+            totalCount: empOrders.length,
+            orders: lateOrderDetails,
+          });
+        }
+      }
+
+      console.log("Report data:", reportData);
+      console.log("=== END DEBUG ===");
+
+      setLateOrdersData(reportData);
+    } catch (error) {
+      console.error("Lỗi khi tạo báo cáo đơn muộn:", error);
+      messageApi.error("Có lỗi khi tạo báo cáo");
+    } finally {
+      setLateOrdersLoading(false);
+    }
+  };
+
+  // Hàm gửi báo cáo qua Telegram
+  const handleSendLateOrdersTelegram = async () => {
+    if (lateOrdersData.length === 0) {
+      messageApi.warning("Không có dữ liệu để gửi");
+      return;
+    }
+
+    try {
+      // Tính tổng số đơn muộn
+      const totalLateOrders = lateOrdersData.reduce(
+        (sum, emp) => sum + emp.totalCount,
+        0,
+      );
+
+      // Xây dựng nội dung tin nhắn dạng bảng đẹp
+      let telegramMessage = `⏰ *BÁO CÁO ĐƠN MUỘN CHƯA DONE*\n`;
+      telegramMessage += `📅 ${dayjs().format("DD/MM/YYYY HH:mm")} | ⏳ Hiện tại - Ngày đặt hàng > 20h\n\n`;
+
+      lateOrdersData.forEach((emp) => {
+        telegramMessage += `━━━━━━━━━━━━━━━\n`;
+        telegramMessage += `👤 *${emp.saleName}*\n`;
+        telegramMessage += `📦 Đơn muộn: ${emp.totalCount} đơn\n`;
+        telegramMessage += `─────────────────\n`;
+
+        emp.orders.forEach((order) => {
+          const hoursAgo =
+            order.hoursDiff > 24
+              ? `${Math.floor(order.hoursDiff / 24)}d${order.hoursDiff % 24}h`
+              : `${order.hoursDiff}h`;
+          telegramMessage += `  🔸 STT: ${order.stt} | ${order.orderDate} ${order.orderTime} (${hoursAgo} trước)\n`;
+        });
+        telegramMessage += `\n`;
+      });
+
+      telegramMessage += `━━━━━━━━━━━━━━━\n`;
+      telegramMessage += `📊 *TỔNG KẾT*\n`;
+      telegramMessage += `👥 Sale có đơn muộn: ${lateOrdersData.length} người\n`;
+      telegramMessage += `📦 Tổng đơn muộn: ${totalLateOrders} đơn\n`;
+     
+
+      // Cấu hình Bot Telegram
+      const TELEGRAM_BOT_TOKEN =
+        "8836390855:AAGXKRn3znRI9OJyP7ID-hf9_IaqRDUM40I";
+      const TELEGRAM_CHAT_ID = "-1004300735415";
+
+      await axios.post(
+        `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`,
+        {
+          chat_id: TELEGRAM_CHAT_ID,
+          text: telegramMessage,
+          parse_mode: "Markdown",
+        },
+      );
+
+      notification.success({
+        message: "Telegram",
+        description: "Đã gửi báo cáo đơn muộn qua Telegram!",
+      });
+    } catch (error) {
+      console.error("Lỗi gửi Telegram:", error);
+      messageApi.error("Có lỗi khi gửi Telegram");
     }
   };
 
@@ -1378,9 +1588,7 @@ const OrderList = () => {
     const applyLocalUpdate = (id, normalizedAddress) => {
       if (!normalizedAddress) return;
       setOrders((prev) =>
-        prev.map((o) =>
-          o.id === id ? { ...o, normalizedAddress } : o,
-        ),
+        prev.map((o) => (o.id === id ? { ...o, normalizedAddress } : o)),
       );
     };
 
@@ -2513,7 +2721,9 @@ const OrderList = () => {
           },
         ]
       : []),
-    ...(currentUser.position === "kho1" || currentUser.position === "salexuly"||currentUser.position === "managerSALE" 
+    ...(currentUser.position === "kho1" ||
+    currentUser.position === "salexuly" ||
+    currentUser.position === "managerSALE"
       ? [
           {
             title: (
@@ -3703,7 +3913,6 @@ const OrderList = () => {
     } catch (error) {
       console.error(error);
       messageApi.error("Lỗi khi lưu các đơn");
-      
     }
   };
 
@@ -4986,6 +5195,19 @@ const OrderList = () => {
                 >
                   🔄 Tải lại tất cả đơn hàng
                 </Button>
+                {(currentUser.position === "managerSALE" ||
+                  currentUser.position === "admin" ||
+                  currentUser.name === "Tung99" ||
+                  currentUser.name === "test") && (
+                  <Button
+                    type="primary"
+                    onClick={handleOpenLateOrdersReport}
+                    className="ft-btn-add"
+                    style={{ backgroundColor: "#e74c3c" }}
+                  >
+                    ⏰ Báo cáo đơn muộn
+                  </Button>
+                )}
               </div>
             </Col>
           </Row>
@@ -5276,16 +5498,17 @@ const OrderList = () => {
                     placeholder="Chọn bộ lọc"
                     allowClear
                     options={[
-                      ...(currentUser.name === "Trần Mỹ Hạnh" || currentUser.position === "salexuly" ? [
-                        { value: "khovn1", label: "KHO VN1" },
-                        { value: "khovn2", label: "KHO VN2" },
-                        { value: "khotq1", label: "KHO TQ1" },
-                        
-                      ] : []),
-                      
-                      
+                      ...(currentUser.name === "Trần Mỹ Hạnh" ||
+                      currentUser.position === "salexuly"
+                        ? [
+                            { value: "khovn1", label: "KHO VN1" },
+                            { value: "khovn2", label: "KHO VN2" },
+                            { value: "khotq1", label: "KHO TQ1" },
+                          ]
+                        : []),
+
                       { value: "done", label: "Đơn Done" },
-                      
+
                       {
                         value: "unpaid_success",
                         label: "Chưa thanh toán & Giao Thành công",
@@ -5670,7 +5893,7 @@ const OrderList = () => {
                 <span style={{ color: "#389e0d" }}>
                   Thành công: {normalizeProgress.success}
                 </span>
-              
+
                 <span style={{ color: "#888" }}>
                   {normalizeProgress.done}/{normalizeProgress.total}
                 </span>
@@ -5809,6 +6032,101 @@ const OrderList = () => {
         onDelete={handleDeleteOrder}
         currentUser={currentUser}
       />
+      {/* Modal báo cáo đơn muộn chưa done */}
+      <Modal
+        title={
+          <span style={{ fontSize: 18, fontWeight: 600 }}>
+            ⏰ Báo cáo đơn muộn chưa Done ({">"} 20h)
+          </span>
+        }
+        open={lateOrdersModalVisible}
+        onCancel={() => setLateOrdersModalVisible(false)}
+        footer={[
+          <Button
+            key="telegram"
+            type="primary"
+            onClick={handleSendLateOrdersTelegram}
+            style={{ backgroundColor: "#0088cc" }}
+          >
+            📤 Gửi Telegram
+          </Button>,
+          <Button key="close" onClick={() => setLateOrdersModalVisible(false)}>
+            Đóng
+          </Button>,
+        ]}
+        width={800}
+      >
+        <Spin spinning={lateOrdersLoading}>
+          {lateOrdersData.length === 0 && !lateOrdersLoading ? (
+            <div style={{ textAlign: "center", padding: 40, color: "#999" }}>
+              Không có đơn muộn nào trong 3 ngày gần nhất
+            </div>
+          ) : (
+            <Table
+              dataSource={lateOrdersData}
+              rowKey="key"
+              pagination={false}
+              bordered
+              columns={[
+                {
+                  title: "STT",
+                  key: "stt",
+                  width: 60,
+                  render: (_, __, index) => index + 1,
+                  align: "center",
+                },
+                {
+                  title: "Tên Sale",
+                  dataIndex: "saleName",
+                  key: "saleName",
+                  width: 150,
+                },
+                {
+                  title: "Danh sách STT đơn muộn",
+                  dataIndex: "orders",
+                  key: "orders",
+                  width: 500,
+                  render: (orders) => (
+                    <div style={{ maxWidth: 500 }}>
+                      {orders?.map((order, idx) => {
+                        const hoursAgo =
+                          order.hoursDiff > 24
+                            ? `${Math.floor(order.hoursDiff / 24)}d${order.hoursDiff % 24}h`
+                            : `${order.hoursDiff}h`;
+                        return (
+                          <Tag
+                            key={idx}
+                            color="red"
+                            style={{ marginBottom: 4, marginRight: 4 }}
+                          >
+                            {order.stt} ({order.orderDate} {order.orderTime} -{" "}
+                            {hoursAgo} trước)
+                          </Tag>
+                        );
+                      })}
+                    </div>
+                  ),
+                },
+                {
+                  title: "Tổng số đơn",
+                  dataIndex: "totalCount",
+                  key: "totalCount",
+                  width: 120,
+                  align: "center",
+                  render: (count) => (
+                    <Tag
+                      color="volcano"
+                      style={{ fontSize: 16, padding: "4px 12px" }}
+                    >
+                      {count}
+                    </Tag>
+                  ),
+                },
+              ]}
+            />
+          )}
+        </Spin>
+      </Modal>
     </div>
   );
 };
