@@ -22,12 +22,14 @@ import {
   Tag,
   Spin,
   Checkbox,
+  Upload,
 } from "antd";
 import {
   EditOutlined,
   DeleteOutlined,
   SearchOutlined,
   CloseOutlined,
+  PlusOutlined,
 } from "@ant-design/icons";
 import dayjs from "dayjs";
 import OrderForm from "./OrderForm";
@@ -480,6 +482,7 @@ const OrderList = () => {
   const [namesalexuly, setnamesalexuly] = useState("");
   // Cho phép chọn nhiều filter
   const [weightFilter, setWeightFilter] = useState(null); // 'under1kg', 'over1kg', or null
+  const [xoaDonFilter, setXoaDonFilter] = useState(null); // 'all', 'pending', 'lead', 'processed'
   const [employees, setEmployees] = useState([]);
   const [selectedFilters, setSelectedFilters] = useState([]);
   const [selectedSale, setSelectedSale] = useState(undefined);
@@ -518,6 +521,49 @@ const OrderList = () => {
   const [lateOrdersModalVisible, setLateOrdersModalVisible] = useState(false);
   const [lateOrdersData, setLateOrdersData] = useState([]);
   const [lateOrdersLoading, setLateOrdersLoading] = useState(false);
+
+  // State cho modal xóa đơn
+  const [xoaDonModalVisible, setXoaDonModalVisible] = useState(false);
+  const [xoaDonOrderId, setXoaDonOrderId] = useState(null);
+  const [xoaDonOrderData, setXoaDonOrderData] = useState(null); // Lưu toàn bộ data order
+  const [xoaDonLyDo, setXoaDonLyDo] = useState("");
+  const [xoaDonImages, setXoaDonImages] = useState([]); // Mảng file objects
+  const [xoaDonImageUrls, setXoaDonImageUrls] = useState([]); // Mảng URL tạm (preview)
+  const [xoaDonSaving, setXoaDonSaving] = useState(false);
+  const [xoaDonUploading, setXoaDonUploading] = useState(false);
+  const [xoaDonReport, setXoaDonReport] = useState(null); // Loại báo cáo: HỦY, XÓA, BÙNG
+  const xoaDonTextAreaRef = useRef(null);
+
+  // Xử lý paste ảnh từ clipboard khi modal xóa đơn mở
+  useEffect(() => {
+    if (!xoaDonModalVisible) return;
+
+    const handlePaste = (e) => {
+      const items = e.clipboardData?.items;
+      if (!items) return;
+
+      for (const item of items) {
+        if (item.type.startsWith("image/")) {
+          e.preventDefault();
+          const file = item.getAsFile();
+          if (file && xoaDonImages.length < 5) {
+            const reader = new FileReader();
+            reader.onload = (ev) => {
+              setXoaDonImageUrls((prev) => [...prev, ev.target.result]);
+              setXoaDonImages((prev) => [...prev, file]);
+            };
+            reader.readAsDataURL(file);
+          } else if (xoaDonImages.length >= 5) {
+            messageApi.warning("Đã đạt giới hạn 5 ảnh");
+          }
+          break;
+        }
+      }
+    };
+
+    document.addEventListener("paste", handlePaste);
+    return () => document.removeEventListener("paste", handlePaste);
+  }, [xoaDonModalVisible, xoaDonImages.length]);
 
   // Detect mobile screen
   useEffect(() => {
@@ -776,7 +822,6 @@ const OrderList = () => {
       telegramMessage += `📊 *TỔNG KẾT*\n`;
       telegramMessage += `👥 Sale có đơn muộn: ${lateOrdersData.length} người\n`;
       telegramMessage += `📦 Tổng đơn muộn: ${totalLateOrders} đơn\n`;
-     
 
       // Cấu hình Bot Telegram
       const TELEGRAM_BOT_TOKEN =
@@ -1512,6 +1557,21 @@ const OrderList = () => {
               ? orderWeight >= 1000
               : true;
 
+        // Filter đơn xin xóa
+        const xoaDonMatch = !xoaDonFilter
+          ? true
+          : xoaDonFilter === "all"
+            ? order.daXinXoaDon === true
+            : xoaDonFilter === "pending"
+              ? order.daXinXoaDon === true && !order.leaderDaXacNhan && !order.leaderTuChoi && !order.managerDaXacNhan 
+              : xoaDonFilter === "lead"
+                ? order.leaderDaXacNhan === true && !order.managerDaXacNhan
+                : xoaDonFilter === "processed"
+                  ? order.managerDaXacNhan === true
+                  : xoaDonFilter === "reject"
+                    ? order.leaderTuChoi === true
+                  : true;
+
         return (
           dateMatch &&
           sttMatch &&
@@ -1521,7 +1581,8 @@ const OrderList = () => {
           filterMatch &&
           saleMatch &&
           mktMatch &&
-          weightMatch
+          weightMatch &&
+          xoaDonMatch
         );
       })
       .sort(
@@ -2588,6 +2649,177 @@ const OrderList = () => {
     }
   };
 
+  // ===== XÓA ĐƠN =====
+  // Gửi yêu cầu xin xóa đơn
+  const handleXinXoaDon = async () => {
+    if (!xoaDonLyDo.trim()) {
+      messageApi.error("Vui lòng nhập lý do xóa đơn");
+      return;
+    }
+
+    setXoaDonSaving(true);
+    try {
+      let cloudinaryUrls = [];
+
+      // Upload ảnh lên Cloudinary nếu có file mới
+      if (xoaDonImages.length > 0) {
+        setXoaDonUploading(true);
+        const uploadPromises = xoaDonImages.map(async (file) => {
+          const formData = new FormData();
+          formData.append("files", file);
+          const res = await axios.post("/api/upload/cloudinary", formData, {
+            headers: { "Content-Type": "multipart/form-data" },
+          });
+          return res.data.urls[0]?.url;
+        });
+
+        const results = await Promise.all(uploadPromises);
+        cloudinaryUrls = results.filter(Boolean);
+        setXoaDonUploading(false);
+      }
+
+      const response = await axios.post("/api/orders/xoa-don", {
+        orderId: xoaDonOrderId,
+        lyDo: xoaDonLyDo,
+        imageUrls: cloudinaryUrls,
+        employeeName: currentUser.name,
+        saleReport2: xoaDonReport, // HỦY / XÓA / BÙNG
+      });
+
+      messageApi.success(response.data.message || "Đã gửi yêu cầu xóa đơn");
+      setXoaDonModalVisible(false);
+      setXoaDonLyDo("");
+      setXoaDonImages([]);
+      setXoaDonImageUrls([]);
+      setXoaDonOrderData(null);
+      fetchOrders();
+    } catch (error) {
+      console.error(error);
+      messageApi.error(
+        error?.response?.data?.error || "Lỗi khi gửi yêu cầu xóa đơn",
+      );
+    } finally {
+      setXoaDonSaving(false);
+      setXoaDonUploading(false);
+    }
+  };
+
+  // LeadSALE xác nhận xóa đơn
+  const handleLeaderXacNhanXoaDon = async () => {
+    if (!xoaDonLyDo.trim()) {
+      messageApi.error("Vui lòng nhập lý do xóa đơn");
+      return;
+    }
+
+    setXoaDonSaving(true);
+    try {
+      const response = await axios.post("/api/orders/xoa-don/leader-confirm", {
+        orderId: xoaDonOrderId,
+        lyDo: xoaDonLyDo,
+        leaderName: currentUser.name,
+        xoaDonImages: xoaDonImageUrls,
+        saleReport2: xoaDonReport,
+      });
+
+      messageApi.success(response.data.message || "Leader đã xác nhận");
+      setXoaDonModalVisible(false);
+      setXoaDonLyDo("");
+      setXoaDonImages([]);
+      setXoaDonImageUrls([]);
+      setXoaDonOrderData(null);
+      fetchOrders();
+    } catch (error) {
+      console.error(error);
+      messageApi.error(
+        error?.response?.data?.error || "Lỗi khi leader xác nhận",
+      );
+    } finally {
+      setXoaDonSaving(false);
+    }
+  };
+
+  // LeadSALE từ chối xóa đơn
+  const handleLeaderTuChoiXoaDon = async () => {
+    Modal.confirm({
+      title: "Xác nhận từ chối",
+      content: "Bạn có chắc muốn từ chối yêu cầu xóa đơn này không?",
+      okText: "Từ chối",
+      cancelText: "Hủy",
+      okButtonProps: { danger: true },
+      onOk: async () => {
+        setXoaDonSaving(true);
+        try {
+          const response = await axios.post("/api/orders/xoa-don/leader-reject", {
+            orderId: xoaDonOrderId,
+            lyDo: xoaDonLyDo,
+            leaderName: currentUser.name,
+          });
+
+          messageApi.success(response.data.message || "Leader đã từ chối");
+          setXoaDonModalVisible(false);
+          setXoaDonLyDo("");
+          setXoaDonImages([]);
+          setXoaDonImageUrls([]);
+          setXoaDonOrderData(null);
+          fetchOrders();
+        } catch (error) {
+          console.error(error);
+          messageApi.error(
+            error?.response?.data?.error || "Lỗi khi leader từ chối",
+          );
+        } finally {
+          setXoaDonSaving(false);
+        }
+      },
+    });
+  };
+
+  // ManagerSALE xác nhận xóa đơn (xóa vĩnh viễn - reset doanh số)
+  const handleManagerXacNhanXoaDon = async () => {
+    if (!xoaDonLyDo.trim()) {
+      messageApi.error("Vui lòng nhập lý do xóa đơn");
+      return;
+    }
+    if (!xoaDonReport) {
+      messageApi.error("Vui lòng chọn loại báo cáo");
+      return;
+    }
+
+    setXoaDonSaving(true);
+    try {
+      const response = await axios.post("/api/orders/xoa-don/manager-confirm", {
+        orderId: xoaDonOrderId,
+        lyDo: xoaDonLyDo,
+        managerName: currentUser.name,
+        xoaDonImages: xoaDonImageUrls,
+        // Thông tin để reset doanh số
+        revenue: xoaDonOrderData?.revenue || 0,
+        revenuemkt: xoaDonOrderData?.revenuemkt || 0,
+        profit: xoaDonOrderData?.profit || 0,
+        profitmkt: xoaDonOrderData?.profitmkt || 0,
+        saleReport: xoaDonOrderData?.saleReport2 || xoaDonReport,
+      });
+
+      messageApi.success(
+        response.data.message || "Manager đã xác nhận xóa đơn",
+      );
+      setXoaDonModalVisible(false);
+      setXoaDonLyDo("");
+      setXoaDonImages([]);
+      setXoaDonImageUrls([]);
+      setXoaDonOrderData(null);
+      setXoaDonReport(null);
+      fetchOrders();
+    } catch (error) {
+      console.error(error);
+      messageApi.error(
+        error?.response?.data?.error || "Lỗi khi manager xác nhận",
+      );
+    } finally {
+      setXoaDonSaving(false);
+    }
+  };
+
   const columns = [
     {
       title: (
@@ -2769,6 +3001,66 @@ const OrderList = () => {
                 }
               />
             ),
+          },
+        ]
+      : []),
+    ...(currentUser.position === "admin" ||
+    (currentUser.position === "managerSALE") |
+      (currentUser.position === "salefull") |
+      (currentUser.position === "salexuly") |
+      (currentUser.position === "leadSALE")
+      ? [
+          {
+            title: "XIN XÓA DS",
+            key: "xoaDon",
+            width: 80,
+            render: (_, record) => {
+              const isDaXinXoa = record.daXinXoaDon === true;
+              return (
+                <Button
+                  type={isDaXinXoa ? "default" : "default"}
+                  danger={isDaXinXoa}
+                  size="small"
+                  onClick={() => {
+                    // salexuly chỉ được xin xóa đơn của mình
+                    if (currentUser.position === "salexuly" && record.salexuly !== currentUser.name) {
+                      messageApi.warning("Bạn chỉ có thể xin xóa đơn của mình");
+                      return;
+                    }
+                    setXoaDonOrderId(record.id);
+                    setXoaDonOrderData(record);
+                    setXoaDonLyDo(record.xoaDonLyDo || "");
+                    setXoaDonReport(record.saleReport2 || null);
+                    setXoaDonImages([record.xoaDonImages || []]);
+                    setXoaDonImageUrls(record.xoaDonImages || []);
+                    setXoaDonModalVisible(true);
+                  }}
+                  style={{ whiteSpace: "nowrap" }}
+                >
+                  <span style={{
+                    color: record.managerDaXacNhan
+                      ? "#52c41a"
+                      : record.leaderDaXacNhan
+                      ? "#faad14"
+                      : record.leaderTuChoi
+                      ? "#ff4d4f"
+                      : isDaXinXoa
+                      ? "#999"
+                      : "inherit"
+                  }}>
+                    {record.managerDaXacNhan
+                      ? "MANAGER ĐÃ XÁC NHẬN"
+                      : record.leaderDaXacNhan
+                      ? "LEAD ĐÃ XÁC NHẬN"
+                      : record.leaderTuChoi
+                      ? "TỪ CHỐI"
+                      : isDaXinXoa
+                      ? "Đã xin"
+                      : "Xin xóa"}
+                  </span>
+                </Button>
+              );
+            },
           },
         ]
       : []),
@@ -5197,13 +5489,14 @@ const OrderList = () => {
                 </Button>
                 {(currentUser.position === "managerSALE" ||
                   currentUser.position === "admin" ||
-                  currentUser.name === "Tung99" ||
+                  currentUser.position === "leadSALE" ||
+                  
                   currentUser.name === "test") && (
                   <Button
                     type="primary"
                     onClick={handleOpenLateOrdersReport}
-                    className="ft-btn-add"
-                    style={{ backgroundColor: "#e74c3c" }}
+                    className="ft-btn-add action-btn-darkgold"
+                    
                   >
                     ⏰ Báo cáo đơn muộn
                   </Button>
@@ -5373,6 +5666,25 @@ const OrderList = () => {
                     >
                       <Option value="under1kg">Dưới 1kg</Option>
                       <Option value="over1kg">Trên 1kg</Option>
+                    </Select>
+                  )}
+                  {currentUser.position_team !== "mkt" &&
+                  currentUser.position !== "lead" &&
+                  currentUser.position !== "managerMKT" &&
+                  currentUser.position !== "leadMKT" && (
+                    <Select
+                      allowClear
+                      value={xoaDonFilter}
+                      onChange={(value) => setXoaDonFilter(value)}
+                      style={{ width: "100%", marginTop: 8 }}
+                      placeholder="Lọc đơn xin xóa DS"
+                    >
+                      <Option value="all">Tất cả đơn xin xóa DS</Option>
+                      <Option value="pending">Đơn chưa xử lý</Option>
+                      <Option value="lead">Lead đã xác nhận</Option>
+                      
+                      <Option value="processed">Đơn đã xử lý</Option>
+                      <Option value="reject">Đơn từ chối</Option>
                     </Select>
                   )}
               </div>
@@ -6126,6 +6438,223 @@ const OrderList = () => {
             />
           )}
         </Spin>
+      </Modal>
+      {/* Modal xóa đơn */}
+      <Modal
+        title={
+          <span style={{ fontSize: 18, fontWeight: 600, color: "#ff4d4f" }}>
+            Xin xóa đơn hàng
+          </span>
+        }
+        open={xoaDonModalVisible}
+        onCancel={() => {
+          setXoaDonModalVisible(false);
+          setXoaDonLyDo("");
+          setXoaDonImages([]);
+          setXoaDonImageUrls([]);
+          setXoaDonOrderData(null);
+          setXoaDonReport(null);
+        }}
+        footer={
+          <div
+            style={{ display: "flex", justifyContent: "space-between", gap: 8 }}
+          >
+            <Button
+              key="cancel"
+              onClick={() => {
+                setXoaDonModalVisible(false);
+                setXoaDonLyDo("");
+                setXoaDonImages([]);
+                setXoaDonImageUrls([]);
+                setXoaDonOrderData(null);
+                setXoaDonReport(null);
+              }}
+            >
+              Hủy
+            </Button>
+            <div style={{ display: "flex", gap: 8 }}>
+              {currentUser.position === "leadSALE" && (
+                <>
+                <Button
+                  key="leader"
+                  type="primary"
+                  loading={xoaDonSaving}
+                  disabled={!xoaDonLyDo.trim()}
+                  onClick={handleLeaderXacNhanXoaDon}
+                  style={{ backgroundColor: "#1890ff" }}
+                >
+                  Leader xác nhận xóa DS
+                </Button>
+                <Button
+                  key="reject"
+                  loading={xoaDonSaving}
+                  onClick={handleLeaderTuChoiXoaDon}
+                  style={{ marginLeft: 8 }}
+                >
+                  Từ chối xóa DS
+                </Button>
+                </>
+              )}
+              {currentUser.position === "managerSALE" && (
+                <Button
+                  key="manager"
+                  type="primary"
+                  danger
+                  loading={xoaDonSaving}
+                  disabled={!xoaDonLyDo.trim() || !xoaDonReport}
+                  onClick={handleManagerXacNhanXoaDon}
+                >
+                  Manager xác nhận xóa DS
+                </Button>
+              )}
+              {currentUser.position !== "managerSALE" &&
+                currentUser.position !== "leadSALE" && (
+                  <Button
+                    key="save"
+                    type="primary"
+                    danger
+                    loading={xoaDonSaving || xoaDonUploading}
+                    disabled={!xoaDonLyDo.trim() || !xoaDonReport}
+                    onClick={handleXinXoaDon}
+                  >
+                    {xoaDonUploading ? "Đang tải ảnh..." : "Gửi yêu cầu"}
+                  </Button>
+                )}
+            </div>
+          </div>
+        }
+        width={600}
+      >
+        <div style={{ padding: "16px 0" }}>
+          {/* Thông tin đơn hàng */}
+          <div
+            style={{
+              backgroundColor: "#f5f5f5",
+              padding: 12,
+              borderRadius: 8,
+              marginBottom: 16,
+            }}
+          >
+            <div style={{ marginBottom: 8 }}>
+              <label style={{ fontWeight: 600 }}>STT: </label>
+              <span style={{ color: "#ff4d4f" }}>{xoaDonOrderData?.stt}</span>
+            </div>
+            <div style={{ marginBottom: 8 }}>
+              <label style={{ fontWeight: 600 }}>Sale: </label>
+              <span>{xoaDonOrderData?.salexuly || "-"}</span>
+            </div>
+            <div style={{ marginBottom: 8 }}>
+              <label style={{ fontWeight: 600 }}>Sản phẩm: </label>
+              <span>
+                {xoaDonOrderData?.products?.length > 0
+                  ? xoaDonOrderData.products.map((p, i) => (
+                      <span key={i}>
+                        {p.product}
+                        {p.quantity ? ` (x${p.quantity})` : ""}
+                        {i < xoaDonOrderData.products.length - 1 ? ", " : ""}
+                      </span>
+                    ))
+                  : "-"}
+              </span>
+            </div>
+            <div style={{ marginBottom: 8 }}>
+              <label style={{ fontWeight: 600 }}>Doanh số: </label>
+              <span
+                style={{
+                  color: xoaDonOrderData?.revenue > 0 ? "#52c41a" : "#999",
+                }}
+              >
+                {xoaDonOrderData?.revenue?.toLocaleString() || 0}
+              </span>
+            </div>
+            {xoaDonOrderData?.revenuemkt > 0 && (
+              <div style={{ marginBottom: 8 }}>
+                <label style={{ fontWeight: 600 }}>Doanh số MKT: </label>
+                <span style={{ color: "#52c41a" }}>
+                  {xoaDonOrderData?.revenuemkt?.toLocaleString() || 0}
+                </span>
+              </div>
+            )}
+          </div>
+
+          <div style={{ marginBottom: 16 }}>
+            <label
+              style={{ fontWeight: 600, display: "block", marginBottom: 8 }}
+            >
+              Lý do xóa đơn <span style={{ color: "#ff4d4f" }}>*</span>
+            </label>
+            <div style={{ display: "flex", gap: 12, alignItems: "flex-start" }}>
+              <Input.TextArea
+                rows={3}
+                placeholder="Nhập lý do yêu cầu xóa đơn..."
+                value={xoaDonLyDo}
+                onChange={(e) => setXoaDonLyDo(e.target.value)}
+                style={{ flex: 1 }}
+              />
+              <Select
+                placeholder="Loại báo cáo"
+                value={xoaDonReport}
+                onChange={setXoaDonReport}
+                style={{ width: 140 }}
+                options={[
+                  { value: "HỦY", label: "HỦY" },
+                  { value: "XÓA", label: "XÓA" },
+                  { value: "BÙNG", label: "BÙNG" },
+                ]}
+              />
+            </div>
+          </div>
+
+          <div>
+            <label
+              style={{ fontWeight: 600, display: "block", marginBottom: 8 }}
+            >
+              Ảnh chứng minh (có thể chọn nhiều ảnh)
+            </label>
+            <Upload
+              listType="picture-card"
+              multiple
+              beforeUpload={(file) => {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                  setXoaDonImageUrls((prev) => [...prev, e.target.result]);
+                  setXoaDonImages((prev) => [...prev, file]);
+                };
+                reader.readAsDataURL(file);
+                return false;
+              }}
+              onRemove={(file) => {
+                const uid = file.uid;
+                setXoaDonImages((prev) => prev.filter((f) => f.uid !== uid));
+                setXoaDonImageUrls((prev) =>
+                  prev.filter((_, idx) => {
+                    const fileIndex = xoaDonImages.findIndex(
+                      (f) => f.uid === uid,
+                    );
+                    return idx !== fileIndex;
+                  }),
+                );
+              }}
+              fileList={xoaDonImageUrls.map((url, idx) => ({
+                uid: String(idx),
+                url,
+                status: "done",
+                name: `image-${idx + 1}`,
+              }))}
+            >
+              {xoaDonImages.length < 5 && (
+                <div>
+                  <PlusOutlined />
+                  <div style={{ marginTop: 8 }}>Tải ảnh</div>
+                </div>
+              )}
+            </Upload>
+            <div style={{ fontSize: 12, color: "#999", marginTop: 4 }}>
+              Tối đa 5 ảnh, mỗi ảnh tối đa 5MB. Có thể paste ảnh từ clipboard
+              (Ctrl+V)
+            </div>
+          </div>
+        </div>
       </Modal>
     </div>
   );

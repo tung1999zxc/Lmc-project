@@ -20,72 +20,11 @@ const getInitials = (name) => {
 
 const DynamicTime = () => {
   const [time, setTime] = useState(new Date());
-  const [weather, setWeather] = useState({
-    temp: 28,
-    humidity: 75,
-    icon: "☀️",
-  });
 
   useEffect(() => {
     const timer = setInterval(() => setTime(new Date()), 1000);
     return () => clearInterval(timer);
   }, []);
-
-  useEffect(() => {
-    const fetchWeather = async () => {
-      try {
-        const response = await fetch(
-          `https://api.open-meteo.com/v1/forecast?latitude=21.04&longitude=105.78&current=temperature_2m,relative_humidity_2m,weather_code&timezone=Asia/Ho_Chi_Minh`,
-        );
-        if (!response.ok) return;
-        const data = await response.json();
-        if (!data.current) return;
-        const temp = Math.round(data.current.temperature_2m);
-        const humidity = data.current.relative_humidity_2m;
-        const code = data.current.weather_code;
-        const weatherData = getWeatherFromCode(code);
-        setWeather({ temp, humidity, ...weatherData });
-      } catch (error) {
-        console.log("Weather fetch error:", error);
-      }
-    };
-
-    fetchWeather();
-    const weatherTimer = setInterval(fetchWeather, 10 * 60 * 1000);
-    return () => clearInterval(weatherTimer);
-  }, []);
-
-  const getWeatherFromCode = (code) => {
-    if (code === 0) return { condition: "Trời quang", icon: "☀️" };
-    if (code === 1) return { condition: "Ít mây", icon: "🌤️" };
-    if (code === 2) return { condition: "Nhiều mây", icon: "⛅" };
-    if (code === 3) return { condition: "U ám", icon: "☁️" };
-    if (code === 45) return { condition: "Sương mù", icon: "🌫️" };
-    if (code === 48) return { condition: "Sương mù đóng băng", icon: "🌫️" };
-    if (code === 51) return { condition: "Phùn nhẹ", icon: "🌦️" };
-    if (code === 53) return { condition: "Phùn", icon: "🌦️" };
-    if (code === 55) return { condition: "Phùn đặc", icon: "🌦️" };
-    if (code === 56) return { condition: "Mưa đóng băng nhẹ", icon: "🌨️" };
-    if (code === 57) return { condition: "Mưa đóng băng", icon: "🌨️" };
-    if (code === 61) return { condition: "Mưa nhỏ", icon: "🌧️" };
-    if (code === 63) return { condition: "Mưa vừa", icon: "🌧️" };
-    if (code === 65) return { condition: "Mưa to", icon: "🌧️" };
-    if (code === 66) return { condition: "Mưa đóng băng nhẹ", icon: "🌨️" };
-    if (code === 67) return { condition: "Mưa đóng băng nặng", icon: "🌨️" };
-    if (code === 71) return { condition: "Tuyết nhẹ", icon: "🌨️" };
-    if (code === 73) return { condition: "Tuyết vừa", icon: "🌨️" };
-    if (code === 75) return { condition: "Tuyết to", icon: "❄️" };
-    if (code === 77) return { condition: "Mưa tuyết", icon: "🌨️" };
-    if (code === 80) return { condition: "Mưa rào nhẹ", icon: "🌦️" };
-    if (code === 81) return { condition: "Mưa rào vừa", icon: "🌧️" };
-    if (code === 82) return { condition: "Mưa rào dữ dội", icon: "⛈️" };
-    if (code === 85) return { condition: "Tuyết rào nhẹ", icon: "🌨️" };
-    if (code === 86) return { condition: "Tuyết rào nặng", icon: "❄️" };
-    if (code === 95) return { condition: "Sấm sét", icon: "⚡" };
-    if (code === 96) return { condition: "Giông kèm mưa đá", icon: "⛈️" };
-    if (code === 99) return { condition: "Giông bão nặng", icon: "⛈️" };
-    return { condition: "Nắng", icon: "☀️" };
-  };
 
   const getTimeBasedStyles = () => {
     if (!time) return { greeting: "Chào buổi", color: "#fff" };
@@ -102,7 +41,6 @@ const DynamicTime = () => {
   return (
     <div className="dyn-time-container dyn-time-sidebar">
       <div className="dyn-greeting" style={{ color: timeStyle.color }}>
-        <span className="dyn-icon">{weather.icon}</span>
         <span className="dyn-text">{timeStyle.greeting}</span>
       </div>
       <div className="dyn-clock-row">
@@ -123,13 +61,6 @@ const DynamicTime = () => {
             })}
           </span>
         </div>
-        <div className="dyn-weather-box">
-          <div className="weather-row">
-            <span className="weather-temp">{weather.temp}°C</span>
-            <span className="weather-humidity">💧 {weather.humidity}%</span>
-          </div>
-          <span className="weather-condition">{weather.condition}</span>
-        </div>
       </div>
     </div>
   );
@@ -137,73 +68,12 @@ const DynamicTime = () => {
 
 const DynamicTimeTopbar = () => {
   const [time, setTime] = useState(new Date());
-  const [weather, setWeather] = useState({
-    temp: 28,
-    humidity: 75,
-    icon: "☀️",
-  });
   const [showAnalog, setShowAnalog] = useState(false);
 
   useEffect(() => {
     const timer = setInterval(() => setTime(new Date()), 1000);
     return () => clearInterval(timer);
   }, []);
-
-  useEffect(() => {
-    const fetchWeather = async () => {
-      try {
-        const response = await fetch(
-          `https://api.open-meteo.com/v1/forecast?latitude=21.04&longitude=105.78&current=temperature_2m,relative_humidity_2m,weather_code&timezone=Asia/Ho_Chi_Minh`,
-        );
-        if (!response.ok) return;
-        const data = await response.json();
-        if (!data.current) return;
-        const temp = Math.round(data.current.temperature_2m);
-        const humidity = data.current.relative_humidity_2m;
-        const code = data.current.weather_code;
-        const weatherData = getWeatherFromCode(code);
-        setWeather({ temp, humidity, ...weatherData });
-      } catch (error) {
-        console.log("Weather fetch error:", error);
-      }
-    };
-
-    fetchWeather();
-    const weatherTimer = setInterval(fetchWeather, 10 * 60 * 1000);
-    return () => clearInterval(weatherTimer);
-  }, []);
-
-  const getWeatherFromCode = (code) => {
-    if (code === 0) return { condition: "Trời quang", icon: "☀️" };
-    if (code === 1) return { condition: "Ít mây", icon: "🌤️" };
-    if (code === 2) return { condition: "Nhiều mây", icon: "⛅" };
-    if (code === 3) return { condition: "U ám", icon: "☁️" };
-    if (code === 45) return { condition: "Sương mù", icon: "🌫️" };
-    if (code === 48) return { condition: "Sương mù đóng băng", icon: "🌫️" };
-    if (code === 51) return { condition: "Phùn nhẹ", icon: "🌦️" };
-    if (code === 53) return { condition: "Phùn", icon: "🌦️" };
-    if (code === 55) return { condition: "Phùn đặc", icon: "🌦️" };
-    if (code === 56) return { condition: "Mưa đóng băng nhẹ", icon: "🌨️" };
-    if (code === 57) return { condition: "Mưa đóng băng", icon: "🌨️" };
-    if (code === 61) return { condition: "Mưa nhỏ", icon: "🌧️" };
-    if (code === 63) return { condition: "Mưa vừa", icon: "🌧️" };
-    if (code === 65) return { condition: "Mưa to", icon: "🌧️" };
-    if (code === 66) return { condition: "Mưa đóng băng nhẹ", icon: "🌨️" };
-    if (code === 67) return { condition: "Mưa đóng băng nặng", icon: "🌨️" };
-    if (code === 71) return { condition: "Tuyết nhẹ", icon: "🌨️" };
-    if (code === 73) return { condition: "Tuyết vừa", icon: "🌨️" };
-    if (code === 75) return { condition: "Tuyết to", icon: "❄️" };
-    if (code === 77) return { condition: "Mưa tuyết", icon: "🌨️" };
-    if (code === 80) return { condition: "Mưa rào nhẹ", icon: "🌦️" };
-    if (code === 81) return { condition: "Mưa rào vừa", icon: "🌧️" };
-    if (code === 82) return { condition: "Mưa rào dữ dội", icon: "⛈️" };
-    if (code === 85) return { condition: "Tuyết rào nhẹ", icon: "🌨️" };
-    if (code === 86) return { condition: "Tuyết rào nặng", icon: "❄️" };
-    if (code === 95) return { condition: "Sấm sét", icon: "⚡" };
-    if (code === 96) return { condition: "Giông kèm mưa đá", icon: "⛈️" };
-    if (code === 99) return { condition: "Giông bão nặng", icon: "⛈️" };
-    return { condition: "Nắng", icon: "☀️" };
-  };
 
   const getTimeBasedStyles = () => {
     const hour = time.getHours();
@@ -221,7 +91,6 @@ const DynamicTimeTopbar = () => {
   return (
     <div className="dyn-time-container dyn-time-topbar">
       <div className="dyn-greeting" style={{ color: timeStyle.color }}>
-        <span className="dyn-icon">{weather.icon}</span>
         <div className="greeting-content">
           <span className="dyn-text">{timeStyle.greeting}</span>
           <div
@@ -249,16 +118,6 @@ const DynamicTimeTopbar = () => {
               })}
             </span>
           </div>
-        </div>
-      </div>
-      <div className="dyn-weather-box">
-        <div className="weather-main">
-          <span className="weather-icon-sm">{weather.icon}</span>
-          <span className="weather-condition">{weather.condition}</span>
-        </div>
-        <div className="weather-row">
-          <span className="weather-temp">{weather.temp}°C</span>
-          <span className="weather-humidity">💧 {weather.humidity}%</span>
         </div>
       </div>
       {showAnalog && (

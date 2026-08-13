@@ -44,7 +44,7 @@ html,body{width:100%;height:100%;background:var(--bg);font-family:-apple-system,
 .dyn-time-sidebar *, .sb-dyntime *{display:none!important}
 .dyn-time-topbar{display:flex;align-items:center;gap:12px;padding:4px 12px;background:linear-gradient(135deg,rgba(99,102,241,0.08),rgba(168,85,247,0.06));border-radius:12px;border:1px solid rgba(255,255,255,0.08);box-shadow:0 4px 16px rgba(0,0,0,0.2),inset 0 1px 0 rgba(255,255,255,0.05);backdrop-filter:blur(10px);max-width:fit-content}
 .dyn-time-topbar .dyn-greeting{display:flex;align-items:center;gap:10px}
-.dyn-time-topbar .dyn-icon{font-size:28px;animation:weatherFloat 3s ease-in-out infinite;filter:drop-shadow(0 2px 8px rgba(255,255,255,0.3))}
+.dyn-time-topbar .dyn-icon{font-size:28px}
 .dyn-time-topbar .greeting-content{display:flex;flex-direction:column;gap:2px;line-height:1.2}
 .dyn-time-topbar .dyn-text{font-size:11px;font-weight:700;letter-spacing:0.4px;line-height:1}
 .dyn-time-topbar .dyn-text::first-letter{text-transform:uppercase}
@@ -66,28 +66,16 @@ html,body{width:100%;height:100%;background:var(--bg);font-family:-apple-system,
 .analog-min{width:3px;height:38px;background:linear-gradient(to top,#fff,#93c5fd);margin-left:-1.5px;z-index:4;box-shadow:0 0 8px rgba(147,197,253,0.5)}
 .analog-sec{width:1.5px;height:42px;background:linear-gradient(to top,#f87171,#ef4444);margin-left:-0.75px;z-index:5;box-shadow:0 0 8px rgba(248,113,113,0.5)}
 .analog-center{position:absolute;top:50%;left:50%;width:8px;height:8px;background:linear-gradient(135deg,#fff,#a5b4fc);border-radius:50%;transform:translate(-50%,-50%);z-index:6;box-shadow:0 0 6px rgba(255,255,255,0.5)}
-.dyn-time-topbar .dyn-weather-box{padding:5px 10px;background:linear-gradient(135deg,rgba(59,130,246,0.2),rgba(168,85,247,0.15));border-radius:8px;border:1px solid rgba(255,255,255,0.12);display:flex;flex-direction:column;gap:3px;min-width:105px;box-shadow:0 2px 8px rgba(59,130,246,0.15)}
-.dyn-time-topbar .weather-main{display:flex;align-items:center;gap:5px;justify-content:center;line-height:1}
-.dyn-time-topbar .weather-icon-sm{font-size:14px;filter:drop-shadow(0 1px 4px rgba(255,255,255,0.3))}
-.dyn-time-topbar .weather-condition{font-size:10px;color:rgba(255,255,255,0.9);font-weight:600;letter-spacing:0.2px}
-.dyn-time-topbar .weather-row{display:flex;align-items:center;gap:8px;justify-content:center;line-height:1}
-.dyn-time-topbar .weather-temp{font-size:13px;font-weight:800;color:#fff;text-shadow:0 0 12px rgba(96,165,250,0.6);background:linear-gradient(135deg,#fff,#93c5fd);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
-.dyn-time-topbar .weather-humidity{font-size:10px;color:rgba(255,255,255,0.7);font-weight:500}
+.dyn-time-topbar .weather-box{display:none}
 @keyframes fadeInSlide{from{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:translateY(0)}}
 .dyn-greeting{display:flex;align-items:center;gap:8px;margin-bottom:8px}
-.dyn-icon{font-size:20px;animation:weatherFloat 3s ease-in-out infinite}
-@keyframes weatherFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-3px)}}
+.dyn-icon{font-size:20px}
 .dyn-text{font-size:13px;font-weight:700;text-shadow:0 1px 4px rgba(0,0,0,0.3);letter-spacing:0.3px}
 .dyn-clock-row{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
 .dyn-clock{display:flex;flex-direction:column;gap:2px}
 .clock-time{font-size:15px;font-weight:800;color:#fff;text-shadow:0 2px 4px rgba(0,0,0,0.4);font-family:monospace;letter-spacing:1px}
 @keyframes timeGlow{from{opacity:1}to{opacity:0.95}}
 .clock-date{font-size:10px;color:rgba(255,255,255,0.5);letter-spacing:0.3px}
-.dyn-weather-box{padding:6px 10px;background:linear-gradient(135deg,rgba(59,130,246,0.15),rgba(139,92,246,0.1));border-radius:8px;border:1px solid rgba(255,255,255,0.08);text-align:right}
-.weather-row{display:flex;align-items:center;gap:8px;justify-content:flex-end}
-.weather-temp{font-size:14px;font-weight:700;color:#fff;text-shadow:0 0 8px rgba(255,255,255,0.3)}
-.weather-humidity{font-size:10px;color:rgba(255,255,255,0.6)}
-.weather-condition{font-size:9px;color:rgba(255,255,255,0.5);display:block;margin-top:2px}
 #sb-nav{flex:1;overflow-y:auto;padding:8px 0;scrollbar-width:none}
 #sb-nav::-webkit-scrollbar{display:none}
 .sb-item{display:flex;align-items:center;gap:9px;margin:1px 8px;padding:9px 11px;border-radius:8px;cursor:pointer;color:rgba(255,255,255,0.5);font-size:12.5px;transition:all 0.18s;position:relative}
@@ -1634,9 +1622,6 @@ h2,h3{color:#000 !important}
   /* Ẩn khối giờ + ngày tháng, ẩn luôn phần "Chào buổi ...", chỉ giữ thời tiết */
   .dyn-time-topbar .topbar-clock{display:none!important}
   .dyn-time-topbar .dyn-greeting{display:none!important}
-  .dyn-time-topbar .weather-icon-sm{font-size:12px}
-  .dyn-time-topbar .weather-condition{font-size:9px;white-space:nowrap}
-  .dyn-time-topbar .weather-temp,.dyn-time-topbar .weather-humidity{font-size:10px}
   .tb-r{gap:6px;flex-shrink:0}
   .tb-r .ant-btn{padding:0 8px;font-size:11px;height:28px}
   .kpi-strip{grid-template-columns:1fr 1fr;gap:8px}
