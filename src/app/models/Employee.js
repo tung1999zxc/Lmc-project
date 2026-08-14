@@ -11,7 +11,8 @@ const EmployeeSchema = new mongoose.Schema(
     position: { type: String, required: true },
     team_id: { type: String },         // Có thể không bắt buộc
     position_team: { type: String, required: true },
-    position_team2: { type: String }     // Có thể không bắt buộc
+    position_team2: { type: String },     // Có thể không bắt buộc
+    assignedTeam: { type: String },       // Team được gắn cho salenhapdon
   },
   { timestamps: true }
 );

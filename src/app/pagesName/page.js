@@ -1,6 +1,26 @@
 "use client";
 import { useState, useEffect, useMemo, useRef } from "react";
-import { CopyOutlined, SearchOutlined, PlusOutlined, EditOutlined, DeleteOutlined, AppstoreOutlined, FileTextOutlined, TeamOutlined, CalendarOutlined, CheckCircleOutlined, DownOutlined, UndoOutlined, UpOutlined, CloseOutlined, NumberOutlined, UserOutlined, SettingOutlined } from "@ant-design/icons";
+import {
+  CopyOutlined,
+  SearchOutlined,
+  PlusOutlined,
+  EditOutlined,
+  DeleteOutlined,
+  AppstoreOutlined,
+  FileTextOutlined,
+  TeamOutlined,
+  CalendarOutlined,
+  CheckCircleOutlined,
+  DownOutlined,
+  UndoOutlined,
+  UpOutlined,
+  CloseOutlined,
+  NumberOutlined,
+  UserOutlined,
+  SettingOutlined,
+  SaveOutlined,
+  ReloadOutlined,
+} from "@ant-design/icons";
 import {
   Table,
   Input,
@@ -11,6 +31,7 @@ import {
   message,
   Modal,
   Tooltip,
+  Switch,
 } from "antd";
 import { useDispatch, useSelector } from "react-redux";
 import axios from "axios";
@@ -18,6 +39,7 @@ import { DatePicker } from "antd";
 import dayjs from "dayjs";
 const { Option } = Select;
 import { useRouter } from "next/navigation";
+import { setCurrentUser } from "../store/userSlice";
 
 // ===== useCountUp — animate a number from 0 → target =====
 function useCountUp(target, duration = 600) {
@@ -59,6 +81,24 @@ function useCountUp(target, duration = 600) {
 const EmployeePageTable = () => {
   const router = useRouter();
   const currentUser = useSelector((state) => state.user.currentUser);
+  const dispatch = useDispatch();
+
+  // Refresh thông tin user từ DB để lấy assignedTeams/team_id mới nhất
+  // (khi admin đổi team, sale chỉ cần reload trang hoặc đợi 30s là thấy page mới)
+  const refreshCurrentUser = async () => {
+    if (!currentUser?.username) return;
+    try {
+      const { data } = await axios.get(
+        `/api/employees/me?username=${encodeURIComponent(currentUser.username)}`,
+      );
+      if (data?.data) {
+        dispatch(setCurrentUser(data.data));
+      }
+    } catch (err) {
+      console.warn("refreshCurrentUser failed:", err?.message);
+    }
+  };
+
   useEffect(() => {
     // Chỉ redirect khi chưa đăng nhập. Không đẩy user khỏi /pagesName
     // dựa trên position — nếu menu đã cho phép click thì phải cho vào.
@@ -68,7 +108,9 @@ const EmployeePageTable = () => {
   }, [currentUser, router]);
   const [messageApi, contextHolder] = message.useMessage();
   const [pageName, setPageName] = useState("");
-  const [selectedEmployee, setSelectedEmployee] = useState(currentUser?.name || null);
+  const [selectedEmployee, setSelectedEmployee] = useState(
+    currentUser?.name || null,
+  );
   const [data, setData] = useState([]);
   const [employees, setEmployees] = useState([]);
   const [editingRecord, setEditingRecord] = useState(null);
@@ -78,6 +120,7 @@ const EmployeePageTable = () => {
   const [showCustomDate, setShowCustomDate] = useState(false);
   const [searchText, setSearchText] = useState("");
   const [appliedSearchText, setAppliedSearchText] = useState("");
+  const [activeOnly, setActiveOnly] = useState(false);
   const [selectedTeam, setSelectedTeam] = useState(null);
   const [pageListInput, setPageListInput] = useState("");
   const [filteredPages, setFilteredPages] = useState([]);
@@ -87,95 +130,154 @@ const EmployeePageTable = () => {
   const [editPageName, setEditPageName] = useState("");
   const [editEmployee, setEditEmployee] = useState(null);
   const [showCheckForm, setShowCheckForm] = useState(false);
-const [viaData, setViaData] = useState([]);
-const [editingViaId, setEditingViaId] = useState(null);
-const [tempViaLink, setTempViaLink] = useState("");
+  const [viaData, setViaData] = useState([]);
+  const [editingViaId, setEditingViaId] = useState(null);
+  const [tempViaLink, setTempViaLink] = useState("");
+  const [tempSaleReports, setTempSaleReports] = useState({});
+  const [tempNoteMKT, setTempNoteMKT] = useState({});
+  const [savingNoteKey, setSavingNoteKey] = useState(null);
 
-const applyDatePreset = (preset) => {
-  // Toggle off nếu click lại đúng preset đang chọn
-  if (activePreset === preset) {
-    setActivePreset(null);
-    setStartDate(null);
-    setEndDate(null);
-    return;
-  }
+  const applyDatePreset = (preset) => {
+    // Toggle off nếu click lại đúng preset đang chọn
+    if (activePreset === preset) {
+      setActivePreset(null);
+      setStartDate(null);
+      setEndDate(null);
+      return;
+    }
 
-  setActivePreset(preset);
-  const today = dayjs().endOf("day");
-  switch (preset) {
-    case "today":
-      setStartDate(today.startOf("day"));
-      setEndDate(today);
-      break;
-    case "yesterday": {
-      const y = dayjs().subtract(1, "day");
-      setStartDate(y.startOf("day"));
-      setEndDate(y.endOf("day"));
-      break;
+    setActivePreset(preset);
+    const today = dayjs().endOf("day");
+    switch (preset) {
+      case "today":
+        setStartDate(today.startOf("day"));
+        setEndDate(today);
+        break;
+      case "yesterday": {
+        const y = dayjs().subtract(1, "day");
+        setStartDate(y.startOf("day"));
+        setEndDate(y.endOf("day"));
+        break;
+      }
+      case "7days":
+        setStartDate(today.subtract(6, "day").startOf("day"));
+        setEndDate(today);
+        break;
+      case "lastMonth": {
+        const lastMonthStart = dayjs().subtract(1, "month").startOf("month");
+        const lastMonthEnd = dayjs().subtract(1, "month").endOf("month");
+        setStartDate(lastMonthStart);
+        setEndDate(lastMonthEnd);
+        break;
+      }
+      default:
+        break;
     }
-    case "7days":
-      setStartDate(today.subtract(6, "day").startOf("day"));
-      setEndDate(today);
-      break;
-    case "lastMonth": {
-      const lastMonthStart = dayjs().subtract(1, "month").startOf("month");
-      const lastMonthEnd = dayjs().subtract(1, "month").endOf("month");
-      setStartDate(lastMonthStart);
-      setEndDate(lastMonthEnd);
-      break;
-    }
-    default:
-      break;
-  }
-};
+  };
   // Danh sách options
   useEffect(() => {
     fetchNamePage();
     fetchEmployees();
     fetchViaLinks();
-  }, []);
+    // Đồng bộ team_id cho các nhân viên đã có assignedTeams (để filter page hoạt động đúng)
+    if (currentUser?.position === "admin") {
+      axios.post("/api/employees/sync-team-id").catch((err) =>
+        console.warn("sync-team-id failed:", err?.message)
+      );
+    }
+
+    // Refresh currentUser từ DB để lấy team mới nhất (admin đổi team -> sale thấy ngay)
+    refreshCurrentUser();
+
+    // Tự động refresh mỗi 30s để bắt thay đổi team từ admin
+    // (cả currentUser + employees để bảng "Gán Team cho Sale Nhập Đơn" luôn mới nhất)
+    const interval = setInterval(async () => {
+      await Promise.all([refreshCurrentUser(), fetchEmployees()]);
+    }, 30000);
+
+    // Lắng nghe broadcast từ tab khác (admin đổi team -> báo tất cả tab reload)
+    let channel;
+    if (typeof window !== "undefined" && window.BroadcastChannel) {
+      channel = new BroadcastChannel("team-updated");
+      channel.onmessage = (event) => {
+        if (event.data?.type === "team-changed") {
+          refreshCurrentUser();
+          fetchEmployees();
+        }
+      };
+    }
+
+    return () => {
+      clearInterval(interval);
+      if (channel) channel.close();
+    };
+  }, [currentUser?.position, currentUser?.username]);
 
   const fetchViaLinks = async () => {
-  try {
-    const res = await axios.get("/api/viaLinks");
-    let list = res.data.data;
-    // Đảm bảo luôn có ít nhất 8 hàng (hàng trống nếu chưa đủ)
-    const filler = Array.from({ length: Math.max(0, 8 - list.length) }).map((_, i) => ({
-      _id: `empty-${i}`,
-      link: "",
-      isEmpty: true
-    }));
-    setViaData([...list, ...filler]);
-  } catch (err) {
-    message.error("Không thể tải danh sách Via");
-  }
-};
-
-const saveVia = async (record) => {
-  if (!tempViaLink) return message.warning("Vui lòng nhập link");
-  try {
-    if (record.isEmpty) {
-      await axios.post("/api/viaLinks", { link: tempViaLink });
-    } else {
-      await axios.put("/api/viaLinks", { id: record._id, link: tempViaLink });
+    try {
+      const res = await axios.get("/api/viaLinks");
+      let list = res.data.data;
+      // Đảm bảo luôn có ít nhất 8 hàng (hàng trống nếu chưa đủ)
+      const filler = Array.from({ length: Math.max(0, 8 - list.length) }).map(
+        (_, i) => ({
+          _id: `empty-${i}`,
+          link: "",
+          isEmpty: true,
+        }),
+      );
+      setViaData([...list, ...filler]);
+    } catch (err) {
+      message.error("Không thể tải danh sách Via");
     }
-    message.success("Thành công");
-    setEditingViaId(null);
-    fetchViaLinks();
-  } catch (err) {
-    message.error("Có lỗi xảy ra");
-  }
-};
+  };
 
-const deleteVia = async (id) => {
-  try {
-    await axios.delete(`/api/viaLinks?id=${id}`);
-    message.success("Đã xóa");
-    fetchViaLinks();
-  } catch (err) {
-    message.error("Lỗi khi xóa");
-  }
-};
+  const saveVia = async (record) => {
+    if (!tempViaLink) return message.warning("Vui lòng nhập link");
+    try {
+      if (record.isEmpty) {
+        await axios.post("/api/viaLinks", { link: tempViaLink });
+      } else {
+        await axios.put("/api/viaLinks", { id: record._id, link: tempViaLink });
+      }
+      message.success("Thành công");
+      setEditingViaId(null);
+      fetchViaLinks();
+    } catch (err) {
+      message.error("Có lỗi xảy ra");
+    }
+  };
+
+  const deleteVia = async (id) => {
+    try {
+      await axios.delete(`/api/viaLinks?id=${id}`);
+      message.success("Đã xóa");
+      fetchViaLinks();
+    } catch (err) {
+      message.error("Lỗi khi xóa");
+    }
+  };
+
+  const [refreshing, setRefreshing] = useState(false);
+
+  // Tải lại thủ công: refresh thông tin user + page + employees
+  const handleRefreshAll = async () => {
+    if (refreshing) return;
+    setRefreshing(true);
+    try {
+      await Promise.all([
+        refreshCurrentUser(),
+        fetchNamePage(),
+        fetchEmployees(),
+        fetchViaLinks(),
+      ]);
+      message.success("Đã cập nhật dữ liệu mới nhất");
+    } catch (err) {
+      console.error("handleRefreshAll:", err);
+      message.error("Lỗi khi tải lại dữ liệu");
+    } finally {
+      setRefreshing(false);
+    }
+  };
 
   const fetchEmployees = async () => {
     try {
@@ -198,7 +300,7 @@ const deleteVia = async (id) => {
         .filter((employee) => employee.team_id === "SON")
         .map((employee) => employee.employee_code),
     },
-  
+
     // {
     //   id: 3,
     //   name: `TEAM CHI `,
@@ -266,12 +368,47 @@ const deleteVia = async (id) => {
     if (
       currentUser.position === "admin" ||
       currentUser.position === "managerMKT" ||
-      currentUser.position_team === "sale"
+      currentUser.position === "leadSALE" ||
+      currentUser.position === "managerSALE"
     ) {
+      // Admin + Manager MKT + Lead sale + Manager sale: thấy tất cả page
       tempData = data;
+    } else if (
+      currentUser.position === "salenhapdon" ||
+      currentUser.position === "salefull"
+    ) {
+      // Sale nhập đơn + sale full: chỉ thấy page có status: true và thuộc team được gắn
+      // Ưu tiên assignedTeams (mảng) > assignedTeam (string) > team_id (string)
+      const assignedTeams =
+        Array.isArray(currentUser.assignedTeams) &&
+        currentUser.assignedTeams.length > 0
+          ? currentUser.assignedTeams
+          : currentUser.assignedTeam
+            ? [currentUser.assignedTeam]
+            : currentUser.team_id
+              ? [currentUser.team_id]
+              : [];
+
+      if (assignedTeams.length > 0) {
+        const teamMembers = employees
+          .filter((emp) => emp.team_id && assignedTeams.includes(emp.team_id))
+          .map((emp) => emp.name);
+        tempData = data.filter(
+          (record) =>
+            record.status === true && teamMembers.includes(record.employee),
+        );
+      } else {
+        tempData = [];
+      }
+    } else if (currentUser.position === "salexuly") {
+      // Sale online + sale xử lý: chỉ thấy page có status: true
+      tempData = data.filter((record) => record.status === true);
+    } else if (currentUser.position_team === "sale") {
+      // Tất cả nhân viên sale khác: chỉ thấy page có status: true
+      tempData = data.filter((record) => record.status === true);
     } else if (currentUser.position === "lead") {
       tempData = data.filter((record) =>
-        leadTeamMembers.includes(record.employee)
+        leadTeamMembers.includes(record.employee),
       );
     } else {
       tempData = data.filter((record) => record.employee === currentUser.name);
@@ -285,8 +422,13 @@ const deleteVia = async (id) => {
             .includes(appliedSearchText.toLowerCase()) ||
           record.employee
             .toLowerCase()
-            .includes(appliedSearchText.toLowerCase())
+            .includes(appliedSearchText.toLowerCase()),
       );
+    }
+
+    // Bộ lọc "Chỉ page đang hoạt động" (status === true)
+    if (activeOnly) {
+      tempData = tempData.filter((record) => record.status === true);
     }
 
     if (startDate && endDate) {
@@ -305,7 +447,7 @@ const deleteVia = async (id) => {
         .filter((emp) => emp.team_id === selectedTeam)
         .map((emp) => emp.name);
       tempData = tempData.filter((record) =>
-        teamMembers.includes(record.employee)
+        teamMembers.includes(record.employee),
       );
     }
 
@@ -319,6 +461,7 @@ const deleteVia = async (id) => {
     endDate,
     selectedTeam,
     employees,
+    activeOnly,
   ]);
 
   const mktOptions = employees
@@ -380,10 +523,7 @@ const deleteVia = async (id) => {
         pageName: editPageName,
         employee: editEmployee,
       };
-      await axios.put(
-        `/api/pageName/${editingRecord.key}`,
-        updateData
-      );
+      await axios.put(`/api/pageName/${editingRecord.key}`, updateData);
       message.success("Đã cập nhật tên page !");
       fetchNamePage();
       handleCloseEdit();
@@ -393,152 +533,427 @@ const deleteVia = async (id) => {
     }
   };
 
-  const handleCopy = (text) => {
-  navigator.clipboard.writeText(text);
-  messageApi.success(`  Đã copy: ${text}`);
-};
-const viaColumns = [
-  {
-    title: "STT",
-    render: (_, __, index) => index + 1,
-    width: 80,
-  },
-  {
-    title: "Link Via",
-    dataIndex: "link",
-    render: (text, record) => {
-      if (editingViaId === record._id) {
-        return <Input value={tempViaLink} onChange={(e) => setTempViaLink(e.target.value)} style={{ borderRadius: 8 }} />;
-      }
-      return (
-        <div className="pages-name-cell">
-          <span className="pages-name-text" style={{ flex: 1, wordBreak: "break-all" }}>{text || "—"}</span>
-          <button
-            className="pages-copy-btn"
-            onClick={() => handleCopy(text)}
-            style={{ flexShrink: 0 }}
-          >
-            <CopyOutlined style={{ fontSize: 14 }} />
-            Copy
-          </button>
-        </div>
+  const handleToggleStatus = async (record, checked) => {
+    try {
+      await axios.put(`/api/pageName/${record.key}`, { status: checked });
+      message.success(
+        checked ? "Đã bật trạng thái hoạt động" : "Đã tắt trạng thái hoạt động",
       );
+      fetchNamePage();
+    } catch (error) {
+      console.error(error.response?.data?.error || error.message);
+      message.error(
+        error.response?.data?.error || "Lỗi khi cập nhật trạng thái",
+      );
+    }
+  };
+
+  const handleSaveSaleReports = async () => {
+    const updates = Object.entries(tempSaleReports);
+    if (updates.length === 0) {
+      message.warning("Không có thay đổi nào để lưu");
+      return;
+    }
+    try {
+      await Promise.all(
+        updates.map(([key, saleReport]) =>
+          axios.put(`/api/pageName/${key}`, { saleReport }),
+        ),
+      );
+      message.success(`Đã lưu ${updates.length} trạng thái Sale Báo`);
+      setTempSaleReports({});
+      fetchNamePage();
+    } catch (error) {
+      console.error(error);
+      message.error("Lỗi khi lưu trạng thái Sale Báo");
+    }
+  };
+
+  const handleResetSaleReports = async () => {
+    const recordsInTable = filteredData;
+    // Chỉ reset những page đang hoạt động (status = true)
+    const recordsToReset = recordsInTable.filter(
+      (record) => record.status === true,
+    );
+    if (recordsInTable.length === 0) {
+      message.warning("Không có đơn nào trong bảng để reset");
+      return;
+    }
+    if (recordsToReset.length === 0) {
+      message.warning("Không có page nào đang hoạt động (status = true) để reset");
+      return;
+    }
+    try {
+      await Promise.all(
+        recordsToReset.map((record) =>
+          axios.put(`/api/pageName/${record.key}`, { saleReport: "" }),
+        ),
+      );
+      message.success(`Đã reset ${recordsToReset.length} đơn đang hoạt động về trống`);
+      setTempSaleReports({});
+      fetchNamePage();
+    } catch (error) {
+      console.error(error);
+      message.error("Lỗi khi reset Sale Báo");
+    }
+  };
+
+  const handleSaveNoteMKT = async (recordKey) => {
+    const noteMKT = tempNoteMKT[recordKey];
+    if (noteMKT === undefined || noteMKT === null) {
+      message.warning("Chưa có thay đổi ghi chú để lưu");
+      return;
+    }
+    try {
+      setSavingNoteKey(recordKey);
+      await axios.put(`/api/pageName/${recordKey}`, { noteMKT });
+      message.success("Đã lưu ghi chú MKT");
+      setTempNoteMKT((prev) => {
+        const next = { ...prev };
+        delete next[recordKey];
+        return next;
+      });
+      fetchNamePage();
+    } catch (error) {
+      console.error(error);
+      message.error("Lỗi khi lưu ghi chú MKT");
+    } finally {
+      setSavingNoteKey(null);
+    }
+  };
+
+  const handleCopy = (text) => {
+    navigator.clipboard.writeText(text);
+    messageApi.success(`  Đã copy: ${text}`);
+  };
+  const viaColumns = [
+    {
+      title: "STT",
+      render: (_, __, index) => index + 1,
+      width: 80,
     },
-  },
-  {
-    title: "Hành động",
-    width: 160,
-    render: (_, record) => (
-      <Space>
-        {editingViaId === record._id ? (
-          <button className="btn-prod-success pages-action-btn" onClick={() => saveVia(record)}>
-            Lưu
-          </button>
-        ) : (
-          <button className="btn-prod-info pages-action-btn" onClick={() => { setEditingViaId(record._id); setTempViaLink(record.link); }}>
-            Sửa
-          </button>
-        )}
-        {!record.isEmpty && (
-          <Popconfirm title="Xóa link này?" onConfirm={() => deleteVia(record._id)}>
-            <button className="btn-prod-danger pages-action-btn">Xóa</button>
-          </Popconfirm>
-        )}
-      </Space>
-    ),
-  },
-];
-  const columns = [
-      {
-        title: (
-          <span className="pages-table-th">
-            <NumberOutlined className="pages-table-th-icon" />
-            <span>STT</span>
-          </span>
-        ),
-        key: "stt",
-        width: 70,
-        align: "center",
-        render: (_v, _record, index) => (
-          <span className="pages-stt-cell">
-            {index + 1}
-          </span>
-        ),
-      },
-      {
-        title: (
-          <span className="pages-table-th">
-            <FileTextOutlined className="pages-table-th-icon" />
-            <span>Tên Page</span>
-          </span>
-        ),
-        dataIndex: "pageName",
-        key: "pageName",
-        width: 450,
-        render: (text) => (
+    {
+      title: "Link Via",
+      dataIndex: "link",
+      render: (text, record) => {
+        if (editingViaId === record._id) {
+          return (
+            <Input
+              value={tempViaLink}
+              onChange={(e) => setTempViaLink(e.target.value)}
+              style={{ borderRadius: 8 }}
+            />
+          );
+        }
+        return (
           <div className="pages-name-cell">
-            <span className="pages-name-text" style={{ flex: 1 }}>{text}</span>
+            <span
+              className="pages-name-text"
+              style={{ flex: 1, wordBreak: "break-all" }}
+            >
+              {text || "—"}
+            </span>
             <button
               className="pages-copy-btn"
               onClick={() => handleCopy(text)}
+              style={{ flexShrink: 0 }}
             >
               <CopyOutlined style={{ fontSize: 14 }} />
               Copy
             </button>
           </div>
-        ),
+        );
       },
-      {
-        title: (
-          <span className="pages-table-th">
-            <UserOutlined className="pages-table-th-icon" />
-            <span>Nhân Viên</span>
-          </span>
-        ),
-        dataIndex: "employee",
-        key: "employee",
-        render: (text) => (
-          <span className="pages-employee-badge">
-            <TeamOutlined style={{ fontSize: 12 }} />
+    },
+    {
+      title: "Hành động",
+      width: 160,
+      render: (_, record) => (
+        <Space>
+          {editingViaId === record._id ? (
+            <button
+              className="btn-prod-success pages-action-btn"
+              onClick={() => saveVia(record)}
+            >
+              Lưu
+            </button>
+          ) : (
+            <button
+              className="btn-prod-info pages-action-btn"
+              onClick={() => {
+                setEditingViaId(record._id);
+                setTempViaLink(record.link);
+              }}
+            >
+              Sửa
+            </button>
+          )}
+          {!record.isEmpty && (
+            <Popconfirm
+              title="Xóa link này?"
+              onConfirm={() => deleteVia(record._id)}
+            >
+              <button className="btn-prod-danger pages-action-btn">Xóa</button>
+            </Popconfirm>
+          )}
+        </Space>
+      ),
+    },
+  ];
+  const columns = [
+    {
+      title: (
+        <span className="pages-table-th">
+          <NumberOutlined className="pages-table-th-icon" />
+          <span>STT</span>
+        </span>
+      ),
+      key: "stt",
+      width: 70,
+      align: "center",
+      render: (_v, _record, index) => (
+        <span className="pages-stt-cell">{index + 1}</span>
+      ),
+    },
+    {
+      title: (
+        <span className="pages-table-th">
+          <FileTextOutlined className="pages-table-th-icon" />
+          <span>Tên Page</span>
+        </span>
+      ),
+      dataIndex: "pageName",
+      key: "pageName",
+      width: 450,
+      render: (text) => (
+        <div className="pages-name-cell">
+          <span className="pages-name-text" style={{ flex: 1 }}>
             {text}
           </span>
-        )
-      },
-      {
-        title: (
-          <span className="pages-table-th">
-            <CalendarOutlined className="pages-table-th-icon" />
-            <span>Ngày tạo</span>
+          <button className="pages-copy-btn" onClick={() => handleCopy(text)}>
+            <CopyOutlined style={{ fontSize: 14 }} />
+            Copy
+          </button>
+        </div>
+      ),
+    },
+    ...(currentUser.position !== "salenhapdon" &&
+    currentUser.position !== "salefull"
+      ? [
+          {
+            title: (
+              <span className="pages-table-th">
+                <UserOutlined className="pages-table-th-icon" />
+                <span>Nhân Viên</span>
+              </span>
+            ),
+            dataIndex: "employee",
+            key: "employee",
+            render: (text) => (
+              <span className="pages-employee-badge">
+                <TeamOutlined style={{ fontSize: 12 }} />
+                {text}
+              </span>
+            ),
+          },
+        ]
+      : []),
+    {
+      title: (
+        <span className="pages-table-th">
+          <CalendarOutlined className="pages-table-th-icon" />
+          <span>Ngày tạo</span>
+        </span>
+      ),
+      dataIndex: "createdAt",
+      key: "createdAt",
+      render: (value) => {
+        const date = new Date(value);
+        return (
+          <span className="pages-date-badge">
+            <CalendarOutlined style={{ fontSize: 12 }} />
+            {date.toLocaleDateString("vi-VN")}
           </span>
-        ),
-        dataIndex: "createdAt",
-        key: "createdAt",
-        render: (value) => {
-          const date = new Date(value);
+        );
+      },
+    },
+    ...(currentUser.position !== "salenhapdon" &&
+    currentUser.position !== "salefull"
+      ? [
+          {
+            title: (
+              <span className="pages-table-th">
+                <CheckCircleOutlined className="pages-table-th-icon" />
+                <span>Trạng thái</span>
+              </span>
+            ),
+            key: "status",
+            width: 110,
+            align: "center",
+            render: (_, record) => (
+              <Switch
+                checked={record.status === true}
+                onChange={(checked) => handleToggleStatus(record, checked)}
+                checkedChildren="ON"
+                unCheckedChildren="OFF"
+                size="small"
+              />
+            ),
+          },
+        ]
+      : []),
+    {
+      title: (
+        <span className="pages-table-th">
+          <FileTextOutlined className="pages-table-th-icon" />
+          <span>Ghi chú MKT</span>
+        </span>
+      ),
+      key: "noteMKT",
+      width: 260,
+      align: "center",
+      render: (_, record) => {
+        const value =
+          tempNoteMKT[record.key] !== undefined
+            ? tempNoteMKT[record.key]
+            : (record.noteMKT ?? "");
+        const dirty =
+          tempNoteMKT[record.key] !== undefined &&
+          tempNoteMKT[record.key] !== (record.noteMKT ?? "");
+        const isSaving = savingNoteKey === record.key;
+        const canEdit = !(
+          currentUser.position === "salenhapdon" ||
+          currentUser.position === "salefull" ||
+          currentUser.position === "salexuly"
+        );
+        return (
+          <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
+            <Input.TextArea
+              value={value}
+              
+              placeholder="Nhập ghi chú..."
+              autoSize={{ minRows: 1, maxRows: 3 }}
+              style={{ flex: 1, minWidth: 0 }}
+              onChange={(e) => {
+                const v = e.target.value;
+                setTempNoteMKT((prev) => ({ ...prev, [record.key]: v }));
+              }}
+            />
+            <Button
+              type="primary"
+              size="small"
+              loading={isSaving}
+              disabled={!canEdit || !dirty || currentUser.position_team === "sale"}
+              onClick={() => handleSaveNoteMKT(record.key)}
+              icon={<SaveOutlined />}
+              title="Lưu ghi chú"
+            />
+          </div>
+        );
+      },
+    },
+    {
+      title: (
+        <div className="pages-sale-report-header">
+          <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+            <span className="pages-table-th-icon">📊</span>
+            <span className="pages-table-th">SALE BÁO</span>
+          </div>
+          <div style={{ display: "flex", gap: 4, marginTop: 4 }}>
+            <button
+              type="button"
+              className="pages-sale-btn pages-sale-btn-save"
+              onClick={handleSaveSaleReports}
+              disabled={Object.keys(tempSaleReports).length === 0}
+              title="Lưu hàng loạt"
+            >
+              <CheckCircleOutlined /> Lưu ({Object.keys(tempSaleReports).length}
+              )
+            </button>
+            <button
+              disabled={currentUser.position_team === "mkt" }
+              type="button"
+              className="pages-sale-btn pages-sale-btn-reset"
+              onClick={handleResetSaleReports}
+              title="Reset tất cả về trống"
+            >
+              <UndoOutlined />
+            </button>
+          </div>
+        </div>
+      ),
+      key: "saleReport",
+      width: 180,
+      align: "center",
+      render: (_, record) => (
+        <Select
+          disabled={currentUser.position_team === "mkt"}
+          value={tempSaleReports[record.key] ?? record.saleReport ?? undefined}
+          onChange={(value) =>
+            setTempSaleReports((prev) => ({ ...prev, [record.key]: value }))
+          }
+          placeholder="Chọn..."
+          style={{ width: "100%" }}
+          allowClear
+          options={[
+            { value: "TTL", label: "TTL" },
+            { value: "CHƯA MỜI", label: "CHƯA MỜI" },
+            { value: "7 NGÀY KO MESS", label: "7 NGÀY KO MESS" },
+            { value: "7 NGÀY 1 MESS", label: "7 NGÀY 1 MESS" },
+          ]}
+        />
+      ),
+    },
+    {
+      title: (
+        <span className="pages-table-th">
+          <SettingOutlined className="pages-table-th-icon" />
+          <span>Thao Tác</span>
+        </span>
+      ),
+      key: "action",
+      width: 110,
+      align: "center",
+      render: (_, record) => {
+        if (
+          currentUser.position === "admin" ||
+          currentUser.position === "managerSALE" ||
+          currentUser.position === "managerMKT"
+        ) {
           return (
-            <span className="pages-date-badge">
-              <CalendarOutlined style={{ fontSize: 12 }} />
-              {date.toLocaleDateString("vi-VN")}
-            </span>
+            <div className="pages-action-group">
+              <button
+                type="button"
+                className="pages-icon-btn pages-icon-btn-edit"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleEdit(record);
+                }}
+                title="Sửa bản ghi"
+                aria-label="Sửa"
+              >
+                <EditOutlined />
+              </button>
+              <Popconfirm
+                title="Xóa bản ghi?"
+                okText="Xóa"
+                cancelText="Hủy"
+                okButtonProps={{ danger: true }}
+                onConfirm={() => handleDelete(record.key)}
+              >
+                <button
+                  type="button"
+                  className="pages-icon-btn pages-icon-btn-delete"
+                  title="Xóa bản ghi"
+                  aria-label="Xóa"
+                >
+                  <DeleteOutlined />
+                </button>
+              </Popconfirm>
+            </div>
           );
-        },
-      },
-      {
-        title: (
-          <span className="pages-table-th">
-            <SettingOutlined className="pages-table-th-icon" />
-            <span>Thao Tác</span>
-          </span>
-        ),
-        key: "action",
-        width: 110,
-        align: "center",
-        render: (_, record) => {
-          if (
-            currentUser.position === "admin" ||
-            currentUser.position === "managerSALE" ||
-            currentUser.position === "managerMKT"
-          ) {
+        } else {
+          if (record.employee === currentUser.name) {
             return (
               <div className="pages-action-group">
                 <button
@@ -572,53 +987,22 @@ const viaColumns = [
               </div>
             );
           } else {
-            if (record.employee === currentUser.name) {
-              return (
-                <div className="pages-action-group">
-                  <button
-                    type="button"
-                    className="pages-icon-btn pages-icon-btn-edit"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleEdit(record);
-                    }}
-                    title="Sửa bản ghi"
-                    aria-label="Sửa"
-                  >
-                    <EditOutlined />
-                  </button>
-                  <Popconfirm
-                    title="Xóa bản ghi?"
-                    okText="Xóa"
-                    cancelText="Hủy"
-                    okButtonProps={{ danger: true }}
-                    onConfirm={() => handleDelete(record.key)}
-                  >
-                    <button
-                      type="button"
-                      className="pages-icon-btn pages-icon-btn-delete"
-                      title="Xóa bản ghi"
-                      aria-label="Xóa"
-                    >
-                      <DeleteOutlined />
-                    </button>
-                  </Popconfirm>
-                </div>
-              );
-            } else {
-              return <span style={{ color: "#94a3b8", fontSize: 12 }}>Chỉ xem</span>;
-            }
+            return (
+              <span style={{ color: "#94a3b8", fontSize: 12 }}>Chỉ xem</span>
+            );
           }
-        },
+        }
       },
-    ];
+    },
+  ];
 
   const normalizeText = (text) =>
     text.toLowerCase().trim().replace(/\s+/g, " ");
 
   // Calculate stats
   const totalPages = filteredData.length;
-  const uniqueEmployees = [...new Set(filteredData.map(p => p.employee))].length;
+  const uniqueEmployees = [...new Set(filteredData.map((p) => p.employee))]
+    .length;
   const activePages = filteredData.filter((p) => {
     if (p && typeof p === "object") {
       if (p.archived || p.deleted || p.status === "inactive") return false;
@@ -636,7 +1020,9 @@ const viaColumns = [
     document.querySelectorAll(".check-overlay").forEach((e) => e.remove());
     const overlay = document.createElement("div");
     overlay.className = "check-overlay";
-    overlay.style.background = isDup ? "rgba(255,40,40,0.12)" : "rgba(34,197,94,0.1)";
+    overlay.style.background = isDup
+      ? "rgba(255,40,40,0.12)"
+      : "rgba(34,197,94,0.1)";
     const txt = document.createElement("div");
     txt.className = "check-text " + (isDup ? "ne" : "vut");
     txt.textContent = isDup ? "🚫 NÉ RA" : "✅ VỤT ĐI";
@@ -672,7 +1058,7 @@ const viaColumns = [
     }
     const vLow = v.toLowerCase();
     const matched = (data || []).find(
-      (d) => (d.pageName || "").trim().toLowerCase() === vLow
+      (d) => (d.pageName || "").trim().toLowerCase() === vLow,
     );
     const isDup = Boolean(matched);
     showCheckEffect(isDup);
@@ -685,7 +1071,27 @@ const viaColumns = [
 
   return (
     <div className="pages-name-container">
-       {contextHolder}
+      {contextHolder}
+
+      <style>{`
+        .ant-select-disabled .ant-select-selector,
+        .ant-select.ant-select-disabled .ant-select-selector {
+          background-color: #ffffff !important;
+          color: rgba(0, 0, 0, 0.88) !important;
+          cursor: default !important;
+          opacity: 1 !important;
+        }
+        .ant-select-disabled .ant-select-selection-item,
+        .ant-select.ant-select-disabled .ant-select-selection-item {
+          color: #4f46e5 !important;
+          background: #eef2ff !important;
+          border: 1px solid #c7d2fe !important;
+        }
+        .ant-select-disabled .ant-select-selection-placeholder,
+        .ant-select.ant-select-disabled .ant-select-selection-placeholder {
+          color: #94a3b8 !important;
+        }
+      `}</style>
 
       {/* Page Header */}
       <div className="pages-header">
@@ -735,7 +1141,9 @@ const viaColumns = [
             </div>
             <div>
               <div className="pages-stat-label">Tổng Page</div>
-              <div className="pages-stat-value">{totalPagesAnim.toLocaleString("vi-VN")}</div>
+              <div className="pages-stat-value">
+                {totalPagesAnim.toLocaleString("vi-VN")}
+              </div>
             </div>
           </div>
           <div className="pages-stat-card" style={{ minWidth: 140 }}>
@@ -744,7 +1152,9 @@ const viaColumns = [
             </div>
             <div>
               <div className="pages-stat-label">Nhân viên</div>
-              <div className="pages-stat-value">{uniqueEmployeesAnim.toLocaleString("vi-VN")}</div>
+              <div className="pages-stat-value">
+                {uniqueEmployeesAnim.toLocaleString("vi-VN")}
+              </div>
             </div>
           </div>
         </div>
@@ -752,118 +1162,118 @@ const viaColumns = [
 
       {/* Add Page Form — accordion, ẩn khi đóng (đã có nút trên header) */}
       {addFormOpen && (
-      <div className="pages-add-form pages-add-collapse">
-            <div className="pages-add-header">
-              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                <DownOutlined style={{ color: "var(--gold)", fontSize: 14 }} />
-                <span style={{ fontWeight: 700, fontSize: 15 }}>
-                  Thêm Page Mới
-                </span>
-              </div>
-              <button
-                type="button"
-                className="pages-add-btn-close"
-                onClick={() => {
-                  setAddFormOpen(false);
-                  setPageName("");
-                  setSelectedEmployee(currentUser?.name || null);
-                }}
-                title="Đóng form"
-                aria-label="Đóng form"
+        <div className="pages-add-form pages-add-collapse">
+          <div className="pages-add-header">
+            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              <DownOutlined style={{ color: "var(--gold)", fontSize: 14 }} />
+              <span style={{ fontWeight: 700, fontSize: 15 }}>
+                Thêm Page Mới
+              </span>
+            </div>
+            <button
+              type="button"
+              className="pages-add-btn-close"
+              onClick={() => {
+                setAddFormOpen(false);
+                setPageName("");
+                setSelectedEmployee(currentUser?.name || null);
+              }}
+              title="Đóng form"
+              aria-label="Đóng form"
+            >
+              <CloseOutlined />
+            </button>
+          </div>
+
+          <div className="pages-add-body">
+            <div className="form-row">
+              <Input
+                style={{ flex: 1, minWidth: 200, borderRadius: 12 }}
+                placeholder="Nhập tên page"
+                value={pageName}
+                onChange={(e) => setPageName(e.target.value)}
+                prefix={<AppstoreOutlined style={{ color: "#9ca3af" }} />}
+              />
+              <Select
+                showSearch
+                placeholder={`👤 ${currentUser?.name || "Chọn nhân viên"}`}
+                value={selectedEmployee}
+                onChange={setSelectedEmployee}
+                style={{ minWidth: 200 }}
+                optionFilterProp="children"
               >
-                <CloseOutlined />
+                {mktOptions.map((emp) => (
+                  <Option key={emp} value={emp}>
+                    {emp}
+                  </Option>
+                ))}
+              </Select>
+              <button onClick={handleAdd} className="pages-add-btn">
+                <PlusOutlined /> Thêm Page
               </button>
             </div>
-
-            <div className="pages-add-body">
-              <div className="form-row">
-                <Input
-                  style={{ flex: 1, minWidth: 200, borderRadius: 12 }}
-                  placeholder="Nhập tên page"
-                  value={pageName}
-                  onChange={(e) => setPageName(e.target.value)}
-                  prefix={<AppstoreOutlined style={{ color: "#9ca3af" }} />}
-                />
-                <Select
-                  showSearch
-                  placeholder={`👤 ${currentUser?.name || "Chọn nhân viên"}`}
-                  value={selectedEmployee}
-                  onChange={setSelectedEmployee}
-                  style={{ minWidth: 200 }}
-                  optionFilterProp="children"
-                >
-                  {mktOptions.map((emp) => (
-                    <Option key={emp} value={emp}>
-                      {emp}
-                    </Option>
-                  ))}
-                </Select>
-                <button
-                  onClick={handleAdd}
-                  className="pages-add-btn"
-                >
-                  <PlusOutlined /> Thêm Page
-                </button>
-              </div>
-            </div>
-      </div>
+          </div>
+        </div>
       )}
 
       {/* Check Page Trùng - accordion, ẩn khi đóng (đã có nút trên header) */}
       {showCheckForm && (
-      <div className="pages-add-form pages-check-row">
-            <div className="pages-add-header">
-              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                <SearchOutlined style={{ color: "var(--blue)", fontSize: 16 }} />
-                <span style={{ fontWeight: 700, fontSize: 15 }}>Check Page Trùng</span>
+        <div className="pages-add-form pages-check-row">
+          <div className="pages-add-header">
+            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              <SearchOutlined style={{ color: "var(--blue)", fontSize: 16 }} />
+              <span style={{ fontWeight: 700, fontSize: 15 }}>
+                Check Page Trùng
+              </span>
+            </div>
+            <button
+              type="button"
+              className="pages-add-btn-close"
+              onClick={() => {
+                setShowCheckForm(false);
+                setCheckPageName("");
+              }}
+              title="Đóng check page"
+              aria-label="Đóng"
+            >
+              <CloseOutlined />
+            </button>
+          </div>
+
+          <div className="pages-add-body">
+            <div className="form-row">
+              <div style={{ flex: 1, minWidth: 280 }}>
+                <Input
+                  className="pages-check-input"
+                  style={{ borderRadius: 12 }}
+                  placeholder="Nhập tên page muốn kiểm tra..."
+                  value={checkPageName}
+                  onChange={(e) => setCheckPageName(e.target.value)}
+                  onPressEnter={handleCheckDup}
+                  prefix={<SearchOutlined style={{ color: "#9ca3af" }} />}
+                />
+                <div className="pages-check-tip-inline">
+                  🔍 Hệ thống sẽ so sánh chính xác tên bạn nhập với các page đã
+                  có.
+                </div>
               </div>
               <button
-                type="button"
-                className="pages-add-btn-close"
-                onClick={() => {
-                  setShowCheckForm(false);
-                  setCheckPageName("");
-                }}
-                title="Đóng check page"
-                aria-label="Đóng"
+                onClick={handleCheckDup}
+                className="pages-check-btn"
+                title="Kiểm tra page đã tồn tại"
               >
-                <CloseOutlined />
+                <SearchOutlined /> Check
+              </button>
+              <button
+                onClick={() => setCheckPageName("")}
+                className="btn-prod-ghost"
+                style={{ padding: "10px 18px", borderRadius: 12 }}
+              >
+                Xóa
               </button>
             </div>
-
-            <div className="pages-add-body">
-              <div className="form-row">
-                <div style={{ flex: 1, minWidth: 280 }}>
-                  <Input
-                    className="pages-check-input"
-                    style={{ borderRadius: 12 }}
-                    placeholder="Nhập tên page muốn kiểm tra..."
-                    value={checkPageName}
-                    onChange={(e) => setCheckPageName(e.target.value)}
-                    onPressEnter={handleCheckDup}
-                    prefix={<SearchOutlined style={{ color: "#9ca3af" }} />}
-                  />
-                  <div className="pages-check-tip-inline">
-                    🔍 Hệ thống sẽ so sánh chính xác tên bạn nhập với các page đã có.
-                  </div>
-                </div>
-                <button
-                  onClick={handleCheckDup}
-                  className="pages-check-btn"
-                  title="Kiểm tra page đã tồn tại"
-                >
-                  <SearchOutlined /> Check
-                </button>
-                <button
-                  onClick={() => setCheckPageName("")}
-                  className="btn-prod-ghost"
-                  style={{ padding: "10px 18px", borderRadius: 12 }}
-                >
-                  Xóa
-                </button>
-              </div>
-            </div>
-      </div>
+          </div>
+        </div>
       )}
 
       {/* Filter Bar */}
@@ -888,8 +1298,22 @@ const viaColumns = [
           >
             <SearchOutlined /> Tìm
           </button>
+          <label
+            className={`pages-active-filter ${activeOnly ? "is-active" : ""}`}
+            title="Chỉ hiển thị các page đang hoạt động (status = true)"
+          >
+            <input
+              type="checkbox"
+              checked={activeOnly}
+              onChange={(e) => setActiveOnly(e.target.checked)}
+            />
+            <span className="pages-active-filter-dot" />
+            <span className="pages-active-filter-label">
+              Chỉ page đang hoạt động
+            </span>
+          </label>
         </div>
-        <div className="pages-date-presets">
+        {/* <div className="pages-date-presets">
           <button
             type="button"
             className={`pages-date-preset ${activePreset === "today" ? "is-active" : ""}`}
@@ -929,7 +1353,7 @@ const viaColumns = [
             {showCustomDate ? <UpOutlined /> : <CalendarOutlined />}
             {showCustomDate ? "Thu gọn" : "Chọn chi tiết"}
           </button>
-        </div>
+        </div> */}
 
         {showCustomDate && (
           <div className="pages-date-range">
@@ -943,10 +1367,14 @@ const viaColumns = [
               disabledDate={(current) => {
                 if (!current) return false;
                 if (current.isAfter(dayjs().endOf("day"))) return true;
-                if (endDate && current.isAfter(endDate.endOf("day"))) return true;
+                if (endDate && current.isAfter(endDate.endOf("day")))
+                  return true;
                 return false;
               }}
-              onChange={(d) => { setStartDate(d); setActivePreset(null); }}
+              onChange={(d) => {
+                setStartDate(d);
+                setActivePreset(null);
+              }}
             />
             <span className="pages-date-sep">→</span>
             <span className="pages-date-label">Đến ngày</span>
@@ -959,16 +1387,24 @@ const viaColumns = [
               disabledDate={(current) => {
                 if (!current) return false;
                 if (current.isAfter(dayjs().endOf("day"))) return true;
-                if (startDate && current.isBefore(startDate.startOf("day"))) return true;
+                if (startDate && current.isBefore(startDate.startOf("day")))
+                  return true;
                 return false;
               }}
-              onChange={(d) => { setEndDate(d); setActivePreset(null); }}
+              onChange={(d) => {
+                setEndDate(d);
+                setActivePreset(null);
+              }}
             />
             {(startDate || endDate) && (
               <button
                 type="button"
                 className="pages-date-reset"
-                onClick={() => { setStartDate(null); setEndDate(null); setActivePreset(null); }}
+                onClick={() => {
+                  setStartDate(null);
+                  setEndDate(null);
+                  setActivePreset(null);
+                }}
                 title="Đặt lại bộ lọc ngày"
               >
                 <UndoOutlined /> Chọn lại
@@ -991,11 +1427,153 @@ const viaColumns = [
           <Option value="LE">TEAM LE</Option>
           <Option value="TUANANH">TEAM TUẤN ANH</Option>
           <Option value="DIEN">TEAM DIỆN</Option>
-          <Option value="HIEU">TEAM HIẾU</Option>
-          <Option value="DIEU">TEAM DIỆU</Option>
+          <Option value="DIENON">TEAM DIỆN ON</Option>
+          
           <Option value="TUNG">TEAM TÙNG</Option>
           <Option value="ANH">TEAM ÁNH</Option>
         </Select>
+
+        {/* Gán Team cho Sale Nhập Đơn (Chỉ admin/managerMKT thấy) */}
+        {(currentUser.position === "admin" ||
+          currentUser.position === "managerMKT" ||
+          currentUser.position === "leadSALE" ||
+          currentUser.position === "salenhapdon" ||
+          currentUser.position === "salefull") && (
+          <div
+            className="pages-sale-team-section"
+            style={{
+              width: "100%",
+              maxWidth: "100%",
+              boxSizing: "border-box",
+              margin: "20px 0",
+              padding: "20px 24px",
+              background: "#fff",
+              borderRadius: 12,
+              border: "1px solid #e2e8f0",
+              boxShadow: "0 2px 8px rgba(0,0,0,0.04)",
+            }}
+          >
+            <div className="pages-sale-team-header">
+              <TeamOutlined style={{ color: "#6366f1", fontSize: 18 }} />
+              <span style={{ fontWeight: 600, color: "#4f46e5" }}>
+                Gán Team cho Sale Nhập Đơn
+              </span>
+            </div>
+            <div
+              className="pages-sale-team-list"
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                gap: "10px",
+                width: "100%",
+              }}
+            >
+              {employees
+                .filter((emp) => {
+                  if (
+                    emp.position !== "salenhapdon" &&
+                    emp.position !== "salefull"
+                  )
+                    return false;
+                  if (emp.quocgia !== "kr") return false;
+                  // Sale nhập đơn chỉ thấy dòng của chính mình
+                  if (
+                    currentUser.position === "salenhapdon" ||
+                    currentUser.position === "salefull"
+                  ) {
+                    return emp.name === currentUser.name;
+                  }
+                  return true;
+                })
+                .map((sale) => (
+                  <div
+                    key={sale.employee_id}
+                    className="pages-sale-team-item"
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 16,
+                      padding: "10px 16px",
+                      background: "#f8fafc",
+                      borderRadius: 8,
+                      border: "1px solid #e2e8f0",
+                      width: "100%",
+                      boxSizing: "border-box",
+                    }}
+                  >
+                    <span
+                      className="pages-sale-team-name"
+                      style={{
+                        flex: "0 0 180px",
+                        minWidth: 300,
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                        whiteSpace: "nowrap",
+                      }}
+                    >
+                      <UserOutlined
+                        style={{ marginRight: 6, color: "#64748b" }}
+                      />
+                      {sale.name}
+                    </span>
+                    <Select
+                      mode="multiple"
+                      value={
+                        Array.isArray(sale.assignedTeams)
+                          ? sale.assignedTeams
+                          : sale.assignedTeam
+                            ? [sale.assignedTeam]
+                            : []
+                      }
+                      placeholder="Chọn team"
+                      style={{ minWidth: 620 }}
+                      allowClear
+                      maxTagCount="responsive"
+                      disabled={
+                        currentUser.position === "salenhapdon" ||
+                        currentUser.position === "salefull"
+                      }
+                      onChange={async (values) => {
+                        try {
+                          await axios.put("/api/employees/assign-team", {
+                            employeeName: sale.name,
+                            assignedTeams: values,
+                          });
+                          message.success(
+                            `Đã gán ${values.length} team cho ${sale.name}`,
+                          );
+                          fetchEmployees();
+                          // Báo cho các tab khác (đang mở bởi sale) cập nhật
+                          if (typeof window !== "undefined" && window.BroadcastChannel) {
+                            const channel = new BroadcastChannel("team-updated");
+                            channel.postMessage({
+                              type: "team-changed",
+                              employeeName: sale.name,
+                              assignedTeams: values,
+                            });
+                            channel.close();
+                          }
+                        } catch (error) {
+                          message.error("Lỗi khi gán team");
+                        }
+                      }}
+                    >
+                      <Option value="SON">TEAM SƠN</Option>
+                      <Option value="HIEP">TEAM HIỆP</Option>
+                      <Option value="MANH">TEAM MẠNH</Option>
+                      <Option value="LE">TEAM LE</Option>
+                      <Option value="TUANANH">TEAM TUẤN ANH</Option>
+                      
+                      <Option value="DIEN">TEAM DIỆN</Option>
+                      <Option value="DIENON">TEAM DIỆN ON</Option>
+                      <Option value="TUNG">TEAM TÙNG</Option>
+                      <Option value="ANH">TEAM ÁNH</Option>
+                    </Select>
+                  </div>
+                ))}
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Bulk Actions Section (Tung99 only) */}
@@ -1023,7 +1601,9 @@ const viaColumns = [
             cancelText="Hủy"
             onConfirm={async () => {
               try {
-                const response = await axios.delete(`/api/pageName/deleteByEmployee?employee=${selectedEmployee}`);
+                const response = await axios.delete(
+                  `/api/pageName/deleteByEmployee?employee=${selectedEmployee}`,
+                );
                 message.success(response.data.message);
                 fetchNamePage();
               } catch (error) {
@@ -1032,7 +1612,10 @@ const viaColumns = [
               }
             }}
           >
-            <button className="btn-prod-danger" style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
+            <button
+              className="btn-prod-danger"
+              style={{ display: "inline-flex", alignItems: "center", gap: 6 }}
+            >
               <DeleteOutlined /> Xoá toàn bộ page
             </button>
           </Popconfirm>
@@ -1052,7 +1635,10 @@ const viaColumns = [
               }
             }}
           >
-            <button className="btn-prod-primary" style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
+            <button
+              className="btn-prod-primary"
+              style={{ display: "inline-flex", alignItems: "center", gap: 6 }}
+            >
               Chuyển page sang Diện
             </button>
           </Popconfirm>
@@ -1062,11 +1648,27 @@ const viaColumns = [
       {/* Search by list for Trần Mỹ Hạnh */}
       {currentUser.name === "Trần Mỹ Hạnh" && (
         <div className="pages-add-form">
-          <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }}>
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 8,
+              marginBottom: 12,
+            }}
+          >
             <SearchOutlined style={{ color: "var(--gold)", fontSize: 18 }} />
-            <span style={{ fontWeight: 700, fontSize: 15 }}>Tìm kiếm danh sách page</span>
+            <span style={{ fontWeight: 700, fontSize: 15 }}>
+              Tìm kiếm danh sách page
+            </span>
           </div>
-          <Space style={{ display: "flex", flexDirection: "column", alignItems: "flex-start", gap: 12 }}>
+          <Space
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "flex-start",
+              gap: 12,
+            }}
+          >
             <Input.TextArea
               rows={3}
               placeholder="Dán danh sách tên page, mỗi dòng 1 tên"
@@ -1083,13 +1685,13 @@ const viaColumns = [
                   .filter((name) => name);
 
                 const matchedPages = data.filter((record) =>
-                  searchPages.includes(normalizeText(record.pageName))
+                  searchPages.includes(normalizeText(record.pageName)),
                 );
 
                 setFilteredPages(matchedPages);
 
                 const notFound = searchPages.filter(
-                  (p) => !data.find((d) => normalizeText(d.pageName) === p)
+                  (p) => !data.find((d) => normalizeText(d.pageName) === p),
                 );
                 if (notFound.length > 0) {
                   console.log("Không tìm thấy các page sau:", notFound);
@@ -1118,24 +1720,24 @@ const viaColumns = [
                 employee: item.employee,
               }))}
               columns={[
-                { 
-                  title: "Tên Page", 
-                  dataIndex: "pageName", 
+                {
+                  title: "Tên Page",
+                  dataIndex: "pageName",
                   key: "pageName",
                   render: (text) => (
                     <span className="pages-name-text">{text}</span>
-                  )
+                  ),
                 },
-                { 
-                  title: "Nhân Viên", 
-                  dataIndex: "employee", 
+                {
+                  title: "Nhân Viên",
+                  dataIndex: "employee",
                   key: "employee",
                   render: (text) => (
                     <span className="pages-employee-badge">
                       <TeamOutlined style={{ fontSize: 12 }} />
                       {text}
                     </span>
-                  )
+                  ),
                 },
               ]}
               pagination={false}
@@ -1158,7 +1760,9 @@ const viaColumns = [
               <span className="pages-list-header-icon" aria-hidden="true">
                 <AppstoreOutlined />
               </span>
-              <span className="pages-list-header-title-text">Danh Sách Page</span>
+              <span className="pages-list-header-title-text">
+                Danh Sách Page
+              </span>
             </h2>
             <p className="pages-list-header-subtitle">
               Quản lý các page của đội nhóm — đồng bộ theo thời gian thực
@@ -1210,17 +1814,17 @@ const viaColumns = [
         <Table
           columns={columns}
           dataSource={filteredData.sort(
-            (a, b) => a.employee?.localeCompare(b.employee) || 0
+            (a, b) => a.employee?.localeCompare(b.employee) || 0,
           )}
-          pagination={{ 
+          pagination={{
             pageSize: 10,
             showSizeChanger: true,
-            pageSizeOptions: ['10', '20', '50'],
+            pageSizeOptions: ["10", "20", "50"],
             showTotal: (total, range) => (
               <span style={{ color: "var(--sub)", fontWeight: 600 }}>
                 {range[0]}-{range[1]} / {total} page
               </span>
-            )
+            ),
           }}
           rowKey="key"
         />

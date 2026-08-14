@@ -38,6 +38,7 @@ export async function POST(req) {
       pageName,
       employee,
       employee_code,
+      status: true,
       createdAt: new Date()
     };
 

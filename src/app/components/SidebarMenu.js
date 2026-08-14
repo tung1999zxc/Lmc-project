@@ -895,7 +895,7 @@ const SidebarMenu = ({ isOpen, onToggle }) => {
           },
         ]),
     ...getProductMenu(),
-    ...(isSale
+    ...(false
       ? []
       : [{ key: "sub7", icon: "📄", label: "Tên page", href: "/pagesName" }]),
     { key: "sub5", icon: "👤", label: "Quản lý tài khoản", href: "/accounts" },
