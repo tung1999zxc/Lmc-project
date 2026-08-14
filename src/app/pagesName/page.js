@@ -1313,8 +1313,8 @@ const EmployeePageTable = () => {
             </span>
           </label>
         </div>
-        {/* <div className="pages-date-presets">
-          <button
+        <div className="pages-date-presets">
+          {/* <button
             type="button"
             className={`pages-date-preset ${activePreset === "today" ? "is-active" : ""}`}
             onClick={() => applyDatePreset("today")}
@@ -1341,7 +1341,7 @@ const EmployeePageTable = () => {
             onClick={() => applyDatePreset("lastMonth")}
           >
             <span className="pages-date-preset-label">Tháng trước</span>
-          </button>
+          </button> */}
 
           <button
             type="button"
@@ -1353,7 +1353,23 @@ const EmployeePageTable = () => {
             {showCustomDate ? <UpOutlined /> : <CalendarOutlined />}
             {showCustomDate ? "Thu gọn" : "Chọn chi tiết"}
           </button>
-        </div> */}
+          <button
+            type="button"
+            className="pages-refresh-btn"
+            onClick={handleRefreshAll}
+            disabled={refreshing}
+            title="Tải lại dữ liệu mới nhất từ quản lý"
+          >
+            <ReloadOutlined spin={refreshing} />
+            {refreshing ? "Đang tải..." : "Tải lại"}
+          </button>
+          <span
+            className="pages-auto-refresh-hint"
+            title="Bảng tự động cập nhật mỗi 30 giây"
+          >
+            Auto 30s
+          </span>
+        </div>
 
         {showCustomDate && (
           <div className="pages-date-range">
