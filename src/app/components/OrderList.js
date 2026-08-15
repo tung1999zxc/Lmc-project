@@ -2870,7 +2870,7 @@ const OrderList = () => {
       width: 50,
     },
     ...(currentUser.position === "salexuly" ||
-    currentUser.position === "leadSALE" ||
+    
     currentUser.position === "admin"
       ? [
           {
@@ -2963,14 +2963,14 @@ const OrderList = () => {
         ]
       : []),
     ...(currentUser.position === "salexuly" ||
-    currentUser.position === "leadSALE" ||
+    
     currentUser.position === "admin"
       ? [
           {
             title: "KHO FB",
             key: "feedback",
             dataIndex: "feedback",
-            width: 260,
+            width: 160,
           },
         ]
       : []),
@@ -3025,71 +3025,7 @@ const OrderList = () => {
           },
         ]
       : []),
-    ...(currentUser.position === "admin" ||
-    (currentUser.position === "managerSALE") |
-      (currentUser.position === "salefull") |
-      (currentUser.position === "salexuly") |
-      (currentUser.position === "leadSALE")
-      ? [
-          {
-            title: "XIN XÓA DS",
-            key: "xoaDon",
-            width: 80,
-            render: (_, record) => {
-              const isDaXinXoa = record.daXinXoaDon === true;
-              return (
-                <Button
-                  type={isDaXinXoa ? "default" : "default"}
-                  danger={isDaXinXoa}
-                  size="small"
-                  onClick={() => {
-                    // salexuly chỉ được xin xóa đơn của mình
-                    if (
-                      currentUser.position === "salexuly" &&
-                      record.salexuly !== currentUser.name
-                    ) {
-                      messageApi.warning("Bạn chỉ có thể xin xóa đơn của mình");
-                      return;
-                    }
-                    setXoaDonOrderId(record.id);
-                    setXoaDonOrderData(record);
-                    setXoaDonLyDo(record.xoaDonLyDo || "");
-                    setXoaDonReport(record.saleReport2 || null);
-                    setXoaDonImages([record.xoaDonImages || []]);
-                    setXoaDonImageUrls(record.xoaDonImages || []);
-                    setXoaDonModalVisible(true);
-                  }}
-                  style={{ whiteSpace: "nowrap" }}
-                >
-                  <span
-                    style={{
-                      color: record.managerDaXacNhan
-                        ? "#52c41a"
-                        : record.leaderDaXacNhan
-                          ? "#faad14"
-                          : record.leaderTuChoi
-                            ? "#ff4d4f"
-                            : isDaXinXoa
-                              ? "#999"
-                              : "inherit",
-                    }}
-                  >
-                    {record.managerDaXacNhan
-                      ? "MANAGER ĐÃ XÁC NHẬN"
-                      : record.leaderDaXacNhan
-                        ? "LEAD ĐÃ XÁC NHẬN"
-                        : record.leaderTuChoi
-                          ? "TỪ CHỐI"
-                          : isDaXinXoa
-                            ? "Đã xin"
-                            : "Xin xóa"}
-                  </span>
-                </Button>
-              );
-            },
-          },
-        ]
-      : []),
+    
     ...(currentUser.position_team === "kho"
       ? [
           {
@@ -3738,7 +3674,8 @@ const OrderList = () => {
             size="small"
             type="primary"
             loading={isNormalizing}
-            disabled={isNormalizing}
+            // disabled={isNormalizing}
+            disabled={true}
             onClick={handleNormalizeAddresses}
             style={{ fontSize: 11, height: 22, padding: "0 8px" }}
           >
@@ -3799,30 +3736,30 @@ const OrderList = () => {
         </div>
       ),
     },
-    {
-      title: (
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: 8,
-            flexWrap: "wrap",
-          }}
-        >
-          <Checkbox
-            checked={selectedColumns.includes("normalizedAddress")}
-            onChange={(e) =>
-              handleColumnSelect("normalizedAddress", e.target.checked)
-            }
-          >
-            ĐỊA CHỈ CHUẨN HÓA
-          </Checkbox>
-        </div>
-      ),
-      dataIndex: "normalizedAddress",
-      key: "normalizedAddress",
-      width: 260,
-    },
+    // {
+    //   title: (
+    //     <div
+    //       style={{
+    //         display: "flex",
+    //         alignItems: "center",
+    //         gap: 8,
+    //         flexWrap: "wrap",
+    //       }}
+    //     >
+    //       <Checkbox
+    //         checked={selectedColumns.includes("normalizedAddress")}
+    //         onChange={(e) =>
+    //           handleColumnSelect("normalizedAddress", e.target.checked)
+    //         }
+    //       >
+    //         ĐỊA CHỈ CHUẨN HÓA
+    //       </Checkbox>
+    //     </div>
+    //   ),
+    //   dataIndex: "normalizedAddress",
+    //   key: "normalizedAddress",
+    //   width: 260,
+    // },
     {
       title: (
         <Checkbox
@@ -3842,6 +3779,71 @@ const OrderList = () => {
         <Tag color={text === "ĐÃ THANH TOÁN" ? "green" : "red"}>{text}</Tag>
       ),
     },
+    ...(currentUser.position === "admin" ||
+      (currentUser.position === "managerSALE") |
+        (currentUser.position === "salefull") |
+        (currentUser.position === "salexuly") |
+        (currentUser.position === "leadSALE")
+        ? [
+            {
+              title: "XIN XÓA DS",
+              key: "xoaDon",
+              width: 80,
+              render: (_, record) => {
+                const isDaXinXoa = record.daXinXoaDon === true;
+                return (
+                  <Button
+                    type={isDaXinXoa ? "default" : "default"}
+                    danger={isDaXinXoa}
+                    size="small"
+                    onClick={() => {
+                      // salexuly chỉ được xin xóa đơn của mình
+                      if (
+                        currentUser.position === "salexuly" &&
+                        record.salexuly !== currentUser.name
+                      ) {
+                        messageApi.warning("Bạn chỉ có thể xin xóa đơn của mình");
+                        return;
+                      }
+                      setXoaDonOrderId(record.id);
+                      setXoaDonOrderData(record);
+                      setXoaDonLyDo(record.xoaDonLyDo || "");
+                      setXoaDonReport(record.saleReport2 || null);
+                      setXoaDonImages([record.xoaDonImages || []]);
+                      setXoaDonImageUrls(record.xoaDonImages || []);
+                      setXoaDonModalVisible(true);
+                    }}
+                    style={{ whiteSpace: "nowrap" }}
+                  >
+                    <span
+                      style={{
+                        color: record.managerDaXacNhan
+                          ? "#52c41a"
+                          : record.leaderDaXacNhan
+                            ? "#faad14"
+                            : record.leaderTuChoi
+                              ? "#ff4d4f"
+                              : isDaXinXoa
+                                ? "#999"
+                                : "inherit",
+                      }}
+                    >
+                      {record.managerDaXacNhan
+                        ? "MANAGER ĐÃ XÁC NHẬN"
+                        : record.leaderDaXacNhan
+                          ? "LEAD ĐÃ XÁC NHẬN"
+                          : record.leaderTuChoi
+                            ? "TỪ CHỐI"
+                            : isDaXinXoa
+                              ? "Đã xin"
+                              : "Xin xóa"}
+                    </span>
+                  </Button>
+                );
+              },
+            },
+          ]
+        : []),
     ...(currentUser.position === "salenhapdon" ||
     currentUser.position === "salexuly" ||
     currentUser.position === "salefull"
@@ -5590,7 +5592,7 @@ const OrderList = () => {
                   alignItems: "center",
                   gap: 10,
                   justifyContent: "flex-end",
-                  flexWrap: "wrap",
+                  flexWrap: "nowrap",
                 }}
               >
                 <Button
@@ -5600,6 +5602,7 @@ const OrderList = () => {
                   icon={
                     <span style={{ fontSize: 14 }}>{isdem ? "✕" : "🧮"}</span>
                   }
+                  style={{ flexShrink: 0, whiteSpace: "nowrap" }}
                 >
                   {isdem ? "Huỷ đếm" : "Đếm SL"}
                 </Button>
@@ -5607,6 +5610,7 @@ const OrderList = () => {
                   type="primary"
                   onClick={fetchOrders}
                   className="ft-btn-add action-btn-darkgold"
+                  style={{ flexShrink: 0, whiteSpace: "nowrap" }}
                 >
                   🔄 Tải lại tất cả đơn hàng
                 </Button>
@@ -5618,8 +5622,9 @@ const OrderList = () => {
                     type="primary"
                     onClick={handleOpenLateOrdersReport}
                     className="ft-btn-add action-btn-darkgold"
+                    style={{ flexShrink: 0, whiteSpace: "nowrap" , marginRight: "100px"}}
                   >
-                    ⏰ Báo cáo đơn DONE muộn
+                    ⏰ Đơn DONE muộn
                   </Button>
                 )}
               </div>

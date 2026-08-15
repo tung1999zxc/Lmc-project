@@ -8,6 +8,7 @@ const ALLOWED_FIELDS = [
   "trackingCode",
   "deliveryStatus",
   "shippingDate2",
+  "feedback",
 ];
 
 function createJsonResponse(data, status = 200) {
