@@ -1564,14 +1564,17 @@ const OrderList = () => {
           : xoaDonFilter === "all"
             ? order.daXinXoaDon === true
             : xoaDonFilter === "pending"
-              ? order.daXinXoaDon === true && !order.leaderDaXacNhan && !order.leaderTuChoi && !order.managerDaXacNhan 
+              ? order.daXinXoaDon === true &&
+                !order.leaderDaXacNhan &&
+                !order.leaderTuChoi &&
+                !order.managerDaXacNhan
               : xoaDonFilter === "lead"
                 ? order.leaderDaXacNhan === true && !order.managerDaXacNhan
                 : xoaDonFilter === "processed"
                   ? order.managerDaXacNhan === true
                   : xoaDonFilter === "reject"
                     ? order.leaderTuChoi === true
-                  : true;
+                    : true;
 
         return (
           dateMatch &&
@@ -2750,11 +2753,14 @@ const OrderList = () => {
       onOk: async () => {
         setXoaDonSaving(true);
         try {
-          const response = await axios.post("/api/orders/xoa-don/leader-reject", {
-            orderId: xoaDonOrderId,
-            lyDo: xoaDonLyDo,
-            leaderName: currentUser.name,
-          });
+          const response = await axios.post(
+            "/api/orders/xoa-don/leader-reject",
+            {
+              orderId: xoaDonOrderId,
+              lyDo: xoaDonLyDo,
+              leaderName: currentUser.name,
+            },
+          );
 
           messageApi.success(response.data.message || "Leader đã từ chối");
           setXoaDonModalVisible(false);
@@ -2863,7 +2869,9 @@ const OrderList = () => {
       },
       width: 50,
     },
-    ...(currentUser.position === "salexuly" || currentUser.position === "admin"
+    ...(currentUser.position === "salexuly" ||
+    currentUser.position === "leadSALE" ||
+    currentUser.position === "admin"
       ? [
           {
             title: (
@@ -2954,6 +2962,18 @@ const OrderList = () => {
           },
         ]
       : []),
+    ...(currentUser.position === "salexuly" ||
+    currentUser.position === "leadSALE" ||
+    currentUser.position === "admin"
+      ? [
+          {
+            title: "KHO FB",
+            key: "feedback",
+            dataIndex: "feedback",
+            width: 260,
+          },
+        ]
+      : []),
     ...(currentUser.position === "kho1" ||
     currentUser.position === "salexuly" ||
     currentUser.position === "managerSALE"
@@ -3024,7 +3044,10 @@ const OrderList = () => {
                   size="small"
                   onClick={() => {
                     // salexuly chỉ được xin xóa đơn của mình
-                    if (currentUser.position === "salexuly" && record.salexuly !== currentUser.name) {
+                    if (
+                      currentUser.position === "salexuly" &&
+                      record.salexuly !== currentUser.name
+                    ) {
                       messageApi.warning("Bạn chỉ có thể xin xóa đơn của mình");
                       return;
                     }
@@ -3038,26 +3061,28 @@ const OrderList = () => {
                   }}
                   style={{ whiteSpace: "nowrap" }}
                 >
-                  <span style={{
-                    color: record.managerDaXacNhan
-                      ? "#52c41a"
-                      : record.leaderDaXacNhan
-                      ? "#faad14"
-                      : record.leaderTuChoi
-                      ? "#ff4d4f"
-                      : isDaXinXoa
-                      ? "#999"
-                      : "inherit"
-                  }}>
+                  <span
+                    style={{
+                      color: record.managerDaXacNhan
+                        ? "#52c41a"
+                        : record.leaderDaXacNhan
+                          ? "#faad14"
+                          : record.leaderTuChoi
+                            ? "#ff4d4f"
+                            : isDaXinXoa
+                              ? "#999"
+                              : "inherit",
+                    }}
+                  >
                     {record.managerDaXacNhan
                       ? "MANAGER ĐÃ XÁC NHẬN"
                       : record.leaderDaXacNhan
-                      ? "LEAD ĐÃ XÁC NHẬN"
-                      : record.leaderTuChoi
-                      ? "TỪ CHỐI"
-                      : isDaXinXoa
-                      ? "Đã xin"
-                      : "Xin xóa"}
+                        ? "LEAD ĐÃ XÁC NHẬN"
+                        : record.leaderTuChoi
+                          ? "TỪ CHỐI"
+                          : isDaXinXoa
+                            ? "Đã xin"
+                            : "Xin xóa"}
                   </span>
                 </Button>
               );
@@ -5588,13 +5613,11 @@ const OrderList = () => {
                 {(currentUser.position === "managerSALE" ||
                   currentUser.position === "admin" ||
                   currentUser.position === "leadSALE" ||
-                  
                   currentUser.name === "test") && (
                   <Button
                     type="primary"
                     onClick={handleOpenLateOrdersReport}
                     className="ft-btn-add action-btn-darkgold"
-                    
                   >
                     ⏰ Báo cáo đơn DONE muộn
                   </Button>
@@ -5766,7 +5789,7 @@ const OrderList = () => {
                       <Option value="over1kg">Trên 1kg</Option>
                     </Select>
                   )}
-                  {currentUser.position_team !== "mkt" &&
+                {currentUser.position_team !== "mkt" &&
                   currentUser.position !== "lead" &&
                   currentUser.position !== "managerMKT" &&
                   currentUser.position !== "leadMKT" && (
@@ -5780,7 +5803,7 @@ const OrderList = () => {
                       <Option value="all">Tất cả đơn xin xóa DS</Option>
                       <Option value="pending">Đơn chưa xử lý</Option>
                       <Option value="lead">Lead đã xác nhận</Option>
-                      
+
                       <Option value="processed">Đơn đã xử lý</Option>
                       <Option value="reject">Đơn từ chối</Option>
                     </Select>
@@ -6573,24 +6596,24 @@ const OrderList = () => {
             <div style={{ display: "flex", gap: 8 }}>
               {currentUser.position === "leadSALE" && (
                 <>
-                <Button
-                  key="leader"
-                  type="primary"
-                  loading={xoaDonSaving}
-                  disabled={!xoaDonLyDo.trim()}
-                  onClick={handleLeaderXacNhanXoaDon}
-                  style={{ backgroundColor: "#1890ff" }}
-                >
-                  Leader xác nhận xóa DS
-                </Button>
-                <Button
-                  key="reject"
-                  loading={xoaDonSaving}
-                  onClick={handleLeaderTuChoiXoaDon}
-                  style={{ marginLeft: 8 }}
-                >
-                  Từ chối xóa DS
-                </Button>
+                  <Button
+                    key="leader"
+                    type="primary"
+                    loading={xoaDonSaving}
+                    disabled={!xoaDonLyDo.trim()}
+                    onClick={handleLeaderXacNhanXoaDon}
+                    style={{ backgroundColor: "#1890ff" }}
+                  >
+                    Leader xác nhận xóa DS
+                  </Button>
+                  <Button
+                    key="reject"
+                    loading={xoaDonSaving}
+                    onClick={handleLeaderTuChoiXoaDon}
+                    style={{ marginLeft: 8 }}
+                  >
+                    Từ chối xóa DS
+                  </Button>
                 </>
               )}
               {currentUser.position === "managerSALE" && (

@@ -1808,8 +1808,8 @@ const calculateStats2Days = useCallback(() => {
             <InputNumber style={{ width: "100%" }} placeholder="Số lượng về Hàn" />
           </Form.Item>
 
-          <Form.Item name="importDate" label="Ngày nhập" rules={[{ required: true, message: "Vui lòng chọn ngày nhập" }]}>
-            <DatePicker initialValue={moment()} style={{ width: "100%" }} />
+          <Form.Item name="importDate" label="Ngày nhập" initialValue={moment()} >
+            <DatePicker  style={{ width: "100%" }} />
           </Form.Item>
 
           <div className="prod-modal-footer">
