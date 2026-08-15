@@ -20,6 +20,7 @@ import {
   SettingOutlined,
   SaveOutlined,
   ReloadOutlined,
+  ClockCircleOutlined,
 } from "@ant-design/icons";
 import {
   Table,
@@ -136,6 +137,7 @@ const EmployeePageTable = () => {
   const [tempSaleReports, setTempSaleReports] = useState({});
   const [tempNoteMKT, setTempNoteMKT] = useState({});
   const [savingNoteKey, setSavingNoteKey] = useState(null);
+  const [tempSaleMessages, setTempSaleMessages] = useState({});
 
   const applyDatePreset = (preset) => {
     // Toggle off nếu click lại đúng preset đang chọn
@@ -555,9 +557,14 @@ const EmployeePageTable = () => {
       return;
     }
     try {
+      const savedAt = new Date().toISOString();
       await Promise.all(
         updates.map(([key, saleReport]) =>
-          axios.put(`/api/pageName/${key}`, { saleReport }),
+          axios.put(`/api/pageName/${key}`, {
+            saleReport,
+            saleReportUpdatedAt: savedAt,
+            saleReportUpdatedBy: currentUser?.name || currentUser?.email || "",
+          }),
         ),
       );
       message.success(`Đã lưu ${updates.length} trạng thái Sale Báo`);
@@ -566,6 +573,32 @@ const EmployeePageTable = () => {
     } catch (error) {
       console.error(error);
       message.error("Lỗi khi lưu trạng thái Sale Báo");
+    }
+  };
+
+  const handleSaveSaleMessages = async () => {
+    const updates = Object.entries(tempSaleMessages);
+    if (updates.length === 0) {
+      message.warning("Không có thay đổi mẫu tin nhắn để lưu");
+      return;
+    }
+    try {
+      const savedAt = new Date().toISOString();
+      await Promise.all(
+        updates.map(([key, saleMessage]) =>
+          axios.put(`/api/pageName/${key}`, {
+            saleMessage,
+            saleMessageUpdatedAt: savedAt,
+            saleMessageUpdatedBy: currentUser?.name || currentUser?.email || "",
+          }),
+        ),
+      );
+      message.success(`Đã lưu ${updates.length} mẫu tin nhắn sale`);
+      setTempSaleMessages({});
+      fetchNamePage();
+    } catch (error) {
+      console.error(error);
+      message.error("Lỗi khi lưu mẫu tin nhắn sale");
     }
   };
 
@@ -584,9 +617,14 @@ const EmployeePageTable = () => {
       return;
     }
     try {
+      const savedAt = new Date().toISOString();
       await Promise.all(
         recordsToReset.map((record) =>
-          axios.put(`/api/pageName/${record.key}`, { saleReport: "" }),
+          axios.put(`/api/pageName/${record.key}`, {
+            saleReport: "",
+            saleReportUpdatedAt: null,
+            saleReportUpdatedBy: null,
+          }),
         ),
       );
       message.success(`Đã reset ${recordsToReset.length} đơn đang hoạt động về trống`);
@@ -886,24 +924,93 @@ const EmployeePageTable = () => {
       width: 180,
       align: "center",
       render: (_, record) => (
-        <Select
-          disabled={currentUser.position_team === "mkt"}
-          value={tempSaleReports[record.key] ?? record.saleReport ?? undefined}
-          onChange={(value) =>
-            setTempSaleReports((prev) => ({ ...prev, [record.key]: value }))
-          }
-          placeholder="Chọn..."
-          style={{ width: "100%" }}
-          allowClear
-          options={[
-            { value: "TTL", label: "TTL" },
-            { value: "CHƯA MỜI", label: "CHƯA MỜI" },
-            { value: "7 NGÀY KO MESS", label: "7 NGÀY KO MESS" },
-            { value: "7 NGÀY 1 MESS", label: "7 NGÀY 1 MESS" },
-          ]}
-        />
+        <div className="pages-sale-report-cell">
+          <Select
+            disabled={currentUser.position_team === "mkt"}
+            value={tempSaleReports[record.key] ?? record.saleReport ?? undefined}
+            onChange={(value) =>
+              setTempSaleReports((prev) => ({ ...prev, [record.key]: value }))
+            }
+            placeholder="Chọn..."
+            style={{ width: "100%" }}
+            allowClear
+            options={[
+              { value: "TTL", label: "TTL" },
+              { value: "CHƯA MỜI", label: "CHƯA MỜI" },
+              { value: "7 NGÀY KO MESS", label: "7 NGÀY KO MESS" },
+              { value: "7 NGÀY 1 MESS", label: "7 NGÀY 1 MESS" },
+            ]}
+          />
+          {record.saleReportUpdatedAt && (
+            <div
+              className="pages-sale-report-meta"
+              title={`Lưu lúc ${dayjs(record.saleReportUpdatedAt).format(
+                "DD/MM/YYYY HH:mm:ss",
+              )}`}
+            >
+              <ClockCircleOutlined />
+              <span>
+                {dayjs(record.saleReportUpdatedAt).format("DD/MM HH:mm")}
+                {/* {record.saleReportUpdatedBy && (
+                  <> · {record.saleReportUpdatedBy}</>
+                )} */}
+              </span>
+            </div>
+          )}
+        </div>
       ),
     },
+    // {
+    //   title: "Mẫu tin nhắn sale",
+    //   key: "saleMessage",
+    //   width: 180,
+    //   align: "center",
+    //   render: (_, record) => {
+    //     const dirty = tempSaleMessages[record.key] !== undefined;
+    //     return (
+    //       <div className="pages-sale-message-cell">
+    //         <Input.TextArea
+    //           rows={3}
+    //           placeholder="Nhập mẫu tin nhắn..."
+    //           value={tempSaleMessages[record.key] ?? record.saleMessage ?? ""}
+    //           onChange={(e) =>
+    //             setTempSaleMessages((prev) => ({
+    //               ...prev,
+    //               [record.key]: e.target.value,
+    //             }))
+    //           }
+    //           disabled={currentUser.position_team === "mkt"}
+    //         />
+    //         {dirty && currentUser.position_team !== "mkt" && (
+    //           <Button
+    //             type="primary"
+    //             size="small"
+    //             onClick={handleSaveSaleMessages}
+    //             style={{ marginTop: 4 }}
+    //           >
+    //             Lưu tin nhắn
+    //           </Button>
+    //         )}
+    //         {record.saleMessageUpdatedAt && (
+    //           <div
+    //             className="pages-sale-report-meta"
+    //             title={`Lưu lúc ${dayjs(record.saleMessageUpdatedAt).format(
+    //               "DD/MM/YYYY HH:mm:ss",
+    //             )}${record.saleMessageUpdatedBy ? ` bởi ${record.saleMessageUpdatedBy}` : ""}`}
+    //           >
+    //             <ClockCircleOutlined />
+    //             <span>
+    //               {dayjs(record.saleMessageUpdatedAt).format("DD/MM HH:mm")}
+    //               {record.saleMessageUpdatedBy && (
+    //                 <> · {record.saleMessageUpdatedBy}</>
+    //               )}
+    //             </span>
+    //           </div>
+    //         )}
+    //       </div>
+    //     );
+    //   },
+    // },
     {
       title: (
         <span className="pages-table-th">
@@ -1451,7 +1558,7 @@ const EmployeePageTable = () => {
 
         {/* Gán Team cho Sale Nhập Đơn (Chỉ admin/managerMKT thấy) */}
         {(currentUser.position === "admin" ||
-          currentUser.position === "managerMKT" ||
+          currentUser.position === "managerSALE" ||
           currentUser.position === "leadSALE" ||
           currentUser.position === "salenhapdon" ||
           currentUser.position === "salefull") && (
@@ -1472,7 +1579,7 @@ const EmployeePageTable = () => {
             <div className="pages-sale-team-header">
               <TeamOutlined style={{ color: "#6366f1", fontSize: 18 }} />
               <span style={{ fontWeight: 600, color: "#4f46e5" }}>
-                Gán Team cho Sale Nhập Đơn
+                Gán Team cho Sale 
               </span>
             </div>
             <div

@@ -30,6 +30,7 @@ import {
   SearchOutlined,
   CloseOutlined,
   PlusOutlined,
+  CopyOutlined,
 } from "@ant-design/icons";
 import dayjs from "dayjs";
 import OrderForm from "./OrderForm";
@@ -651,7 +652,7 @@ const OrderList = () => {
     try {
       // Lấy danh sách nhân viên sale (position === "salenhapdon")
       const saleEmployees = employees.filter(
-        (emp) => emp.position === "salenhapdon",
+        (emp) => emp.position === "salenhapdon" || emp.position === "salefull",
       );
 
       // Lấy 3 ngày gần nhất (Hôm nay, Hôm qua, Hôm kia)
@@ -3208,6 +3209,23 @@ const OrderList = () => {
                 {count}
               </span>
             )}
+            <button
+              className="pages-copy-btn"
+              onClick={() => {
+                navigator.clipboard.writeText(customerName || "");
+                messageApi.success(`Đã copy: ${customerName || ""}`);
+              }}
+              style={{
+                flexShrink: 0,
+                marginLeft: "auto",
+                padding: "2px 6px !important",
+                fontSize: 10,
+              }}
+              title="Copy tên khách"
+            >
+              <CopyOutlined style={{ fontSize: 11 }} />
+              Copy
+            </button>
           </div>
         );
       },
@@ -3224,7 +3242,48 @@ const OrderList = () => {
       dataIndex: "pageName",
       key: "pageName",
       sorter: (a, b) => (a.pageName || "").localeCompare(b.pageName || ""),
-      render: (text) => (text ? text.split("||")[0].trim() : ""),
+      render: (text) => {
+        const display = text ? text.split("||")[0].trim() : "";
+        return (
+          <div
+            className="pages-name-cell"
+            style={{ gap: 6, maxWidth: "100%", overflow: "hidden" }}
+          >
+            <span
+              className="pages-name-text"
+              style={{
+                flex: 1,
+                minWidth: 0,
+                maxWidth: "100%",
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                whiteSpace: "nowrap",
+                display: "inline-block",
+                fontSize: 13,
+              }}
+              title={display}
+            >
+              {display || "—"}
+            </span>
+            <button
+              className="pages-copy-btn"
+              onClick={() => {
+                navigator.clipboard.writeText(display || "");
+                messageApi.success(`Đã copy: ${display || ""}`);
+              }}
+              style={{
+                flexShrink: 0,
+                padding: "2px 6px !important",
+                fontSize: 10,
+              }}
+              title="Copy tên page"
+            >
+              <CopyOutlined style={{ fontSize: 11 }} />
+              Copy
+            </button>
+          </div>
+        );
+      },
     },
     ...(currentUser.position === "kho1"
       ? [
@@ -3674,7 +3733,46 @@ const OrderList = () => {
       ),
       dataIndex: "address",
       key: "address",
-      width: 260,
+      width: 210,
+      className: "col-address-fixed",
+      render: (text) => (
+        <div
+          className="pages-name-cell"
+          style={{ gap: 6, maxWidth: "100%", overflow: "hidden" }}
+        >
+          <span
+            className="pages-name-text"
+            style={{
+              flex: 1,
+              minWidth: 0,
+              maxWidth: "100%",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              whiteSpace: "nowrap",
+              display: "inline-block",
+              fontSize: 12,
+            }}
+            title={text || ""}
+          >
+            {text || "—"}
+          </span>
+          <button
+            className="pages-copy-btn"
+            onClick={() => {
+              navigator.clipboard.writeText(text || "");
+              messageApi.success(`Đã copy: ${text || ""}`);
+            }}
+            style={{
+              flexShrink: 0,
+              padding: "2px 6px !important",
+              fontSize: 10,
+            }}
+          >
+            <CopyOutlined style={{ fontSize: 11 }} />
+            Copy
+          </button>
+        </div>
+      ),
     },
     {
       title: (
