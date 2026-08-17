@@ -1289,8 +1289,8 @@ const EmployeePageTable = () => {
             options={[
               { value: "TTL", label: "TTL" },
               { value: "CHƯA MỜI", label: "CHƯA MỜI" },
-              { value: "7 NGÀY KO MESS", label: "7 NGÀY KO MESS" },
-              { value: "7 NGÀY 1 MESS", label: "7 NGÀY 1 MESS" },
+              { value: "5 NGÀY KO MESS", label: "5 NGÀY KO MESS" },
+              
             ]}
           />
           {record.saleReportUpdatedAt && (
