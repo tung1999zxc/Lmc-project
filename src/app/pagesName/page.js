@@ -621,7 +621,7 @@ const EmployeePageTable = () => {
 
   useEffect(() => {
     fetchShiftAssignments();
-    const t = setInterval(fetchShiftAssignments, 30 * 1000);
+    const t = setInterval(fetchShiftAssignments, 5 * 60 * 1000);
     return () => clearInterval(t);
   }, []);
 
