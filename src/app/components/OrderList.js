@@ -3570,8 +3570,7 @@ const OrderList = () => {
           },
         ]
       : []),
-    ...(currentUser.position !== "salenhapdon" &&
-    currentUser.position !== "salefull"
+    ...(true
       ? [
           {
             title: (
