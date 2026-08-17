@@ -21,6 +21,8 @@ import {
   SaveOutlined,
   ReloadOutlined,
   ClockCircleOutlined,
+  PlusCircleOutlined,
+  MinusCircleOutlined,
 } from "@ant-design/icons";
 import {
   Table,
@@ -364,8 +366,290 @@ const EmployeePageTable = () => {
       .map((employee) => employee.name);
   }, [employees, currentUser.team_id]);
 
+  const mktOptions = employees
+    .filter((order) => order.position_team === "mkt")
+    .map((order) => order.name);
+
+  // ============ Phân công Sale theo ca (3 ngày gần nhất) ============
+
+  // Định nghĩa ca theo giờ VN
+  // Thứ 2–Thứ 7 (4 ca): sáng 5:30–8:30, trưa 12:00–14:00, hành chính 8:30–12:00 + 14:00–18:00, tối 18:00–23:00
+  // Chủ nhật (3 ca): sáng 5:30–12:00, chiều 12:00–18:00, tối 18:00–23:00
+  const SHIFTS_WEEKDAY = [
+    { key: "morning", label: "Sáng", time: "05:30 – 08:30" },
+    { key: "office", label: "Hành chính", time: "08:30 – 12:00 & 14:00 – 18:00" },
+    { key: "noon", label: "Trưa", time: "12:00 – 14:00" },
+    { key: "evening", label: "Tối", time: "18:00 – 23:00" },
+  ];
+  const SHIFTS_SUNDAY = [
+    { key: "sunday-morning", label: "Sáng", time: "05:30 – 12:00" },
+    { key: "sunday-afternoon", label: "Chiều", time: "12:00 – 18:00" },
+    { key: "sunday-evening", label: "Tối", time: "18:00 – 23:00" },
+  ];
+
+  // 5 hàng cố định theo label — mỗi hàng biết key nào dùng cho T2–T7, key nào cho CN
+  const SHIFTS_BY_LABEL = [
+    { label: "Sáng",         weekdayKey: "morning",         sundayKey: "sunday-morning",    timeWeekday: "05:30 – 08:30", timeSunday: "05:30 – 12:00" },
+    { label: "Hành chính",  weekdayKey: "office",          sundayKey: null,                timeWeekday: "08:30 – 12:00 & 14:00 – 18:00" },
+    { label: "Trưa",         weekdayKey: "noon",            sundayKey: null,                timeWeekday: "12:00 – 14:00" },
+    { label: "Chiều",        weekdayKey: null,              sundayKey: "sunday-afternoon",   timeSunday: "12:00 – 18:00" },
+    { label: "Tối",          weekdayKey: "evening",         sundayKey: "sunday-evening",    timeWeekday: "18:00 – 23:00", timeSunday: "18:00 – 23:00" },
+  ];
+
+  function getShiftForDay(labelRow, day) {
+    const key = day.isSunday ? labelRow.sundayKey : labelRow.weekdayKey;
+    const time = day.isSunday ? labelRow.timeSunday : labelRow.timeWeekday;
+    if (!key || !time) return null;
+    return { key, label: labelRow.label, time };
+  }
+
+  // Xác định ca hiện tại theo giờ VN — trả về { dateKey, shiftKey } hoặc null
+  function getCurrentShiftVN() {
+    try {
+      const now = new Date();
+      const vnParts = new Intl.DateTimeFormat("en-GB", {
+        timeZone: "Asia/Ho_Chi_Minh",
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+        weekday: "short",
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: false,
+      }).formatToParts(now);
+      const get = (t) => vnParts.find((p) => p.type === t)?.value;
+      const day = get("day");
+      const month = get("month");
+      const year = get("year");
+      const hour = parseInt(get("hour"), 10);
+      const minute = parseInt(get("minute"), 10);
+      const weekdayStr = get("weekday");
+      const dateKey = `${year}-${month}-${day}`;
+      const isSunday = weekdayStr === "Sun";
+      const timeMin = hour * 60 + minute;
+      const inRange = (sh, sm, eh, em) => {
+        const start = sh * 60 + sm;
+        const end = eh * 60 + em;
+        return timeMin >= start && timeMin < end;
+      };
+      if (isSunday) {
+        if (inRange(5, 30, 12, 0)) return { dateKey, shiftKey: "sunday-morning" };
+        if (inRange(12, 0, 18, 0)) return { dateKey, shiftKey: "sunday-afternoon" };
+        if (inRange(18, 0, 23, 0)) return { dateKey, shiftKey: "sunday-evening" };
+        return null;
+      }
+      if (inRange(5, 30, 8, 30)) return { dateKey, shiftKey: "morning" };
+      if (inRange(8, 30, 12, 0)) return { dateKey, shiftKey: "office" };
+      if (inRange(12, 0, 14, 0)) return { dateKey, shiftKey: "noon" };
+      if (inRange(14, 0, 18, 0)) return { dateKey, shiftKey: "office" };
+      if (inRange(18, 0, 23, 0)) return { dateKey, shiftKey: "evening" };
+      return null;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  // Sinh 3 ngày gần nhất tính từ hôm nay (giờ VN)
+  function getThreeDaysVN() {
+    const out = [];
+    const now = new Date();
+    for (let i = 0; i < 3; i++) {
+      const d = new Date(now);
+      d.setDate(d.getDate() + i);
+      // TEMP: force day 2 (index 2) = Sunday to test CN layout
+      
+      const vn = new Intl.DateTimeFormat("en-GB", {
+        timeZone: "Asia/Ho_Chi_Minh",
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+        weekday: "short",
+      }).formatToParts(d);
+      const get = (t) => vn.find((p) => p.type === t)?.value;
+      const dateKey = `${get("year")}-${get("month")}-${get("day")}`;
+      const weekdayStr = get("weekday");
+      out.push({
+        dateKey,
+        weekdayLabel: weekdayStr,
+        isSunday: weekdayStr === "Sun",
+        shifts: weekdayStr === "Sun" ? SHIFTS_SUNDAY : SHIFTS_WEEKDAY,
+      });
+    }
+    return out;
+  }
+
+  const [nowTick, setNowTick] = useState(0);
+  useEffect(() => {
+    const t = setInterval(() => setNowTick((x) => x + 1), 60 * 1000);
+    return () => clearInterval(t);
+  }, []);
+  const currentShift = useMemo(() => getCurrentShiftVN(), [nowTick]);
+  const threeDays = useMemo(() => getThreeDaysVN(), []);
+
+  const [shiftGridCollapsed, setShiftGridCollapsed] = useState(true);
+
+  const [shiftAssignments, setShiftAssignments] = useState({}); // { dateKey: { shiftKey: [{ sale, teamsMKT: [] }] } }
+
+  // Danh sách sale hợp lệ (salenhapdon / salefull + quocgia = kr)
+  const saleOptions = useMemo(() => {
+    return employees
+      .filter((emp) => {
+        if (emp.position !== "salenhapdon" && emp.position !== "salefull") return false;
+        if (emp.quocgia !== "kr") return false;
+        if (
+          currentUser.position === "salenhapdon" ||
+          currentUser.position === "salefull"
+        ) {
+          return emp.name === currentUser.name;
+        }
+        return true;
+      })
+      .map((emp) => emp.name);
+  }, [employees, currentUser]);
+
+  const teamMKTOptions = useMemo(() => {
+    return [
+      { value: "SON", label: "TEAM SƠN" },
+      { value: "HIEP", label: "TEAM HIỆP" },
+      { value: "MANH", label: "TEAM MẠNH" },
+      { value: "LE", label: "TEAM LE" },
+      { value: "TUANANH", label: "TEAM TUẤN ANH" },
+      { value: "DIEN", label: "TEAM DIỆN" },
+      { value: "DIENON", label: "TEAM DIỆN ON" },
+      { value: "TUNG", label: "TEAM TÙNG" },
+      { value: "ANH", label: "TEAM ÁNH" },
+      ...mktOptions.map((name) => ({ value: name, label: name })),
+    ];
+  }, [mktOptions]);
+
+  const isAdminMKT =
+    currentUser.position === "admin" ||
+    currentUser.position === "managerSALE" ||
+    currentUser.position === "leadSALE" ||
+    currentUser.position === "salenhapdon" ||
+    currentUser.position === "salefull";
+
+  // Helper: lấy slot cho 1 ca — luôn trả về đúng 5 dòng (T2–T7) hoặc 3 dòng (CN)
+  const getShiftSlots = (dateKey, shiftKey, _isSunday) => {
+    const expectedRows = 5;
+    const existing = shiftAssignments[dateKey]?.[shiftKey] || [];
+    const slots = existing.map((s) => ({
+      sale: s.sale || "",
+      teamsMKT: Array.isArray(s.teamsMKT) ? s.teamsMKT : [],
+    }));
+    while (slots.length < expectedRows) slots.push({ sale: "", teamsMKT: [] });
+    return slots.slice(0, expectedRows);
+  };
+
+  const updateShiftSlot = (dateKey, shiftKey, _isSunday, index, patch) => {
+    const expectedRows = 5;
+    const existing = shiftAssignments[dateKey]?.[shiftKey] || [];
+    const slots = existing.map((s) => ({
+      sale: s.sale || "",
+      teamsMKT: Array.isArray(s.teamsMKT) ? s.teamsMKT : [],
+    }));
+    while (slots.length < expectedRows) slots.push({ sale: "", teamsMKT: [] });
+    const current = slots[index] || { sale: "", teamsMKT: [] };
+    const updated = { ...current, ...patch };
+    if (patch.sale !== undefined && !patch.sale) {
+      updated.teamsMKT = [];
+      updated.sale = "";
+    }
+    slots[index] = updated;
+    setShiftAssignments((prev) => ({
+      ...prev,
+      [dateKey]: { ...(prev[dateKey] || {}), [shiftKey]: slots },
+    }));
+  };
+
+  const handleAssignShift = async (dateKey, shiftKey, slots) => {
+    try {
+      const clean = (slots || [])
+        .filter((s) => s && s.sale)
+        .map((s) => ({
+          date: dateKey,
+          shift: shiftKey,
+          sale: s.sale,
+          teamsMKT: Array.isArray(s.teamsMKT) ? s.teamsMKT : [],
+        }));
+      console.log("[DEBUG] handleAssignShift payload:", {
+        dateKey,
+        shiftKey,
+        slots,
+        clean,
+      });
+      await axios.delete("/api/shift-assignments", {
+        data: { date: dateKey, shift: shiftKey },
+      });
+      if (clean.length > 0) {
+        await axios.put("/api/shift-assignments", { assignments: clean });
+      }
+      message.success("Đã lưu phân công ca");
+      fetchShiftAssignments();
+    } catch (error) {
+      console.error(error);
+      message.error("Lỗi khi lưu phân công ca");
+    }
+  };
+
+  const fetchShiftAssignments = async () => {
+    try {
+      const response = await axios.get("/api/shift-assignments");
+      const docs = response.data?.data || [];
+      const map = {};
+      for (const d of docs) {
+        if (!d.sale) continue;
+        if (!map[d.date]) map[d.date] = {};
+        if (!map[d.date][d.shift]) map[d.date][d.shift] = [];
+        const teams = Array.isArray(d.teamsMKT)
+          ? d.teamsMKT
+          : d.teamMKT
+            ? [d.teamMKT]
+            : [];
+        map[d.date][d.shift].push({ sale: d.sale, teamsMKT: teams });
+      }
+      setShiftAssignments(map);
+      console.log("[DEBUG] fetchShiftAssignments loaded:", {
+        totalDocs: docs.length,
+        dateKeys: Object.keys(map),
+        map,
+      });
+    } catch (error) {
+      console.error("[DEBUG] Lỗi khi lấy shiftAssignments:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchShiftAssignments();
+    const t = setInterval(fetchShiftAssignments, 30 * 1000);
+    return () => clearInterval(t);
+  }, []);
+
+  useEffect(() => {
+    if (typeof window === "undefined" || !window.BroadcastChannel) return;
+    const channel = new BroadcastChannel("team-updated");
+    channel.onmessage = () => fetchShiftAssignments();
+    return () => channel.close();
+  }, []);
+
   const filteredData = useMemo(() => {
     let tempData = [];
+
+    console.log("[DEBUG] === filteredData START ===", {
+      currentUserName: currentUser.name,
+      currentUserPosition: currentUser.position,
+      currentUserPositionTeam: currentUser.position_team,
+      currentUserTeamId: currentUser.team_id,
+      currentUserAssignedTeam: currentUser.assignedTeam,
+      currentUserAssignedTeams: currentUser.assignedTeams,
+      totalData: data.length,
+      totalActiveData: data.filter((r) => r.status === true).length,
+      dataSample: data.slice(0, 2).map((r) => ({
+        pageName: r.pageName,
+        employee: r.employee,
+        status: r.status,
+      })),
+    });
 
     if (
       currentUser.position === "admin" ||
@@ -373,14 +657,17 @@ const EmployeePageTable = () => {
       currentUser.position === "leadSALE" ||
       currentUser.position === "managerSALE"
     ) {
+      console.log("[DEBUG] BRANCH: admin/managerMKT/leadSALE/managerSALE");
       // Admin + Manager MKT + Lead sale + Manager sale: thấy tất cả page
       tempData = data;
     } else if (
       currentUser.position === "salenhapdon" ||
       currentUser.position === "salefull"
     ) {
-      // Sale nhập đơn + sale full: chỉ thấy page có status: true và thuộc team được gắn
-      // Ưu tiên assignedTeams (mảng) > assignedTeam (string) > team_id (string)
+      console.log("[DEBUG] BRANCH: salenhapdon/salefull");
+      // Sale nhập đơn + sale full:
+      // 1) ƯU TIÊN: lấy teamsMKT từ shiftAssignments của user (mọi ca/mọi ngày đã phân công)
+      // 2) FALLBACK: dùng assignedTeams/assignedTeam/team_id gắn sẵn trên employee
       const assignedTeams =
         Array.isArray(currentUser.assignedTeams) &&
         currentUser.assignedTeams.length > 0
@@ -391,28 +678,87 @@ const EmployeePageTable = () => {
               ? [currentUser.team_id]
               : [];
 
-      if (assignedTeams.length > 0) {
+      // ===== DEBUG LOG =====
+      const csDebug = getCurrentShiftVN();
+      console.log("[DEBUG] Filter salenhapdon/salefull:", {
+        currentUserName: currentUser.name,
+        currentUserPosition: currentUser.position,
+        assignedTeams,
+        currentShiftVN: csDebug,
+        shiftAssignmentsKeys: Object.keys(shiftAssignments || {}),
+      });
+
+      // Chỉ lấy teamsMKT từ CA HIỆN TẠI theo giờ Việt Nam (không gộp ca cũ)
+      let shiftTeams = [];
+      const cs = getCurrentShiftVN();
+      if (cs && shiftAssignments?.[cs.dateKey]?.[cs.shiftKey]) {
+        const slots = shiftAssignments[cs.dateKey][cs.shiftKey] || [];
+        for (const slot of slots) {
+          if (
+            slot?.sale &&
+            slot.sale === currentUser.name &&
+            Array.isArray(slot.teamsMKT) &&
+            slot.teamsMKT.length > 0
+          ) {
+            shiftTeams = [...shiftTeams, ...slot.teamsMKT];
+          }
+        }
+      }
+      shiftTeams = Array.from(new Set(shiftTeams));
+
+      console.log("[DEBUG] shiftTeams from CURRENT shift only:", shiftTeams);
+
+      // Ưu tiên SHIFT filter (chỉ khi tìm được team)
+      if (shiftTeams.length > 0) {
+        const teamMembers = employees
+          .filter((emp) => emp.team_id && shiftTeams.includes(emp.team_id))
+          .map((emp) => emp.name);
+        console.log("[DEBUG] Using SHIFT filter:", {
+          shiftTeams,
+          teamMembersFound: teamMembers,
+          totalMatchingPages: data.filter(
+            (r) => r.status === true && teamMembers.includes(r.employee),
+          ).length,
+        });
+        tempData = data.filter(
+          (record) =>
+            record.status === true && teamMembers.includes(record.employee),
+        );
+      } else if (assignedTeams.length > 0) {
+        // Fallback: logic cũ
         const teamMembers = employees
           .filter((emp) => emp.team_id && assignedTeams.includes(emp.team_id))
           .map((emp) => emp.name);
+        console.log("[DEBUG] Using FALLBACK filter (no shift assignment):", {
+          assignedTeams,
+          teamMembersFound: teamMembers,
+          totalMatchingPages: data.filter(
+            (r) => r.status === true && teamMembers.includes(r.employee),
+          ).length,
+        });
         tempData = data.filter(
           (record) =>
             record.status === true && teamMembers.includes(record.employee),
         );
       } else {
+        console.log("[DEBUG] salenhapdon/salefull: no shiftTeams, no assignedTeams — empty");
         tempData = [];
       }
     } else if (currentUser.position === "salexuly") {
+      console.log("[DEBUG] BRANCH: salexuly");
       // Sale online + sale xử lý: chỉ thấy page có status: true
       tempData = data.filter((record) => record.status === true);
     } else if (currentUser.position_team === "sale") {
+      console.log("[DEBUG] BRANCH: position_team=sale");
       // Tất cả nhân viên sale khác: chỉ thấy page có status: true
       tempData = data.filter((record) => record.status === true);
     } else if (currentUser.position === "lead") {
+      console.log("[DEBUG] BRANCH: lead");
       tempData = data.filter((record) =>
         leadTeamMembers.includes(record.employee),
       );
     } else {
+      console.log("[DEBUG] BRANCH: else (own name only)");
       tempData = data.filter((record) => record.employee === currentUser.name);
     }
 
@@ -453,6 +799,14 @@ const EmployeePageTable = () => {
       );
     }
 
+    console.log("[DEBUG] filteredData result:", {
+      total: tempData.length,
+      sample: tempData.slice(0, 3).map((r) => ({
+        pageName: r.pageName,
+        employee: r.employee,
+        status: r.status,
+      })),
+    });
     return tempData;
   }, [
     data,
@@ -464,11 +818,9 @@ const EmployeePageTable = () => {
     selectedTeam,
     employees,
     activeOnly,
+    shiftAssignments,
+    nowTick,
   ]);
-
-  const mktOptions = employees
-    .filter((order) => order.position_team === "mkt")
-    .map((order) => order.name);
 
   const handleAdd = async () => {
     if (!pageName || !selectedEmployee) {
@@ -1579,122 +1931,132 @@ const EmployeePageTable = () => {
             <div className="pages-sale-team-header">
               <TeamOutlined style={{ color: "#6366f1", fontSize: 18 }} />
               <span style={{ fontWeight: 600, color: "#4f46e5" }}>
-                Gán Team cho Sale 
+                Phân công Sale theo ca (3 ngày gần nhất — giờ VN)
               </span>
+              <span
+                style={{
+                  marginLeft: 8,
+                  fontSize: 12,
+                  color: "#64748b",
+                  fontWeight: 400,
+                }}
+              >
+                Hôm nay: {nowTick >= 0 && currentShift
+                  ? `${currentShift.dateKey} • đang ca: ${currentShift.shiftKey}`
+                  : "ngoài giờ làm"}
+              </span>
+              <Button
+                size="large"
+                type="text"
+                icon={shiftGridCollapsed ? <PlusCircleOutlined /> : <MinusCircleOutlined />}
+                onClick={() => setShiftGridCollapsed((v) => !v)}
+                style={{ marginLeft: "auto", color: "#64748b", fontSize: 30, lineHeight: 1 }}
+              />
             </div>
-            <div
-              className="pages-sale-team-list"
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                gap: "10px",
-                width: "100%",
-              }}
-            >
-              {employees
-                .filter((emp) => {
-                  if (
-                    emp.position !== "salenhapdon" &&
-                    emp.position !== "salefull"
-                  )
-                    return false;
-                  if (emp.quocgia !== "kr") return false;
-                  // Sale nhập đơn chỉ thấy dòng của chính mình
-                  if (
-                    currentUser.position === "salenhapdon" ||
-                    currentUser.position === "salefull"
-                  ) {
-                    return emp.name === currentUser.name;
-                  }
-                  return true;
-                })
-                .map((sale) => (
+
+            {!shiftGridCollapsed && (
+            <div className="pages-shift-grid">
+              <div className="pages-shift-day pages-shift-day-header">
+                <div className="pages-shift-cell-pageshift-label">Ca</div>
+                {threeDays.map((day) => (
                   <div
-                    key={sale.employee_id}
-                    className="pages-sale-team-item"
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: 16,
-                      padding: "10px 16px",
-                      background: "#f8fafc",
-                      borderRadius: 8,
-                      border: "1px solid #e2e8f0",
-                      width: "100%",
-                      boxSizing: "border-box",
-                    }}
+                    key={day.dateKey}
+                    className={`pages-shift-day-col ${currentShift?.dateKey === day.dateKey ? "pages-shift-day-col-today" : ""}`}
                   >
-                    <span
-                      className="pages-sale-team-name"
-                      style={{
-                        flex: "0 0 180px",
-                        minWidth: 300,
-                        overflow: "hidden",
-                        textOverflow: "ellipsis",
-                        whiteSpace: "nowrap",
-                      }}
-                    >
-                      <UserOutlined
-                        style={{ marginRight: 6, color: "#64748b" }}
-                      />
-                      {sale.name}
-                    </span>
-                    <Select
-                      mode="multiple"
-                      value={
-                        Array.isArray(sale.assignedTeams)
-                          ? sale.assignedTeams
-                          : sale.assignedTeam
-                            ? [sale.assignedTeam]
-                            : []
-                      }
-                      placeholder="Chọn team"
-                      style={{ minWidth: 620 }}
-                      allowClear
-                      maxTagCount="responsive"
-                      disabled={
-                        currentUser.position === "salenhapdon" ||
-                        currentUser.position === "salefull"
-                      }
-                      onChange={async (values) => {
-                        try {
-                          await axios.put("/api/employees/assign-team", {
-                            employeeName: sale.name,
-                            assignedTeams: values,
-                          });
-                          message.success(
-                            `Đã gán ${values.length} team cho ${sale.name}`,
-                          );
-                          fetchEmployees();
-                          // Báo cho các tab khác (đang mở bởi sale) cập nhật
-                          if (typeof window !== "undefined" && window.BroadcastChannel) {
-                            const channel = new BroadcastChannel("team-updated");
-                            channel.postMessage({
-                              type: "team-changed",
-                              employeeName: sale.name,
-                              assignedTeams: values,
-                            });
-                            channel.close();
-                          }
-                        } catch (error) {
-                          message.error("Lỗi khi gán team");
-                        }
-                      }}
-                    >
-                      <Option value="SON">TEAM SƠN</Option>
-                      <Option value="HIEP">TEAM HIỆP</Option>
-                      <Option value="MANH">TEAM MẠNH</Option>
-                      <Option value="LE">TEAM LE</Option>
-                      <Option value="TUANANH">TEAM TUẤN ANH</Option>
-                      
-                      <Option value="DIEN">TEAM DIỆN</Option>
-                      <Option value="DIENON">TEAM DIỆN ON</Option>
-                      <Option value="TUNG">TEAM TÙNG</Option>
-                      <Option value="ANH">TEAM ÁNH</Option>
-                    </Select>
+                    <div className="pages-shift-day-name">
+                      {day.weekdayLabel}
+                      {day.isSunday ? " (CN)" : ""}
+                    </div>
+                    <div className="pages-shift-day-date">{day.dateKey}</div>
                   </div>
                 ))}
+              </div>
+
+              {/* Mỗi hàng = 1 loại ca (theo label cố định), mỗi cột = 1 ngày */}
+              {SHIFTS_BY_LABEL.map((labelRow) => {
+                const isSundayRow = labelRow.sundayKey !== null && labelRow.weekdayKey === null;
+                const isWeekdayRow = labelRow.weekdayKey !== null && labelRow.sundayKey === null;
+                return (
+                  <div key={labelRow.label} className="pages-shift-day">
+                    <div className="pages-shift-cell-pageshift-label">
+                      {labelRow.label}
+                      <div className="pages-shift-time">
+                        {isSundayRow ? labelRow.timeSunday : labelRow.timeWeekday}
+                      </div>
+                    </div>
+                    {threeDays.map((day) => {
+                      const shift = getShiftForDay(labelRow, day);
+                      if (!shift) {
+                        return (
+                          <div key={day.dateKey} className="pages-shift-day-col pages-shift-day-col-empty">
+                            —
+                          </div>
+                        );
+                      }
+                      return (
+                        <div
+                          key={day.dateKey}
+                          className={`pages-shift-day-col ${currentShift?.dateKey === day.dateKey && currentShift?.shiftKey === shift.key ? "pages-shift-shift-active" : ""} ${currentShift?.dateKey === day.dateKey ? "pages-shift-day-col-today" : ""}`}
+                        >
+                          <div className="pages-shift-time">{shift.time}</div>
+                          {getShiftSlots(day.dateKey, shift.key, day.isSunday).map((slot, sIdx) => (
+                            <div key={sIdx} className="pages-shift-slot">
+                              <Select
+                                size="small"
+                                showSearch
+                                optionFilterProp="children"
+                                placeholder="Sale"
+                                value={slot.sale || undefined}
+                                disabled={!isAdminMKT || (currentUser.position === "salenhapdon" || currentUser.position === "salefull")}
+                                style={{ width: "100%" }}
+                                allowClear
+                                onChange={(v) =>
+                                  updateShiftSlot(day.dateKey, shift.key, day.isSunday, sIdx, { sale: v || "" })
+                                }
+                              >
+                                {saleOptions.map((name) => (
+                                  <Option key={name} value={name}>
+                                    {name}
+                                  </Option>
+                                ))}
+                              </Select>
+                              <Select
+                                size="small"
+                                mode="multiple"
+                                showSearch
+                                optionFilterProp="label"
+                                placeholder="Team MKT (có thể chọn nhiều)"
+                                value={slot.teamsMKT || []}
+                                disabled={!isAdminMKT || (currentUser.position === "salenhapdon" || currentUser.position === "salefull")}
+                                style={{ width: "100%" }}
+                                allowClear
+                                maxTagCount="responsive"
+                                onChange={(v) =>
+                                  updateShiftSlot(day.dateKey, shift.key, day.isSunday, sIdx, { teamsMKT: v || [] })
+                                }
+                                options={teamMKTOptions}
+                              />
+                            </div>
+                          ))}
+                          {isAdminMKT && currentUser.position !== "salenhapdon" && currentUser.position !== "salefull" && (
+                            <Button
+                              size="small"
+                              type="primary"
+                              style={{ marginTop: 4 }}
+                              onClick={() => handleAssignShift(day.dateKey, shift.key, getShiftSlots(day.dateKey, shift.key, day.isSunday))}
+                            >
+                              Lưu ca
+                            </Button>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                );
+              })}
+
             </div>
+            )}
           </div>
         )}
       </div>
