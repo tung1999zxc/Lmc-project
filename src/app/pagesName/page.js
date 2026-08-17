@@ -2030,7 +2030,7 @@ const EmployeePageTable = () => {
                                 disabled={!isAdminMKT || (currentUser.position === "salenhapdon" || currentUser.position === "salefull")}
                                 style={{ width: "100%" }}
                                 allowClear
-                                maxTagCount="responsive"
+                                maxTagCount={99}
                                 onChange={(v) =>
                                   updateShiftSlot(day.dateKey, shift.key, day.isSunday, sIdx, { teamsMKT: v || [] })
                                 }
