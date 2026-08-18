@@ -140,7 +140,7 @@ export async function DELETE(request, { params }) {
       );
     }
 
-    const { id } = params;
+    const { id } = await params;
     const { db } = await connectToDatabase();
 
     const result = await db.collection("orders").deleteOne({ id });
