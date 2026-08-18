@@ -23,6 +23,7 @@ import {
   ClockCircleOutlined,
   PlusCircleOutlined,
   MinusCircleOutlined,
+  HistoryOutlined,
 } from "@ant-design/icons";
 import {
   Table,
@@ -133,6 +134,9 @@ const EmployeePageTable = () => {
   const [editPageName, setEditPageName] = useState("");
   const [editEmployee, setEditEmployee] = useState(null);
   const [showCheckForm, setShowCheckForm] = useState(false);
+  const [historyOpen, setHistoryOpen] = useState(false);
+  const [historyLoading, setHistoryLoading] = useState(false);
+  const [historyRows, setHistoryRows] = useState([]);
   const [viaData, setViaData] = useState([]);
   const [editingViaId, setEditingViaId] = useState(null);
   const [tempViaLink, setTempViaLink] = useState("");
@@ -617,6 +621,57 @@ const EmployeePageTable = () => {
     } catch (error) {
       console.error("[DEBUG] Lỗi khi lấy shiftAssignments:", error);
     }
+  };
+
+  // Lấy lịch sử chia ca của tất cả nhân viên (mặc định 30 ngày gần nhất)
+  const fetchShiftHistory = async () => {
+    setHistoryLoading(true);
+    try {
+      const now = new Date();
+      const start = new Date(now);
+      start.setDate(start.getDate() - 30);
+      const end = new Date(now);
+      end.setDate(end.getDate() + 7);
+      const fmt = (d) =>
+        `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+      const res = await axios.get("/api/shift-assignments", {
+        params: { from: fmt(start), to: fmt(end) },
+      });
+      const docs = res.data?.data || [];
+      const rows = [];
+      for (const d of docs) {
+        if (!d.sale) continue;
+        const teams = Array.isArray(d.teamsMKT)
+          ? d.teamsMKT
+          : d.teamMKT
+            ? [d.teamMKT]
+            : [];
+        rows.push({
+          date: d.date,
+          shift: d.shift,
+          sale: d.sale,
+          teamsMKT: teams.join(", ") || "—",
+          updatedAt: d.updatedAt
+            ? new Date(d.updatedAt).toLocaleString("vi-VN", {
+                timeZone: "Asia/Ho_Chi_Minh",
+              })
+            : "",
+        });
+      }
+      rows.sort((a, b) => (a.date === b.date ? 0 : a.date > b.date ? -1 : 1));
+      setHistoryRows(rows);
+    } catch (error) {
+      console.error("[DEBUG] Lỗi khi lấy lịch sử chia ca:", error);
+      message.error("Lỗi khi tải lịch sử chia ca");
+    } finally {
+      setHistoryLoading(false);
+    }
+  };
+
+  const handleOpenHistory = async () => {
+    setHistoryOpen(true);
+    setHistoryRows([]);
+    await fetchShiftHistory();
   };
 
   useEffect(() => {
@@ -1952,6 +2007,14 @@ const EmployeePageTable = () => {
                 onClick={() => setShiftGridCollapsed((v) => !v)}
                 style={{ marginLeft: "auto", color: "#64748b", fontSize: 30, lineHeight: 1 }}
               />
+              <Button
+                size="small"
+                icon={<HistoryOutlined />}
+                onClick={handleOpenHistory}
+                style={{ marginLeft: 8, color: "#4f46e5", borderColor: "#c7d2fe" }}
+              >
+                Xem lịch sử chia ca
+              </Button>
             </div>
 
             {!shiftGridCollapsed && (
@@ -2411,6 +2474,46 @@ const EmployeePageTable = () => {
             Lưu thay đổi
           </button>
         </div>
+      </Modal>
+
+      {/* Modal lịch sử chia ca — chỉ xem, load khi mở */}
+      <Modal
+        open={historyOpen}
+        onCancel={() => setHistoryOpen(false)}
+        footer={null}
+        width={900}
+        title={
+          <span>
+            <HistoryOutlined style={{ marginRight: 8, color: "#4f46e5" }} />
+            Lịch sử chia ca (30 ngày gần nhất)
+          </span>
+        }
+        destroyOnClose
+      >
+        <Table
+          dataSource={historyRows}
+          loading={historyLoading}
+          rowKey={(r, idx) => `${r.date}-${r.shift}-${r.sale}-${idx}`}
+          size="small"
+          pagination={{ pageSize: 20, showSizeChanger: false }}
+          scroll={{ x: 600 }}
+          columns={[
+            { title: "Ngày", dataIndex: "date", width: 110, sorter: (a, b) => a.date.localeCompare(b.date) },
+            {
+              title: "Ca",
+              dataIndex: "shift",
+              width: 130,
+              render: (v) => {
+                const all = [...SHIFTS_WEEKDAY, ...SHIFTS_SUNDAY];
+                const found = all.find((s) => s.key === v);
+                return found ? `${found.label} (${found.time})` : v;
+              },
+            },
+            { title: "Sale", dataIndex: "sale", width: 180 },
+            { title: "Team MKT", dataIndex: "teamsMKT" },
+            { title: "Cập nhật", dataIndex: "updatedAt", width: 160 },
+          ]}
+        />
       </Modal>
     </div>
   );

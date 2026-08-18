@@ -17,6 +17,7 @@ import {
   Col,
   Modal,
   Space,
+  Upload,
   message,
 } from "antd";
 import {
@@ -44,6 +45,135 @@ const OrderForm = ({
   const { Option } = Select;
   const currentUser = useSelector((state) => state.user.currentUser);
   // Giả sử: nếu mã nhân viên là 1 thì isEmployee1 = true
+
+  const SCORE_ITEMS = [
+    { key: "ckt50", label: "CKT 50% doanh số", points: 40 },
+    { key: "ckt10", label: "CKT 10 -> 35k doanh số", points: 30 },
+    { key: "addFb", label: "ADD FB", points: 20 },
+    { key: "dataImgFb", label: "Dữ liệu ảnh + link FB bạn bè", points: 10 },
+    { key: "nhanSim", label: "Nhắn sim khách có xác nhận", points: 20 },
+    { key: "nhietTinh", label: "Nhiệt tình, rep nhanh, hợp tác", points: 10 },
+  ];
+
+  const [scoreModalVisible, setScoreModalVisible] = useState(false);
+  const [scoreOrder, setScoreOrder] = useState(null);
+  const [scoreChecked, setScoreChecked] = useState({});
+  // Mỗi item là { kind: "cloudinary", url } hoặc { kind: "new", file, preview }
+  const [scoreImageList, setScoreImageList] = useState([]);
+  const [scoreUploading, setScoreUploading] = useState(false);
+  const [scoreSaving, setScoreSaving] = useState(false);
+
+  const computeScore = (checked) => {
+    const total = SCORE_ITEMS.reduce((sum, item) => {
+      return sum + (checked?.[item.key] ? item.points : 0);
+    }, 0);
+    if (total < 50) return 50;
+    return 70;
+  };
+
+  const scoreTotalRaw = SCORE_ITEMS.reduce((sum, item) => {
+    return sum + (scoreChecked[item.key] ? item.points : 0);
+  }, 0);
+  const scoreFinal = computeScore(scoreChecked);
+
+  const openScoreModal = (record) => {
+    let orderRecord = record;
+    if (!orderRecord && initialValues?.id) {
+      const liveValues = form.getFieldsValue(true);
+      orderRecord = {
+        ...initialValues,
+        ...liveValues,
+      };
+    }
+    setScoreOrder(orderRecord);
+    const initial = {};
+    SCORE_ITEMS.forEach((item) => {
+      initial[item.key] = false;
+    });
+    const savedItems = Array.isArray(orderRecord?.scoreItems)
+      ? orderRecord.scoreItems
+      : [];
+    savedItems.forEach((key) => {
+      if (initial.hasOwnProperty(key)) initial[key] = true;
+    });
+    setScoreChecked(initial);
+    const savedUrls = Array.isArray(orderRecord?.scoreImages)
+      ? orderRecord.scoreImages
+      : [];
+    setScoreImageList(
+      savedUrls.map((url) => ({ kind: "cloudinary", url, uid: url })),
+    );
+    setScoreModalVisible(true);
+  };
+
+  const handleSaveScore = async () => {
+    if (!scoreOrder?.id) {
+      message.error("Không tìm thấy đơn hàng để lưu điểm");
+      return;
+    }
+    setScoreSaving(true);
+    try {
+      const newItems = scoreImageList.filter((i) => i.kind === "new");
+      const cloudinaryItems = scoreImageList.filter(
+        (i) => i.kind === "cloudinary",
+      );
+      const cloudinaryUrls = cloudinaryItems.map((i) => i.url);
+
+      let uploadedUrls = [];
+      if (newItems.length > 0) {
+        setScoreUploading(true);
+        const uploadPromises = newItems.map(async (item) => {
+          const formData = new FormData();
+          formData.append("files", item.file);
+          const res = await axios.post("/api/upload/cloudinary", formData, {
+            headers: { "Content-Type": "multipart/form-data" },
+          });
+          return res.data.urls[0]?.url;
+        });
+        const results = await Promise.all(uploadPromises);
+        uploadedUrls = results.filter(Boolean);
+        setScoreUploading(false);
+      }
+
+      const finalUrls = [...cloudinaryUrls, ...uploadedUrls];
+      const checkedKeys = Object.keys(scoreChecked).filter(
+        (k) => scoreChecked[k],
+      );
+      await axios.put(`/api/orders/${scoreOrder.id}`, {
+        scorePoints: scoreFinal,
+        scoreItems: checkedKeys,
+        scoreImages: finalUrls,
+      });
+
+      // cập nhật lại danh sách đơn trong modal khách
+      setModalCustomerOrders((prev) =>
+        prev.map((o) =>
+          o.id === scoreOrder.id
+            ? {
+                ...o,
+                scorePoints: scoreFinal,
+                scoreItems: checkedKeys,
+                scoreImages: finalUrls,
+              }
+            : o,
+        ),
+      );
+
+      message.success("Đã lưu điểm đơn hàng");
+      setScoreModalVisible(false);
+      setScoreOrder(null);
+      setScoreChecked({});
+      setScoreImageList([]);
+    } catch (err) {
+      console.error(err);
+      message.error(
+        err?.response?.data?.error || "Lỗi khi lưu điểm đơn hàng",
+      );
+    } finally {
+      setScoreSaving(false);
+      setScoreUploading(false);
+    }
+  };
 
   const [loading2, setLoading2] = useState(false);
   const [checkingAddress, setCheckingAddress] = useState(false);
@@ -446,11 +576,33 @@ const OrderForm = ({
             },
             {
               title: "ĐƠN",
-
               dataIndex: "saleReport",
               key: "saleReport",
-              render: (text) => (
-                <Tag color={text === "DONE" ? "green" : "red"}>{text}</Tag>
+              render: (text, record) => (
+                <div>
+                  <Tag color={text === "DONE" ? "green" : "red"}>{text}</Tag>
+                  <div
+                    style={{ marginTop: 4, cursor: "pointer" }}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      openScoreModal(record);
+                    }}
+                  >
+                    <Tag
+                      color={
+                        record.scorePoints >= 70
+                          ? "green"
+                          : record.scorePoints >= 50
+                            ? "blue"
+                            : "default"
+                      }
+                    >
+                      {record.scorePoints
+                        ? `Điểm: ${record.scorePoints}`
+                        : "Chấm điểm"}
+                    </Tag>
+                  </div>
+                </div>
               ),
             },
             {
@@ -583,6 +735,124 @@ const OrderForm = ({
           size="small"
           pagination={false}
         />
+      </Modal>
+      <Modal
+        title={`Chấm điểm đơn hàng - STT ${scoreOrder?.stt || ""}`}
+        open={scoreModalVisible}
+        onCancel={() => {
+          setScoreModalVisible(false);
+          setScoreOrder(null);
+          setScoreChecked({});
+          setScoreImageList([]);
+        }}
+        onOk={handleSaveScore}
+        okText={scoreUploading ? "Đang tải ảnh..." : "Lưu điểm"}
+        cancelText="Hủy"
+        confirmLoading={scoreSaving || scoreUploading}
+        width={600}
+        centered
+      >
+        <div style={{ padding: "8px 0" }}>
+          <div style={{ marginBottom: 8, fontWeight: 600 }}>
+            Tổng điểm thô: {scoreTotalRaw} điểm
+          </div>
+          <div
+            style={{
+              marginBottom: 16,
+              padding: 12,
+              backgroundColor: "#f5f5f5",
+              borderRadius: 6,
+              fontSize: 16,
+              fontWeight: 600,
+              color: scoreFinal >= 70 ? "#52c41a" : "#1890ff",
+            }}
+          >
+            Điểm sau chốt: {scoreFinal} điểm
+          </div>
+
+          <div style={{ marginBottom: 16 }}>
+            {SCORE_ITEMS.map((item) => (
+              <div
+                key={item.key}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  padding: "6px 0",
+                  borderBottom: "1px dashed #eee",
+                }}
+              >
+                <Checkbox
+                  checked={!!scoreChecked[item.key]}
+                  onChange={(e) =>
+                    setScoreChecked((prev) => ({
+                      ...prev,
+                      [item.key]: e.target.checked,
+                    }))
+                  }
+                >
+                  <span style={{ marginLeft: 4 }}>{item.label}</span>
+                </Checkbox>
+                <span style={{ marginLeft: "auto", color: "#1890ff" }}>
+                  {item.points}đ
+                </span>
+              </div>
+            ))}
+          </div>
+
+          <div>
+            <label
+              style={{ fontWeight: 600, display: "block", marginBottom: 8 }}
+            >
+              Ảnh chứng minh (có thể chọn nhiều ảnh)
+            </label>
+            <Upload
+              listType="picture-card"
+              multiple
+              beforeUpload={(file) => {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                  setScoreImageList((prev) => [
+                    ...prev,
+                    {
+                      kind: "new",
+                      file,
+                      preview: e.target.result,
+                      uid: `new-${file.uid}-${Date.now()}`,
+                    },
+                  ]);
+                };
+                reader.readAsDataURL(file);
+                return false;
+              }}
+              onRemove={(file) => {
+                const uid = file.uid;
+                setScoreImageList((prev) =>
+                  prev.filter((item) => item.uid !== uid),
+                );
+              }}
+              fileList={scoreImageList.map((item) => ({
+                uid: item.uid,
+                url: item.kind === "cloudinary" ? item.url : item.preview,
+                status: "done",
+                name:
+                  item.kind === "cloudinary"
+                    ? `cloudinary-${item.uid}`
+                    : `new-${item.uid}`,
+              }))}
+            >
+              {scoreImageList.length < 5 && (
+                <div>
+                  <PlusOutlined />
+                  <div style={{ marginTop: 8 }}>Tải ảnh</div>
+                </div>
+              )}
+            </Upload>
+            <div style={{ fontSize: 12, color: "#999", marginTop: 4 }}>
+              Tối đa 5 ảnh, mỗi ảnh tối đa 5MB. Có thể paste ảnh từ clipboard
+              (Ctrl+V)
+            </div>
+          </div>
+        </div>
       </Modal>
       <Modal
         title={initialValues ? "Chỉnh sửa đơn hàng" : "Thêm đơn hàng mới"}
@@ -1218,6 +1488,15 @@ const OrderForm = ({
                         </Option>
                       ))}
                     </Select>
+                  </Form.Item>
+                  <Form.Item>
+                    <Button
+                      block
+                      onClick={() => openScoreModal(null)}
+                      disabled={!initialValues?.id}
+                    >
+                      Thả đơn
+                    </Button>
                   </Form.Item>
                   <Form.Item
                     label="THANH TOÁN"

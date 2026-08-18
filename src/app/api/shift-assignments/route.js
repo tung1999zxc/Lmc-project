@@ -19,10 +19,17 @@ export async function GET(req) {
     const { db } = await connectToDatabase();
     const { searchParams } = new URL(req.url);
     const date = searchParams.get("date");
+    const from = searchParams.get("from");
+    const to = searchParams.get("to");
 
     let query = {};
     if (date) {
       query = { date };
+    } else if (from || to) {
+      const range = {};
+      if (from) range.$gte = from;
+      if (to) range.$lte = to;
+      query = { date: range };
     } else {
       // Mặc định: lấy 1 tuần gần nhất tính từ hôm nay (giờ VN)
       const now = new Date();
