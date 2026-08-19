@@ -71,8 +71,11 @@ const OrderForm = ({
   // Auto-open modal khi có order được truyền từ ngoài (OrderList)
   useEffect(() => {
     if (scoreOrderExternal) {
-      setScoreOrder(scoreOrderExternal);
+      // Reset state trước khi mở cho đơn mới
+      setScoreChecked({});
+      setScoreImageList([]);
       setScoreMode("view");
+      setScoreOrder(scoreOrderExternal);
       const initial = {};
       SCORE_ITEMS.forEach((item) => {
         initial[item.key] = false;
@@ -96,7 +99,7 @@ const OrderForm = ({
       );
       setScoreModalVisible(true);
     }
-  }, [scoreOrderExternal]);
+  }, [scoreOrderExternal?.id, scoreOrderExternal]);
 
   const handleScoreModalClose = () => {
     setScoreModalVisible(false);
@@ -121,6 +124,11 @@ const OrderForm = ({
   const scoreFinal = computeScore(scoreChecked);
 
   const openScoreModal = (record) => {
+    // Reset state trước khi mở cho đơn mới
+    setScoreChecked({});
+    setScoreImageList([]);
+    setScoreMode("edit");
+
     let orderRecord = record;
     if (!orderRecord && initialValues?.id) {
       const liveValues = form.getFieldsValue(true);
@@ -867,7 +875,56 @@ const OrderForm = ({
             >
               Ảnh chứng minh ({scoreImageList.length} ảnh)
             </label>
-            {scoreImageList.length > 0 ? (
+            {scoreMode === "edit" ? (
+              <>
+                <Upload
+                  listType="picture-card"
+                  multiple
+                  beforeUpload={(file) => {
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                      setScoreImageList((prev) => [
+                        ...prev,
+                        {
+                          kind: "new",
+                          file,
+                          preview: e.target.result,
+                          uid: `new-${file.uid}-${Date.now()}`,
+                        },
+                      ]);
+                    };
+                    reader.readAsDataURL(file);
+                    return false;
+                  }}
+                  onRemove={(file) => {
+                    const uid = file.uid;
+                    setScoreImageList((prev) =>
+                      prev.filter((item) => item.uid !== uid),
+                    );
+                  }}
+                  fileList={scoreImageList.map((item) => ({
+                    uid: item.uid,
+                    url: item.kind === "cloudinary" ? item.url : item.preview,
+                    status: "done",
+                    name:
+                      item.kind === "cloudinary"
+                        ? `cloudinary-${item.uid}`
+                        : `new-${item.uid}`,
+                  }))}
+                >
+                  {scoreImageList.length < 5 && (
+                    <div>
+                      <PlusOutlined />
+                      <div style={{ marginTop: 8 }}>Tải ảnh</div>
+                    </div>
+                  )}
+                </Upload>
+                <div style={{ fontSize: 12, color: "#999", marginTop: 4 }}>
+                  Tối đa 5 ảnh, mỗi ảnh tối đa 5MB. Có thể paste ảnh từ clipboard
+                  (Ctrl+V)
+                </div>
+              </>
+            ) : scoreImageList.length > 0 ? (
               <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
                 {scoreImageList.map((item, idx) => (
                   <Image
