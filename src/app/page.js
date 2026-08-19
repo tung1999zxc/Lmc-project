@@ -2283,7 +2283,11 @@ const Dashboard = () => {
             order.sale.trim().toLowerCase() === emp.name.trim().toLowerCase() &&
             order.paymentStatus === "ĐÃ THANH TOÁN",
         )
-        .reduce((sum, order) => sum + order.profit, 0);
+        .reduce((acc, order) => {
+          const profit = Number(order.profit ?? 0);
+          const scorePoints = Number(order.scorePoints ?? 100);
+          return acc + profit * scorePoints * 0.01;
+        }, 0);
       unpaid = filteredOrdersByArea
         .filter(
           (order) =>
@@ -2291,7 +2295,11 @@ const Dashboard = () => {
             (order.paymentStatus === "CHƯA THANH TOÁN" ||
               order.paymentStatus === ""),
         )
-        .reduce((sum, order) => sum + order.profit, 0);
+        .reduce((acc, order) => {
+          const profit = Number(order.profit ?? 0);
+          const scorePoints = Number(order.scorePoints ?? 100);
+          return acc + profit * scorePoints * 0.01;
+        }, 0);
     } else if (emp.position === "salexuly") {
       paid = filteredOrdersByArea
         .filter(
@@ -2300,7 +2308,11 @@ const Dashboard = () => {
               emp.name.trim().toLowerCase() &&
             order.paymentStatus === "ĐÃ THANH TOÁN",
         )
-        .reduce((sum, order) => sum + order.profit, 0);
+        .reduce((acc, order) => {
+          const profit = Number(order.profit ?? 0);
+          const scorePoints = Number(order.scorePoints ?? 100);
+          return acc + profit + (100 - scorePoints) * 0.01;
+        }, 0);
       unpaid = filteredOrdersByArea
         .filter(
           (order) =>
@@ -2309,7 +2321,11 @@ const Dashboard = () => {
             (order.paymentStatus === "CHƯA THANH TOÁN" ||
               order.paymentStatus === ""),
         )
-        .reduce((sum, order) => sum + order.profit, 0);
+        .reduce((acc, order) => {
+          const profit = Number(order.profit ?? 0);
+          const scorePoints = Number(order.scorePoints ?? 100);
+          return acc + profit + (100 - scorePoints) * 0.01;
+        }, 0);
     }
     const total = paid + unpaid;
     const tienVND = total * exchangeRate;
@@ -2334,7 +2350,11 @@ const Dashboard = () => {
             order.sale.trim().toLowerCase() === emp.name.trim().toLowerCase() &&
             order.paymentStatus === "ĐÃ THANH TOÁN",
         )
-        .reduce((sum, order) => sum + order.profit, 0);
+        .reduce((acc, order) => {
+          const profit = Number(order.profit ?? 0);
+          const scorePoints = Number(order.scorePoints ?? 100);
+          return acc + profit * scorePoints * 0.01;
+        }, 0);
       unpaid = filteredOrdersByArea
         .filter(
           (order) =>
@@ -2342,7 +2362,11 @@ const Dashboard = () => {
             (order.paymentStatus === "CHƯA THANH TOÁN" ||
               order.paymentStatus === ""),
         )
-        .reduce((sum, order) => sum + order.profit, 0);
+        .reduce((acc, order) => {
+          const profit = Number(order.profit ?? 0);
+          const scorePoints = Number(order.scorePoints ?? 100);
+          return acc + profit * scorePoints * 0.01;
+        }, 0);
     } else if (emp.position === "salexuly") {
       paid = filteredOrdersByArea
         .filter(
@@ -2351,7 +2375,11 @@ const Dashboard = () => {
               emp.name.trim().toLowerCase() &&
             order.paymentStatus === "ĐÃ THANH TOÁN",
         )
-        .reduce((sum, order) => sum + order.profit, 0);
+        .reduce((acc, order) => {
+          const profit = Number(order.profit ?? 0);
+          const scorePoints = Number(order.scorePoints ?? 100);
+          return acc + profit + (100 - scorePoints) * 0.01;
+        }, 0);
       unpaid = filteredOrdersByArea
         .filter(
           (order) =>
@@ -2360,7 +2388,11 @@ const Dashboard = () => {
             (order.paymentStatus === "CHƯA THANH TOÁN" ||
               order.paymentStatus === ""),
         )
-        .reduce((sum, order) => sum + order.profit, 0);
+        .reduce((acc, order) => {
+          const profit = Number(order.profit ?? 0);
+          const scorePoints = Number(order.scorePoints ?? 100);
+          return acc + profit + (100 - scorePoints) * 0.01;
+        }, 0);
     }
     const total = paid + unpaid;
     const tienVND = total * exchangeRate;
@@ -2385,7 +2417,11 @@ const Dashboard = () => {
             order.sale.trim().toLowerCase() === emp.name.trim().toLowerCase() &&
             order.paymentStatus === "ĐÃ THANH TOÁN",
         )
-        .reduce((sum, order) => sum + order.profit, 0);
+        .reduce((acc, order) => {
+          const profit = Number(order.profit ?? 0);
+          const scorePoints = Number(order.scorePoints ?? 100);
+          return acc + profit * scorePoints * 0.01;
+        }, 0);
       unpaid = filteredOrdersByArea
         .filter(
           (order) =>
@@ -2393,7 +2429,11 @@ const Dashboard = () => {
             (order.paymentStatus === "CHƯA THANH TOÁN" ||
               order.paymentStatus === ""),
         )
-        .reduce((sum, order) => sum + order.profit, 0);
+        .reduce((acc, order) => {
+          const profit = Number(order.profit ?? 0);
+          const scorePoints = Number(order.scorePoints ?? 100);
+          return acc + profit * scorePoints * 0.01;
+        }, 0);
     } else if (emp.position === "salexuly") {
       paid = filteredOrdersByArea
         .filter(
@@ -2402,7 +2442,11 @@ const Dashboard = () => {
               emp.name.trim().toLowerCase() &&
             order.paymentStatus === "ĐÃ THANH TOÁN",
         )
-        .reduce((sum, order) => sum + order.profit, 0);
+        .reduce((acc, order) => {
+          const profit = Number(order.profit ?? 0);
+          const scorePoints = Number(order.scorePoints ?? 100);
+          return acc + profit + (100 - scorePoints) * 0.01;
+        }, 0);
       unpaid = filteredOrdersByArea
         .filter(
           (order) =>
@@ -2411,7 +2455,11 @@ const Dashboard = () => {
             (order.paymentStatus === "CHƯA THANH TOÁN" ||
               order.paymentStatus === ""),
         )
-        .reduce((sum, order) => sum + order.profit, 0);
+        .reduce((acc, order) => {
+          const profit = Number(order.profit ?? 0);
+          const scorePoints = Number(order.scorePoints ?? 100);
+          return acc + profit + (100 - scorePoints) * 0.01;
+        }, 0);
     }
     const total = paid + unpaid;
     const tienVND = total * exchangeRate;
@@ -2436,7 +2484,11 @@ const Dashboard = () => {
             order.sale.trim().toLowerCase() === emp.name.trim().toLowerCase() &&
             order.paymentStatus === "ĐÃ THANH TOÁN",
         )
-        .reduce((sum, order) => sum + order.profit, 0);
+        .reduce((acc, order) => {
+          const profit = Number(order.profit ?? 0);
+          const scorePoints = Number(order.scorePoints ?? 100);
+          return acc + profit * scorePoints * 0.01;
+        }, 0);
       unpaid = filteredOrdersByArea
         .filter(
           (order) =>
@@ -2444,7 +2496,11 @@ const Dashboard = () => {
             (order.paymentStatus === "CHƯA THANH TOÁN" ||
               order.paymentStatus === ""),
         )
-        .reduce((sum, order) => sum + order.profit, 0);
+        .reduce((acc, order) => {
+          const profit = Number(order.profit ?? 0);
+          const scorePoints = Number(order.scorePoints ?? 100);
+          return acc + profit * scorePoints * 0.01;
+        }, 0);
     } else if (emp.position === "salexuly") {
       paid = filteredOrdersByArea
         .filter(
@@ -2453,7 +2509,11 @@ const Dashboard = () => {
               emp.name.trim().toLowerCase() &&
             order.paymentStatus === "ĐÃ THANH TOÁN",
         )
-        .reduce((sum, order) => sum + order.profit, 0);
+        .reduce((acc, order) => {
+          const profit = Number(order.profit ?? 0);
+          const scorePoints = Number(order.scorePoints ?? 100);
+          return acc + profit + (100 - scorePoints) * 0.01;
+        }, 0);
       unpaid = filteredOrdersByArea
         .filter(
           (order) =>
@@ -2462,7 +2522,11 @@ const Dashboard = () => {
             (order.paymentStatus === "CHƯA THANH TOÁN" ||
               order.paymentStatus === ""),
         )
-        .reduce((sum, order) => sum + order.profit, 0);
+        .reduce((acc, order) => {
+          const profit = Number(order.profit ?? 0);
+          const scorePoints = Number(order.scorePoints ?? 100);
+          return acc + profit + (100 - scorePoints) * 0.01;
+        }, 0);
     }
     const total = paid + unpaid;
     const tienVND = total * exchangeRate;
@@ -4268,7 +4332,34 @@ const Dashboard = () => {
                   </div>
                 </Col>
                 <Col xs={24} md={10}>
-                  <div className="sale-table-card">
+                  
+                  <div className="sale-pie-card">
+                    <div className="sale-table-header">
+                      <div
+                        className="sale-table-header-icon"
+                        style={{
+                          background: "linear-gradient(135deg,#f59e0b,#f97316)",
+                        }}
+                      >
+                        <span>🥧</span>
+                      </div>
+                      <div className="sale-table-header-text">
+                        <h3 className="sale-table-title">
+                          Phần trăm doanh số Sale
+                        </h3>
+                        <p className="sale-table-subtitle">
+                          Tỷ trọng doanh số theo các ca
+                        </p>
+                      </div>
+                    </div>
+                    <SalePieChartOuter data={salePieData} total={totalSale} />
+                  </div>
+                </Col>
+              </Row>
+
+              <Row gutter={[20, 20]}>
+                <Col xs={24} md={24}>
+                <div className="sale-table-card">
                     <div className="sale-table-header">
                       <div
                         className="sale-table-header-icon"
@@ -4294,32 +4385,6 @@ const Dashboard = () => {
                       pagination={false}
                       scroll={{ x: 720 }}
                     />
-                  </div>
-                </Col>
-              </Row>
-
-              <Row gutter={[20, 20]}>
-                <Col xs={24} md={24}>
-                  <div className="sale-pie-card">
-                    <div className="sale-table-header">
-                      <div
-                        className="sale-table-header-icon"
-                        style={{
-                          background: "linear-gradient(135deg,#f59e0b,#f97316)",
-                        }}
-                      >
-                        <span>🥧</span>
-                      </div>
-                      <div className="sale-table-header-text">
-                        <h3 className="sale-table-title">
-                          Phần trăm doanh số Sale
-                        </h3>
-                        <p className="sale-table-subtitle">
-                          Tỷ trọng doanh số theo các ca
-                        </p>
-                      </div>
-                    </div>
-                    <SalePieChartOuter data={salePieData} total={totalSale} />
                   </div>
                 </Col>
               </Row>
@@ -4437,7 +4502,34 @@ const Dashboard = () => {
 
                     <Row gutter={[20, 20]} style={{ marginTop: 20 }}>
                       <Col xs={24} md={24}>
-                        <div className="sale-table-card">
+                      <div className="sale-pie-card">
+                      <div className="sale-table-header">
+                        <div
+                          className="sale-table-header-icon"
+                          style={{
+                            background:
+                              "linear-gradient(135deg,#f59e0b,#f97316)",
+                          }}
+                        >
+                          <span>🥧</span>
+                        </div>
+                        <div className="sale-table-header-text">
+                          <h3 className="sale-table-title">
+                            Phần trăm doanh số Sale
+                          </h3>
+                          <p className="sale-table-subtitle">
+                            Tỷ trọng doanh số theo các ca
+                          </p>
+                        </div>
+                      </div>
+                      <SalePieChartOuter data={salePieData} total={totalSale} />
+                    </div>
+                      </Col>
+                    </Row>
+                  </Col>
+                  <Col xs={24} md={9}>
+                    
+                    <div className="sale-table-card">
                           <div className="sale-table-header">
                             <div
                               className="sale-table-header-icon"
@@ -4466,33 +4558,6 @@ const Dashboard = () => {
                             scroll={{ x: 720 }}
                           />
                         </div>
-                      </Col>
-                    </Row>
-                  </Col>
-                  <Col xs={24} md={9}>
-                    <div className="sale-pie-card">
-                      <div className="sale-table-header">
-                        <div
-                          className="sale-table-header-icon"
-                          style={{
-                            background:
-                              "linear-gradient(135deg,#f59e0b,#f97316)",
-                          }}
-                        >
-                          <span>🥧</span>
-                        </div>
-                        <div className="sale-table-header-text">
-                          <h3 className="sale-table-title">
-                            Phần trăm doanh số Sale
-                          </h3>
-                          <p className="sale-table-subtitle">
-                            Tỷ trọng doanh số theo các ca
-                          </p>
-                        </div>
-                      </div>
-                      <SalePieChartOuter data={salePieData} total={totalSale} />
-                    </div>
-
                     <div className="sale-table-card" style={{ marginTop: 20 }}>
                       <div className="sale-table-header">
                         <div

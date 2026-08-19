@@ -124,20 +124,29 @@ const Dashboard = () => {
     const completedOrders = ordersForDate.filter(
       (order) => order.paymentStatus === "ĐÃ THANH TOÁN"
     ).length;
-    const totalRevenue = ordersForDate.reduce(
-      (acc, order) => acc + Number(order.profit || 0),
-      0
-    );
+    const totalRevenue = ordersForDate.reduce((acc, order) => {
+      const profit = Number(order.profit ?? 0);
+      const scorePoints = Number(order.scorePoints ?? 100);
+      return acc + profit + (100 - scorePoints) * 0.01;
+    }, 0);
     const paidRevenue = ordersForDate
       .filter((order) => order.paymentStatus === "ĐÃ THANH TOÁN")
-      .reduce((acc, order) => acc + Number(order.profit || 0), 0);
+      .reduce((acc, order) => {
+        const profit = Number(order.profit ?? 0);
+        const scorePoints = Number(order.scorePoints ?? 100);
+        return acc + profit + (100 - scorePoints) * 0.01;
+      }, 0);
     const unpaidRevenue = ordersForDate
       .filter(
         (order) =>
           order.paymentStatus === "CHƯA THANH TOÁN" ||
           order.paymentStatus === ""
       )
-      .reduce((acc, order) => acc + Number(order.profit || 0), 0);
+      .reduce((acc, order) => {
+        const profit = Number(order.profit ?? 0);
+        const scorePoints = Number(order.scorePoints ?? 100);
+        return acc + profit + (100 - scorePoints) * 0.01;
+      }, 0);
     const paymentRate = totalRevenue ? paidRevenue / totalRevenue : 0;
     return {
       sharedOrders,
@@ -232,20 +241,29 @@ const Dashboard = () => {
     if (user) {
       filtered = filtered.filter((order) => order.salexuly === user);
     }
-    const totalRevenueSum = filtered.reduce(
-      (acc, order) => acc + Number(order.profit || 0),
-      0
-    );
+    const totalRevenueSum = filtered.reduce((acc, order) => {
+      const profit = Number(order.profit ?? 0);
+      const scorePoints = Number(order.scorePoints ?? 100);
+      return acc + profit + (100 - scorePoints) * 0.01;
+    }, 0);
     const paidRevenueSum = filtered
       .filter((order) => order.paymentStatus === "ĐÃ THANH TOÁN")
-      .reduce((acc, order) => acc + Number(order.profit || 0), 0);
+      .reduce((acc, order) => {
+        const profit = Number(order.profit ?? 0);
+        const scorePoints = Number(order.scorePoints ?? 100);
+        return acc + profit + (100 - scorePoints) * 0.01;
+      }, 0);
     const unpaidRevenueSum = filtered
       .filter(
         (order) =>
           order.paymentStatus === "CHƯA THANH TOÁN" ||
           order.paymentStatus === ""
       )
-      .reduce((acc, order) => acc + Number(order.profit || 0), 0);
+      .reduce((acc, order) => {
+        const profit = Number(order.profit ?? 0);
+        const scorePoints = Number(order.scorePoints ?? 100);
+        return acc + profit + (100 - scorePoints) * 0.01;
+      }, 0);
     const summaryRate = totalRevenueSum ? paidRevenueSum / totalRevenueSum : 0;
     const ratePercentage = summaryRate * 100;
 
@@ -324,7 +342,11 @@ const Dashboard = () => {
     const filtered = getFilteredByUser(getFilteredOrders());
     return filtered
       .filter((order) => order.paymentStatus === "ĐÃ THANH TOÁN")
-      .reduce((acc, order) => acc + Number(order.profit || 0), 0) * 17000;
+      .reduce((acc, order) => {
+      const profit = Number(order.profit ?? 0);
+      const scorePoints = Number(order.scorePoints ?? 100);
+      return acc + profit + (100 - scorePoints) * 0.01;
+    }, 0) * 17000;
   };
 
   const getAvgPaymentRate = () => {
@@ -335,10 +357,18 @@ const Dashboard = () => {
     let count = 0;
     dates.forEach((date) => {
       const ordersForDate = filtered.filter((order) => order.orderDate === date);
-      const totalRevenue = ordersForDate.reduce((acc, order) => acc + Number(order.profit || 0), 0);
+      const totalRevenue = ordersForDate.reduce((acc, order) => {
+      const profit = Number(order.profit ?? 0);
+      const scorePoints = Number(order.scorePoints ?? 100);
+      return acc + profit + (100 - scorePoints) * 0.01;
+    }, 0);
       const paidRevenue = ordersForDate
         .filter((order) => order.paymentStatus === "ĐÃ THANH TOÁN")
-        .reduce((acc, order) => acc + Number(order.profit || 0), 0);
+        .reduce((acc, order) => {
+      const profit = Number(order.profit ?? 0);
+      const scorePoints = Number(order.scorePoints ?? 100);
+      return acc + profit + (100 - scorePoints) * 0.01;
+    }, 0);
       if (totalRevenue > 0) {
         totalRate += paidRevenue / totalRevenue;
         count++;

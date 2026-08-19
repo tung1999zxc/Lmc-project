@@ -18,6 +18,7 @@ import {
   Modal,
   Space,
   Upload,
+  Image,
   message,
 } from "antd";
 import {
@@ -40,6 +41,8 @@ const OrderForm = ({
   employees = [],
   dataPagename = [],
   onProductsChange,
+  scoreOrderExternal,
+  onCancelScore,
 }) => {
   const [form] = Form.useForm();
   const { Option } = Select;
@@ -62,6 +65,47 @@ const OrderForm = ({
   const [scoreImageList, setScoreImageList] = useState([]);
   const [scoreUploading, setScoreUploading] = useState(false);
   const [scoreSaving, setScoreSaving] = useState(false);
+  // "view": chỉ xem (từ OrderList), "edit": chỉnh sửa (từ modal khách)
+  const [scoreMode, setScoreMode] = useState("edit");
+
+  // Auto-open modal khi có order được truyền từ ngoài (OrderList)
+  useEffect(() => {
+    if (scoreOrderExternal) {
+      setScoreOrder(scoreOrderExternal);
+      setScoreMode("view");
+      const initial = {};
+      SCORE_ITEMS.forEach((item) => {
+        initial[item.key] = false;
+      });
+      const savedItems = Array.isArray(scoreOrderExternal?.scoreItems)
+        ? scoreOrderExternal.scoreItems
+        : [];
+      savedItems.forEach((key) => {
+        if (initial.hasOwnProperty(key)) initial[key] = true;
+      });
+      setScoreChecked(initial);
+      const savedUrls = Array.isArray(scoreOrderExternal?.scoreImages)
+        ? scoreOrderExternal.scoreImages
+        : [];
+      setScoreImageList(
+        savedUrls.map((url) => ({
+          kind: "cloudinary",
+          url,
+          uid: url,
+        })),
+      );
+      setScoreModalVisible(true);
+    }
+  }, [scoreOrderExternal]);
+
+  const handleScoreModalClose = () => {
+    setScoreModalVisible(false);
+    setScoreOrder(null);
+    setScoreChecked({});
+    setScoreImageList([]);
+    setScoreMode("edit");
+    if (onCancelScore) onCancelScore();
+  };
 
   const computeScore = (checked) => {
     const total = SCORE_ITEMS.reduce((sum, item) => {
@@ -737,18 +781,26 @@ const OrderForm = ({
         />
       </Modal>
       <Modal
-        title={`Chấm điểm đơn hàng - STT ${scoreOrder?.stt || ""}`}
+        title={
+          scoreMode === "view"
+            ? `Xem điểm đơn hàng - STT ${scoreOrder?.stt || ""}`
+            : `Chấm điểm đơn hàng - STT ${scoreOrder?.stt || ""}`
+        }
         open={scoreModalVisible}
-        onCancel={() => {
-          setScoreModalVisible(false);
-          setScoreOrder(null);
-          setScoreChecked({});
-          setScoreImageList([]);
-        }}
-        onOk={handleSaveScore}
-        okText={scoreUploading ? "Đang tải ảnh..." : "Lưu điểm"}
-        cancelText="Hủy"
-        confirmLoading={scoreSaving || scoreUploading}
+        onCancel={handleScoreModalClose}
+        footer={
+          scoreMode === "edit" ? (
+            <Button
+              type="primary"
+              onClick={handleSaveScore}
+              loading={scoreSaving || scoreUploading}
+            >
+              {scoreUploading ? "Đang tải ảnh..." : "Lưu điểm"}
+            </Button>
+          ) : (
+            <Button onClick={handleScoreModalClose}>Đóng</Button>
+          )
+        }
         width={600}
         centered
       >
@@ -781,19 +833,29 @@ const OrderForm = ({
                   borderBottom: "1px dashed #eee",
                 }}
               >
-                <Checkbox
-                  checked={!!scoreChecked[item.key]}
-                  onChange={(e) =>
-                    setScoreChecked((prev) => ({
-                      ...prev,
-                      [item.key]: e.target.checked,
-                    }))
-                  }
+                {scoreMode === "edit" ? (
+                  <Checkbox
+                    checked={!!scoreChecked[item.key]}
+                    onChange={(e) =>
+                      setScoreChecked((prev) => ({
+                        ...prev,
+                        [item.key]: e.target.checked,
+                      }))
+                    }
+                  >
+                    <span style={{ marginLeft: 4 }}>{item.label}</span>
+                  </Checkbox>
+                ) : (
+                  <span style={{ color: "#333" }}>{item.label}</span>
+                )}
+                <span
+                  style={{
+                    marginLeft: "auto",
+                    color: scoreChecked[item.key] ? "#52c41a" : "#999",
+                    fontWeight: scoreChecked[item.key] ? 600 : 400,
+                  }}
                 >
-                  <span style={{ marginLeft: 4 }}>{item.label}</span>
-                </Checkbox>
-                <span style={{ marginLeft: "auto", color: "#1890ff" }}>
-                  {item.points}đ
+                  {scoreChecked[item.key] ? `+${item.points}đ ✓` : `${item.points}đ`}
                 </span>
               </div>
             ))}
@@ -803,54 +865,33 @@ const OrderForm = ({
             <label
               style={{ fontWeight: 600, display: "block", marginBottom: 8 }}
             >
-              Ảnh chứng minh (có thể chọn nhiều ảnh)
+              Ảnh chứng minh ({scoreImageList.length} ảnh)
             </label>
-            <Upload
-              listType="picture-card"
-              multiple
-              beforeUpload={(file) => {
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                  setScoreImageList((prev) => [
-                    ...prev,
-                    {
-                      kind: "new",
-                      file,
-                      preview: e.target.result,
-                      uid: `new-${file.uid}-${Date.now()}`,
-                    },
-                  ]);
-                };
-                reader.readAsDataURL(file);
-                return false;
-              }}
-              onRemove={(file) => {
-                const uid = file.uid;
-                setScoreImageList((prev) =>
-                  prev.filter((item) => item.uid !== uid),
-                );
-              }}
-              fileList={scoreImageList.map((item) => ({
-                uid: item.uid,
-                url: item.kind === "cloudinary" ? item.url : item.preview,
-                status: "done",
-                name:
-                  item.kind === "cloudinary"
-                    ? `cloudinary-${item.uid}`
-                    : `new-${item.uid}`,
-              }))}
-            >
-              {scoreImageList.length < 5 && (
-                <div>
-                  <PlusOutlined />
-                  <div style={{ marginTop: 8 }}>Tải ảnh</div>
-                </div>
-              )}
-            </Upload>
-            <div style={{ fontSize: 12, color: "#999", marginTop: 4 }}>
-              Tối đa 5 ảnh, mỗi ảnh tối đa 5MB. Có thể paste ảnh từ clipboard
-              (Ctrl+V)
-            </div>
+            {scoreImageList.length > 0 ? (
+              <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+                {scoreImageList.map((item, idx) => (
+                  <Image
+                    key={item.uid}
+                    src={item.kind === "cloudinary" ? item.url : item.preview}
+                    alt={`Ảnh ${idx + 1}`}
+                    width={100}
+                    height={100}
+                    style={{
+                      objectFit: "cover",
+                      borderRadius: 8,
+                      border: "1px solid #eee",
+                    }}
+                    preview={{
+                      maskClassName: "custom-preview-mask",
+                    }}
+                  />
+                ))}
+              </div>
+            ) : (
+              <div style={{ color: "#999", fontStyle: "italic" }}>
+                Không có ảnh
+              </div>
+            )}
           </div>
         </div>
       </Modal>

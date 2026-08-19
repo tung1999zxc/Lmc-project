@@ -31,6 +31,7 @@ import {
   CloseOutlined,
   PlusOutlined,
   CopyOutlined,
+  EyeOutlined,
 } from "@ant-design/icons";
 import dayjs from "dayjs";
 import OrderForm from "./OrderForm";
@@ -464,6 +465,7 @@ const OrderList = () => {
   // Ref lưu tạm giá trị nhập lý do istick5 (chỉ dùng khi ấn Lưu mà chưa blur)
   const istick5DraftRef = useRef({});
   const [formVisible, setFormVisible] = useState(false);
+  const [scoreOrderExternal, setScoreOrderExternal] = useState(null);
   const [dateRange2, setDateRange2] = useState("today");
   const [dateRange, setDateRange] = useState("undefined");
   const [searchText, setSearchText] = useState("");
@@ -2962,6 +2964,27 @@ const OrderList = () => {
           },
         ]
       : []),
+    {
+      title: "THẢ ĐƠN",
+      key: "scorePoints",
+      dataIndex: "scorePoints",
+      width: 120,
+      render: (scorePoints, record) => {
+        if (scorePoints) {
+          return (
+            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              <span style={{ color: "#52c41a", fontWeight: 600 }}>Thả - {scorePoints}%</span>
+              <EyeOutlined
+                style={{ color: "#1890ff", cursor: "pointer", fontSize: 16 }}
+                onClick={() => setScoreOrderExternal(record)}
+                title="Xem chi tiết điểm"
+              />
+            </div>
+          );
+        }
+        return <span style={{ color: "#ff4d4f" }}>-</span>;
+      },
+    },
     ...(currentUser.position === "salexuly" ||
     
     currentUser.position === "admin"
@@ -5548,6 +5571,44 @@ const OrderList = () => {
                       <span className="order-summary-value">
                         {(
                           filteredOrders.reduce((acc, order) => {
+                            const profit = Number(order.profit ?? 0);
+                            const scorePoints = Number(order.scorePoints ?? 100);
+                            return acc + profit * scorePoints * 0.01;
+                          }, 0)
+                        ).toLocaleString()}
+                      </span>
+                    </span>
+                  </div>
+                )}
+                {currentUser.position === "salexuly" && (
+                  <div className="order-summary-pill order-summary-pill-wide">
+                    <span className="order-summary-icon">💰</span>
+                    <span className="order-summary-content">
+                      <span className="order-summary-label">
+                        Tổng DS (Chưa DONE)
+                      </span>
+                      <span className="order-summary-value">
+                        {(
+                          filteredOrders.reduce((acc, order) => {
+                            const profit = Number(order.profit ?? 0);
+                            const scorePoints = Number(order.scorePoints ?? 100);
+                            return acc + profit + (100 - scorePoints) * 0.01;
+                          }, 0)*17000
+                        ).toLocaleString()}
+                      </span>
+                    </span>
+                  </div>
+                )}
+                {currentUser.position !== "salenhapdon" && currentUser.position !== "salexuly" && (
+                  <div className="order-summary-pill order-summary-pill-wide">
+                    <span className="order-summary-icon">💰</span>
+                    <span className="order-summary-content">
+                      <span className="order-summary-label">
+                        Tổng DS (Chưa DONE)
+                      </span>
+                      <span className="order-summary-value">
+                        {(
+                          filteredOrders.reduce((acc, order) => {
                             return (
                               acc +
                               (Number(order.revenuemkt ?? order.revenue ?? 0) ||
@@ -5559,6 +5620,7 @@ const OrderList = () => {
                     </span>
                   </div>
                 )}
+                
                 {currentUser.position_team === "mkt" && (
                   <div className="order-summary-pill order-summary-pill-wide">
                     <span className="order-summary-icon">💰</span>
@@ -6456,6 +6518,8 @@ const OrderList = () => {
         resetPagename={resetPagename}
         loading={loading}
         onProductsChange={setProducts}
+        scoreOrderExternal={scoreOrderExternal}
+        onCancelScore={() => setScoreOrderExternal(null)}
       />
       <CustomerHistoryModal
         visible={modalVisible}
