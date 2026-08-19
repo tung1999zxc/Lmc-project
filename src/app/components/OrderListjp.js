@@ -2513,37 +2513,7 @@ const OrderListjp = () => {
         </div>
       ),
     },
-    {
-      title: (
-        <Checkbox
-          checked={selectedColumns.includes("totalWeight")}
-          onChange={(e) => handleColumnSelect("totalWeight", e.target.checked)}
-        >
-          TỔNG KL
-        </Checkbox>
-      ),
-      key: "totalWeight",
-      render: (_, record) => {
-        const totalWeight = (record.products || []).reduce((sum, item) => {
-          const productInfo = products2.find((p) => p.name === item.product);
-          const weight = productInfo?.weight || 0;
-          return sum + item.quantity * weight;
-        }, 0);
-        return totalWeight > 0 ? (
-          <span style={{ fontWeight: 600 }}>{totalWeight}g</span>
-        ) : (
-          "-"
-        );
-      },
-      sorter: (a, b) => {
-        const calcWeight = (products) =>
-          (products || []).reduce((sum, item) => {
-            const productInfo = products2.find((p) => p.name === item.product);
-            return sum + item.quantity * (productInfo?.weight || 0);
-          }, 0);
-        return calcWeight(a.products) - calcWeight(b.products);
-      },
-    },
+    //    
     { title: "DOANH SỐ", width: 100, dataIndex: "revenue", key: "revenue" },
 
     { title: "DOANH THU", dataIndex: "profit", key: "profit", width: 20 },
