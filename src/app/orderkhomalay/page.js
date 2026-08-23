@@ -392,11 +392,11 @@ function isLate(o) {
 function getViewList(orders, view) {
   switch (view) {
     case "all":
-      return orders.slice();
-    case "unsent2":
       return orders.filter(
         (o) => o.deliveryStatus === "HOÀN" || o.deliveryStatus === "HOÀN HÀNG",
       );
+    case "unsent2":
+      return orders.filter((o) => !o.delivered);
     case "unsent":
       return orders.filter((o) => !o.ngayGui && o.deliveryStatus !== "HOÀN");
     case "sent":
@@ -439,6 +439,7 @@ export default function KhoOrderList() {
   const [matchPreview, setMatchPreview] = useState(null); // null | array
   const [trackNote, setTrackNote] = useState("");
   const [sttDoneInput, setSttDoneInput] = useState("");
+  const [sttHoanInput, setSttHoanInput] = useState("");
   // Panel collapse
   const [p1collapsed, setP1collapsed] = useState(false);
   const [p2collapsed, setP2collapsed] = useState(false);
@@ -533,9 +534,9 @@ export default function KhoOrderList() {
     () => ({
       all: ordersWithState.length,
       unsent2: ordersWithState.filter((o) => o.saleReport === "HOÀN").length,
-      unsent: ordersWithState.filter(
-        (o) => !o.ngayGui && o.saleReport !== "HOÀN",
-      ).length,
+      unsent:
+        ordersWithState.filter((o) => !o.ngayGui && o.saleReport !== "HOÀN")
+          .length - 1,
       sent: ordersWithState.filter(
         (o) => o.ngayGui && !o.delivered && !o.reconciled,
       ).length,
@@ -1038,6 +1039,24 @@ export default function KhoOrderList() {
     } catch (error) {
       console.error(error);
       alert("Lỗi khi cập nhật trạng thái");
+    }
+  };
+
+  const handleUpdateHoanStatus = async () => {
+    const sttList = sttHoanInput.trim().split(/\s+/).map(Number);
+    if (!sttList.length) {
+      alert("Vui lòng nhập STT đơn hàng");
+      return;
+    }
+
+    try {
+      await axios.post("/api/jp/orders/mark-hoan", { sttList });
+      alert("Đã đánh dấu HOÀN");
+      setSttHoanInput("");
+      fetchOrders();
+    } catch (error) {
+      console.error(error);
+      alert("Lỗi khi cập nhật trạng thái HOÀN");
     }
   };
 
@@ -1635,30 +1654,8 @@ export default function KhoOrderList() {
 
               {/* Panel 2: Ghép mã VĐ */}
               <div className={`tp-body${p2collapsed ? " hidden" : ""}`}>
-                <Row gutter={16} align="top">
+              <Row gutter={16} align="top" style={{ marginBottom: 12 }}>
                   <Col flex="1">
-                    <div className="dp-col">
-                      <label>STT đơn hàng</label>
-                      <textarea
-                        placeholder={"28792\n28742\n28499"}
-                        value={bulkStt}
-                        onChange={(e) => setBulkStt(e.target.value)}
-                      />
-                    </div>
-                  </Col>
-
-                  <Col flex="1">
-                    <div className="dp-col">
-                      <label>Mã vận đơn</label>
-                      <textarea
-                        placeholder={"44413913703\n44413913714\n44413913725"}
-                        value={bulkTrack}
-                        onChange={(e) => setBulkTrack(e.target.value)}
-                      />
-                    </div>
-                  </Col>
-
-                  <Col flex="230px">
                     <div className="dp-col">
                       <label>STT</label>
                       <textarea
@@ -1681,7 +1678,57 @@ export default function KhoOrderList() {
                       Đánh dấu GIAO THÀNH CÔNG
                     </button>
                   </Col>
+
+                  <Col flex="1">
+                    <div className="dp-col">
+                      <label>STT</label>
+                      <textarea
+                        placeholder={"1\n2\n3"}
+                        value={sttHoanInput}
+                        onChange={(e) => setSttHoanInput(e.target.value)}
+                      />
+                    </div>
+                    <button
+                      className="btn btn-sec btn-sm"
+                      onClick={handleUpdateHoanStatus}
+                    >
+                      <svg
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                      >
+                        <path d="M3 12a9 9 0 1 0 3-6.7L3 8" />
+                        <path d="M3 3v5h5" />
+                      </svg>
+                      Đánh dấu HOÀN
+                    </button>
+                  </Col>
                 </Row>
+                <Row gutter={16} align="top">
+                  <Col flex="1">
+                    <div className="dp-col">
+                      <label>STT đơn hàng</label>
+                      <textarea
+                        placeholder={"28792\n28742\n28499"}
+                        value={bulkStt}
+                        onChange={(e) => setBulkStt(e.target.value)}
+                      />
+                    </div>
+                  </Col>
+
+                  <Col flex="1">
+                    <div className="dp-col">
+                      <label>Mã vận đơn</label>
+                      <textarea
+                        placeholder={"44413913703\n44413913714\n44413913725"}
+                        value={bulkTrack}
+                        onChange={(e) => setBulkTrack(e.target.value)}
+                      />
+                    </div>
+                  </Col>
+                </Row>
+
+                
 
                 <div className="panel-actions">
                   <button

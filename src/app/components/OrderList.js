@@ -1435,6 +1435,10 @@ const OrderList = () => {
               }
               case "ero":
                 return order.salexuly === "";
+              case "tha50":
+                return order.scorePoints === 50;
+              case "tha70":
+                return order.scorePoints === 70;
               case "waiting_done":
                 return order.saleReport !== "DONE";
               case "khoshiping":
@@ -6007,6 +6011,8 @@ const OrderList = () => {
                         : []),
 
                       { value: "done", label: "Đơn Done" },
+                      { value: "tha50", label: "Đơn thả 50" },
+                      { value: "tha70", label: "Đơn thả 70" },
 
                       {
                         value: "unpaid_success",
