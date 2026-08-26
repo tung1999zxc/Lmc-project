@@ -3368,7 +3368,7 @@ const OrderList = () => {
         const totalWeight = (record.products || []).reduce((sum, item) => {
           const productInfo = products2.find((p) => p.name === item.product);
           const weight = productInfo?.weight || 0;
-          return sum + item.quantity * weight;
+          return sum + item.quantity * weight + 50;
         }, 0);
         return totalWeight > 0 ? (
           <span className="weight-cell">{totalWeight}g</span>
