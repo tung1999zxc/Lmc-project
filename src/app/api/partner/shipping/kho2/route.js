@@ -28,6 +28,7 @@ export async function GET(req) {
         category: 1,
         trackingCode: 1,
         deliveryStatus: 1,
+        paymentStatus: 1,
         // note: 0,
       })
       .toArray();
