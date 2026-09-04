@@ -781,7 +781,7 @@ const Dashboard = () => {
       minusAmount = 27000000;
     }
     if (month === 8 && year === 2026 && selectedTeam === "all") {
-      minusAmount = 40000000;
+      minusAmount = 54900000;
     }
 
     return (totalTienThua || 0) - minusAmount;
