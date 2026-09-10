@@ -114,6 +114,8 @@ const OrderForm = ({
     const total = SCORE_ITEMS.reduce((sum, item) => {
       return sum + (checked?.[item.key] ? item.points : 0);
     }, 0);
+    // Không tích mục nào -> 100 điểm
+    if (total === 0) return 100;
     if (total < 50) return 50;
     return 70;
   };
@@ -127,7 +129,6 @@ const OrderForm = ({
     // Reset state trước khi mở cho đơn mới
     setScoreChecked({});
     setScoreImageList([]);
-    setScoreMode("edit");
 
     let orderRecord = record;
     if (!orderRecord && initialValues?.id) {
@@ -137,6 +138,13 @@ const OrderForm = ({
         ...liveValues,
       };
     }
+
+    // Chỉ cho phép chỉnh sửa khi deliveryStatus === ""
+    // Ngược lại chỉ được xem (không tick, không upload, không lưu)
+    const canEdit =
+      orderRecord && (orderRecord.deliveryStatus ?? "") === "";
+    setScoreMode(canEdit ? "edit" : "view");
+
     setScoreOrder(orderRecord);
     const initial = {};
     SCORE_ITEMS.forEach((item) => {
