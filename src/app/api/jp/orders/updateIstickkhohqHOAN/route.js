@@ -1,5 +1,4 @@
-import { connectToDatabase } from '../../../../lib/mongodb2.js';
-
+import { connectToDatabase } from "../../../../lib/mongodb2.js";
 
 export async function POST(req) {
   try {
@@ -7,9 +6,12 @@ export async function POST(req) {
     const { db } = await connectToDatabase();
 
     if (!Array.isArray(orders) || orders.length === 0) {
-      return new Response(JSON.stringify({ error: "Không có đơn để cập nhật" }), {
-        status: 400,
-      });
+      return new Response(
+        JSON.stringify({ error: "Không có đơn để cập nhật" }),
+        {
+          status: 400,
+        },
+      );
     }
 
     const bulkOps = orders.map((order) => ({
@@ -20,6 +22,8 @@ export async function POST(req) {
             shippingDate1: "",
             deliveryStatus: "HOÀN",
             saleReport: "HOÀN",
+            revenue: 0,
+            profit: 0,
             // istick: true,
           },
         },
@@ -34,7 +38,7 @@ export async function POST(req) {
         matched: result.matchedCount,
         modified: result.modifiedCount,
       }),
-      { status: 200 }
+      { status: 200 },
     );
   } catch (error) {
     console.error("Lỗi POST /api/orders/updateIstick:", error);

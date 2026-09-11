@@ -15,6 +15,8 @@ export async function POST(req) {
             shippingDate1: "",
             deliveryStatus: "HOÀN",
             saleReport: "HOÀN",
+            revenue: 0,
+            profit: 0,
           },
         },
       },
