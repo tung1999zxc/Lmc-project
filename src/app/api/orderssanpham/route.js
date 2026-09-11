@@ -17,6 +17,8 @@ export async function GET(req) {
       deliveryStatus: 1,
       profit: 1,
       saleReport: 1,
+      orderDate: 1,
+      mkt: 1,
     };
 
     const orders = await db

@@ -86,6 +86,7 @@ const InventoryPage = () => {
   const [orders2, setOrders] = useState([]);
   const [products, setProducts] = useState([]);
 const [lastFilterType, setLastFilterType] = useState(null);
+const [lastOrderFilter, setLastOrderFilter] = useState(null);
   // Forms
   const [form] = Form.useForm();
   const [editForm] = Form.useForm();
@@ -349,6 +350,63 @@ const rowSelection = {
     return map;
   }, [orders2]);
 
+  /**
+   * lastOrderMap: { [productName]: { lastDate: 'YYYY-MM-DD', dayCount: number, daysSince: number } }
+   * - lastDate: ngày gần nhất có đơn
+   * - dayCount: tổng số ngày có đơn (distinct)
+   * - daysSince: số ngày tính từ hôm nay đến lastDate
+   */
+  const lastOrderMap = useMemo(() => {
+    const map = Object.create(null);
+    if (!orders2 || orders2.length === 0) return map;
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    for (const order of orders2) {
+      if (!order.orderDate) continue;
+      if (!Array.isArray(order.products)) continue;
+
+      const orderDate = new Date(order.orderDate);
+      if (isNaN(orderDate.getTime())) continue;
+      orderDate.setHours(0, 0, 0, 0);
+
+      for (const item of order.products) {
+        const pname = normalizeName(item.product);
+        if (!pname) continue;
+
+        if (!map[pname]) {
+          map[pname] = {
+            lastDate: orderDate,
+            daySet: new Set(),
+          };
+        }
+
+        // Cập nhật ngày cuối cùng (lớn nhất)
+        if (orderDate > map[pname].lastDate) {
+          map[pname].lastDate = orderDate;
+        }
+        map[pname].daySet.add(orderDate.getTime());
+      }
+    }
+
+    // Chuẩn hóa output + tính daysSince
+    const out = Object.create(null);
+    for (const key of Object.keys(map)) {
+      const { lastDate, daySet } = map[key];
+      const daysSince = Math.max(
+        0,
+        Math.round((today - lastDate) / (1000 * 60 * 60 * 24))
+      );
+      out[key] = {
+        lastDate,
+        dayCount: daySet.size,
+        daysSince,
+      };
+    }
+    return out;
+  }, [orders2]);
+
   /** ===========
    * filteredProducts: search by name.
    * This is memoized so Table sees stable reference when inputs unchanged.
@@ -422,8 +480,25 @@ else if (lastFilterType === "createdAt" && createdAtRange?.length === 2) {
   });
 }
 
+// ✅ Filter không ra đơn theo số tháng
+if (lastOrderFilter) {
+  const daysMap = {
+    "1thang": 30,
+    "2thang": 60,
+    "3thang": 90,
+  };
+  const minDays = daysMap[lastOrderFilter];
+  if (minDays) {
+    data = data.filter((p) => {
+      const info = lastOrderMap[normalizeName(p.name)];
+      if (!info) return true; // không có đơn nào → vẫn hiển thị
+      return info.daysSince >= minDays;
+    });
+  }
+}
+
   return data;
-}, [products, searchText, filterMktTest,lastFilterType, selectedMktFilter,testDayPreset,testDayRange,createdAtRange]);
+}, [products, searchText, filterMktTest,lastFilterType, selectedMktFilter,testDayPreset,testDayRange,createdAtRange, lastOrderFilter, lastOrderMap]);
 
   /** Compute derived "orders" list filtered by preset to match original behavior */
   const ordersByPreset = useMemo(() => {
@@ -675,6 +750,50 @@ else if (lastFilterType === "createdAt" && createdAtRange?.length === 2) {
             <span>{text}</span>
           </Popover>
         ),
+      },
+      {
+        title: "Đơn cuối",
+        key: "lastOrder",
+        width: 110,
+        sorter: (a, b) => {
+          const av = lastOrderMap[normalizeName(a.name)]?.lastDate?.getTime() || 0;
+          const bv = lastOrderMap[normalizeName(b.name)]?.lastDate?.getTime() || 0;
+          return av - bv;
+        },
+        render: (_, record) => {
+          const info = lastOrderMap[normalizeName(record.name)];
+          if (!info) {
+            return <span style={{ color: "var(--sub)", fontSize: 12 }}>—</span>;
+          }
+          const dateStr = moment(info.lastDate).format("DD/MM/YYYY");
+          // Số ngày từ hôm nay (11/9/2026) đến ngày đơn cuối
+          const daysSince = info.daysSince;
+          // Tô màu: <7 ngày xanh, 7-14 ngày vàng, >14 ngày đỏ
+          const color =
+            daysSince <= 3
+              ? "#15803d"
+              : daysSince <= 7
+              ? "#ca8a04"
+              : daysSince <= 14
+              ? "#ea580c"
+              : "#dc2626";
+          return (
+            <span style={{ fontSize: 13 }}>
+              <span style={{ fontWeight: 600, color: "var(--text)" }}>
+                {dateStr}
+              </span><br></br>
+              <span
+                style={{
+                  color,
+                  fontWeight: 600,
+                  marginLeft: 6,
+                }}
+              >
+                ({daysSince} ngày)
+              </span>
+            </span>
+          );
+        },
       },
       {
         title: "Khối lượng",
@@ -1242,8 +1361,10 @@ const calculateStats2Days = useCallback(() => {
   }
   
   const now = new Date();
-  const twoDaysAgo = new Date();
-  twoDaysAgo.setDate(now.getDate() - 3);
+  // 3 hôm gần đây: từ 3 ngày trước đến hiện tại
+  const threeDaysAgo = new Date();
+  threeDaysAgo.setDate(now.getDate() - 3);
+  threeDaysAgo.setHours(0, 0, 0, 0);
 
   const stats = {};
 
@@ -1251,7 +1372,7 @@ const calculateStats2Days = useCallback(() => {
     if (!order.orderDate) return;
 
     const orderDate = new Date(order.orderDate);
-    if (orderDate < twoDaysAgo || orderDate > now) return;
+    if (orderDate < threeDaysAgo || orderDate > now) return;
 
     if (!Array.isArray(order.products)) return;
 
@@ -1351,6 +1472,49 @@ const calculateStats2Days = useCallback(() => {
   } catch (err) {
     console.error(err);
     message.error("Lỗi cập nhật");
+  } finally {
+    setLoading(false);
+  }
+};
+// Tắt tất cả sản phẩm > 90 ngày không có đơn
+const handleDisableStale = async () => {
+  // Đếm trước các sản phẩm sẽ bị ảnh hưởng (dựa trên lastOrderMap)
+  const affected = [];
+  for (const p of products || []) {
+    if (p.status === false) continue;
+    const info = lastOrderMap[normalizeName(p.name)];
+    const daysSince = info?.daysSince ?? Infinity;
+    if (daysSince >= 90) {
+      affected.push({ key: p.key, name: p.name, daysSince });
+    }
+  }
+
+  if (affected.length === 0) {
+    message.info("Không có sản phẩm nào > 90 ngày không có đơn");
+    return;
+  }
+
+  const ok = window.confirm(
+    `Sẽ tắt (status = false) cho ${affected.length} sản phẩm > 90 ngày không có đơn.\n\n` +
+      affected
+        .slice(0, 10)
+        .map((a) => `• ${a.name} (${a.daysSince} ngày)`)
+        .join("\n") +
+      (affected.length > 10 ? `\n... và ${affected.length - 10} sản phẩm khác` : "") +
+      `\n\nBạn có chắc chắn muốn tiếp tục?`
+  );
+  if (!ok) return;
+
+  try {
+    setLoading(true);
+    const res = await axios.post("/api/products/disable-stale", { days: 90 });
+    message.success(
+      res.data?.message || `Đã tắt ${res.data?.disabledCount ?? 0} sản phẩm`
+    );
+    await fetchProducts();
+  } catch (err) {
+    console.error(err);
+    message.error("Lỗi khi tắt sản phẩm cũ");
   } finally {
     setLoading(false);
   }
@@ -1660,6 +1824,49 @@ const calculateStats2Days = useCallback(() => {
     <EditFilled />
     ĐÁNH DẤU CHỦ QUYỀN
   </button>
+
+  {/* Bộ lọc không ra đơn theo tháng */}
+  <Select
+    allowClear
+    placeholder="Không ra đơn..."
+    style={{ minWidth: 220}}
+    value={lastOrderFilter}
+    onChange={(value) => {
+      setLastOrderFilter(value);
+      setLastFilterType(value ? "lastOrder" : null);
+    }}
+    dropdownStyle={{ borderRadius: 10 }}
+  >
+    <Option value="1thang">
+      Không ra đơn 1 tháng
+    </Option>
+    <Option value="2thang">
+      Không ra đơn 2 tháng
+    </Option>
+    <Option value="3thang">
+      Không ra đơn 3 tháng
+    </Option>
+  </Select>
+
+  {/* <button
+    onClick={handleDisableStale}
+    disabled={currentUser?.position === "mkt" || currentUser?.position === "lead"}
+    style={{
+      display: "inline-flex",
+      alignItems: "center",
+      gap: 6,
+      padding: "6px 14px",
+      borderRadius: 8,
+      border: "1px solid #dc2626",
+      background: "#fff",
+      color: "#dc2626",
+      fontWeight: 600,
+      cursor: "pointer",
+    }}
+  >
+    <CloseCircleOutlined style={{ fontSize: 15 }} />
+    Tắt sản phẩm &gt; 90 ngày 0 đơn
+  </button> */}
 
   <DatePicker.RangePicker
     style={{ marginLeft: "auto", minWidth: 260 }}
