@@ -877,9 +877,9 @@ const Dashboard = () => {
         const percent = (tongTienTieu / dsTong) * 100;
 
         let pctClass = "g";
-        if (percent >= 30 && percent <= 35) {
+        if (percent >= 29 && percent <= 33) {
           pctClass = "o";
-        } else if (percent > 35) {
+        } else if (percent > 33) {
           pctClass = "r";
         }
         return <span className={`pct ${pctClass}`}>{percent.toFixed(2)}%</span>;
@@ -1242,9 +1242,9 @@ const Dashboard = () => {
         const percent = Number((record.totalReceived / total) * 100);
 
         let pctClass = "g";
-        if (percent >= 30 && percent <= 35) {
+        if (percent >= 29 && percent <= 33) {
           pctClass = "o";
-        } else if (percent > 35) {
+        } else if (percent > 33) {
           pctClass = "r";
         }
         return <span className={`pct ${pctClass}`}>{percent.toFixed(2)}%</span>;
@@ -1266,9 +1266,9 @@ const Dashboard = () => {
         );
 
         let pctClass = "g";
-        if (percent >= 30 && percent <= 35) {
+        if (percent >= 29 && percent <= 33) {
           pctClass = "o";
-        } else if (percent > 35) {
+        } else if (percent > 33) {
           pctClass = "r";
         }
         return <span className={`pct ${pctClass}`}>{percent.toFixed(2)}%</span>;
@@ -1821,40 +1821,38 @@ const Dashboard = () => {
                   </strong>
                   <span style={{ color: "#d0a0a8" }}>|</span>
                   %ADS xin/DS:{" "}
-                  <strong
-                    style={{
-                      background: "#e8f5e9",
-                      padding: "2px 9px",
-                      borderRadius: "5px",
-                      color: "#2e7d32",
-                    }}
-                  >
-                    {computePercentADS(userRecords[0].name)}%
-                  </strong>
+                  {(() => {
+                    const percent = parseFloat(
+                      computePercentADS(userRecords[0].name),
+                    );
+                    let pctClass = "g";
+                    if (percent >= 29 && percent <= 33) pctClass = "o";
+                    else if (percent > 33) pctClass = "r";
+                    return (
+                      <span className={`pct ${pctClass}`}>
+                        {percent.toFixed(2)}%
+                      </span>
+                    );
+                  })()}
                   <span style={{ color: "#d0a0a8" }}>|</span>
                   %ADS tiêu/DS:{" "}
-                  <strong
-                    style={{
-                      background: "#ef9a9a",
-                      padding: "2px 9px",
-                      borderRadius: "5px",
-                      color: "#b71c1c",
-                    }}
-                  >
-                    {/* Tính %ADS tiêu = tổng tiền tiêu / tổng ds */}
-                    {(() => {
-                      const totalTienTieu = userRecords.reduce(
-                        (sum, r) => sum + (r.totalReceived || 0),
-                        0,
-                      );
-                      const totalDS = computeTotalSales(userRecords[0].name);
-                      const percent =
-                        totalDS > 0
-                          ? ((totalTienTieu / totalDS) * 100).toFixed(2)
-                          : "0.00";
-                      return `${percent}%`;
-                    })()}
-                  </strong>
+                  {(() => {
+                    const totalTienTieu = userRecords.reduce(
+                      (sum, r) => sum + (r.totalReceived || 0),
+                      0,
+                    );
+                    const totalDS = computeTotalSales(userRecords[0].name);
+                    const percent =
+                      totalDS > 0 ? (totalTienTieu / totalDS) * 100 : 0;
+                    let pctClass = "g";
+                    if (percent >= 29 && percent <= 33) pctClass = "o";
+                    else if (percent > 33) pctClass = "r";
+                    return (
+                      <span className={`pct ${pctClass}`}>
+                        {percent.toFixed(2)}%
+                      </span>
+                    );
+                  })()}
                 </div>
               </Col>
               <Col xs={24}>
@@ -1907,39 +1905,35 @@ const Dashboard = () => {
             </strong>
             <span style={{ color: "#d0a0a8" }}>|</span>
             %ADS xin/DS:{" "}
-            <strong
-              style={{
-                background: "#e8f5e9",
-                padding: "2px 9px",
-                borderRadius: "5px",
-                color: "#2e7d32",
-              }}
-            >
-              {computePercentADS(currentUser.name)}%
-            </strong>
+            {(() => {
+              const percent = parseFloat(computePercentADS(currentUser.name));
+              let pctClass = "g";
+              if (percent >= 29 && percent <= 33) pctClass = "o";
+              else if (percent > 33) pctClass = "r";
+              return (
+                <span className={`pct ${pctClass}`}>
+                  {percent.toFixed(2)}%
+                </span>
+              );
+            })()}
             <span style={{ color: "#d0a0a8" }}>|</span>
             %ADS tiêu/DS:{" "}
-            <strong
-              style={{
-                background: "#ef9a9a",
-                padding: "2px 9px",
-                borderRadius: "5px",
-                color: "#b71c1c",
-              }}
-            >
-              {/* Tính %ADS tiêu = tổng tiền tiêu / tổng ds */}
-              {(() => {
-                const totalTienTieu = filteredRecords
-                  .filter((r) => r.name === currentUser.name)
-                  .reduce((sum, r) => sum + (r.totalReceived || 0), 0);
-                const totalDS = computeTotalSales(currentUser.name);
-                const percent =
-                  totalDS > 0
-                    ? ((totalTienTieu / totalDS) * 100).toFixed(2)
-                    : "0.00";
-                return `${percent}%`;
-              })()}
-            </strong>
+            {(() => {
+              const totalTienTieu = filteredRecords
+                .filter((r) => r.name === currentUser.name)
+                .reduce((sum, r) => sum + (r.totalReceived || 0), 0);
+              const totalDS = computeTotalSales(currentUser.name);
+              const percent =
+                totalDS > 0 ? (totalTienTieu / totalDS) * 100 : 0;
+              let pctClass = "g";
+              if (percent >= 29 && percent <= 33) pctClass = "o";
+              else if (percent > 33) pctClass = "r";
+              return (
+                <span className={`pct ${pctClass}`}>
+                  {percent.toFixed(2)}%
+                </span>
+              );
+            })()}
           </div>
           <Row gutter={[16, 16]}>
             <Col xs={24}>
