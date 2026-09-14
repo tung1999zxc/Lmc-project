@@ -393,12 +393,14 @@ function getViewList(orders, view) {
   switch (view) {
     case "all":
       return orders.filter(
-        (o) => o.deliveryStatus === "HOÀN" || o.deliveryStatus === "HOÀN HÀNG",
+        (o) => o.deliveryStatus !== "GIAO THÀNH CÔNG"
       );
     case "unsent2":
-      return orders.filter((o) => !o.delivered);
+      return orders.filter(
+        (o) => o.deliveryStatus === "HOÀN" || o.deliveryStatus === "HOÀN",
+      );
     case "unsent":
-      return orders.filter((o) => !o.ngayGui && o.deliveryStatus !== "HOÀN");
+      return orders.filter((o) => !o.ngayGui && o.deliveryStatus !== "HOÀN" && o.deliveryStatus !== "GIAO THÀNH CÔNG");
     case "sent":
       return orders.filter((o) => o.ngayGui && !o.delivered && !o.reconciled);
     case "late":
@@ -533,7 +535,7 @@ export default function KhoOrderList() {
   const pillCounts = useMemo(
     () => ({
       all: ordersWithState.length,
-      unsent2: ordersWithState.filter((o) => o.saleReport === "HOÀN").length,
+      unsent2: ordersWithState.filter((o) => o.saleReport === "HOÀN"|| o.deliveryStatus === "HOÀN").length,
       unsent:
         ordersWithState.filter((o) => !o.ngayGui && o.saleReport !== "HOÀN")
           .length - 1,
