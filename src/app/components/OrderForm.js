@@ -47,6 +47,20 @@ const OrderForm = ({
   const [form] = Form.useForm();
   const { Option } = Select;
   const currentUser = useSelector((state) => state.user.currentUser);
+
+  // Auto-fill field "VẬN ĐƠN" (salexuly) khi tạo đơn mới.
+  // Sửa lỗi: nếu user bấm "+" quá nhanh trước khi useEffect round-robin ở
+  // OrderList chạy xong, prop `namesalexuly` ban đầu là "" -> Form mount với
+  // giá trị rỗng. Effect này sẽ re-bind field ngay khi namesalexuly thay đổi
+  // từ "" thành tên thật.
+  useEffect(() => {
+    if (initialValues) return; // đang sửa đơn -> không ghi đè
+    if (!namesalexuly) return; // chưa có tên -> chờ lần render tiếp theo
+    const current = form.getFieldValue("salexuly");
+    if (current !== namesalexuly) {
+      form.setFieldsValue({ salexuly: namesalexuly });
+    }
+  }, [namesalexuly, initialValues, form]);
   // Giả sử: nếu mã nhân viên là 1 thì isEmployee1 = true
 
   const SCORE_ITEMS = [
