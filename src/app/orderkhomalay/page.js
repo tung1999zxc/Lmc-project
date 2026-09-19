@@ -397,12 +397,12 @@ function getViewList(orders, view) {
       );
     case "unsent2":
       return orders.filter(
-        (o) => o.deliveryStatus === "HOÀN" || o.deliveryStatus === "HOÀN",
+        (o) => o.saleReport === "HOÀN" || o.deliveryStatus === "HOÀN",
       );
     case "unsent":
       return orders.filter((o) => !o.ngayGui && o.deliveryStatus !== "HOÀN" && o.deliveryStatus !== "GIAO THÀNH CÔNG");
     case "sent":
-      return orders.filter((o) => o.ngayGui && !o.delivered && !o.reconciled);
+      return orders.filter((o) => o.ngayGui && !o.delivered && !o.reconciled &&( o.deliveryStatus !== "HOÀN" || o.saleReport !== "HOÀN" ));
     case "late":
       return orders.filter((o) => isLate(o));
     case "done":
@@ -1850,7 +1850,7 @@ export default function KhoOrderList() {
                       Tải lại
                     </button>
                   )}
-                  {currentView === "unsent2" && (
+                  {/* {currentView === "unsent2" && (
                     <>
                       <button
                         className="btn btn-green btn-sm"
@@ -1867,7 +1867,7 @@ export default function KhoOrderList() {
                         Chuyển sang Đã gửi hàng
                       </button>
                     </>
-                  )}
+                  )} */}
                   {currentView === "unsent" && (
                     <>
                       <button
@@ -2372,7 +2372,7 @@ export default function KhoOrderList() {
             </div>
           )}
           <div className="bulk-actions">
-            {currentView === "unsent2" && (
+            {/* {currentView === "unsent2" && (
               <button
                 className="bb bb-green"
                 onClick={markAsSentSelectedOrders}
@@ -2383,7 +2383,7 @@ export default function KhoOrderList() {
                 </svg>
                 Chuyển sang Đã gửi hàng ({selectedCount})
               </button>
-            )}
+            )} */}
             {(currentView === "sent" || currentView === "late") && (
               <button className="bb bb-green" onClick={bulkDeliver}>
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
