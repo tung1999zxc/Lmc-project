@@ -783,6 +783,9 @@ const Dashboard = () => {
     if (month === 8 && year === 2026 && selectedTeam === "all") {
       minusAmount = 54900000;
     }
+    if (month === 9 && year === 2026 && selectedTeam === "all") {
+      minusAmount = 26000000;
+    }
 
     return (totalTienThua || 0) - minusAmount;
   }, [period, selectedTeam, totalTienThua]);
@@ -1911,9 +1914,7 @@ const Dashboard = () => {
               if (percent >= 29 && percent <= 33) pctClass = "o";
               else if (percent > 33) pctClass = "r";
               return (
-                <span className={`pct ${pctClass}`}>
-                  {percent.toFixed(2)}%
-                </span>
+                <span className={`pct ${pctClass}`}>{percent.toFixed(2)}%</span>
               );
             })()}
             <span style={{ color: "#d0a0a8" }}>|</span>
@@ -1923,15 +1924,12 @@ const Dashboard = () => {
                 .filter((r) => r.name === currentUser.name)
                 .reduce((sum, r) => sum + (r.totalReceived || 0), 0);
               const totalDS = computeTotalSales(currentUser.name);
-              const percent =
-                totalDS > 0 ? (totalTienTieu / totalDS) * 100 : 0;
+              const percent = totalDS > 0 ? (totalTienTieu / totalDS) * 100 : 0;
               let pctClass = "g";
               if (percent >= 29 && percent <= 33) pctClass = "o";
               else if (percent > 33) pctClass = "r";
               return (
-                <span className={`pct ${pctClass}`}>
-                  {percent.toFixed(2)}%
-                </span>
+                <span className={`pct ${pctClass}`}>{percent.toFixed(2)}%</span>
               );
             })()}
           </div>
