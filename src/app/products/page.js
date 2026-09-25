@@ -1,5 +1,6 @@
 "use client";
 import React, { useState, useEffect, useMemo, useCallback } from "react";
+import { createPortal } from "react-dom";
 import {
   Table,
   Form,
@@ -20,6 +21,7 @@ import {
 } from "antd";
 import moment from "moment";
 import FullScreenLoading from "../components/FullScreenLoading";
+import ProductAddForm from "../components/ProductAddForm";
 
 import {
   EditOutlined,
@@ -37,6 +39,8 @@ import {
   EditFilled,
   PlusCircleOutlined,
   WalletOutlined,
+  ImportOutlined,
+  EyeOutlined,
 } from "@ant-design/icons";
 
 import axios from "axios";
@@ -60,6 +64,100 @@ const normalizeName = (name) =>
   String(name || "")
     .trim()
     .toLowerCase();
+
+/**
+ * EditableCell - Inline-editable number cell with bulk-save indicator.
+ * Props:
+ *  - value: current value (will be used as default)
+ *  - recordKey: product key
+ *  - field: pendingChanges field key
+ *  - pending: whether this cell has a pending change
+ *  - onCommit(newValue): called when user enters a value
+ *  - renderPopover: () => ReactNode for the popover history content (optional)
+ *  - popoverTitle: string
+ *  - valueStyle: extra style for the value display (when not editing)
+ */
+const EditableCell = ({
+  value,
+  recordKey,
+  field,
+  pending,
+  onCommit,
+  renderPopover,
+  popoverTitle,
+  valueStyle,
+  disabled,
+}) => {
+  const [editing, setEditing] = useState(false);
+  const [draft, setDraft] = useState(null);
+
+  const displayValue =
+    draft !== null
+      ? draft
+      : value !== undefined && value !== null
+      ? Number(value)
+      : 0;
+
+  const baseStyle = {
+    fontWeight: displayValue !== 0 || pending ? "bold" : "normal",
+    color: displayValue !== 0 || pending ? "#000" : "#999",
+    backgroundColor: pending
+      ? "#fff7e6"
+      : displayValue !== 0
+      ? "#e6f7ff"
+      : "transparent",
+    padding: "2px 6px",
+    borderRadius: "4px",
+    cursor: disabled ? "default" : "pointer",
+    display: "inline-block",
+    minWidth: 30,
+    textAlign: "center",
+    border: pending ? "1px dashed #fa8c16" : "1px solid transparent",
+  };
+
+  const cellBody = editing && !disabled ? (
+    <InputNumber
+      autoFocus
+      size="small"
+      value={draft}
+      onChange={(v) => setDraft(v)}
+      onBlur={() => {
+        if (draft !== null && draft !== undefined) {
+          onCommit(Number(draft));
+        }
+        setEditing(false);
+      }}
+      onPressEnter={(e) => {
+        e.target?.blur?.();
+      }}
+      style={{ width: "100%" }}
+    />
+  ) : (
+    <span
+      style={{ ...baseStyle, ...(valueStyle || {}) }}
+      onClick={() => {
+        if (disabled) return;
+        setDraft(displayValue);
+        setEditing(true);
+      }}
+    >
+      {pending ? `${displayValue} *` : displayValue}
+    </span>
+  );
+
+  if (renderPopover) {
+    return (
+      <Popover
+        content={renderPopover()}
+        title={popoverTitle}
+        trigger="hover"
+      >
+        {cellBody}
+      </Popover>
+    );
+  }
+  return cellBody;
+};
 
 /**
  * InventoryPage (Optimized)
@@ -93,6 +191,7 @@ const InventoryPage = () => {
   const [form] = Form.useForm();
   const [editForm] = Form.useForm();
   const [addImportForm] = Form.useForm();
+  const addFormRef = React.useRef(null);
   const [testDayRange, setTestDayRange] = useState(null);
   const [testDayPreset, setTestDayPreset] = useState(null);
 
@@ -118,6 +217,12 @@ const InventoryPage = () => {
   const [editFileList, setEditFileList] = useState([]);
   const [filterMktTest, setFilterMktTest] = useState(false);
   const [selectedMktFilter, setSelectedMktFilter] = useState(null);
+
+  // ===== Inline edit state =====
+  // Map: `${productKey}::${field}` -> { key, field, oldValue, newValue }
+  const [pendingChanges, setPendingChanges] = useState({});
+  const [savingBulk, setSavingBulk] = useState(false);
+  const pendingChangeCount = Object.keys(pendingChanges).length;
   // Fetch functions
   const fetchOrders = useCallback(async () => {
     try {
@@ -134,6 +239,7 @@ const InventoryPage = () => {
     try {
       const response = await axios.get("/api/products");
       setProducts(response.data.data || []);
+      setPendingChanges({});
     } catch (error) {
       console.error(error);
       message.error("Lỗi khi lấy danh sách sản phẩm");
@@ -141,6 +247,135 @@ const InventoryPage = () => {
       setLoading(false);
     }
   }, []);
+
+  // ===== Inline edit helpers =====
+  const setPending = useCallback((key, field, newValue) => {
+    setPendingChanges((prev) => {
+      const next = { ...prev };
+      const cellKey = `${key}::${field}`;
+      // Determine "no change" baseline from product record
+      const prod = products.find((p) => p.key === key);
+      let baseline = null;
+      if (prod) {
+        if (field === "slvn") baseline = Number(prod.slvn) || 0;
+        else if (field === "sltq") baseline = Number(prod.sltq) || 0;
+        else if (field === "importedQty") {
+          baseline = (prod.imports || []).reduce(
+            (acc, cur) =>
+              acc +
+              (Number(cur.importedQty) || 0) +
+              (Number(cur.importVN) || 0) +
+              (Number(cur.importKR) || 0),
+            0,
+          );
+        } else if (field === "importedQtyVN") {
+          baseline = (prod.imports || []).reduce(
+            (acc, cur) => acc + (Number(cur.importVN) || 0),
+            0,
+          );
+        } else if (field === "importedQtyKR") {
+          baseline = (prod.imports || []).reduce(
+            (acc, cur) => acc + (Number(cur.importKR) || 0),
+            0,
+          );
+        }
+      }
+      if (baseline !== null && Number(newValue) === Number(baseline)) {
+        delete next[cellKey];
+      } else {
+        next[cellKey] = { key, field, newValue: Number(newValue) || 0 };
+      }
+      return next;
+    });
+  }, [products]);
+
+  const handleSaveBulk = useCallback(async () => {
+    const entries = Object.values(pendingChanges);
+    if (entries.length === 0) {
+      message.info("Chưa có thay đổi nào");
+      return;
+    }
+    setSavingBulk(true);
+    try {
+      // Group by product key
+      const byProduct = {};
+      for (const e of entries) {
+        if (!byProduct[e.key]) byProduct[e.key] = {};
+        byProduct[e.key][e.field] = e.newValue;
+      }
+
+      for (const [prodKey, fields] of Object.entries(byProduct)) {
+        // Compute current baselines for this product
+        const prod = products.find((p) => p.key === Number(prodKey) || p.key === prodKey);
+        const baselineSlvn = Number(prod?.slvn) || 0;
+        const baselineSltq = Number(prod?.sltq) || 0;
+        const baselineTot = (prod?.imports || []).reduce(
+          (acc, cur) =>
+            acc +
+            (Number(cur.importedQty) || 0) +
+            (Number(cur.importVN) || 0) +
+            (Number(cur.importKR) || 0),
+          0,
+        );
+        const baselineVN = (prod?.imports || []).reduce(
+          (acc, cur) => acc + (Number(cur.importVN) || 0),
+          0,
+        );
+        const baselineKR = (prod?.imports || []).reduce(
+          (acc, cur) => acc + (Number(cur.importKR) || 0),
+          0,
+        );
+
+        // slvn / sltq -> PUT /api/products/[key] (API tự push history với giá trị tuyệt đối mới)
+        const putPayload = {};
+        if (fields.slvn !== undefined && fields.slvn !== baselineSlvn) {
+          putPayload.slvn = fields.slvn;
+        }
+        if (fields.sltq !== undefined && fields.sltq !== baselineSltq) {
+          putPayload.sltq = fields.sltq;
+        }
+        if (Object.keys(putPayload).length > 0) {
+          await axios.put(`/api/products/${prodKey}`, putPayload);
+        }
+
+        // Compute deltas for imports fields (user input = desired total)
+        const deltas = {};
+        if (fields.importedQty !== undefined) {
+          deltas.importedQty = fields.importedQty - baselineTot;
+        }
+        if (fields.importedQtyVN !== undefined) {
+          deltas.importVN = fields.importedQtyVN - baselineVN;
+        }
+        if (fields.importedQtyKR !== undefined) {
+          deltas.importKR = fields.importedQtyKR - baselineKR;
+        }
+
+        // Only push import entry if at least one delta is non-zero
+        if (
+          (deltas.importedQty && deltas.importedQty !== 0) ||
+          (deltas.importVN && deltas.importVN !== 0) ||
+          (deltas.importKR && deltas.importKR !== 0)
+        ) {
+          const body = {
+            importDate: new Date().toISOString().split("T")[0],
+          };
+          if (deltas.importedQty) body.importedQty = deltas.importedQty;
+          if (deltas.importVN) body.importVN = deltas.importVN;
+          if (deltas.importKR) body.importKR = deltas.importKR;
+          await axios.post(`/api/products/${prodKey}/add-import`, body);
+        }
+      }
+
+      message.success(`Đã lưu ${entries.length} thay đổi`);
+      setPendingChanges({});
+      await fetchProducts();
+    } catch (err) {
+      console.error(err);
+      message.error("Lỗi khi lưu thay đổi");
+    } finally {
+      setSavingBulk(false);
+    }
+  }, [pendingChanges, fetchProducts, products]);
   const fetchEmployees = async () => {
     try {
       const response = await axios.get("/api/employees");
@@ -856,14 +1091,28 @@ const InventoryPage = () => {
               "Chưa có lịch sử nhập"
             );
 
+          const cellKey = `${record.key}::importedQty`;
+          const pending = !!pendingChanges[cellKey];
+          const displayed = pending
+            ? totalImported + (pendingChanges[cellKey].newValue || 0)
+            : totalImported;
+
           return (
-            <Popover
-              content={historyContent}
-              title="Lịch sử nhập hàng"
-              trigger="hover"
-            >
-              <span>{totalImported}</span>
-            </Popover>
+            <EditableCell
+              value={displayed}
+              recordKey={record.key}
+              field="importedQty"
+              pending={pending}
+              onCommit={(v) => setPending(record.key, "importedQty", v)}
+              renderPopover={() => historyContent}
+              popoverTitle="Lịch sử nhập hàng"
+              disabled={
+                currentUser?.position_team === "mkt" ||
+                (currentUser?.position !== "admin" &&
+                  currentUser?.position !== "managerSALE" &&
+                  currentUser?.position !== "leadSALE")
+              }
+            />
           );
         },
       },
@@ -889,14 +1138,27 @@ const InventoryPage = () => {
             ) : (
               "Chưa có lịch sử nhập"
             );
+          const cellKey = `${record.key}::importedQtyVN`;
+          const pending = !!pendingChanges[cellKey];
+          const displayed = pending
+            ? totalImported + (pendingChanges[cellKey].newValue || 0)
+            : totalImported;
           return (
-            <Popover
-              content={historyContent}
-              title="Lịch sử nhập hàng"
-              trigger="hover"
-            >
-              <span>{totalImported}</span>
-            </Popover>
+            <EditableCell
+              value={displayed}
+              recordKey={record.key}
+              field="importedQtyVN"
+              pending={pending}
+              onCommit={(v) => setPending(record.key, "importedQtyVN", v)}
+              renderPopover={() => historyContent}
+              popoverTitle="Lịch sử nhập hàng"
+              disabled={
+                currentUser?.position_team === "mkt" ||
+                (currentUser?.position !== "admin" &&
+                  currentUser?.position !== "managerSALE" &&
+                  currentUser?.position !== "leadSALE")
+              }
+            />
           );
         },
       },
@@ -922,14 +1184,27 @@ const InventoryPage = () => {
             ) : (
               "Chưa có lịch sử nhập"
             );
+          const cellKey = `${record.key}::importedQtyKR`;
+          const pending = !!pendingChanges[cellKey];
+          const displayed = pending
+            ? totalImported + (pendingChanges[cellKey].newValue || 0)
+            : totalImported;
           return (
-            <Popover
-              content={historyContent}
-              title="Lịch sử nhập hàng"
-              trigger="hover"
-            >
-              <span>{totalImported}</span>
-            </Popover>
+            <EditableCell
+              value={displayed}
+              recordKey={record.key}
+              field="importedQtyKR"
+              pending={pending}
+              onCommit={(v) => setPending(record.key, "importedQtyKR", v)}
+              renderPopover={() => historyContent}
+              popoverTitle="Lịch sử nhập hàng"
+              disabled={
+                currentUser?.position_team === "mkt" ||
+                (currentUser?.position !== "admin" &&
+                  currentUser?.position !== "managerSALE" &&
+                  currentUser?.position !== "leadSALE")
+              }
+            />
           );
         },
       },
@@ -1072,28 +1347,33 @@ const InventoryPage = () => {
                     "Chưa có lịch sử nhập VN"
                   );
 
-                const value =
+                const baseValue =
                   record.slvn !== undefined && record.slvn !== null
                     ? Number(record.slvn)
                     : 0;
 
-                // ✅ Nếu có giá trị khác 0 thì bôi đậm
-                const style = {
-                  fontWeight: value !== 0 ? "bold" : "normal",
-                  color: value !== 0 ? "#000" : "#999",
-                  backgroundColor: value !== 0 ? "#e6f7ff" : "transparent",
-                  padding: "2px 6px",
-                  borderRadius: "4px",
-                };
+                const cellKey = `${record.key}::slvn`;
+                const pending = !!pendingChanges[cellKey];
+                const displayed = pending
+                  ? pendingChanges[cellKey].newValue
+                  : baseValue;
 
                 return (
-                  <Popover
-                    content={historyContent}
-                    title="Lịch sử nhập VN"
-                    trigger="hover"
-                  >
-                    <span style={style}>{value}</span>
-                  </Popover>
+                  <EditableCell
+                    value={displayed}
+                    recordKey={record.key}
+                    field="slvn"
+                    pending={pending}
+                    onCommit={(v) => setPending(record.key, "slvn", v)}
+                    renderPopover={() => historyContent}
+                    popoverTitle="Lịch sử nhập VN"
+                    disabled={
+                      currentUser?.position_team === "mkt" ||
+                      (currentUser?.position !== "admin" &&
+                        currentUser?.position !== "managerSALE" &&
+                        currentUser?.position !== "leadSALE")
+                    }
+                  />
                 );
               },
             },
@@ -1116,27 +1396,33 @@ const InventoryPage = () => {
                     "Chưa có lịch sử nhập HQ"
                   );
 
-                const value =
+                const baseValue =
                   record.sltq !== undefined && record.sltq !== null
                     ? Number(record.sltq)
                     : 0;
 
-                const style = {
-                  fontWeight: value !== 0 ? "bold" : "normal",
-                  color: value !== 0 ? "#000" : "#999",
-                  backgroundColor: value !== 0 ? "#e6f7ff" : "transparent",
-                  padding: "2px 6px",
-                  borderRadius: "4px",
-                };
+                const cellKey = `${record.key}::sltq`;
+                const pending = !!pendingChanges[cellKey];
+                const displayed = pending
+                  ? pendingChanges[cellKey].newValue
+                  : baseValue;
 
                 return (
-                  <Popover
-                    content={historyContent}
-                    title="Lịch sử nhập HQ"
-                    trigger="hover"
-                  >
-                    <span style={style}>{value}</span>
-                  </Popover>
+                  <EditableCell
+                    value={displayed}
+                    recordKey={record.key}
+                    field="sltq"
+                    pending={pending}
+                    onCommit={(v) => setPending(record.key, "sltq", v)}
+                    renderPopover={() => historyContent}
+                    popoverTitle="Lịch sử nhập HQ"
+                    disabled={
+                      currentUser?.position_team === "mkt" ||
+                      (currentUser?.position !== "admin" &&
+                        currentUser?.position !== "managerSALE" &&
+                        currentUser?.position !== "leadSALE")
+                    }
+                  />
                 );
               },
             },
@@ -1399,46 +1685,71 @@ const InventoryPage = () => {
     handleDeleteProduct,
     currentUser,
     ordersAggMap,
+    pendingChanges,
   ]);
 
   /** ===========
    * Form submit: create new product (preserve original behavior)
    * =========== */
-  const onFinish = useCallback(
-    async (values) => {
-      const file = values.image?.[0];
-      const base64Image = file ? await getBase64(file.originFileObj) : null;
+  // ====== Helpers: tách màu/size theo dấu phẩy và sinh tổ hợp tên ======
+  const splitCsv = (v) =>
+    !v
+      ? []
+      : String(v)
+          .split(",")
+          .map((s) => s.trim())
+          .filter(Boolean);
 
-      const newProduct = {
-        key: Date.now(),
-        name: values.name,
-        image: base64Image,
-        description: values.description,
-        weight: values.weight || 0,
-        importedQty: values.importedQty,
-        status: true,
-        slvn: 0,
-        sltq: 0,
-        imports: [
-          {
-            importedQty: values.importedQty || 0,
-            importDate: moment().format("YYYY-MM-DD"),
-          },
-        ],
-      };
+  const toTitleCase = (s) =>
+    !s
+      ? ""
+      : String(s)
+          .toLowerCase()
+          .split(/\s+/)
+          .filter(Boolean)
+          .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+          .join(" ");
 
-      try {
-        const response = await axios.post("/api/products", newProduct);
-        message.success(response.data.message || "Thêm sản phẩm thành công");
-        await fetchProducts();
-        form.resetFields();
-      } catch (error) {
-        console.error(error);
-        message.error("Lỗi khi thêm sản phẩm");
+  const buildCombos = ({ name, mau, size }) => {
+    const base = (name || "").trim();
+    const maus = splitCsv(mau);
+    const sizes = splitCsv(size);
+    if (maus.length === 0 && sizes.length === 0) {
+      return base ? [base] : [];
+    }
+    const mauList = maus.length ? maus : [""];
+    const sizeList = sizes.length ? sizes : [""];
+    const out = [];
+    for (const m of mauList) {
+      for (const s of sizeList) {
+        const parts = [base, toTitleCase(m), toTitleCase(s)].filter(
+          (p) => p && p.length > 0,
+        );
+        out.push(parts.join(" - "));
       }
-    },
-    [form, fetchProducts],
-  );
+    }
+    return out;
+  };
+
+  const handleAddProducts = useCallback(async (docs) => {
+    try {
+      const payload = { docs };
+      const response = await axios.post("/api/products/bulk", payload, {
+        headers: { "Content-Type": "application/json" },
+      });
+      const data = response.data || {};
+      message.success(data.message || `Đã thêm ${docs.length} sản phẩm`);
+      addFormRef.current?.reset();
+      await fetchProducts();
+    } catch (error) {
+      console.error(error);
+      message.error(
+        error?.response?.data?.error || "Lỗi khi thêm sản phẩm",
+      );
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [fetchProducts]);
+
   // ======== BẢNG LIST SẢN PHẨM ĐANG CHẠY 2 HÔM GẦN ĐÂY ========= //
   const calculateStats2Days = useCallback(() => {
     if (!orders2 || orders2.length === 0) {
@@ -1631,6 +1942,28 @@ const InventoryPage = () => {
             Tính thống kê 3 hôm gần đây
           </button>
 
+          {/* Nút mở trang Nhập Hàng mới
+          <button
+            className="btn-prod-success"
+            onClick={() => router.push("/nhaphang")}
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 6,
+              background: "linear-gradient(135deg, #ea580c, #fb923c)",
+              color: "#fff",
+              border: "none",
+              padding: "6px 14px",
+              borderRadius: 8,
+              fontWeight: 600,
+              cursor: "pointer",
+            }}
+            title="Mở trang Nhập Hàng (UI mới)"
+          >
+            <ImportOutlined style={{ fontSize: 15 }} />
+            📦 Trang Nhập Hàng (mới)
+          </button> */}
+
           {showStatTable && (
             <button
               className="btn-prod-danger"
@@ -1640,6 +1973,78 @@ const InventoryPage = () => {
               <CloseCircleOutlined style={{ fontSize: 15 }} />
               Tắt bảng
             </button>
+          )}
+
+          {typeof document !== "undefined" && pendingChangeCount > 0 && createPortal(
+            <div
+              style={{
+                position: "fixed",
+                top: 16,
+                right: 24,
+                display: "flex",
+                gap: 10,
+                zIndex: 2147483647,
+                background: "rgba(255, 255, 255, 0.95)",
+                padding: "8px 10px",
+                borderRadius: 12,
+                boxShadow: "0 8px 24px rgba(0, 0, 0, 0.18)",
+                border: "1px solid var(--border)",
+                backdropFilter: "blur(6px)",
+              }}
+            >
+              <button
+                onClick={() => setPendingChanges({})}
+                disabled={pendingChangeCount === 0}
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: 6,
+                  background: "#fff",
+                  color: "#555",
+                  border: "1px solid var(--border)",
+                  padding: "8px 14px",
+                  borderRadius: 8,
+                  fontWeight: 600,
+                  cursor: pendingChangeCount === 0 ? "not-allowed" : "pointer",
+                  opacity: pendingChangeCount === 0 ? 0.5 : 1,
+                }}
+              >
+                <CloseCircleOutlined style={{ fontSize: 15 }} />
+                Hủy thay đổi
+              </button>
+              <button
+                onClick={handleSaveBulk}
+                disabled={savingBulk || pendingChangeCount === 0||currentUser.position !== "admin"}
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: 6,
+                  background:
+                    savingBulk || pendingChangeCount === 0
+                      ? "#fb923c99"
+                      : "linear-gradient(135deg, #f59e0b, #ea580c)",
+                  color: "#fff",
+                  border: "none",
+                  padding: "8px 16px",
+                  borderRadius: 8,
+                  fontWeight: 700,
+                  cursor:
+                    savingBulk || pendingChangeCount === 0
+                      ? "not-allowed"
+                      : "pointer",
+                  boxShadow: "0 2px 6px rgba(234,88,12,0.35)",
+                  opacity: savingBulk || pendingChangeCount === 0 ? 0.6 : 1,
+                }}
+              >
+                {savingBulk ? (
+                  <Spin size="small" />
+                ) : (
+                  <CheckCircleOutlined style={{ fontSize: 15 }} />
+                )}
+                Lưu hàng loạt ({pendingChangeCount})
+              </button>
+            </div>,
+            document.body
           )}
         </div>
         {showStatTable && (
@@ -1728,68 +2133,30 @@ const InventoryPage = () => {
               Thêm sản phẩm mới
             </span>
           </div>
-          <Form form={form} layout="inline" onFinish={onFinish}>
-            <Form.Item
-              name="name"
-              rules={[
-                { required: true, message: "Vui lòng nhập tên sản phẩm" },
-              ]}
-              style={{ flex: 1, minWidth: 200 }}
-            >
-              <Input placeholder="Tên sản phẩm" style={{ borderRadius: 10 }} />
-            </Form.Item>
-            <Form.Item name="weight" style={{ width: 120 }}>
-              <InputNumber
-                placeholder="Khối lượng (g)"
-                min={0}
-                style={{ width: "100%", borderRadius: 10 }}
-              />
-            </Form.Item>
-            <Form.Item name="importedQty" hidden>
-              <InputNumber placeholder="SL nhập hàng" min={0} />
-            </Form.Item>
-            <Form.Item name="description" hidden>
-              <Input.TextArea rows={1} placeholder="Kịch bản sản phẩm" />
-            </Form.Item>
-            <Form.Item
-              name="image"
-              valuePropName="fileList"
-              getValueFromEvent={(e) =>
-                e?.fileList && e.fileList.length > 0 ? [e.fileList[0]] : []
-              }
-            >
-              <Upload
-                listType="picture"
-                maxCount={1}
-                fileList={editFileList}
-                onChange={({ fileList }) => {
-                  setEditFileList(fileList);
-                  editForm.setFieldsValue({ image: fileList });
-                }}
-                beforeUpload={() => false}
-              ></Upload>
-            </Form.Item>
-            <Form.Item>
-              <button
-                className="btn-prod-primary"
-                type="submit"
-                disabled={
-                  currentUser?.position !== "admin" &&
-                  currentUser?.position !== "leadSALE" &&
-                  currentUser?.position !== "managerSALE"
-                }
-                style={{
-                  display: "inline-flex",
-                  alignItems: "center",
-                  gap: 6,
-                  height: 38,
-                }}
-              >
-                <PlusOutlined />
-                Thêm sản phẩm
-              </button>
-            </Form.Item>
-          </Form>
+          <ProductAddForm
+            ref={addFormRef}
+            onSubmit={handleAddProducts}
+            disabled={
+              currentUser?.position !== "admin" &&
+              currentUser?.position !== "leadSALE" &&
+              currentUser?.position !== "managerSALE"
+            }
+          />
+
+          {/* Dòng hướng dẫn */}
+          <div
+            style={{
+              marginTop: 8,
+              fontSize: 12,
+              color: "var(--sub)",
+              lineHeight: 1.5,
+            }}
+          >
+            Nhập <b>nhiều màu</b> và <b>nhiều size</b>, mỗi loại cách nhau bởi
+            dấu <b>phẩy</b>. Mỗi tổ hợp sẽ tạo thành 1 sản phẩm riêng với tên
+            ghép:{" "}
+            <b>{'"{tên} - {màu} - {size}"'}</b>
+          </div>
         </div>
 
         <div

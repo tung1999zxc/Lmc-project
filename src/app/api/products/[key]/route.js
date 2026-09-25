@@ -12,7 +12,11 @@ export async function PUT(request, { params }) {
     delete updateFields.createdAt;
 
     const { db } = await connectToDatabase();
-    const filter = { key: parseInt(key, 10) };
+    // key trong DB có thể là Number hoặc String ("...-8xz0"), thử cả 2
+    const keyNum = Number(key);
+    const filter = Number.isFinite(keyNum) && String(keyNum) === String(key)
+      ? { $or: [{ key: keyNum }, { key }] }
+      : { key };
 
     // 🔹 Lấy sản phẩm cũ ra để so sánh
     const oldProduct = await db.collection("products").findOne(filter);
@@ -77,7 +81,11 @@ export async function DELETE(request, { params }) {
   try {
     const { key } = await params;
     const { db } = await connectToDatabase();
-    const filter = { key: parseInt(key, 10) };
+    // key trong DB có thể là Number hoặc String ("...-8xz0"), thử cả 2
+    const keyNum = Number(key);
+    const filter = Number.isFinite(keyNum) && String(keyNum) === String(key)
+      ? { $or: [{ key: keyNum }, { key }] }
+      : { key };
 
     const result = await db.collection("products").deleteOne(filter);
     console.log("Delete result:", result);
