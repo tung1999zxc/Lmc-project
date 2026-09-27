@@ -87,9 +87,16 @@ const EditableCell = ({
   popoverTitle,
   valueStyle,
   disabled,
+  // NEW: when true, the cell is treated as a "cộng dồn" cell:
+  //       user enters a delta (số nhập thêm) into a small input next to the value;
+  //       onCommit will be called with (baseline + delta).
+  // backend will get the new total and we compute delta = newValue - baseline (already handled).
+  // Used for the 3 nhập-hàng columns.
+  isDelta,
 }) => {
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState(null);
+  const [deltaInput, setDeltaInput] = useState(null);
 
   const displayValue =
     draft !== null
@@ -98,10 +105,22 @@ const EditableCell = ({
       ? Number(value)
       : 0;
 
+  // Khi deltaInput có giá trị → ô này đang pending (sẽ cộng dồn khi lưu)
+  const hasDelta = deltaInput !== null && deltaInput !== undefined && Number(deltaInput) !== 0;
+  const effectivePending = pending || hasDelta;
+
+  // Reset ô deltaInput khi pendingChanges cho cellKey này bị xóa (ví dụ sau khi lưu xong
+  // parent clear pendingChanges, hoặc user commit rồi baseline bằng newValue → key bị xóa)
+  useEffect(() => {
+    if (!pending) {
+      setDeltaInput(null);
+    }
+  }, [pending]);
+
   const baseStyle = {
-    fontWeight: displayValue !== 0 || pending ? "bold" : "normal",
-    color: displayValue !== 0 || pending ? "#000" : "#999",
-    backgroundColor: pending
+    fontWeight: displayValue !== 0 || effectivePending ? "bold" : "normal",
+    color: displayValue !== 0 || effectivePending ? "#000" : "#999",
+    backgroundColor: effectivePending
       ? "#fff7e6"
       : displayValue !== 0
       ? "#e6f7ff"
@@ -112,17 +131,96 @@ const EditableCell = ({
     display: "inline-block",
     minWidth: 30,
     textAlign: "center",
-    border: pending ? "1px dashed #fa8c16" : "1px solid transparent",
+    border: effectivePending ? "1px dashed #fa8c16" : "1px solid transparent",
   };
 
+  // ----- Delta (cộng dồn) cell: hiện [giá trị hiện tại] + [ô nhập số cần cộng thêm]
+  if (isDelta) {
+    const deltaCellBody = (
+      <span
+        style={{
+          display: "inline-flex",
+          alignItems: "center",
+          gap: 6,
+          whiteSpace: "nowrap",
+        }}
+      >
+        <span
+          style={{
+            ...baseStyle,
+            fontWeight: "600",
+          }}
+          onClick={() => {
+            // show current total (popover) – không cho edit
+          }}
+        >
+          {effectivePending
+            ? `${displayValue + Number(deltaInput || 0)} *`
+            : displayValue}
+        </span>
+        {disabled ? null : (
+          <InputNumber
+            size="small"
+            placeholder="+nhập"
+            value={deltaInput}
+            onChange={(v) => {
+              setDeltaInput(v);
+              // Commit realtime để parent cập nhật pendingChanges → nút Lưu hiện ngay
+              const num = v === null || v === undefined ? 0 : Number(v);
+              if (num !== 0) {
+                onCommit(displayValue + num);
+              } else if (hasDelta) {
+                // delta về 0 → xóa pendingChange
+                onCommit(displayValue);
+              }
+            }}
+            onPressEnter={(e) => {
+              e.target?.blur?.();
+            }}
+            onBlur={() => {
+              // Không cần commit ở đây nữa (đã commit trên onChange).
+              // Nhưng có thể giữ để đảm bảo lần cuối.
+              if (deltaInput !== null && deltaInput !== undefined && Number(deltaInput) !== 0) {
+                onCommit(displayValue + Number(deltaInput));
+              }
+            }}
+            style={{ width: 86 }}
+            disabled={disabled}
+          />
+        )}
+      </span>
+    );
+    if (renderPopover) {
+      return (
+        <Popover
+          content={renderPopover()}
+          title={popoverTitle}
+          trigger="hover"
+          mouseEnterDelay={3}
+        >
+          {deltaCellBody}
+        </Popover>
+      );
+    }
+    return deltaCellBody;
+  }
+
+  // ----- Default (absolute) cell -----
   const cellBody = editing && !disabled ? (
     <InputNumber
       autoFocus
       size="small"
       value={draft}
-      onChange={(v) => setDraft(v)}
+      onChange={(v) => {
+        setDraft(v);
+        // Commit realtime để parent cập nhật pendingChanges ngay khi gõ
+        if (v !== null && v !== undefined && v !== "") {
+          onCommit(Number(v));
+        }
+      }}
       onBlur={() => {
-        if (draft !== null && draft !== undefined) {
+        if (draft !== null && draft !== undefined && draft !== "") {
+          // Nếu chưa commit được (vd giá trị rỗng khi blur) → commit lần cuối
           onCommit(Number(draft));
         }
         setEditing(false);
@@ -151,6 +249,7 @@ const EditableCell = ({
         content={renderPopover()}
         title={popoverTitle}
         trigger="hover"
+        mouseEnterDelay={3}
       >
         {cellBody}
       </Popover>
@@ -1091,18 +1190,13 @@ const InventoryPage = () => {
               "Chưa có lịch sử nhập"
             );
 
-          const cellKey = `${record.key}::importedQty`;
-          const pending = !!pendingChanges[cellKey];
-          const displayed = pending
-            ? totalImported + (pendingChanges[cellKey].newValue || 0)
-            : totalImported;
-
           return (
             <EditableCell
-              value={displayed}
+              value={totalImported}
               recordKey={record.key}
               field="importedQty"
-              pending={pending}
+              isDelta
+              pending={!!pendingChanges[`${record.key}::importedQty`]}
               onCommit={(v) => setPending(record.key, "importedQty", v)}
               renderPopover={() => historyContent}
               popoverTitle="Lịch sử nhập hàng"
@@ -1138,17 +1232,13 @@ const InventoryPage = () => {
             ) : (
               "Chưa có lịch sử nhập"
             );
-          const cellKey = `${record.key}::importedQtyVN`;
-          const pending = !!pendingChanges[cellKey];
-          const displayed = pending
-            ? totalImported + (pendingChanges[cellKey].newValue || 0)
-            : totalImported;
           return (
             <EditableCell
-              value={displayed}
+              value={totalImported}
               recordKey={record.key}
               field="importedQtyVN"
-              pending={pending}
+              isDelta
+              pending={!!pendingChanges[`${record.key}::importedQtyVN`]}
               onCommit={(v) => setPending(record.key, "importedQtyVN", v)}
               renderPopover={() => historyContent}
               popoverTitle="Lịch sử nhập hàng"
@@ -1184,17 +1274,14 @@ const InventoryPage = () => {
             ) : (
               "Chưa có lịch sử nhập"
             );
-          const cellKey = `${record.key}::importedQtyKR`;
-          const pending = !!pendingChanges[cellKey];
-          const displayed = pending
-            ? totalImported + (pendingChanges[cellKey].newValue || 0)
-            : totalImported;
+
           return (
             <EditableCell
-              value={displayed}
+              value={totalImported}
               recordKey={record.key}
               field="importedQtyKR"
-              pending={pending}
+              isDelta
+              pending={!!pendingChanges[`${record.key}::importedQtyKR`]}
               onCommit={(v) => setPending(record.key, "importedQtyKR", v)}
               renderPopover={() => historyContent}
               popoverTitle="Lịch sử nhập hàng"
