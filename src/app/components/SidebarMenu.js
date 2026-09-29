@@ -899,7 +899,7 @@ const SidebarMenu = ({ isOpen, onToggle }) => {
       ? []
       : [{ key: "sub7", icon: "📄", label: "Tên page", href: "/pagesName" }]),
     { key: "sub5", icon: "👤", label: "Quản lý tài khoản", href: "/accounts" },
-    ...(isTranNgocLam
+    ...(isTranNgocLam || isMarketing
       ? []
       : [
           {
@@ -929,6 +929,16 @@ const SidebarMenu = ({ isOpen, onToggle }) => {
             icon: "🔔",
             label: "Quản lý thông báo",
             href: "/NotificationManagement",
+          },
+        ]),
+    ...(false
+      ? []
+      : [
+          {
+            key: "sub921",
+            icon: "📋",
+            label: "Quy định công ty",
+            href: "/rulesCompany",
           },
         ]),
   ]);

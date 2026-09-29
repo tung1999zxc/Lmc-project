@@ -204,6 +204,12 @@ const CustomerHistoryModal = ({
     dataIndex: "revenue",
     key: "revenue",
   },
+  {
+    title: " Kho Đóng Hàng",
+
+    key: "isShippingName",
+    dataIndex: "isShippingName",
+  },
     {
       title: "Tên Khách",
       dataIndex: "customerName",

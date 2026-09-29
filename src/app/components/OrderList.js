@@ -2875,9 +2875,7 @@ const OrderList = () => {
       },
       width: 50,
     },
-    ...(currentUser.position === "salexuly" ||
-    
-    currentUser.position === "admin"
+    ...(currentUser.position === "salexuly" || currentUser.position === "admin"
       ? [
           {
             title: (
@@ -2977,7 +2975,9 @@ const OrderList = () => {
         if (scorePoints) {
           return (
             <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-              <span style={{ color: "#52c41a", fontWeight: 600 }}>Thả - {scorePoints}%</span>
+              <span style={{ color: "#52c41a", fontWeight: 600 }}>
+                Thả - {scorePoints}%
+              </span>
               <EyeOutlined
                 style={{ color: "#1890ff", cursor: "pointer", fontSize: 16 }}
                 onClick={() => setScoreOrderExternal(record)}
@@ -2989,9 +2989,7 @@ const OrderList = () => {
         return <span style={{ color: "#ff4d4f" }}>-</span>;
       },
     },
-    ...(currentUser.position === "salexuly" ||
-    
-    currentUser.position === "admin"
+    ...(currentUser.position === "salexuly" || currentUser.position === "admin"
       ? [
           {
             title: "KHO FB",
@@ -3052,7 +3050,7 @@ const OrderList = () => {
           },
         ]
       : []),
-    
+
     ...(currentUser.position_team === "kho"
       ? [
           {
@@ -3806,70 +3804,70 @@ const OrderList = () => {
       ),
     },
     ...(currentUser.position === "admin" ||
-      (currentUser.position === "managerSALE") |
-        (currentUser.position === "salefull") |
-        (currentUser.position === "salexuly") |
-        (currentUser.position === "leadSALE")
-        ? [
-            {
-              title: "XIN XÓA DS",
-              key: "xoaDon",
-              width: 80,
-              render: (_, record) => {
-                const isDaXinXoa = record.daXinXoaDon === true;
-                return (
-                  <Button
-                    type={isDaXinXoa ? "default" : "default"}
-                    danger={isDaXinXoa}
-                    size="small"
-                    onClick={() => {
-                      // salexuly chỉ được xin xóa đơn của mình
-                      if (
-                        currentUser.position === "salexuly" &&
-                        record.salexuly !== currentUser.name
-                      ) {
-                        messageApi.warning("Bạn chỉ có thể xin xóa đơn của mình");
-                        return;
-                      }
-                      setXoaDonOrderId(record.id);
-                      setXoaDonOrderData(record);
-                      setXoaDonLyDo(record.xoaDonLyDo || "");
-                      setXoaDonReport(record.saleReport2 || null);
-                      setXoaDonImages([record.xoaDonImages || []]);
-                      setXoaDonImageUrls(record.xoaDonImages || []);
-                      setXoaDonModalVisible(true);
-                    }}
-                    style={{ whiteSpace: "nowrap" }}
-                  >
-                    <span
-                      style={{
-                        color: record.managerDaXacNhan
-                          ? "#52c41a"
-                          : record.leaderDaXacNhan
-                            ? "#faad14"
-                            : record.leaderTuChoi
-                              ? "#ff4d4f"
-                              : isDaXinXoa
-                                ? "#999"
-                                : "inherit",
-                      }}
-                    >
-                      {record.managerDaXacNhan
-                        ? "MANAGER ĐÃ XÁC NHẬN"
+    (currentUser.position === "managerSALE") |
+      (currentUser.position === "salefull") |
+      (currentUser.position === "salexuly") |
+      (currentUser.position === "leadSALE")
+      ? [
+          {
+            title: "XIN XÓA DS",
+            key: "xoaDon",
+            width: 80,
+            render: (_, record) => {
+              const isDaXinXoa = record.daXinXoaDon === true;
+              return (
+                <Button
+                  type={isDaXinXoa ? "default" : "default"}
+                  danger={isDaXinXoa}
+                  size="small"
+                  onClick={() => {
+                    // salexuly chỉ được xin xóa đơn của mình
+                    if (
+                      currentUser.position === "salexuly" &&
+                      record.salexuly !== currentUser.name
+                    ) {
+                      messageApi.warning("Bạn chỉ có thể xin xóa đơn của mình");
+                      return;
+                    }
+                    setXoaDonOrderId(record.id);
+                    setXoaDonOrderData(record);
+                    setXoaDonLyDo(record.xoaDonLyDo || "");
+                    setXoaDonReport(record.saleReport2 || null);
+                    setXoaDonImages([record.xoaDonImages || []]);
+                    setXoaDonImageUrls(record.xoaDonImages || []);
+                    setXoaDonModalVisible(true);
+                  }}
+                  style={{ whiteSpace: "nowrap" }}
+                >
+                  <span
+                    style={{
+                      color: record.managerDaXacNhan
+                        ? "#52c41a"
                         : record.leaderDaXacNhan
-                          ? "LEAD ĐÃ XÁC NHẬN"
+                          ? "#faad14"
                           : record.leaderTuChoi
-                            ? "TỪ CHỐI"
+                            ? "#ff4d4f"
                             : isDaXinXoa
-                              ? "Đã xin"
-                              : "Xin xóa"}
-                    </span>
-                  </Button>
-                );
-              },
+                              ? "#999"
+                              : "inherit",
+                    }}
+                  >
+                    {record.managerDaXacNhan
+                      ? "MANAGER ĐÃ XÁC NHẬN"
+                      : record.leaderDaXacNhan
+                        ? "LEAD ĐÃ XÁC NHẬN"
+                        : record.leaderTuChoi
+                          ? "TỪ CHỐI"
+                          : isDaXinXoa
+                            ? "Đã xin"
+                            : "Xin xóa"}
+                  </span>
+                </Button>
+              );
             },
-          ]
-        : []),
+          },
+        ]
+      : []),
     ...(currentUser.position === "salenhapdon" ||
     currentUser.position === "salexuly" ||
     currentUser.position === "salefull"
@@ -5521,7 +5519,7 @@ const OrderList = () => {
   }}
 >
   Cập nhật Salexuly cho Đỗ Uyển Nhi
-</Button> */}
+</Button>  */}
       {/* <Button type="primary"  danger onClick={handleResetAllSTT}>
   Đặt STT về 0
 </Button> */}
@@ -5573,13 +5571,15 @@ const OrderList = () => {
                         Tổng DS (Chưa DONE)
                       </span>
                       <span className="order-summary-value">
-                        {(
-                          filteredOrders.reduce((acc, order) => {
+                        {filteredOrders
+                          .reduce((acc, order) => {
                             const profit = Number(order.profit ?? 0);
-                            const scorePoints = Number(order.scorePoints ?? 100);
+                            const scorePoints = Number(
+                              order.scorePoints ?? 100,
+                            );
                             return acc + profit * scorePoints * 0.01;
                           }, 0)
-                        ).toLocaleString()}
+                          .toLocaleString()}
                       </span>
                     </span>
                   </div>
@@ -5595,36 +5595,40 @@ const OrderList = () => {
                         {(
                           filteredOrders.reduce((acc, order) => {
                             const profit = Number(order.profit ?? 0);
-                            const scorePoints = Number(order.scorePoints ?? 100);
-                            return acc + profit + (100 - scorePoints) * 0.01;
-                          }, 0)*17000
-                        ).toLocaleString()}
-                      </span>
-                    </span>
-                  </div>
-                )}
-                {currentUser.position !== "salenhapdon" && currentUser.position !== "salexuly" && (
-                  <div className="order-summary-pill order-summary-pill-wide">
-                    <span className="order-summary-icon">💰</span>
-                    <span className="order-summary-content">
-                      <span className="order-summary-label">
-                        Tổng DS (Chưa DONE)
-                      </span>
-                      <span className="order-summary-value">
-                        {(
-                          filteredOrders.reduce((acc, order) => {
-                            return (
-                              acc +
-                              (Number(order.revenuemkt ?? order.revenue ?? 0) ||
-                                0)
+                            const scorePoints = Number(
+                              order.scorePoints ?? 100,
                             );
+                            return acc + profit + (100 - scorePoints) * 0.01;
                           }, 0) * 17000
                         ).toLocaleString()}
                       </span>
                     </span>
                   </div>
                 )}
-                
+                {currentUser.position !== "salenhapdon" &&
+                  currentUser.position !== "salexuly" && (
+                    <div className="order-summary-pill order-summary-pill-wide">
+                      <span className="order-summary-icon">💰</span>
+                      <span className="order-summary-content">
+                        <span className="order-summary-label">
+                          Tổng DS (Chưa DONE)
+                        </span>
+                        <span className="order-summary-value">
+                          {(
+                            filteredOrders.reduce((acc, order) => {
+                              return (
+                                acc +
+                                (Number(
+                                  order.revenuemkt ?? order.revenue ?? 0,
+                                ) || 0)
+                              );
+                            }, 0) * 17000
+                          ).toLocaleString()}
+                        </span>
+                      </span>
+                    </div>
+                  )}
+
                 {currentUser.position_team === "mkt" && (
                   <div className="order-summary-pill order-summary-pill-wide">
                     <span className="order-summary-icon">💰</span>
@@ -5687,7 +5691,11 @@ const OrderList = () => {
                     type="primary"
                     onClick={handleOpenLateOrdersReport}
                     className="ft-btn-add action-btn-darkgold"
-                    style={{ flexShrink: 0, whiteSpace: "nowrap" , marginRight: "100px"}}
+                    style={{
+                      flexShrink: 0,
+                      whiteSpace: "nowrap",
+                      marginRight: "100px",
+                    }}
                   >
                     ⏰ Đơn DONE muộn
                   </Button>

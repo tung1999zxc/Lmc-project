@@ -196,7 +196,7 @@ const EditableCell = ({
           content={renderPopover()}
           title={popoverTitle}
           trigger="hover"
-          mouseEnterDelay={3}
+          mouseEnterDelay={1}
         >
           {deltaCellBody}
         </Popover>
@@ -249,7 +249,7 @@ const EditableCell = ({
         content={renderPopover()}
         title={popoverTitle}
         trigger="hover"
-        mouseEnterDelay={3}
+        mouseEnterDelay={1}
       >
         {cellBody}
       </Popover>
