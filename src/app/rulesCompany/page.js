@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useRouter } from "next/navigation";
 import axios from "axios";
@@ -16,6 +16,185 @@ import {
 
 const { TextArea } = Input;
 const { Option } = Select;
+
+/* ====================== RICH-TEXT EDITOR ====================== */
+/**
+ * Editor nhập liệu như Word: gõ chữ bình thường, dùng nút B/I/U để định dạng.
+ * - Nội dung lưu trong state.value là HTML (tương thích DB & hiển thị nội quy).
+ * - Dùng contentEditable + document.execCommand để không cần cài thêm thư viện.
+ */
+function RichTextEditor({ value, onChange, placeholder = "Nhập nội dung..." }) {
+  const editorRef = useRef(null);
+  const lastHtmlRef = useRef("");
+
+  // Đồng bộ giá trị từ prop vào DOM (chỉ khi HTML thực sự khác)
+  useEffect(() => {
+    if (!editorRef.current) return;
+    const incoming = value || "";
+    if (incoming !== lastHtmlRef.current) {
+      editorRef.current.innerHTML = incoming;
+      lastHtmlRef.current = incoming;
+    }
+  }, [value]);
+
+  const exec = (cmd, arg = null) => {
+    document.execCommand(cmd, false, arg);
+    if (editorRef.current) {
+      editorRef.current.focus();
+      handleInput();
+    }
+  };
+
+  const handleInput = () => {
+    if (!editorRef.current) return;
+    const html = editorRef.current.innerHTML;
+    lastHtmlRef.current = html;
+    onChange(html);
+  };
+
+  const handlePaste = (e) => {
+    // Dán thuần text để không mang theo style rác từ Word/Google Docs
+    e.preventDefault();
+    const text = e.clipboardData.getData("text/plain");
+    document.execCommand("insertText", false, text);
+  };
+
+  // Các nút toolbar
+  const tools = [
+    { key: "bold", label: <strong>B</strong>, title: "In đậm (Ctrl+B)", style: { width: 32 } },
+    { key: "italic", label: <em>I</em>, title: "In nghiêng (Ctrl+I)", style: { width: 32 } },
+    { key: "underline", label: <u>U</u>, title: "Gạch chân (Ctrl+U)", style: { width: 32 } },
+    { divider: true },
+    { key: "formatBlock-h4", label: <strong>H</strong>, title: "Tiêu đề", cmd: "formatBlock", arg: "h4", style: { width: 32 } },
+    { key: "formatBlock-p", label: <span style={{ fontSize: 13 }}>¶</span>, title: "Đoạn văn", cmd: "formatBlock", arg: "p", style: { width: 32 } },
+    { divider: true },
+    { key: "insertUnorderedList", label: "•", title: "Danh sách dấu đầu dòng", style: { width: 32 } },
+    { key: "insertOrderedList", label: "1.", title: "Danh sách số", style: { width: 32 } },
+    { divider: true },
+    { key: "justifyLeft", label: "⬅", title: "Căn trái", style: { width: 32 } },
+    { key: "justifyCenter", label: "↔", title: "Căn giữa", style: { width: 32 } },
+    { key: "justifyRight", label: "➡", title: "Căn phải", style: { width: 32 } },
+    { divider: true },
+    { key: "undo", label: "↶", title: "Hoàn tác (Ctrl+Z)", style: { width: 32 } },
+    { key: "redo", label: "↷", title: "Làm lại (Ctrl+Y)", style: { width: 32 } },
+    { divider: true },
+    { key: "removeFormat", label: "Tx", title: "Xoá định dạng", style: { width: 36, fontSize: 12 } },
+  ];
+
+  return (
+    <div className="rte-wrapper">
+      <div className="rte-toolbar">
+        {tools.map((t, idx) =>
+          t.divider ? (
+            <div key={`d${idx}`} className="rte-divider" />
+          ) : (
+            <button
+              key={t.key}
+              type="button"
+              className="rte-btn"
+              title={t.title}
+              onMouseDown={(e) => e.preventDefault()}
+              onClick={() => exec(t.cmd || t.key, t.arg)}
+              style={t.style}
+            >
+              {t.label}
+            </button>
+          )
+        )}
+      </div>
+      <div
+        ref={editorRef}
+        className="rte-content"
+        contentEditable
+        suppressContentEditableWarning
+        onInput={handleInput}
+        onPaste={handlePaste}
+        data-placeholder={placeholder}
+      />
+      <style jsx global>{`
+        .rte-wrapper {
+          border: 1px solid #d9d9d9;
+          border-radius: 6px;
+          background: #fff;
+          transition: border-color 0.2s;
+        }
+        .rte-wrapper:focus-within {
+          border-color: #1677ff;
+          box-shadow: 0 0 0 2px rgba(22, 119, 255, 0.1);
+        }
+        .rte-toolbar {
+          display: flex;
+          flex-wrap: wrap;
+          align-items: center;
+          gap: 2px;
+          padding: 6px 8px;
+          border-bottom: 1px solid #f0f0f0;
+          background: #fafafa;
+          border-radius: 6px 6px 0 0;
+        }
+        .rte-btn {
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          min-width: 30px;
+          height: 30px;
+          padding: 0 8px;
+          border: 1px solid transparent;
+          border-radius: 4px;
+          background: transparent;
+          color: #333;
+          font-size: 14px;
+          cursor: pointer;
+          transition: all 0.15s;
+        }
+        .rte-btn:hover {
+          background: #fff;
+          border-color: #d9d9d9;
+        }
+        .rte-btn:active {
+          background: #e6f4ff;
+        }
+        .rte-divider {
+          width: 1px;
+          height: 18px;
+          background: #e8e8e8;
+          margin: 0 4px;
+        }
+        .rte-content {
+          min-height: 200px;
+          max-height: 480px;
+          overflow-y: auto;
+          padding: 12px 14px;
+          font-size: 14px;
+          line-height: 1.7;
+          color: #222;
+          outline: none;
+        }
+        .rte-content:empty::before {
+          content: attr(data-placeholder);
+          color: #bfbfbf;
+          pointer-events: none;
+        }
+        .rte-content h4 {
+          margin: 8px 0 6px;
+          font-size: 16px;
+          font-weight: 600;
+        }
+        .rte-content p {
+          margin: 4px 0;
+        }
+        .rte-content ul,
+        .rte-content ol {
+          padding-left: 22px;
+          margin: 4px 0;
+        }
+        .rte-content li {
+          margin: 2px 0;
+        }
+      `}</style>
+    </div>
+  );
+}
 
 /* ====================== HẰNG SỐ & NHÃN ====================== */
 const CATEGORIES = [
@@ -775,12 +954,11 @@ export default function RulesCompanyPage() {
           </div>
 
           <div className="rules-form-row">
-            <label>Nội dung chi tiết (HTML)</label>
-            <TextArea
-              rows={8}
+            <label>Nội dung chi tiết</label>
+            <RichTextEditor
               value={form.body}
-              onChange={(e) => setForm({ ...form, body: e.target.value })}
-              placeholder="<h4>1. Nội dung</h4><p>Mô tả chi tiết...</p>"
+              onChange={(html) => setForm({ ...form, body: html })}
+              placeholder="Nhập nội dung chi tiết... Bôi đen chữ rồi bấm B / I / U để định dạng."
             />
           </div>
 
