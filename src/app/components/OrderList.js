@@ -484,7 +484,7 @@ const OrderList = () => {
   const [products2, setProducts] = useState([]);
   const [namesalexuly, setnamesalexuly] = useState("");
   // Cho phép chọn nhiều filter
-  const [weightFilter, setWeightFilter] = useState(null); // 'under1kg', 'over1kg', or null
+  const [weightFilter, setWeightFilter] = useState(null); // 'le100' | 'under500' | '500to1000' | 'over1000' | null
   const [xoaDonFilter, setXoaDonFilter] = useState(null); // 'all', 'pending', 'lead', 'processed'
   const [employees, setEmployees] = useState([]);
   const [selectedFilters, setSelectedFilters] = useState([]);
@@ -1550,19 +1550,29 @@ const OrderList = () => {
               );
 
         // Weight filter
-        const calcOrderWeight = (order) =>
-          (order.products || []).reduce((sum, item) => {
-            const productInfo = products2.find((p) => p.name === item.product);
-            return sum + item.quantity * (productInfo?.weight || 0);
-          }, 0);
+        const PACKAGING_WEIGHT = 100;
+
+const calcOrderWeight = (order) =>
+  PACKAGING_WEIGHT +
+  (order.products || []).reduce((sum, item) => {
+    const productInfo = products2.find(
+      (p) => p.name === item.product
+    );
+
+    return sum + item.quantity * (productInfo?.weight || 0);
+  }, 0);
         const orderWeight = calcOrderWeight(order);
         const weightMatch = !weightFilter
           ? true
-          : weightFilter === "under1kg"
-            ? orderWeight > 0 && orderWeight < 1000
-            : weightFilter === "over1kg"
-              ? orderWeight >= 1000
-              : true;
+          : weightFilter === "le100"
+            ? orderWeight === 100
+            : weightFilter === "under500"
+              ? orderWeight > 0 && orderWeight <= 500
+              : weightFilter === "500to1000"
+                ? orderWeight > 500 && orderWeight <= 1000
+                : weightFilter === "over1000"
+                  ? orderWeight > 1000
+                  : true;
 
         // Filter đơn xin xóa
         const xoaDonMatch = !xoaDonFilter
@@ -3366,7 +3376,7 @@ const OrderList = () => {
         const totalWeight = (record.products || []).reduce((sum, item) => {
           const productInfo = products2.find((p) => p.name === item.product);
           const weight = productInfo?.weight || 0;
-          return sum + item.quantity * weight + 50;
+          return sum + item.quantity * weight + 100;
         }, 0);
         return totalWeight > 0 ? (
           <span className="weight-cell">{totalWeight}g</span>
@@ -5863,8 +5873,10 @@ const OrderList = () => {
                       style={{ width: "100%" }}
                       placeholder="Lọc theo khối lượng"
                     >
-                      <Option value="under1kg">Dưới 1kg</Option>
-                      <Option value="over1kg">Trên 1kg</Option>
+                      <Option value="le100">100g</Option>
+                      <Option value="under500">&lt; 500g</Option>
+                      <Option value="500to1000">Từ 500g đến 1000g</Option>
+                      <Option value="over1000">&gt; 1000g</Option>
                     </Select>
                   )}
                 {currentUser.position_team !== "mkt" &&

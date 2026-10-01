@@ -293,6 +293,7 @@ const InventoryPage = () => {
   const addFormRef = React.useRef(null);
   const [testDayRange, setTestDayRange] = useState(null);
   const [testDayPreset, setTestDayPreset] = useState(null);
+  const [weightRange, setWeightRange] = useState({ min: null, max: null });
 
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
   const [bulkMkt, setBulkMkt] = useState(null);
@@ -358,6 +359,7 @@ const InventoryPage = () => {
       if (prod) {
         if (field === "slvn") baseline = Number(prod.slvn) || 0;
         else if (field === "sltq") baseline = Number(prod.sltq) || 0;
+        else if (field === "weight") baseline = Number(prod.weight) || 0;
         else if (field === "importedQty") {
           baseline = (prod.imports || []).reduce(
             (acc, cur) =>
@@ -408,6 +410,7 @@ const InventoryPage = () => {
         const prod = products.find((p) => p.key === Number(prodKey) || p.key === prodKey);
         const baselineSlvn = Number(prod?.slvn) || 0;
         const baselineSltq = Number(prod?.sltq) || 0;
+        const baselineWeight = Number(prod?.weight) || 0;
         const baselineTot = (prod?.imports || []).reduce(
           (acc, cur) =>
             acc +
@@ -425,13 +428,16 @@ const InventoryPage = () => {
           0,
         );
 
-        // slvn / sltq -> PUT /api/products/[key] (API tự push history với giá trị tuyệt đối mới)
+        // slvn / sltq / weight -> PUT /api/products/[key]
         const putPayload = {};
         if (fields.slvn !== undefined && fields.slvn !== baselineSlvn) {
           putPayload.slvn = fields.slvn;
         }
         if (fields.sltq !== undefined && fields.sltq !== baselineSltq) {
           putPayload.sltq = fields.sltq;
+        }
+        if (fields.weight !== undefined && fields.weight !== baselineWeight) {
+          putPayload.weight = fields.weight;
         }
         if (Object.keys(putPayload).length > 0) {
           await axios.put(`/api/products/${prodKey}`, putPayload);
@@ -827,6 +833,23 @@ const InventoryPage = () => {
       }
     }
 
+    // ✅ Filter theo khoảng khối lượng (g)
+    if (weightRange && (weightRange.min !== null || weightRange.max !== null)) {
+      const minW = weightRange.min !== null && weightRange.min !== ""
+        ? Number(weightRange.min)
+        : null;
+      const maxW = weightRange.max !== null && weightRange.max !== ""
+        ? Number(weightRange.max)
+        : null;
+      data = data.filter((p) => {
+        const w = Number(p.weight);
+        if (!Number.isFinite(w)) return false; // không có weight hợp lệ → loại
+        if (minW !== null && w < minW) return false;
+        if (maxW !== null && w > maxW) return false;
+        return true;
+      });
+    }
+
     return data;
   }, [
     products,
@@ -839,6 +862,7 @@ const InventoryPage = () => {
     createdAtRange,
     lastOrderFilter,
     lastOrderMap,
+    weightRange,
   ]);
 
   /** Compute derived "orders" list filtered by preset to match original behavior */
@@ -1154,9 +1178,33 @@ const InventoryPage = () => {
         dataIndex: "weight",
         key: "weight",
         width: 100,
-        render: (text) => (
-          <span className="weight-cell">{text ? `${text} g` : "-"}</span>
-        ),
+        render: (_, record) => {
+          const cellKey = `${record.key}::weight`;
+          const pending = !!pendingChanges[cellKey];
+          const rawWeight = record.weight;
+         
+          const displayed = pending
+            ? pendingChanges[cellKey].newValue
+            : Number(record.weight) || 0;
+          // Debug: bật comment dưới để kiểm tra giá trị thô từ API
+          // console.log("weight debug:", { key: record.key, rawWeight, baseValue, displayed });
+          return (
+            <EditableCell
+              value={displayed}
+              recordKey={record.key}
+              field="weight"
+              pending={pending}
+              onCommit={(v) => setPending(record.key, "weight", v)}
+              valueStyle={{ fontWeight: pending ? "bold" : "normal" }}
+              disabled={
+                currentUser?.position_team === "mkt" ||
+                (currentUser?.position !== "admin" &&
+                  currentUser?.position !== "managerSALE" &&
+                  currentUser?.position !== "leadSALE")
+              }
+            />
+          );
+        },
       },
       {
         title: "SL nhập hàng Tổng",
@@ -2289,7 +2337,7 @@ const InventoryPage = () => {
             onPressEnter={(e) => setSearchText(e.target.value.trim())}
             className="prod-search-input"
             style={{
-              width: 260,
+              width: 200,
               flexShrink: 0,
               borderRadius: 10,
               background: "rgba(255, 255, 255, 0.95)",
@@ -2353,6 +2401,50 @@ const InventoryPage = () => {
               </Option>
             ))}
           </Select>
+
+          <span
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 6,
+              flexShrink: 0,
+            }}
+          >
+            <span style={{ fontSize: 13, color: "#fff", fontWeight: 500 }}>
+              KL(g):
+            </span>
+            <InputNumber
+              placeholder="Từ"
+              min={0}
+              style={{ width: 90 }}
+              value={weightRange.min}
+              onChange={(v) =>
+                setWeightRange((prev) => ({ ...prev, min: v }))
+              }
+              onPressEnter={(e) => e.target?.blur?.()}
+            />
+            <span style={{ color: "#6b7280" }}>—</span>
+            <InputNumber
+              placeholder="Đến"
+              min={0}
+              style={{ width: 90 }}
+              value={weightRange.max}
+              onChange={(v) =>
+                setWeightRange((prev) => ({ ...prev, max: v }))
+              }
+              onPressEnter={(e) => e.target?.blur?.()}
+            />
+            {(weightRange.min !== null || weightRange.max !== null) && (
+              <Button
+                size="small"
+                type="text"
+                onClick={() => setWeightRange({ min: null, max: null })}
+                style={{ color: "#fff" }}
+              >
+                Xóa
+              </Button>
+            )}
+          </span>
 
           <div
             style={{
