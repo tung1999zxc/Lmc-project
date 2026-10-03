@@ -400,9 +400,9 @@ function getViewList(orders, view) {
         (o) => o.saleReport === "HOÀN" || o.deliveryStatus === "HOÀN",
       );
     case "unsent":
-      return orders.filter((o) => !o.ngayGui && o.deliveryStatus !== "HOÀN" && o.deliveryStatus !== "GIAO THÀNH CÔNG");
+      return orders.filter((o) => !o.ngayGui && o.deliveryStatus !== "HOÀN" && o.saleReport !== "HOÀN" && o.deliveryStatus !== "GIAO THÀNH CÔNG");
     case "sent":
-      return orders.filter((o) => o.ngayGui && !o.delivered && !o.reconciled &&( o.deliveryStatus !== "HOÀN" || o.saleReport !== "HOÀN" ));
+      return orders.filter((o) => o.ngayGui && !o.delivered && !o.reconciled &&( o.deliveryStatus !== "HOÀN" && o.saleReport !== "HOÀN" ));
     case "late":
       return orders.filter((o) => isLate(o));
     case "done":
@@ -540,7 +540,7 @@ export default function KhoOrderList() {
         ordersWithState.filter((o) => !o.ngayGui && o.saleReport !== "HOÀN")
           .length - 1,
       sent: ordersWithState.filter(
-        (o) => o.ngayGui && !o.delivered && !o.reconciled,
+        (o) => o.ngayGui && !o.delivered && !o.reconciled &&( o.deliveryStatus !== "HOÀN" && o.saleReport !== "HOÀN" ),
       ).length,
       late: ordersWithState.filter((o) => isLate(o)).length,
       done: ordersWithState.filter((o) => o.delivered && !o.reconciled).length,
