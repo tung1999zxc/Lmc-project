@@ -1,4 +1,4 @@
-import React from "react";
+import React, { ReactNode } from "react";
 
 export const metadata = {
   title: "LMC – Trang công khai",
@@ -10,6 +10,8 @@ export const metadata = {
 // Mọi trang public đặt trong src/app/(standalone)/... sẽ render trực tiếp.
 export default function StandaloneLayout({
   children
+}: {
+  children: ReactNode;
 }) {
   return <>{children}</>;
 }
