@@ -33,7 +33,7 @@ function InnerDashboardLayout({ children }: { children: ReactNode }) {
   const dispatch = useDispatch();
   const router = useRouter();
   const pathname = usePathname();
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
 
   // Lấy thông tin người dùng từ Redux store
@@ -78,15 +78,24 @@ function InnerDashboardLayout({ children }: { children: ReactNode }) {
   // Khởi tạo hiệu ứng đổi màu cho header với framer-motion
   const headerControls = useAnimation();
 
+  // Các đường dẫn công khai, KHÔNG yêu cầu đăng nhập.
+  // Lưu ý: vẫn render layout (sidebar/header) bình thường cho những path này
+  // trừ khi chúng nằm trong route group "(standalone)" (xem (standalone)/layout.tsx).
+  const PUBLIC_PATHS = ["/rulebotchat"];
+  const isPublicPath = PUBLIC_PATHS.some(
+    (p) => pathname === p || pathname?.startsWith?.(`${p}/`)
+  );
+
   // Kiểm tra nếu chưa đăng nhập, chuyển hướng về trang login
   useEffect(() => {
+    if (isPublicPath) return;
     if (!currentUser || !currentUser.username) {
       // Tránh push trùng khi đã đang ở /login
       if (typeof window !== "undefined" && window.location.pathname !== "/login") {
         router.push("/login");
       }
     }
-  }, [currentUser, router]);
+  }, [currentUser, router, isPublicPath]);
 
   useEffect(() => {
     headerControls.start({
@@ -128,7 +137,9 @@ function InnerDashboardLayout({ children }: { children: ReactNode }) {
   // Nếu chưa đăng nhập (bị dispatch clear khi logout hoặc truy cập trực tiếp),
   // KHÔNG render sidebar/header. handleLogout đã chủ động router.replace
   // nên không cần đợi effect.
-  if (!currentUser || !currentUser.username) {
+  // Ngoại lệ: các đường dẫn công khai (PUBLIC_PATHS) vẫn render nội dung để
+  // người dùng xem được trang mà không cần đăng nhập.
+  if (!isPublicPath && (!currentUser || !currentUser.username)) {
     return null;
   }
 

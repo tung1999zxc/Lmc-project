@@ -155,8 +155,7 @@ const OrderForm = ({
 
     // Chỉ cho phép chỉnh sửa khi deliveryStatus === ""
     // Ngược lại chỉ được xem (không tick, không upload, không lưu)
-    const canEdit =
-      orderRecord && (orderRecord.deliveryStatus ?? "") === "";
+    const canEdit = orderRecord && (orderRecord.deliveryStatus ?? "") === "";
     setScoreMode(canEdit ? "edit" : "view");
 
     setScoreOrder(orderRecord);
@@ -240,9 +239,7 @@ const OrderForm = ({
       setScoreImageList([]);
     } catch (err) {
       console.error(err);
-      message.error(
-        err?.response?.data?.error || "Lỗi khi lưu điểm đơn hàng",
-      );
+      message.error(err?.response?.data?.error || "Lỗi khi lưu điểm đơn hàng");
     } finally {
       setScoreSaving(false);
       setScoreUploading(false);
@@ -298,7 +295,10 @@ const OrderForm = ({
   }, [products2]);
   const [employeeNamepage, setEmployeeNamepage] = useState("");
   const [modalCustomerOrders, setModalCustomerOrders] = useState([]);
+  const [modalFbOrders, setModalFbOrders] = useState([]);
   const [modalVisible, setModalVisible] = useState(false);
+  // Loại dữ liệu đang hiển thị trong modal: "customer" | "fb"
+  const [modalSearchType, setModalSearchType] = useState("customer");
   const [selectedColumns, setSelectedColumns] = useState([]);
 
   const handleColumnSelect = (key, checked) => {
@@ -314,10 +314,33 @@ const OrderForm = ({
         `/api/orders/search-by-customer?name=${encodeURIComponent(name)}`,
       );
       setModalCustomerOrders(res.data.data || []);
+      setModalFbOrders([]);
+      setModalSearchType("customer");
       setModalVisible(true);
     } catch (err) {
       console.error(err);
       message.error("Không thể tìm đơn khách hàng");
+    }
+  };
+
+  // Tìm các đơn trùng link FB trong DB (gọi khi người dùng rời ô Link FB)
+  const handleSearchFbModal = async (fb) => {
+    try {
+      const res = await axios.get(
+        `/api/orders/search-by-fb?fb=${encodeURIComponent(fb)}`,
+      );
+      const matches = res.data.data || [];
+      setModalFbOrders(matches);
+      setModalCustomerOrders([]);
+      setModalSearchType("fb");
+      setModalVisible(true);
+      if (matches.length === 0) {
+        // Không có đơn trùng -> thông báo nhẹ để sale biết là đã check
+        message.info("Không tìm thấy đơn nào trùng link FB này");
+      }
+    } catch (err) {
+      console.error(err);
+      message.error("Không thể tìm đơn theo link FB");
     }
   };
 
@@ -540,15 +563,21 @@ const OrderForm = ({
   return (
     <>
       <Modal
-        title="Các đơn hàng của khách"
+        title={
+          modalSearchType === "fb"
+            ? "Các đơn hàng trùng link FB"
+            : "Các đơn hàng của khách"
+        }
         open={modalVisible}
         onCancel={() => setModalVisible(false)}
         footer={null}
         width="90%"
-  centered
+        centered
       >
         <Table
-          dataSource={modalCustomerOrders}
+          dataSource={
+            modalSearchType === "fb" ? modalFbOrders : modalCustomerOrders
+          }
           scroll={{ x: "max-content" }}
           width={3000}
           columns={[
@@ -885,7 +914,9 @@ const OrderForm = ({
                     fontWeight: scoreChecked[item.key] ? 600 : 400,
                   }}
                 >
-                  {scoreChecked[item.key] ? `+${item.points}đ ✓` : `${item.points}đ`}
+                  {scoreChecked[item.key]
+                    ? `+${item.points}đ ✓`
+                    : `${item.points}đ`}
                 </span>
               </div>
             ))}
@@ -942,8 +973,8 @@ const OrderForm = ({
                   )}
                 </Upload>
                 <div style={{ fontSize: 12, color: "#999", marginTop: 4 }}>
-                  Tối đa 5 ảnh, mỗi ảnh tối đa 5MB. Có thể paste ảnh từ clipboard
-                  (Ctrl+V)
+                  Tối đa 5 ảnh, mỗi ảnh tối đa 5MB. Có thể paste ảnh từ
+                  clipboard (Ctrl+V)
                 </div>
               </>
             ) : scoreImageList.length > 0 ? (
@@ -1431,19 +1462,10 @@ const OrderForm = ({
                                     (p) => p.name === product,
                                   );
                                   return (
-                                    <Option key={product} value={product}>
-                                      {/* <Popover
-            content={
-              productObj && productObj.image ? (
-                <img src={productObj.image} alt={product} style={{ width: 150 }} />
-              ) : null
-            }
-            title={product}
-            trigger="hover"
-          >
-            <span>{product}</span>
-          </Popover> */}
-                                    </Option>
+                                    <Option
+                                      key={product}
+                                      value={product}
+                                    ></Option>
                                   );
                                 })}
                               </Select>
@@ -1589,7 +1611,12 @@ const OrderForm = ({
                   </Form.Item>
 
                   <Form.Item label="Link FB" name="fb">
-                    <Input />
+                    <Input
+                      onBlur={(e) => {
+                        const value = e.target.value.trim();
+                        if (value) handleSearchFbModal(value);
+                      }}
+                    />
                   </Form.Item>
                   <Form.Item label="TT SALE XỬ LÍ ĐƠN" name="processStatus">
                     <Select showSearch>
