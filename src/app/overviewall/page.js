@@ -3664,7 +3664,7 @@ const Dashboard = () => {
     }
 
     const C = filteredOrdersByArea0mkt.length;
-    const notSent = A - B - E;
+    const notSent = A - B ;
 
     return {
       key: 1,
@@ -3673,7 +3673,7 @@ const Dashboard = () => {
       B,
       notSent,
       percentDoneText: C ? ((A / C) * 100).toFixed(2) + "%" : "0%",
-      percentSentText: A ? (((B + E) / A) * 100).toFixed(2) + "%" : "0%",
+      percentSentText: A ? (((B ) / A) * 100).toFixed(2) + "%" : "0%",
       percentNotSentText: A ? ((notSent / A) * 100).toFixed(2) + "%" : "0%",
     };
   }, [filteredOrdersByArea0mkt]);

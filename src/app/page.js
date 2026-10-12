@@ -56,7 +56,10 @@ const Dashboard = () => {
   // Ràng buộc team_tp dựa trên user đăng nhập (chỉ áp dụng cho 2 case đặc biệt)
   const restrictedTeamTp = useMemo(() => {
     const userName = (currentUser.name || "").trim();
-    if (currentUser.position === "managerMKT" && userName === "Trần Ngọc Diện") {
+    if (
+      currentUser.position === "managerMKT" &&
+      userName === "Trần Ngọc Diện"
+    ) {
       return "DIEN";
     }
     if (currentUser.position === "admin" && userName === "Phi Navy") {
@@ -312,7 +315,7 @@ const Dashboard = () => {
                   fontWeight: 600,
                 }}
                 formatter={(value) =>
-                  value === "profit" ? "Doanh thu" : value 
+                  value === "profit" ? "Doanh thu" : value
                 }
               />
             </PieChart>
@@ -1200,10 +1203,7 @@ const Dashboard = () => {
         )
       : teamsByArea[selectedArea] || [];
   const teamsByArea2 = {
-    da: [
-    
-      { label: "TEAM TUẤN ANH", value: "TUANANH" },
-    ],
+    da: [{ label: "TEAM TUẤN ANH", value: "TUANANH" }],
     pvd: [
       // { label: "TEAM DIỆU", value: "DIEU" },
       { label: "TEAM SƠN", value: "SON" },
@@ -1215,7 +1215,6 @@ const Dashboard = () => {
       { label: "TEAM ÁNH ", value: "ANH" },
       { label: "TEAM TÙNG ", value: "TUNG" },
       { label: "TEAM HIỆP ", value: "HIEP" },
-
     ],
     all: [
       // { label: "TEAM PHI", value: "PHI" },
@@ -1318,7 +1317,9 @@ const Dashboard = () => {
   const specialDIENMembers = filteredEmployeesByArea.filter(
     (emp) =>
       currentUser.team_id === "DIEN" &&
-      ["Hoàng Ngọc Ánh", "Nguyễn Mạnh Tùng","Nguyễn Thế Hiệp"].includes(emp.name.trim()) &&
+      ["Hoàng Ngọc Ánh", "Nguyễn Mạnh Tùng", "Nguyễn Thế Hiệp"].includes(
+        emp.name.trim(),
+      ) &&
       (!restrictedTeamTp || emp.team_tp === restrictedTeamTp) &&
       (selectedMktName === "all" || emp.name.trim() === selectedMktName),
   );
@@ -1382,7 +1383,8 @@ const Dashboard = () => {
         (emp.name.trim() === "Nguyễn Thị Xuân Diệu" ||
           emp.name.trim() === "Nguyễn Bá Quân")) ||
       (currentUser.team_id === "DIEN" &&
-        (emp.name.trim() === "Hoàng Ngọc Ánh" ||emp.name.trim() === "Nguyễn Thế Hiệp" ||
+        (emp.name.trim() === "Hoàng Ngọc Ánh" ||
+          emp.name.trim() === "Nguyễn Thế Hiệp" ||
           emp.name.trim() === "Nguyễn Mạnh Tùng")),
   );
 
@@ -1605,7 +1607,7 @@ const Dashboard = () => {
               (emp.name || "").trim(),
             )) ||
           (currentUser.team_id === "DIEN" &&
-            ["Hoàng Ngọc Ánh", "Nguyễn Mạnh Tùng","Nguyễn Thế Hiệp"].includes(
+            ["Hoàng Ngọc Ánh", "Nguyễn Mạnh Tùng", "Nguyễn Thế Hiệp"].includes(
               (emp.name || "").trim(),
             )),
 
@@ -2090,7 +2092,9 @@ const Dashboard = () => {
     }
     if (
       currentUser.team_id === "DIEN" &&
-      ["Hoàng Ngọc Ánh", "Nguyễn Mạnh Tùng","Nguyễn Thế Hiệp"].includes(emp.name.trim())
+      ["Hoàng Ngọc Ánh", "Nguyễn Mạnh Tùng", "Nguyễn Thế Hiệp"].includes(
+        emp.name.trim(),
+      )
     ) {
       return true;
     }
@@ -2119,7 +2123,7 @@ const Dashboard = () => {
   const teamLeaders = teamEmployees.filter(
     (emp) => emp.position === "lead" || emp.name === currentUser.name,
   );
-  const leaderNames = teamLeaders.map(emp => emp.name.toLowerCase());
+  const leaderNames = teamLeaders.map((emp) => emp.name.toLowerCase());
 
   // Tạo map chức vụ
   const positionMap = {};
@@ -3254,15 +3258,12 @@ const Dashboard = () => {
       },
     },
   ];
-  const totalSangSom = saleDailyData.reduce(
-    (sum, item) => sum + item.sangSom,
-    0,
-  ) * 17000;
-  const totalHanhChinh = saleDailyData.reduce(
-    (sum, item) => sum + item.hanhChinh,
-    0,
-  ) * 17000;
-  const totalToi = saleDailyData.reduce((sum, item) => sum + item.toi, 0) * 17000;
+  const totalSangSom =
+    saleDailyData.reduce((sum, item) => sum + item.sangSom, 0) * 17000;
+  const totalHanhChinh =
+    saleDailyData.reduce((sum, item) => sum + item.hanhChinh, 0) * 17000;
+  const totalToi =
+    saleDailyData.reduce((sum, item) => sum + item.toi, 0) * 17000;
   const totalSale = totalSangSom + totalHanhChinh + totalToi;
 
   const salePieData =
@@ -3446,7 +3447,7 @@ const Dashboard = () => {
     }
 
     const C = filteredOrders.length;
-    const notSent = A - B - E;
+    const notSent = A - B;
 
     return {
       key: 1,
@@ -3455,7 +3456,7 @@ const Dashboard = () => {
       B,
       notSent,
       percentDoneText: C ? ((A / C) * 100).toFixed(2) + "%" : "0%",
-      percentSentText: A ? (((B + E) / A) * 100).toFixed(2) + "%" : "0%",
+      percentSentText: A ? (((B) / A) * 100).toFixed(2) + "%" : "0%",
       percentNotSentText: A ? ((notSent / A) * 100).toFixed(2) + "%" : "0%",
     };
   }, [filteredOrders]);
@@ -3493,70 +3494,79 @@ const Dashboard = () => {
       }}
     >
       {/* VINH DANH TOP 3 - LEADERBOARD */}
-    {currentUser.position_team !=="sale" && (<>
-     {top5Employees.length > 0 && (
-        <div className="lb-wrap">
-          <div className="lb-sub">
-            🏆 Vinh danh hôm nay ·{" "}
-            <span id="lb-date">
-              {new Date().getDate().toString().padStart(2, "0")}/
-              {new Date().getMonth() + 1}/{new Date().getFullYear()}
-            </span>
-          </div>
-          <div className="lb-hl">
-            {top5Employees[0].totalToday * 17000 >= 10000000 ? (
-              <span>
-                Đội ngũ bùng nổ — <span>{top5Employees[0].nickname}!</span>
-              </span>
-            ) : (
-              <span style={{ color: "rgba(255,255,255,0.5)", fontSize: 14 }}>
-                Hãy cố lên — chưa ai đạt 10 triệu hôm nay!
-              </span>
-            )}
-          </div>
-          <div className="lb-grid">
-            {top5Employees.slice(0, 3).map((emp, index) => {
-              const medals = ["🥇", "🥈", "🥉"];
-              const ranks = ["r1", "r2", ""];
-              const badges = ["bg-gold", "bg-silver", "bg-bronze"];
-              const tops = ["TOP 1", "TOP 2", "TOP 3"];
-              const showDs = emp.totalToday * 17000 >= 10000000;
-              return (
-                <div key={index} className={`lb-card ${ranks[index] || ""}`}>
-                  <div className="lb-rank">{medals[index]}</div>
-                  <img
-                    src={`/${emp.avatarNum}.png`}
-                    alt={emp.nickname}
-                    className={`lb-av ${ranks[index] || ""}`}
-                    style={{
-                      width: 54,
-                      height: 54,
-                      borderRadius: "50%",
-                      objectFit: "cover",
-                    }}
-                    onError={(e) => {
-                      e.currentTarget.onerror = null;
-                      e.currentTarget.src = "/ngockem.jpg";
-                    }}
-                  />
-                  <div className="lb-name">{emp.nickname}</div>
-                  <div className={`lb-badge ${badges[index]}`}>
-                    {tops[index]}
-                  </div>
-                  {showDs && (
-                    <div className="lb-stat">
-                      <strong>
-                        {(emp.totalToday * 17000).toLocaleString("vi-VN")} VNĐ
-                      </strong>
-                      DS hôm nay
+      {currentUser.position_team !== "sale" && (
+        <>
+          {top5Employees.length > 0 && (
+            <div className="lb-wrap">
+              <div className="lb-sub">
+                🏆 Vinh danh hôm nay ·{" "}
+                <span id="lb-date">
+                  {new Date().getDate().toString().padStart(2, "0")}/
+                  {new Date().getMonth() + 1}/{new Date().getFullYear()}
+                </span>
+              </div>
+              <div className="lb-hl">
+                {top5Employees[0].totalToday * 17000 >= 10000000 ? (
+                  <span>
+                    Đội ngũ bùng nổ — <span>{top5Employees[0].nickname}!</span>
+                  </span>
+                ) : (
+                  <span
+                    style={{ color: "rgba(255,255,255,0.5)", fontSize: 14 }}
+                  >
+                    Hãy cố lên — chưa ai đạt 10 triệu hôm nay!
+                  </span>
+                )}
+              </div>
+              <div className="lb-grid">
+                {top5Employees.slice(0, 3).map((emp, index) => {
+                  const medals = ["🥇", "🥈", "🥉"];
+                  const ranks = ["r1", "r2", ""];
+                  const badges = ["bg-gold", "bg-silver", "bg-bronze"];
+                  const tops = ["TOP 1", "TOP 2", "TOP 3"];
+                  const showDs = emp.totalToday * 17000 >= 10000000;
+                  return (
+                    <div
+                      key={index}
+                      className={`lb-card ${ranks[index] || ""}`}
+                    >
+                      <div className="lb-rank">{medals[index]}</div>
+                      <img
+                        src={`/${emp.avatarNum}.png`}
+                        alt={emp.nickname}
+                        className={`lb-av ${ranks[index] || ""}`}
+                        style={{
+                          width: 54,
+                          height: 54,
+                          borderRadius: "50%",
+                          objectFit: "cover",
+                        }}
+                        onError={(e) => {
+                          e.currentTarget.onerror = null;
+                          e.currentTarget.src = "/ngockem.jpg";
+                        }}
+                      />
+                      <div className="lb-name">{emp.nickname}</div>
+                      <div className={`lb-badge ${badges[index]}`}>
+                        {tops[index]}
+                      </div>
+                      {showDs && (
+                        <div className="lb-stat">
+                          <strong>
+                            {(emp.totalToday * 17000).toLocaleString("vi-VN")}{" "}
+                            VNĐ
+                          </strong>
+                          DS hôm nay
+                        </div>
+                      )}
                     </div>
-                  )}
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      )}</>)}
+                  );
+                })}
+              </div>
+            </div>
+          )}
+        </>
+      )}
 
       {/* BỘ LỌC */}
       <div className="filter-bar-container">
@@ -3732,7 +3742,6 @@ const Dashboard = () => {
               <span className="dn">▼ Trên doanh số</span>: {selectedTeam}
             </div>
           </div>
-          
         </div>
       )}
       {((currentUser.position === "admin" && !selectedTeam) ||
@@ -4212,7 +4221,7 @@ const Dashboard = () => {
                                     </div>
                                   </div>
                                 </td>
-                               
+
                                 <td style={tdStyle}>
                                   <span
                                     style={{
@@ -4332,7 +4341,6 @@ const Dashboard = () => {
                   </div>
                 </Col>
                 <Col xs={24} md={10}>
-                  
                   <div className="sale-pie-card">
                     <div className="sale-table-header">
                       <div
@@ -4359,7 +4367,7 @@ const Dashboard = () => {
 
               <Row gutter={[20, 20]}>
                 <Col xs={24} md={24}>
-                <div className="sale-table-card">
+                  <div className="sale-table-card">
                     <div className="sale-table-header">
                       <div
                         className="sale-table-header-icon"
@@ -4502,62 +4510,63 @@ const Dashboard = () => {
 
                     <Row gutter={[20, 20]} style={{ marginTop: 20 }}>
                       <Col xs={24} md={24}>
-                      <div className="sale-pie-card">
-                      <div className="sale-table-header">
-                        <div
-                          className="sale-table-header-icon"
-                          style={{
-                            background:
-                              "linear-gradient(135deg,#f59e0b,#f97316)",
-                          }}
-                        >
-                          <span>🥧</span>
-                        </div>
-                        <div className="sale-table-header-text">
-                          <h3 className="sale-table-title">
-                            Phần trăm doanh số Sale
-                          </h3>
-                          <p className="sale-table-subtitle">
-                            Tỷ trọng doanh số theo các ca
-                          </p>
-                        </div>
-                      </div>
-                      <SalePieChartOuter data={salePieData} total={totalSale} />
-                    </div>
-                      </Col>
-                    </Row>
-                  </Col>
-                  <Col xs={24} md={9}>
-                    
-                    <div className="sale-table-card">
+                        <div className="sale-pie-card">
                           <div className="sale-table-header">
                             <div
                               className="sale-table-header-icon"
                               style={{
                                 background:
-                                  "linear-gradient(135deg,#0ea5e9,#2563eb)",
+                                  "linear-gradient(135deg,#f59e0b,#f97316)",
                               }}
                             >
-                              <span>🚚</span>
+                              <span>🥧</span>
                             </div>
                             <div className="sale-table-header-text">
-                              <h2 className="sale-table-title">
-                                Báo cáo Doanh Số Nhân Viên Sale Vận Đơn
-                              </h2>
+                              <h3 className="sale-table-title">
+                                Phần trăm doanh số Sale
+                              </h3>
                               <p className="sale-table-subtitle">
-                                Doanh số và tỷ lệ đòi tiền nhân viên Xử lý vận
-                                đơn
+                                Tỷ trọng doanh số theo các ca
                               </p>
                             </div>
                           </div>
-                          <Table
-                            className="sale-table sale-table-xl"
-                            columns={saleColumns}
-                            dataSource={saleReportDataXL}
-                            pagination={false}
-                            scroll={{ x: 720 }}
+                          <SalePieChartOuter
+                            data={salePieData}
+                            total={totalSale}
                           />
                         </div>
+                      </Col>
+                    </Row>
+                  </Col>
+                  <Col xs={24} md={9}>
+                    <div className="sale-table-card">
+                      <div className="sale-table-header">
+                        <div
+                          className="sale-table-header-icon"
+                          style={{
+                            background:
+                              "linear-gradient(135deg,#0ea5e9,#2563eb)",
+                          }}
+                        >
+                          <span>🚚</span>
+                        </div>
+                        <div className="sale-table-header-text">
+                          <h2 className="sale-table-title">
+                            Báo cáo Doanh Số Nhân Viên Sale Vận Đơn
+                          </h2>
+                          <p className="sale-table-subtitle">
+                            Doanh số và tỷ lệ đòi tiền nhân viên Xử lý vận đơn
+                          </p>
+                        </div>
+                      </div>
+                      <Table
+                        className="sale-table sale-table-xl"
+                        columns={saleColumns}
+                        dataSource={saleReportDataXL}
+                        pagination={false}
+                        scroll={{ x: 720 }}
+                      />
+                    </div>
                     <div className="sale-table-card" style={{ marginTop: 20 }}>
                       <div className="sale-table-header">
                         <div
