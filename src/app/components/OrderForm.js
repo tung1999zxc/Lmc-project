@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import FullScreenLoading from "./FullScreenLoading";
 
@@ -45,6 +45,7 @@ const OrderForm = ({
   onCancelScore,
 }) => {
   const [form] = Form.useForm();
+  const revenueRef = useRef(null);
   const { Option } = Select;
   const currentUser = useSelector((state) => state.user.currentUser);
 
@@ -1512,9 +1513,22 @@ const OrderForm = ({
                     <Input
                       type="number"
                       onChange={(e) => {
-                        const value = e.target.value
-                          ? Number(e.target.value)
-                          : 0;
+                        const raw = e.target.value;
+                        const value = raw ? Number(raw) : 0;
+                        if (currentUser.position === "salexuly") {
+                          if (value !== 0) {
+                            revenueRef.current = value;
+                          }
+                          if (value === 0) {
+                            form.setFieldsValue({
+                              revenue: revenueRef.current ?? 0,
+                            });
+                            message.warning(
+                              "Bạn không có quyền sửa doanh số về 0"
+                            );
+                            return;
+                          }
+                        }
                         form.setFieldsValue({ revenue: value });
                       }}
                     />
