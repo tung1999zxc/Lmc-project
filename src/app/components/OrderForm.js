@@ -45,9 +45,14 @@ const OrderForm = ({
   onCancelScore,
 }) => {
   const [form] = Form.useForm();
-  const revenueRef = useRef(null);
-  const { Option } = Select;
   const currentUser = useSelector((state) => state.user.currentUser);
+  const revenueRef = useRef(null);
+  const revenueValue = Form.useWatch("revenue", form);
+  const isHuyDisabled =
+    currentUser.position === "salexuly" &&
+    revenueValue &&
+    Number(revenueValue) !== 0;
+  const { Option } = Select;
 
   // Auto-fill field "VẬN ĐƠN" (salexuly) khi tạo đơn mới.
   // Sửa lỗi: nếu user bấm "+" quá nhanh trước khi useEffect round-robin ở
@@ -1518,6 +1523,15 @@ const OrderForm = ({
                         if (currentUser.position === "salexuly") {
                           if (value !== 0) {
                             revenueRef.current = value;
+                            const currentReport = form.getFieldValue(
+                              "saleReport"
+                            );
+                            if (currentReport === "HỦY") {
+                              form.setFieldsValue({ saleReport: undefined });
+                              message.warning(
+                                "Doanh số khác 0 không thể chọn HỦY"
+                              );
+                            }
                           }
                           if (value === 0) {
                             form.setFieldsValue({
@@ -1642,9 +1656,31 @@ const OrderForm = ({
                     </Select>
                   </Form.Item>
                   <Form.Item label="ĐƠN" name="saleReport">
-                    <Select allowClear>
+                    <Select
+                      allowClear
+                      onChange={(val) => {
+                        if (
+                          currentUser.position === "salexuly" &&
+                          val === "HỦY"
+                        ) {
+                          const revenue = form.getFieldValue("revenue");
+                          if (revenue && revenue !== 0) {
+                            form.setFieldsValue({ saleReport: undefined });
+                            message.warning(
+                              "Doanh số khác 0 không thể chọn HỦY"
+                            );
+                            return;
+                          }
+                        }
+                        form.setFieldsValue({ saleReport: val });
+                      }}
+                    >
                       {saleBaoOptions.map((report) => (
-                        <Option key={report} value={report}>
+                        <Option
+                          key={report}
+                          value={report}
+                          disabled={isHuyDisabled && report === "HỦY"}
+                        >
                           {report}
                         </Option>
                       ))}

@@ -6546,6 +6546,7 @@ const calcOrderWeight = (order) =>
         onProductsChange={setProducts}
         scoreOrderExternal={scoreOrderExternal}
         onCancelScore={() => setScoreOrderExternal(null)}
+        currentUser={currentUser}
       />
       <CustomerHistoryModal
         visible={modalVisible}
