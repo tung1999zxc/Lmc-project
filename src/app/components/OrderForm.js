@@ -261,6 +261,14 @@ const OrderForm = ({
 
   const orderDate6 = Form.useWatch("orderDate6", form);
   const orderDate5 = Form.useWatch("orderDate5", form);
+  const orderDateWatch = Form.useWatch("orderDate", form);
+
+  // Sau 10 ngày kể từ ngày lên đơn (orderDate), salenhapdon không được sửa
+  // 2 ô DOANH SỐ (revenue) và ĐƠN (saleReport)
+  const isOrderDateLocked =
+    currentUser.position === "salenhapdon" &&
+    !!orderDateWatch &&
+    dayjs().diff(orderDateWatch, "day") >= 10;
 
   useEffect(() => {
     const numericProfit = Number(revenue); // chuyển về số
@@ -1517,9 +1525,16 @@ const OrderForm = ({
                   <Form.Item label="DOANH SỐ" name="revenue">
                     <Input
                       type="number"
+                      disabled={isOrderDateLocked}
                       onChange={(e) => {
                         const raw = e.target.value;
                         const value = raw ? Number(raw) : 0;
+                        if (isOrderDateLocked) {
+                          message.warning(
+                            "Đã quá 10 ngày kể từ ngày lên đơn, bạn không thể sửa doanh số"
+                          );
+                          return;
+                        }
                         if (currentUser.position === "salexuly") {
                           if (value !== 0) {
                             revenueRef.current = value;
@@ -1658,7 +1673,17 @@ const OrderForm = ({
                   <Form.Item label="ĐƠN" name="saleReport">
                     <Select
                       allowClear
+                      disabled={isOrderDateLocked}
                       onChange={(val) => {
+                        if (isOrderDateLocked) {
+                          message.warning(
+                            "Đã quá 10 ngày kể từ ngày lên đơn, bạn không thể sửa báo cáo đơn"
+                          );
+                          form.setFieldsValue({
+                            saleReport: saleReport ?? undefined,
+                          });
+                          return;
+                        }
                         if (
                           currentUser.position === "salexuly" &&
                           val === "HỦY"

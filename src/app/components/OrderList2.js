@@ -1973,13 +1973,9 @@ const OrderList = () => {
       ? [
           {
             title: (
-              <Checkbox
-                checked={selectedColumns.includes("isShipping")}
-                onChange={(e) =>
-                  handleColumnSelect("isShipping", e.target.checked)
-                }
-              >
+              <div>
                 <div
+                  onClick={(e) => e.stopPropagation()}
                   style={{
                     whiteSpace: "normal",
                     fontSize: "9px",
@@ -2023,7 +2019,15 @@ const OrderList = () => {
                     Lưu
                   </Button>
                 </div>
-              </Checkbox>
+                <div style={{ marginTop: 4 }}>
+                  <Checkbox
+                    checked={selectedColumns.includes("isShipping")}
+                    onChange={(e) =>
+                      handleColumnSelect("isShipping", e.target.checked)
+                    }
+                  />
+                </div>
+              </div>
             ),
             width: 40,
             key: "isShipping",
@@ -2123,7 +2127,7 @@ const OrderList = () => {
     },
     ...(currentUser.position !== "salexuly" &&
     currentUser.position !== "salenhapdon" &&
-    currentUser.position !== "leadSALE" 
+    currentUser.position !== "leadSALE"
       ? [
           {
             title: (
@@ -2897,13 +2901,9 @@ const OrderList = () => {
       ? [
           {
             title: (
-              <Checkbox
-                checked={selectedColumns.includes("isShipping")}
-                onChange={(e) =>
-                  handleColumnSelect("isShipping", e.target.checked)
-                }
-              >
+              <div>
                 <div
+                  onClick={(e) => e.stopPropagation()}
                   style={{
                     whiteSpace: "normal",
                     fontSize: "9px",
@@ -2947,7 +2947,15 @@ const OrderList = () => {
                     Lưu
                   </Button>
                 </div>
-              </Checkbox>
+                <div style={{ marginTop: 4 }}>
+                  <Checkbox
+                    checked={selectedColumns.includes("isShipping")}
+                    onChange={(e) =>
+                      handleColumnSelect("isShipping", e.target.checked)
+                    }
+                  />
+                </div>
+              </div>
             ),
             width: 40,
             key: "isShipping",
@@ -4306,14 +4314,14 @@ const OrderList = () => {
               allowClear
             >
               <Option value="SON">TEAM SƠN</Option>
-             
+
               <Option value="HIEP">TEAM HIỆP</Option>
               <Option value="MANH">TEAM MẠNH</Option>
               <Option value="LE">TEAM LẺ</Option>
               <Option value="TUANANH">TEAM TUẤN ANH</Option>
               <Option value="DIEN">TEAM DIỆN</Option>
               <Option value="DIEU">TEAM DIỆU</Option>
-              
+
               <Option value="DIENON">TEAM DIỆN ON</Option>
               <Option value="ANH">TEAM ÁNH</Option>
               <Option value="PHUTHANH">TEAM Phú Thành</Option>

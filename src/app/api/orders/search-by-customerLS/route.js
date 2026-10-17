@@ -16,12 +16,23 @@ export async function GET(req) {
 
 const searchTerm = customerName.trim();
 
+// Hàm escape các ký tự đặc biệt của regex để tránh lỗi injection
+function escapeRegex(str) {
+  return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+const escapedSearchTerm = escapeRegex(searchTerm);
+const exactRegex = new RegExp(`^${escapedSearchTerm}$`, 'i');
+
+// Tìm CHÍNH XÁC 100% (không phải LIKE / partial match):
+// - Nếu nhập chữ: so khớp customerName bằng anchor ^...$ (case-insensitive)
+// - Nếu nhập số: so khớp chính xác stt, đồng thời cũng exact-match customerName (trường hợp stt có thể trùng tên)
 const query = isNaN(searchTerm)
-  ? { customerName: { $regex: new RegExp(searchTerm, 'i') } } // nếu nhập chữ, tìm trong tên
+  ? { customerName: exactRegex }
   : {
       $or: [
-        { customerName: { $regex: new RegExp(searchTerm, 'i') } },
-        { stt: Number(searchTerm) } // nếu nhập số, tìm chính xác trong stt
+        { customerName: exactRegex },
+        { stt: Number(searchTerm) }
       ]
     };
 
