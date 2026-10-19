@@ -1552,15 +1552,13 @@ const OrderList = () => {
         // Weight filter
         const PACKAGING_WEIGHT = 100;
 
-const calcOrderWeight = (order) =>
-  PACKAGING_WEIGHT +
-  (order.products || []).reduce((sum, item) => {
-    const productInfo = products2.find(
-      (p) => p.name === item.product
-    );
+        const calcOrderWeight = (order) =>
+          PACKAGING_WEIGHT +
+          (order.products || []).reduce((sum, item) => {
+            const productInfo = products2.find((p) => p.name === item.product);
 
-    return sum + item.quantity * (productInfo?.weight || 0);
-  }, 0);
+            return sum + item.quantity * (productInfo?.weight || 0);
+          }, 0);
         const orderWeight = calcOrderWeight(order);
         const weightMatch = !weightFilter
           ? true
@@ -2674,6 +2672,10 @@ const calcOrderWeight = (order) =>
   const handleXinXoaDon = async () => {
     if (!xoaDonLyDo.trim()) {
       messageApi.error("Vui lòng nhập lý do xóa đơn");
+      return;
+    }
+    if (xoaDonImages.length === 0) {
+      messageApi.error("Vui lòng tải lên ít nhất 1 ảnh");
       return;
     }
 
@@ -3817,6 +3819,7 @@ const calcOrderWeight = (order) =>
     (currentUser.position === "managerSALE") |
       (currentUser.position === "salefull") |
       (currentUser.position === "salexuly") |
+      (currentUser.position === "salenhapdon") |
       (currentUser.position === "leadSALE")
       ? [
           {
@@ -6825,7 +6828,8 @@ const calcOrderWeight = (order) =>
             <label
               style={{ fontWeight: 600, display: "block", marginBottom: 8 }}
             >
-              Ảnh chứng minh (có thể chọn nhiều ảnh)
+              <span style={{ color: "red" }}>* </span>Ảnh chứng minh (bắt
+              buộc, có thể chọn nhiều ảnh)
             </label>
             <Upload
               listType="picture-card"
