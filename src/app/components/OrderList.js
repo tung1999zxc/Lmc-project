@@ -1415,6 +1415,8 @@ const OrderList = () => {
                 return order.saleReport === "BOOK TB";
               case "chuyendon":
                 return order.saleReport === "CHUYỂN ĐƠN";
+              case "huy":
+                return order.saleReport === "HỦY";
               case "istick":
                 return order.istick === true;
               case "istick5":
@@ -6034,6 +6036,7 @@ const OrderList = () => {
                         : []),
 
                       { value: "done", label: "Đơn Done" },
+                      { value: "huy", label: "Đơn HỦY" },
                       { value: "tha50", label: "Đơn thả 50" },
                       { value: "tha70", label: "Đơn thả 70" },
 
@@ -6828,8 +6831,8 @@ const OrderList = () => {
             <label
               style={{ fontWeight: 600, display: "block", marginBottom: 8 }}
             >
-              <span style={{ color: "red" }}>* </span>Ảnh chứng minh (bắt
-              buộc, có thể chọn nhiều ảnh)
+              <span style={{ color: "red" }}>* </span>Ảnh chứng minh (bắt buộc,
+              có thể chọn nhiều ảnh)
             </label>
             <Upload
               listType="picture-card"
