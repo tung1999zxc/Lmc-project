@@ -5,6 +5,17 @@ export async function POST(req) {
     const { orderId, lyDo, leaderName } = await req.json();
     const { db } = await connectToDatabase();
 
+    // Lấy order hiện tại để giữ nguyên người xin xóa ban đầu
+    const existingOrder = await db
+      .collection("orders")
+      .findOne({ id: orderId });
+    if (!existingOrder) {
+      return new Response(
+        JSON.stringify({ error: "Không tìm thấy đơn hàng" }),
+        { status: 404 },
+      );
+    }
+
     const update = {
       $set: {
         daXinXoaDon: true,
@@ -15,6 +26,10 @@ export async function POST(req) {
         xoaDonLyDo: lyDo,
         xoaDonBy: leaderName,
         xoaDonAt: new Date(),
+        // Người từ chối là người ghi nhận; người xin xóa ban đầu giữ nguyên
+        xoaDonRequestBy: existingOrder.xoaDonRequestBy || leaderName,
+        xoaDonRequestAt:
+          existingOrder.xoaDonRequestAt || existingOrder.xoaDonAt || new Date(),
       },
     };
 

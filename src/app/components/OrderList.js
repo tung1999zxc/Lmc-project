@@ -530,11 +530,13 @@ const OrderList = () => {
   const [xoaDonOrderId, setXoaDonOrderId] = useState(null);
   const [xoaDonOrderData, setXoaDonOrderData] = useState(null); // Lưu toàn bộ data order
   const [xoaDonLyDo, setXoaDonLyDo] = useState("");
-  const [xoaDonImages, setXoaDonImages] = useState([]); // Mảng file objects
-  const [xoaDonImageUrls, setXoaDonImageUrls] = useState([]); // Mảng URL tạm (preview)
+  const [xoaDonImages, setXoaDonImages] = useState([]); // Mảng { uid, file } - file mới chọn/paste
+  const [xoaDonImageUrls, setXoaDonImageUrls] = useState([]); // Mảng { uid, url } - preview base64 của file mới
+  const [xoaDonExistingImages, setXoaDonExistingImages] = useState([]); // Mảng URL ảnh đã lưu trong DB
   const [xoaDonSaving, setXoaDonSaving] = useState(false);
   const [xoaDonUploading, setXoaDonUploading] = useState(false);
   const [xoaDonReport, setXoaDonReport] = useState(null); // Loại báo cáo: HỦY, XÓA, BÙNG
+  const [xoaDonOpenedAt, setXoaDonOpenedAt] = useState(null); // Thời điểm mở modal xin xóa
   const xoaDonTextAreaRef = useRef(null);
 
   // Xử lý paste ảnh từ clipboard khi modal xóa đơn mở
@@ -550,10 +552,14 @@ const OrderList = () => {
           e.preventDefault();
           const file = item.getAsFile();
           if (file && xoaDonImages.length < 5) {
+            const uid = file.uid || `paste-${Date.now()}-${Math.random()}`;
             const reader = new FileReader();
             reader.onload = (ev) => {
-              setXoaDonImageUrls((prev) => [...prev, ev.target.result]);
-              setXoaDonImages((prev) => [...prev, file]);
+              setXoaDonImageUrls((prev) => [
+                ...prev,
+                { uid, url: ev.target.result },
+              ]);
+              setXoaDonImages((prev) => [...prev, { uid, file }]);
             };
             reader.readAsDataURL(file);
           } else if (xoaDonImages.length >= 5) {
@@ -567,7 +573,6 @@ const OrderList = () => {
     document.addEventListener("paste", handlePaste);
     return () => document.removeEventListener("paste", handlePaste);
   }, [xoaDonModalVisible, xoaDonImages.length]);
-
   // Detect mobile screen
   useEffect(() => {
     const checkMobile = () => {
@@ -2670,14 +2675,30 @@ const OrderList = () => {
   };
 
   // ===== XÓA ĐƠN =====
+  // Upload toàn bộ ảnh mới lên Cloudinary, trả về mảng URL
+  const uploadXoaDonImages = async (files) => {
+    if (!files || files.length === 0) return [];
+    const uploadPromises = files.map(async (file) => {
+      const formData = new FormData();
+      formData.append("files", file);
+      const res = await axios.post("/api/upload/cloudinary", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+      return res.data.urls?.[0]?.url;
+    });
+    const results = await Promise.all(uploadPromises);
+    return results.filter(Boolean);
+  };
+
   // Gửi yêu cầu xin xóa đơn
   const handleXinXoaDon = async () => {
     if (!xoaDonLyDo.trim()) {
       messageApi.error("Vui lòng nhập lý do xóa đơn");
       return;
     }
-    if (xoaDonImages.length === 0) {
-      messageApi.error("Vui lòng tải lên ít nhất 1 ảnh");
+    // Bắt buộc phải có ít nhất 1 ảnh (ảnh mới vừa tải lên HOẶC ảnh đã lưu sẵn từ lần trước)
+    if (xoaDonImages.length === 0 && xoaDonExistingImages.length === 0) {
+      messageApi.error("Vui lòng tải lên ít nhất 1 ảnh chứng minh");
       return;
     }
 
@@ -2688,24 +2709,27 @@ const OrderList = () => {
       // Upload ảnh lên Cloudinary nếu có file mới
       if (xoaDonImages.length > 0) {
         setXoaDonUploading(true);
-        const uploadPromises = xoaDonImages.map(async (file) => {
-          const formData = new FormData();
-          formData.append("files", file);
-          const res = await axios.post("/api/upload/cloudinary", formData, {
-            headers: { "Content-Type": "multipart/form-data" },
-          });
-          return res.data.urls[0]?.url;
-        });
-
-        const results = await Promise.all(uploadPromises);
-        cloudinaryUrls = results.filter(Boolean);
+        cloudinaryUrls = await uploadXoaDonImages(
+          xoaDonImages.map((img) => img.file),
+        );
         setXoaDonUploading(false);
+
+        // Nếu upload lỗi và không có ảnh nào thành công -> không cho gửi
+        if (cloudinaryUrls.length === 0 && xoaDonExistingImages.length === 0) {
+          messageApi.error("Không tải lên được ảnh. Vui lòng thử lại");
+          setXoaDonSaving(false);
+          setXoaDonUploading(false);
+          return;
+        }
       }
+
+      // Gộp ảnh đã lưu sẵn + ảnh mới upload
+      const allImageUrls = [...xoaDonExistingImages, ...cloudinaryUrls];
 
       const response = await axios.post("/api/orders/xoa-don", {
         orderId: xoaDonOrderId,
         lyDo: xoaDonLyDo,
-        imageUrls: cloudinaryUrls,
+        imageUrls: allImageUrls,
         employeeName: currentUser.name,
         saleReport2: xoaDonReport, // HỦY / XÓA / BÙNG
       });
@@ -2715,6 +2739,7 @@ const OrderList = () => {
       setXoaDonLyDo("");
       setXoaDonImages([]);
       setXoaDonImageUrls([]);
+      setXoaDonExistingImages([]);
       setXoaDonOrderData(null);
       fetchOrders();
     } catch (error) {
@@ -2734,14 +2759,35 @@ const OrderList = () => {
       messageApi.error("Vui lòng nhập lý do xóa đơn");
       return;
     }
+    if (xoaDonImages.length === 0 && xoaDonExistingImages.length === 0) {
+      messageApi.error("Vui lòng tải lên ít nhất 1 ảnh chứng minh");
+      return;
+    }
 
     setXoaDonSaving(true);
     try {
+      // Upload ảnh mới (nếu có) rồi gộp với ảnh đã lưu sẵn
+      let cloudinaryUrls = [];
+      if (xoaDonImages.length > 0) {
+        setXoaDonUploading(true);
+        cloudinaryUrls = await uploadXoaDonImages(
+          xoaDonImages.map((img) => img.file),
+        );
+        setXoaDonUploading(false);
+      }
+      const allImageUrls = [...xoaDonExistingImages, ...cloudinaryUrls];
+      if (allImageUrls.length === 0) {
+        messageApi.error("Không tải lên được ảnh. Vui lòng thử lại");
+        setXoaDonSaving(false);
+        setXoaDonUploading(false);
+        return;
+      }
+
       const response = await axios.post("/api/orders/xoa-don/leader-confirm", {
         orderId: xoaDonOrderId,
         lyDo: xoaDonLyDo,
         leaderName: currentUser.name,
-        xoaDonImages: xoaDonImageUrls,
+        xoaDonImages: allImageUrls,
         saleReport2: xoaDonReport,
       });
 
@@ -2750,6 +2796,7 @@ const OrderList = () => {
       setXoaDonLyDo("");
       setXoaDonImages([]);
       setXoaDonImageUrls([]);
+      setXoaDonExistingImages([]);
       setXoaDonOrderData(null);
       fetchOrders();
     } catch (error) {
@@ -2787,6 +2834,7 @@ const OrderList = () => {
           setXoaDonLyDo("");
           setXoaDonImages([]);
           setXoaDonImageUrls([]);
+          setXoaDonExistingImages([]);
           setXoaDonOrderData(null);
           fetchOrders();
         } catch (error) {
@@ -2811,14 +2859,35 @@ const OrderList = () => {
       messageApi.error("Vui lòng chọn loại báo cáo");
       return;
     }
+    if (xoaDonImages.length === 0 && xoaDonExistingImages.length === 0) {
+      messageApi.error("Vui lòng tải lên ít nhất 1 ảnh chứng minh");
+      return;
+    }
 
     setXoaDonSaving(true);
     try {
+      // Upload ảnh mới (nếu có) rồi gộp với ảnh đã lưu sẵn
+      let cloudinaryUrls = [];
+      if (xoaDonImages.length > 0) {
+        setXoaDonUploading(true);
+        cloudinaryUrls = await uploadXoaDonImages(
+          xoaDonImages.map((img) => img.file),
+        );
+        setXoaDonUploading(false);
+      }
+      const allImageUrls = [...xoaDonExistingImages, ...cloudinaryUrls];
+      if (allImageUrls.length === 0) {
+        messageApi.error("Không tải lên được ảnh. Vui lòng thử lại");
+        setXoaDonSaving(false);
+        setXoaDonUploading(false);
+        return;
+      }
+
       const response = await axios.post("/api/orders/xoa-don/manager-confirm", {
         orderId: xoaDonOrderId,
         lyDo: xoaDonLyDo,
         managerName: currentUser.name,
-        xoaDonImages: xoaDonImageUrls,
+        xoaDonImages: allImageUrls,
         // Thông tin để reset doanh số
         revenue: xoaDonOrderData?.revenue || 0,
         revenuemkt: xoaDonOrderData?.revenuemkt || 0,
@@ -2834,6 +2903,7 @@ const OrderList = () => {
       setXoaDonLyDo("");
       setXoaDonImages([]);
       setXoaDonImageUrls([]);
+      setXoaDonExistingImages([]);
       setXoaDonOrderData(null);
       setXoaDonReport(null);
       fetchOrders();
@@ -3848,8 +3918,15 @@ const OrderList = () => {
                     setXoaDonOrderData(record);
                     setXoaDonLyDo(record.xoaDonLyDo || "");
                     setXoaDonReport(record.saleReport2 || null);
-                    setXoaDonImages([record.xoaDonImages || []]);
-                    setXoaDonImageUrls(record.xoaDonImages || []);
+                    // Ảnh đã lưu trong DB (URL cloudinary) tách riêng khỏi file mới
+                    setXoaDonExistingImages(
+                      Array.isArray(record.xoaDonImages)
+                        ? record.xoaDonImages
+                        : [],
+                    );
+                    setXoaDonImages([]);
+                    setXoaDonImageUrls([]);
+                    setXoaDonOpenedAt(new Date().toISOString());
                     setXoaDonModalVisible(true);
                   }}
                   style={{ whiteSpace: "nowrap" }}
@@ -5514,6 +5591,24 @@ const OrderList = () => {
     }
   };
 
+  // Định dạng thời gian xin xóa (DD/MM/YYYY HH:mm)
+  const formatXoaDonTime = (value) => {
+    if (!value) return null;
+    const d = dayjs(value);
+    return d.isValid() ? d.format("DD/MM/YYYY HH:mm") : String(value);
+  };
+
+  // Người xin xóa: nếu đơn đã có yêu cầu xóa thì lấy người xin gốc,
+  // ngược lại là người đang thao tác (currentUser.name)
+  const xoaDonRequesterName = xoaDonOrderData?.daXinXoaDon
+    ? xoaDonOrderData?.xoaDonRequestBy || xoaDonOrderData?.xoaDonBy || "-"
+    : currentUser?.name || "-";
+
+  // Thời điểm xin xóa
+  const xoaDonRequestTime = formatXoaDonTime(
+    xoaDonOrderData?.xoaDonRequestAt || xoaDonOrderData?.xoaDonAt,
+  );
+
   return (
     <div
       style={{
@@ -6674,6 +6769,7 @@ const OrderList = () => {
           setXoaDonLyDo("");
           setXoaDonImages([]);
           setXoaDonImageUrls([]);
+          setXoaDonExistingImages([]);
           setXoaDonOrderData(null);
           setXoaDonReport(null);
         }}
@@ -6688,6 +6784,7 @@ const OrderList = () => {
                 setXoaDonLyDo("");
                 setXoaDonImages([]);
                 setXoaDonImageUrls([]);
+                setXoaDonExistingImages([]);
                 setXoaDonOrderData(null);
                 setXoaDonReport(null);
               }}
@@ -6701,7 +6798,11 @@ const OrderList = () => {
                     key="leader"
                     type="primary"
                     loading={xoaDonSaving}
-                    disabled={!xoaDonLyDo.trim()}
+                    disabled={
+                      !xoaDonLyDo.trim() ||
+                      (xoaDonImages.length === 0 &&
+                        xoaDonExistingImages.length === 0)
+                    }
                     onClick={handleLeaderXacNhanXoaDon}
                     style={{ backgroundColor: "#1890ff" }}
                   >
@@ -6723,7 +6824,12 @@ const OrderList = () => {
                   type="primary"
                   danger
                   loading={xoaDonSaving}
-                  disabled={!xoaDonLyDo.trim() || !xoaDonReport}
+                  disabled={
+                    !xoaDonLyDo.trim() ||
+                    !xoaDonReport ||
+                    (xoaDonImages.length === 0 &&
+                      xoaDonExistingImages.length === 0)
+                  }
                   onClick={handleManagerXacNhanXoaDon}
                 >
                   Manager xác nhận xóa DS
@@ -6736,7 +6842,12 @@ const OrderList = () => {
                     type="primary"
                     danger
                     loading={xoaDonSaving || xoaDonUploading}
-                    disabled={!xoaDonLyDo.trim() || !xoaDonReport}
+                    disabled={
+                      !xoaDonLyDo.trim() ||
+                      !xoaDonReport ||
+                      (xoaDonImages.length === 0 &&
+                        xoaDonExistingImages.length === 0)
+                    }
                     onClick={handleXinXoaDon}
                   >
                     {xoaDonUploading ? "Đang tải ảnh..." : "Gửi yêu cầu"}
@@ -6758,13 +6869,15 @@ const OrderList = () => {
             }}
           >
             <div style={{ marginBottom: 8 }}>
+              <label style={{ fontWeight: 600 }}>Ngày đặt:  </label>
+              <span style={{ color: "#ff4d4f" }}>{xoaDonOrderData?.orderDate}</span>
+            </div>
+            
+            <div style={{ marginBottom: 8 }}>
               <label style={{ fontWeight: 600 }}>STT: </label>
               <span style={{ color: "#ff4d4f" }}>{xoaDonOrderData?.stt}</span>
             </div>
-            <div style={{ marginBottom: 8 }}>
-              <label style={{ fontWeight: 600 }}>Sale: </label>
-              <span>{xoaDonOrderData?.salexuly || "-"}</span>
-            </div>
+            
             <div style={{ marginBottom: 8 }}>
               <label style={{ fontWeight: 600 }}>Sản phẩm: </label>
               <span>
@@ -6797,7 +6910,26 @@ const OrderList = () => {
                 </span>
               </div>
             )}
+            <div style={{ marginBottom: 8 }}>
+              <label style={{ fontWeight: 600 }}>Tình trạng giao hàng: </label>
+              <span style={{ color: "#ff4d4f" }}>{xoaDonOrderData?.deliveryStatus}</span>
+            </div>
+            <div style={{ marginBottom: 8 }}>
+              <label style={{ fontWeight: 600 }}>Ngày giao thành công: </label>
+              <span style={{ color: "#ff4d4f" }}>{xoaDonOrderData?.shippingDate2}</span>
+            </div>
           </div>
+          
+            <div style={{ marginBottom: 8 }}>
+              <label style={{ fontWeight: 600 }}>Thời gian xin xóa: </label>
+              <span style={{ color: "#ff4d4f" }}>
+                {xoaDonRequestTime || formatXoaDonTime(xoaDonOpenedAt) || "-"}
+              </span>
+            </div>
+            <div style={{ marginBottom: 8 }}>
+              <label style={{ fontWeight: 600 }}>Người xin xóa: </label>
+              <span style={{ color: "#ff4d4f" }}>{xoaDonRequesterName}</span>
+            </div>
 
           <div style={{ marginBottom: 16 }}>
             <label
@@ -6837,11 +6969,20 @@ const OrderList = () => {
             <Upload
               listType="picture-card"
               multiple
+              fileType="image/*"
               beforeUpload={(file) => {
+                if (file.size > 5 * 1024 * 1024) {
+                  messageApi.error("Mỗi ảnh tối đa 5MB");
+                  return Upload.LIST_IGNORE;
+                }
+                const uid = file.uid || `${Date.now()}-${Math.random()}`;
                 const reader = new FileReader();
                 reader.onload = (e) => {
-                  setXoaDonImageUrls((prev) => [...prev, e.target.result]);
-                  setXoaDonImages((prev) => [...prev, file]);
+                  setXoaDonImageUrls((prev) => [
+                    ...prev,
+                    { uid, url: e.target.result },
+                  ]);
+                  setXoaDonImages((prev) => [...prev, { uid, file }]);
                 };
                 reader.readAsDataURL(file);
                 return false;
@@ -6850,22 +6991,27 @@ const OrderList = () => {
                 const uid = file.uid;
                 setXoaDonImages((prev) => prev.filter((f) => f.uid !== uid));
                 setXoaDonImageUrls((prev) =>
-                  prev.filter((_, idx) => {
-                    const fileIndex = xoaDonImages.findIndex(
-                      (f) => f.uid === uid,
-                    );
-                    return idx !== fileIndex;
-                  }),
+                  prev.filter((img) => img.uid !== uid),
                 );
               }}
-              fileList={xoaDonImageUrls.map((url, idx) => ({
-                uid: String(idx),
-                url,
-                status: "done",
-                name: `image-${idx + 1}`,
-              }))}
+              fileList={[
+                // Ảnh đã lưu trong DB
+                ...xoaDonExistingImages.map((url, idx) => ({
+                  uid: `existing-${idx}`,
+                  url,
+                  status: "done",
+                  name: `image-${idx + 1}`,
+                })),
+                // Ảnh mới vừa chọn/paste
+                ...xoaDonImageUrls.map((img, idx) => ({
+                  uid: img.uid,
+                  url: img.url,
+                  status: "done",
+                  name: `image-${idx + 1}`,
+                })),
+              ]}
             >
-              {xoaDonImages.length < 5 && (
+              {xoaDonImages.length + xoaDonExistingImages.length < 5 && (
                 <div>
                   <PlusOutlined />
                   <div style={{ marginTop: 8 }}>Tải ảnh</div>

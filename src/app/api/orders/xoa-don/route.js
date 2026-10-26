@@ -5,12 +5,23 @@ export async function POST(req) {
     const { orderId, lyDo, imageUrls, employeeName , saleReport2 } = await req.json();
     const { db } = await connectToDatabase();
 
+    // Bắt buộc phải có ít nhất 1 ảnh chứng minh
+    if (!imageUrls || !Array.isArray(imageUrls) || imageUrls.length === 0) {
+      return new Response(
+        JSON.stringify({ error: "Vui lòng tải lên ít nhất 1 ảnh chứng minh" }),
+        { status: 400 },
+      );
+    }
+
     const update = {
       $set: {
         xoaDonLyDo: lyDo,
         xoaDonImages: imageUrls || [],
         xoaDonBy: employeeName,
         xoaDonAt: new Date(),
+        // Người xin xóa & thời điểm xin xóa (giữ lại, không bị ghi đè khi lead/manager xác nhận)
+        xoaDonRequestBy: employeeName,
+        xoaDonRequestAt: new Date(),
         daXinXoaDon: true,
         saleReport2: saleReport2,
       },

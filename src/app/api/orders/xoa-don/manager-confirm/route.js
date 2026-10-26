@@ -24,12 +24,28 @@ export async function POST(req) {
       );
     }
 
+    // Bắt buộc phải có ít nhất 1 ảnh chứng minh
+    if (
+      !xoaDonImages ||
+      !Array.isArray(xoaDonImages) ||
+      xoaDonImages.length === 0
+    ) {
+      return new Response(
+        JSON.stringify({ error: "Vui lòng tải lên ít nhất 1 ảnh chứng minh" }),
+        { status: 400 },
+      );
+    }
+
     const update = {
       $set: {
         xoaDonLyDo: lyDo,
         xoaDonImages: xoaDonImages || [],
         xoaDonBy: managerName,
         xoaDonAt: new Date(),
+        // Giữ nguyên người xin xóa ban đầu (nếu chưa có thì manager là người ghi nhận)
+        xoaDonRequestBy: existingOrder.xoaDonRequestBy || managerName,
+        xoaDonRequestAt:
+          existingOrder.xoaDonRequestAt || existingOrder.xoaDonAt || new Date(),
         daXinXoaDon: true,
         leaderDaXacNhan: true,
         leaderXacNhanAt: new Date(),
