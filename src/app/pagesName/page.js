@@ -338,13 +338,13 @@ const EmployeePageTable = () => {
         .map((employee) => employee.employee_code),
     },
 
-    {
-      id: 8,
-      name: `TEAM DIỆU`,
-      members: employees
-        .filter((employee) => employee.team_id === "DIEU")
-        .map((employee) => employee.employee_code),
-    },
+    // {
+    //   id: 8,
+    //   name: `TEAM DIỆU`,
+    //   members: employees
+    //     .filter((employee) => employee.team_id === "DIEU")
+    //     .map((employee) => employee.employee_code),
+    // },
     {
       id: 9,
       name: `TEAM PHI`,

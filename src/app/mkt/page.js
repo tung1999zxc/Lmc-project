@@ -179,13 +179,13 @@ const Dashboard = () => {
         .filter((employee) => employee.team_id === "PHI")
         .map((employee) => employee.employee_code),
     },
-    {
-      id: 9,
-      name: `TEAM PHÚ THÀNH`,
-      members: safeEmployees
-        .filter((employee) => employee.team_id === "PHUTHANH")
-        .map((employee) => employee.employee_code),
-    },
+    // {
+    //   id: 9,
+    //   name: `TEAM PHÚ THÀNH`,
+    //   members: safeEmployees
+    //     .filter((employee) => employee.team_id === "PHUTHANH")
+    //     .map((employee) => employee.employee_code),
+    // },
     {
       id: 10,
       name: `TEAM ÁNH`,
