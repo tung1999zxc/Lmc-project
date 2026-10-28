@@ -357,6 +357,7 @@ const SidebarMenu = ({ isOpen, onToggle }) => {
   const isTranNgocLam = currentUser?.name === "Trần Ngọc Lâm";
 
   const isToMyHanh = currentUser?.name === "Tô Mỹ Hạnh";
+  const Tung99 = currentUser?.name === "Tung99";
   const isTranMyHanh = currentUser?.position === "managerSALE";
   const isdiepanh = currentUser?.name === "Diệp Anh";
   const isLeTuyetKha = currentUser?.name === "Lê Tuyết Kha";
@@ -516,6 +517,12 @@ const SidebarMenu = ({ isOpen, onToggle }) => {
     normalizedPosition,
   );
   const isSales = isLeadSale || isManagerSale || isSale;
+
+  // Quyền xem "Báo cáo ngày": quản lý / lead / admin.
+  // Nhân viên MKT & sale thường không cần xem báo cáo tổng của cả công ty.
+  const isManagerMkt = normalizedPosition === "managermkt";
+  const canViewDailyReport =
+  Tung99 ;
 
   const searchOrders = async (query) => {
     const encodedQuery = encodeURIComponent(query.trim());
@@ -863,6 +870,18 @@ const SidebarMenu = ({ isOpen, onToggle }) => {
     ...hideTaiwanItems(getOverviewMenu()),
     ...hideTaiwanItems(getOrderMenu()),
     ...hideTaiwanItems(getMktMenu()),
+    // Báo cáo ngày (tổng doanh số MKT theo team DIỆN/PHI, top/bottom MKT,
+    // page mới, mess mới, doanh số sale nhập đơn) - chỉ dành cho role quản lý.
+    ...(canViewDailyReport
+      ? [
+          {
+            key: "subDailyReport",
+            icon: "📊",
+            label: "Báo cáo ngày",
+            href: "/report/daily",
+          },
+        ]
+      : []),
     ...(isMarketing || isKRTW
       ? []
       : [

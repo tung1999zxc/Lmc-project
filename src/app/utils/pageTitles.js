@@ -19,6 +19,7 @@ export const pageTitleMap = {
   "/productsjp": "Tất cả sản phẩm",
   "/productstw": "Tất cả sản phẩm",
   "/pagesName": "Tên page",
+  "/report/daily": "Báo cáo ngày",
   "/accounts": "Quản lý tài khoản",
   "/attendance": "Chấm công SALE",
   "/OrderHistory": "Lịch sử chỉnh sửa đơn hàng",

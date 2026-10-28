@@ -157,6 +157,8 @@ function InnerDashboardLayout({ children }: { children: ReactNode }) {
           backgroundPosition: "center",
           opacity: 0.6,
           zIndex: 1,
+          // Không chặn click xuống các nút bên dưới (vd nút "Gửi Telegram")
+          pointerEvents: "none",
         }}
       />
       <div id="app">
