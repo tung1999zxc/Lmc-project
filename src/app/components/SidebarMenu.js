@@ -423,6 +423,14 @@ const SidebarMenu = ({ isOpen, onToggle }) => {
       label: "Tổng Quan Hàn",
       href: "/",
     },
+    // Tổng quan cá nhân dành cho nhân viên MKT
+    // (thay thế "Tổng Quan Hàn" cho role mkt - xem getOverviewMenu)
+    mktOverview: {
+      key: "subMktOverview",
+      icon: "🚀",
+      label: "Tổng quan cá nhân",
+      href: "/mkt-overview",
+    },
     jp: {
       key: "sub01",
       icon: "📊",
@@ -738,6 +746,20 @@ const SidebarMenu = ({ isOpen, onToggle }) => {
   };
 
   const getOverviewMenu = () => {
+    // Nhân viên MKT (Hàn): thay "Tổng Quan Hàn" bằng "Tổng quan cá nhân".
+    // Người có quocgia = "jp" KHÔNG thấy mục "Tổng quan cá nhân"
+    // (trang này tính doanh số Hàn nên không áp dụng cho Malaysia).
+    if (isMkt) {
+      return isJP
+        ? [overviewItems.jp]
+        : [overviewItems.mktOverview];
+    }
+    // Leader MKT: giữ cả "Tổng Quan" và "Tổng quan cá nhân" (trừ người quocgia jp)
+    if (isLeadMkt) {
+      return isJP
+        ? [overviewItems.jp]
+        : [overviewItems[userCountryKey], overviewItems.mktOverview];
+    }
     if (isMarketing) return [overviewItems[userCountryKey]];
     if (isLeadSale) {
       return [overviewItems.kr];

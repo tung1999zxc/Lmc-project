@@ -20,6 +20,7 @@ export const pageTitleMap = {
   "/productstw": "Tất cả sản phẩm",
   "/pagesName": "Tên page",
   "/report/daily": "Báo cáo ngày",
+  "/mkt-overview": "Tổng quan cá nhân",
   "/accounts": "Quản lý tài khoản",
   "/attendance": "Chấm công SALE",
   "/OrderHistory": "Lịch sử chỉnh sửa đơn hàng",
