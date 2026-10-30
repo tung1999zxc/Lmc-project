@@ -2824,7 +2824,8 @@ const OrderList = () => {
             "/api/orders/xoa-don/leader-reject",
             {
               orderId: xoaDonOrderId,
-              lyDo: xoaDonLyDo,
+              // Từ chối không cần lý do: giữ nguyên lý do gốc của người xin xóa
+              lyDo: "",
               leaderName: currentUser.name,
             },
           );
@@ -2915,6 +2916,48 @@ const OrderList = () => {
     } finally {
       setXoaDonSaving(false);
     }
+  };
+
+  // ManagerSALE từ chối xóa đơn
+  const handleManagerTuChoiXoaDon = async () => {
+    Modal.confirm({
+      title: "Xác nhận từ chối",
+      content: "Bạn có chắc muốn từ chối yêu cầu xóa đơn này không?",
+      okText: "Từ chối",
+      cancelText: "Hủy",
+      okButtonProps: { danger: true },
+      onOk: async () => {
+        setXoaDonSaving(true);
+        try {
+          const response = await axios.post(
+            "/api/orders/xoa-don/manager-reject",
+            {
+              orderId: xoaDonOrderId,
+              // Từ chối không cần lý do: giữ nguyên lý do gốc của người xin xóa
+              lyDo: "",
+              managerName: currentUser.name,
+            },
+          );
+
+          messageApi.success(response.data.message || "Manager đã từ chối");
+          setXoaDonModalVisible(false);
+          setXoaDonLyDo("");
+          setXoaDonImages([]);
+          setXoaDonImageUrls([]);
+          setXoaDonExistingImages([]);
+          setXoaDonOrderData(null);
+          setXoaDonReport(null);
+          fetchOrders();
+        } catch (error) {
+          console.error(error);
+          messageApi.error(
+            error?.response?.data?.error || "Lỗi khi manager từ chối",
+          );
+        } finally {
+          setXoaDonSaving(false);
+        }
+      },
+    });
   };
 
   const columns = [
@@ -6819,21 +6862,31 @@ const OrderList = () => {
                 </>
               )}
               {currentUser.position === "managerSALE" && (
-                <Button
-                  key="manager"
-                  type="primary"
-                  danger
-                  loading={xoaDonSaving}
-                  disabled={
-                    !xoaDonLyDo.trim() ||
-                    !xoaDonReport ||
-                    (xoaDonImages.length === 0 &&
-                      xoaDonExistingImages.length === 0)
-                  }
-                  onClick={handleManagerXacNhanXoaDon}
-                >
-                  Manager xác nhận xóa DS
-                </Button>
+                <>
+                  <Button
+                    key="manager"
+                    type="primary"
+                    danger
+                    loading={xoaDonSaving}
+                    disabled={
+                      !xoaDonLyDo.trim() ||
+                      !xoaDonReport ||
+                      (xoaDonImages.length === 0 &&
+                        xoaDonExistingImages.length === 0)
+                    }
+                    onClick={handleManagerXacNhanXoaDon}
+                  >
+                    Manager xác nhận xóa DS
+                  </Button>
+                  <Button
+                    key="manager-reject"
+                    loading={xoaDonSaving}
+                    onClick={handleManagerTuChoiXoaDon}
+                    style={{ marginLeft: 8 }}
+                  >
+                    Từ chối xóa DS
+                  </Button>
+                </>
               )}
               {currentUser.position !== "managerSALE" &&
                 currentUser.position !== "leadSALE" && (

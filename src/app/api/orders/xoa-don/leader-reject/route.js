@@ -23,7 +23,10 @@ export async function POST(req) {
         leaderTuChoi: true,
         leaderTuChoiAt: new Date(),
         leaderTuChoiBy: leaderName,
-        xoaDonLyDo: lyDo,
+        // Lý do gốc của người xin xóa được giữ nguyên, không bị ghi đè
+        xoaDonLyDo: existingOrder.xoaDonLyDo || lyDo,
+        // Lý do/lời giải thích của người từ chối (có thể để trống)
+        leaderTuChoiLyDo: lyDo || "",
         xoaDonBy: leaderName,
         xoaDonAt: new Date(),
         // Người từ chối là người ghi nhận; người xin xóa ban đầu giữ nguyên
