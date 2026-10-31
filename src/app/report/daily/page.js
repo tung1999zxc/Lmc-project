@@ -1,5 +1,3 @@
-"use client";
-
 // ============================================================================
 // TRANG BÁO CÁO NGÀY
 // ----------------------------------------------------------------------------
@@ -15,6 +13,8 @@
 // Nút "Gửi Telegram" gọi lại API với ?send=1.
 // ============================================================================
 
+"use client";
+
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   Alert,
@@ -26,6 +26,7 @@ import {
   Descriptions,
   Empty,
   Row,
+  Segmented,
   Space,
   Statistic,
   Table,
@@ -152,7 +153,11 @@ function AdsInfo({ adsCost, percentAds }) {
         </Text>
         <Text
           strong
-          style={{ fontSize: 12, marginLeft: 8, color: adsPercentColor(percentAds) }}
+          style={{
+            fontSize: 12,
+            marginLeft: 8,
+            color: adsPercentColor(percentAds),
+          }}
         >
           {hasAds ? `${(Number(percentAds) || 0).toFixed(2)}%` : "—"}
         </Text>
@@ -184,6 +189,7 @@ function DailyReportContent() {
   const [sending, setSending] = useState(false);
   const [telegramInfo, setTelegramInfo] = useState(null);
   const [error, setError] = useState(null);
+  const [slot, setSlot] = useState("noon");
 
   useEffect(() => {
     if (!currentUser?.name) {
@@ -197,9 +203,9 @@ function DailyReportContent() {
       setError(null);
       try {
         const dateStr = date.format("YYYY-MM-DD");
-        const res = await axios.get(
-          `/api/report/daily?date=${dateStr}${force ? "&force=1" : ""}`,
-        );
+      const res = await axios.get(
+        `/api/report/daily?date=${dateStr}&slot=${slot}${force ? "&force=1" : ""}`,
+      );
         if (res.data?.ok) {
           setData(res.data.data);
           // API không trả telegram khi không có send=1 -> luôn reset để không
@@ -214,7 +220,7 @@ function DailyReportContent() {
         setLoading(false);
       }
     },
-    [date],
+    [date, slot],
   );
 
   useEffect(() => {
@@ -225,7 +231,9 @@ function DailyReportContent() {
     setSending(true);
     try {
       const dateStr = date.format("YYYY-MM-DD");
-      const res = await axios.get(`/api/report/daily?date=${dateStr}&send=1`);
+      const res = await axios.get(
+        `/api/report/daily?date=${dateStr}&send=1&slot=${slot}&force=1`,
+      );
       if (!res.data?.ok) {
         message.error(res.data?.error || "Gửi Telegram thất bại");
         return;
@@ -272,7 +280,7 @@ function DailyReportContent() {
     } finally {
       setSending(false);
     }
-  }, [date, message, notification]);
+  }, [date, slot, message, notification]);
 
   const mktColumns = useMemo(
     () => [
@@ -407,6 +415,14 @@ function DailyReportContent() {
         </div>
 
         <Space wrap>
+          <Segmented
+            value={slot}
+            onChange={(v) => setSlot(v)}
+            options={[
+              { label: "🌤️ Trưa 12h", value: "noon" },
+              { label: "🌙 Tổng kết 21h", value: "end" },
+            ]}
+          />
           <DatePicker
             value={date}
             onChange={(d) => d && setDate(d)}
@@ -578,8 +594,7 @@ function DailyReportContent() {
                       data.newMessTotal > 0
                         ? Number(
                             (
-                              ((data.newOrdersCount ?? 0) /
-                                data.newMessTotal) *
+                              ((data.newOrdersCount ?? 0) / data.newMessTotal) *
                               100
                             ).toFixed(2),
                           )
@@ -590,7 +605,8 @@ function DailyReportContent() {
                     valueStyle={{ color: "#eb2f96", fontWeight: 700 }}
                   />
                   <Text type="secondary" style={{ fontSize: 12 }}>
-                    {data.newOrdersCount ?? 0} đơn / {data.newMessTotal ?? 0} mess
+                    {data.newOrdersCount ?? 0} đơn / {data.newMessTotal ?? 0}{" "}
+                    mess
                   </Text>
                 </Card>
               </Col>

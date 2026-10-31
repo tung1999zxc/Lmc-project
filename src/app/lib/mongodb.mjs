@@ -31,10 +31,19 @@ async function resolveSrvMongoUri(rawUri) {
   const params = new URLSearchParams(url.searchParams);
   if (!params.has("tls") && !params.has("ssl")) params.set("tls", "true");
 
-  const resolver = new Resolver();
-  resolver.setServers(["8.8.8.8", "1.1.1.1"]);
-  const srvRecords = await resolver.resolveSrv(`_mongodb._tcp.${url.hostname}`);
-  const hosts = srvRecords.map((r) => `${r.name}:${r.port}`).join(",");
+  let hosts;
+  try {
+    const resolver = new Resolver();
+    resolver.setServers(["8.8.8.8", "1.1.1.1"]);
+    const srvRecords = await resolver.resolveSrv(`_mongodb._tcp.${url.hostname}`);
+    hosts = srvRecords.map((r) => `${r.name}:${r.port}`).join(",");
+  } catch (err) {
+    // Không resolve được qua DNS công cộng (hay gặp trên Vercel) ->
+    // để driver tự resolve mongodb+srv bằng DNS hệ thống.
+    console.warn("[mongodb] Không resolve SRV qua 8.8.8.8, dùng DNS hệ thống:", err?.message);
+    return rawUri;
+  }
+
   if (!params.has("authSource")) params.set("authSource", "admin");
 
   const query = params.toString();

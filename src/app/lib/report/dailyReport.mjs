@@ -672,11 +672,7 @@ function renderTable(headers, rows, aligns = []) {
   );
 
   const widths = headers.map((h, i) =>
-    Math.max(
-      cellWidth(h),
-      ...body.map((r) => cellWidth(r[i])),
-      0,
-    ),
+    Math.max(cellWidth(h), ...body.map((r) => cellWidth(r[i])), 0),
   );
 
   const line = (cells) =>
@@ -754,9 +750,7 @@ export function formatTelegramMessage(payload, { slot } = {}) {
   if (slot === "noon") {
     parts.push(`<b>🌤️ BÁO CÁO TRƯA · ${escapeHtml(payload.dateLabel)}</b>`);
   } else if (slot === "end") {
-    parts.push(
-      `<b>🌙 BÁO CÁO TỔNG KẾT · ${escapeHtml(payload.dateLabel)}</b>`,
-    );
+    parts.push(`<b>🌙 BÁO CÁO TỔNG KẾT · ${escapeHtml(payload.dateLabel)}</b>`);
   } else {
     parts.push(`<b>📊 BÁO CÁO NGÀY · ${escapeHtml(payload.dateLabel)}</b>`);
   }
@@ -819,11 +813,10 @@ export function formatTelegramMessage(payload, { slot } = {}) {
   parts.push("<b>📈 HOẠT ĐỘNG TRONG NGÀY</b>");
   parts.push(
     "<pre>" +
-      renderTable(
-        ["CHỈ SỐ", "GIÁ TRỊ"],
-        activityRows(payload),
-        ["left", "right"],
-      ).join("\n") +
+      renderTable(["CHỈ SỐ", "GIÁ TRỊ"], activityRows(payload), [
+        "left",
+        "right",
+      ]).join("\n") +
       "</pre>",
   );
 
@@ -884,10 +877,14 @@ function richCell(text, { isHeader = false, align = "left" } = {}) {
  */
 function richTable(headers, rows, aligns = [], caption) {
   const cells = [];
-  cells.push(headers.map((h) => richCell(h, { isHeader: true, align: "left" })));
+  cells.push(
+    headers.map((h) => richCell(h, { isHeader: true, align: "left" })),
+  );
   for (const row of rows) {
     cells.push(
-      row.map((v, i) => richCell(v, { align: aligns[i] === "right" ? "right" : "left" })),
+      row.map((v, i) =>
+        richCell(v, { align: aligns[i] === "right" ? "right" : "left" }),
+      ),
     );
   }
   const block = {
@@ -1038,7 +1035,10 @@ export function parseChatIds(raw) {
  * @param {object} [opts]
  * @param {object} [opts.richMessage] - đối tượng `rich_message` (InputRichMessage)
  */
-export async function sendTelegramMessage(text, { token, chatId, richMessage } = {}) {
+export async function sendTelegramMessage(
+  text,
+  { token, chatId, richMessage } = {},
+) {
   const botToken = token || process.env.TELEGRAM_BOT_TOKEN;
   const chatIdValue = chatId || process.env.TELEGRAM_CHAT_ID;
 
@@ -1212,16 +1212,61 @@ export async function withReportDb(fn) {
  * - Sau đó tới query `?secret=`
  */
 export function checkReportSecret(request) {
-  const expected = process.env.REPORT_SECRET;
-  if (!expected) {
-    // Chưa cấu hình secret -> cho qua (chế độ dev) nhưng cảnh báo
+  // Danh sách secret được chấp nhận.
+  //   REPORT_SECRET -> secret riêng do bạn tự đặt (dùng cho Task Scheduler / gọi tay)
+  //   CRON_SECRET  -> secret Vercel tự sinh, gửi kèm header "Authorization: Bearer"
+  // Chấp nhận nếu khớp BẤT KỲ giá trị nào -> tránh xung đột khi 2 biến khác nhau.
+  const accepted = [process.env.REPORT_SECRET, process.env.CRON_SECRET]
+    .map((v) => (v || "").trim())
+    .filter(Boolean);
+
+  // 1) Header "x-report-secret" (dùng tay / Task Scheduler)
+  let provided = request.headers.get("x-report-secret");
+
+  // 2) Header "Authorization: Bearer <token>" -> Vercel Cron gửi CRON_SECRET
+  //    theo đúng định dạng này.
+  if (!provided) {
+    const authHeader = request.headers.get("authorization");
+    if (authHeader && /^bearer\s+/i.test(authHeader)) {
+      provided = authHeader.replace(/^bearer\s+/i, "").trim();
+    }
+  }
+
+  // 3) Query ?secret=
+  if (!provided) {
+    provided = new URL(request.url).searchParams.get("secret");
+  }
+
+  provided = (provided || "").trim();
+
+  if (provided) {
+    return {
+      ok: accepted.length === 0 ? true : accepted.includes(provided),
+      configured: accepted.length > 0,
+    };
+  }
+
+  // Request do chính Vercel Cron kích hoạt (user-agent "vercel-cron/1.0").
+  // -> Tin cậy, không cần secret (trường hợp bạn KHÔNG set CRON_SECRET).
+  const ua = request.headers.get("user-agent") || "";
+  if (ua.includes("vercel-cron")) {
+    return { ok: true, configured: accepted.length > 0, via: "vercel-cron" };
+  }
+
+  // Không truyền secret:
+  //  - Chưa cấu hình secret -> cho qua (chế độ dev)
+  //  - Request từ chính trang web (nút "Gửi Telegram") -> cho qua.
+  //    Browser gửi header "sec-fetch-site: same-origin" cho fetch cùng origin.
+  if (accepted.length === 0) {
     return { ok: true, configured: false };
   }
-  const provided =
-    request.headers.get("x-report-secret") ||
-    new URL(request.url).searchParams.get("secret");
-  return {
-    ok: Boolean(provided) && provided === expected,
-    configured: true,
-  };
+
+  const sameOrigin =
+    request.headers.get("sec-fetch-site") === "same-origin" ||
+    request.headers.get("sec-fetch-site") === "none";
+  if (sameOrigin) {
+    return { ok: true, configured: true, via: "same-origin" };
+  }
+
+  return { ok: false, configured: true };
 }
