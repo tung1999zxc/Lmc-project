@@ -757,6 +757,8 @@ const OrderList = () => {
                 return order.isShippingName === "KHOTQ1";
               case "khovn1":
                 return order.isShippingName === "KHOVN1";
+              case "khovn2":
+                return order.isShippingName === "KHOVN2";
               case "even_stt":
                 return order.stt % 2 === 0;
               case "odd_stt":
@@ -4206,6 +4208,7 @@ const OrderList = () => {
               options={[
                 { value: "khotq1", label: "KHOTQ1" },
                 { value: "khovn1", label: "KHOVN1" },
+                { value: "khovn2", label: "KHOVN2" },
                 { value: "khoshiping", label: "NHI đóng hàng" },
                 {
                   value: "deliveredchuatick",
