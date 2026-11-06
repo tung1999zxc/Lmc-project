@@ -48,8 +48,8 @@ export async function POST(req) {
     for (const p of products) {
       if (p.status === false) {
         skipped.push({ key: p.key, name: p.name, reason: "Đã tắt trước đó" });
-        continue;
-      }
+          continue;
+        }
       const lastDate = lastDateMap.get(p.name);
       // Nếu không có đơn nào, coi như > N ngày
       const daysSince = lastDate

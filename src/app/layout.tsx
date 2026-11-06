@@ -190,7 +190,7 @@ function InnerDashboardLayout({ children }: { children: ReactNode }) {
             </div>
             <div className="tb-r">
               <DynamicTimeTopbar />
-              {/* <CurrentUserSelector /> */}
+              <CurrentUserSelector />
               <Button
                 type="primary"
                 icon={<LogoutOutlined />}

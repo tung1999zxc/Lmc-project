@@ -904,6 +904,26 @@ const SidebarMenu = ({ isOpen, onToggle }) => {
           },
         ]
       : []),
+    // Care Camp: theo dõi chỉ số nhóm quảng cáo + tự động tắt chiến dịch.
+    // - "Care Camp": nhân viên MKT dùng (tự nhập token + tài khoản QC của mình,
+    //   báo cáo tự động lưu vào DB khi dùng web).
+    // - "BC Care Camp": admin/leader CHỈ ĐỌC báo cáo đã lưu.
+    ...(Tung99 
+      ? [
+          {
+            key: "subCareCamp",
+            icon: "🎯",
+            label: "Care Camp",
+            href: "/care-camp",
+          },
+          {
+            key: "subCareCampReports",
+            icon: "📅",
+            label: "BC Care Camp",
+            href: "/care-camp/reports",
+          },
+        ]
+      : []),
     ...(isMarketing || isKRTW
       ? []
       : [

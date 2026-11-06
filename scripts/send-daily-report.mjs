@@ -77,9 +77,7 @@ const logArg = getArg("log");
 // Ghi log ra file (dùng khi chạy từ Task Scheduler, stdout không được giữ)
 // ---------------------------------------------------------------------------
 if (logArg) {
-  const logPath = path.isAbsolute(logArg)
-    ? logArg
-    : path.join(ROOT, logArg);
+  const logPath = path.isAbsolute(logArg) ? logArg : path.join(ROOT, logArg);
   try {
     fs.mkdirSync(path.dirname(logPath), { recursive: true });
     fs.appendFileSync(
@@ -90,12 +88,14 @@ if (logArg) {
     // Tee stdout/stderr vào file log
     const origWrite = process.stdout.write.bind(process.stdout);
     const origErrWrite = process.stderr.write.bind(process.stderr);
-    const toFile = (stream, orig) => (chunk, ...rest) => {
-      try {
-        fs.appendFileSync(logPath, chunk);
-      } catch {}
-      return orig(chunk, ...rest);
-    };
+    const toFile =
+      (stream, orig) =>
+      (chunk, ...rest) => {
+        try {
+          fs.appendFileSync(logPath, chunk);
+        } catch {}
+        return orig(chunk, ...rest);
+      };
     process.stdout.write = toFile(process.stdout, origWrite);
     process.stderr.write = toFile(process.stderr, origErrWrite);
   } catch (e) {

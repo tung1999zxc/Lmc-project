@@ -61,43 +61,44 @@
 // }
 
 // File: /src/app/api/orders/batchSplitLinhChiMay/route.js
-import { connectToDatabase } from '../../../../app/lib/mongodb';
+import { connectToDatabase } from "../../../../app/lib/mongodb";
 
 export async function POST() {
   try {
     const { db } = await connectToDatabase();
-    const collection = db.collection('orders');
+    const collection = db.collection("orders");
 
     const teamMembers = [
-      "Phan Thị Bích Ngọc",
+      "Bùi Thị Thu Trang",
       "Hoàng Thị Oanh",
       "Trần Thị Hồng Nhung",
       "Bùi Yến Nhi",
-      "Nguyễn Thái Hà",
-      "Nguyễn Thị Thúy Quỳnh"
+      "Nguyễn Thị Hồng Ngọc 2",
+      "Nguyễn Thị Thúy Quỳnh",
     ];
 
     // 🎯 Lấy đơn hàng của Lê Linh Chi trong tháng 5
     // với saleReport === "DONE" và (chưa thanh toán || chưa giao hàng)
-    const orders = await collection.find({
-      salexuly: "Lê Linh Chi",
-      saleReport: "DONE",
-      orderDate: {
-        $gte: "2025-05-01",
-        $lte: "2025-05-31"
-      },
-      $or: [
-        { paymentStatus: { $ne: "ĐÃ THANH TOÁN" } },
-        { deliveryStatus: { $ne: "GIAO THÀNH CÔNG" } }
-      ]
-    })
-    .sort({ orderDate: 1 }) // chia đều theo thời gian
-    .toArray();
+    const orders = await collection
+      .find({
+        salexuly: "Nguyễn Thái Hà",
+        saleReport: "DONE",
+        orderDate: {
+          $gte: "2026-08-01",
+          $lte: "2026-08-31",
+        },
+        $or: [
+          { paymentStatus: { $ne: "CHƯA THANH TOÁN" } },
+          // { deliveryStatus: { $ne: "GIAO THÀNH CÔNG" } }
+        ],
+      })
+      .sort({ orderDate: 1 }) // chia đều theo thời gian
+      .toArray();
 
     if (orders.length === 0) {
       return new Response(
-        JSON.stringify({ message: 'Không tìm thấy đơn hàng phù hợp để chia' }),
-        { status: 200 }
+        JSON.stringify({ message: "Không tìm thấy đơn hàng phù hợp để chia" }),
+        { status: 200 },
       );
     }
 
@@ -106,25 +107,26 @@ export async function POST() {
       return {
         updateOne: {
           filter: { id: order.id },
-          update: { $set: { salexuly: assignee } }
-        }
+          update: { $set: { salexuly: assignee } },
+        },
       };
     });
 
     const result = await collection.bulkWrite(updates);
 
-    return new Response(JSON.stringify({
-      message: `✅ Đã chia ${orders.length} đơn hàng cho 6 người`,
-      modifiedCount: result.modifiedCount
-    }), {
-      status: 200
-    });
-
+    return new Response(
+      JSON.stringify({
+        message: `✅ Đã chia ${orders.length} đơn hàng cho 6 người`,
+        modifiedCount: result.modifiedCount,
+      }),
+      {
+        status: 200,
+      },
+    );
   } catch (error) {
     console.error("Lỗi chia đơn hàng:", error);
-    return new Response(
-      JSON.stringify({ error: "Lỗi server nội bộ" }),
-      { status: 500 }
-    );
+    return new Response(JSON.stringify({ error: "Lỗi server nội bộ" }), {
+      status: 500,
+    });
   }
 }
