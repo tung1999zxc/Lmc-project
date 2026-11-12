@@ -2149,13 +2149,23 @@ const InventoryPage = () => {
               </button>
               <button
                 onClick={handleSaveBulk}
-                disabled={savingBulk || pendingChangeCount === 0||currentUser.position !== "admin"}
+                disabled={
+                  savingBulk ||
+                  pendingChangeCount === 0 ||
+                  !["admin", "leadSALE", "managerSALE"].includes(
+                    currentUser?.position,
+                  )
+                }
                 style={{
                   display: "inline-flex",
                   alignItems: "center",
                   gap: 6,
                   background:
-                    savingBulk || pendingChangeCount === 0
+                    savingBulk ||
+                    pendingChangeCount === 0 ||
+                    !["admin", "leadSALE", "managerSALE"].includes(
+                      currentUser?.position,
+                    )
                       ? "#fb923c99"
                       : "linear-gradient(135deg, #f59e0b, #ea580c)",
                   color: "#fff",
@@ -2164,11 +2174,22 @@ const InventoryPage = () => {
                   borderRadius: 8,
                   fontWeight: 700,
                   cursor:
-                    savingBulk || pendingChangeCount === 0
+                    savingBulk ||
+                    pendingChangeCount === 0 ||
+                    !["admin", "leadSALE", "managerSALE"].includes(
+                      currentUser?.position,
+                    )
                       ? "not-allowed"
                       : "pointer",
                   boxShadow: "0 2px 6px rgba(234,88,12,0.35)",
-                  opacity: savingBulk || pendingChangeCount === 0 ? 0.6 : 1,
+                  opacity:
+                    savingBulk ||
+                    pendingChangeCount === 0 ||
+                    !["admin", "leadSALE", "managerSALE"].includes(
+                      currentUser?.position,
+                    )
+                      ? 0.6
+                      : 1,
                 }}
               >
                 {savingBulk ? (

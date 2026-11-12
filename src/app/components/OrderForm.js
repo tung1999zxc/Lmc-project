@@ -263,12 +263,12 @@ const OrderForm = ({
   const orderDate5 = Form.useWatch("orderDate5", form);
   const orderDateWatch = Form.useWatch("orderDate", form);
 
-  // Sau 10 ngày kể từ ngày lên đơn (orderDate), salenhapdon không được sửa
+  // Sau 7 ngày kể từ ngày lên đơn (orderDate), salenhapdon không được sửa
   // 2 ô DOANH SỐ (revenue) và ĐƠN (saleReport)
   const isOrderDateLocked =
     currentUser.position === "salenhapdon" &&
     !!orderDateWatch &&
-    dayjs().diff(orderDateWatch, "day") >= 10;
+    dayjs().diff(orderDateWatch, "day") >= 7;
 
   useEffect(() => {
     const numericProfit = Number(revenue); // chuyển về số
@@ -1531,7 +1531,7 @@ const OrderForm = ({
                         const value = raw ? Number(raw) : 0;
                         if (isOrderDateLocked) {
                           message.warning(
-                            "Đã quá 10 ngày kể từ ngày lên đơn, bạn không thể sửa doanh số"
+                            "Đã quá 7 ngày kể từ ngày lên đơn, bạn không thể sửa doanh số "
                           );
                           return;
                         }
@@ -1619,7 +1619,7 @@ const OrderForm = ({
                         currentUser.position === "salexacnhan" ||
                         currentUser.position === "salefull"
                         //    &&
-                        // currentUser.name !== "Lê Linh Chi" &&
+                       
                         // currentUser.name !== "Trần Thị Hồng Nhung"
                       }
                     >
@@ -1677,7 +1677,7 @@ const OrderForm = ({
                       onChange={(val) => {
                         if (isOrderDateLocked) {
                           message.warning(
-                            "Đã quá 10 ngày kể từ ngày lên đơn, bạn không thể sửa báo cáo đơn"
+                            "Đã quá 7 ngày kể từ ngày lên đơn, bạn không thể sửa báo cáo đơn"
                           );
                           form.setFieldsValue({
                             saleReport: saleReport ?? undefined,
