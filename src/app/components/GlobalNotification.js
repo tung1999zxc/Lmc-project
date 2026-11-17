@@ -4,7 +4,21 @@ import React, { useState, useEffect } from "react";
 import { Modal, Button, message } from "antd";
 import axios from "axios";
 import { useSelector } from "react-redux";
-import { CheckCircleOutlined, UserOutlined, TeamOutlined, BellOutlined, ExpandOutlined } from "@ant-design/icons";
+import {
+  CheckCircleOutlined,
+  UserOutlined,
+  TeamOutlined,
+  BellOutlined,
+  ExpandOutlined,
+  EyeOutlined,
+} from "@ant-design/icons";
+
+const norm = (v) => (v || "").trim().toLowerCase();
+
+// Thông báo liên quan xóa đơn -> dùng "Đánh dấu đã đọc" thay cho "Xác nhận"
+const isXoaDonNotification = (notif) =>
+  Boolean(notif?.xoaDon) ||
+  String(notif?.message || "").startsWith("[XÓA ĐƠN]");
 
 const GlobalNotification = () => {
   const currentUser = useSelector((state) => state.user.currentUser);
@@ -13,15 +27,24 @@ const GlobalNotification = () => {
 
   const fetchActiveNotification = async () => {
     try {
-      const response = await axios.get("/api/notifications");
-      const notifications = response.data.data;
-      const filtered = notifications.filter((notif) => 
-        notif.recipients.some(
-          (name) => name.trim() === currentUser.name.trim()
-        ) &&
-        !notif.confirmed.some(
-          (name) => name.trim() === currentUser.name.trim()
-        )
+      // Chỉ lấy thông báo trong 1 tháng gần nhất để giảm tải
+      const since = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
+      const response = await axios.get("/api/notifications", {
+        params: { since, limit: 100 },
+      });
+      const notifications = response.data.data || [];
+      const userName = currentUser.name || "";
+      const filtered = notifications.filter(
+        (notif) =>
+          (notif.recipients || []).some(
+            (name) => norm(name) === norm(userName)
+          ) &&
+          // Thông báo xóa đơn: chỉ cần đánh dấu đã đọc là ẩn khỏi popup
+          (isXoaDonNotification(notif)
+            ? !(notif.readBy || []).some((name) => norm(name) === norm(userName))
+            : !(notif.confirmed || []).some(
+                (name) => norm(name) === norm(userName)
+              ))
       );
       if (filtered.length > 0) {
         setActiveNotification(filtered[0]);
@@ -56,6 +79,21 @@ const GlobalNotification = () => {
     }
   };
 
+  // Đánh dấu đã đọc (dùng cho thông báo liên quan xóa đơn)
+  const handleMarkRead = async () => {
+    try {
+      await axios.patch(
+        `/api/notifications/${activeNotification._id}/read`,
+        { user: currentUser.name }
+      );
+      message.success("Đã đánh dấu đã đọc");
+      setActiveNotification(null);
+    } catch (error) {
+      console.error("Error marking notification as read:", error);
+      message.error("Lỗi khi đánh dấu đã đọc");
+    }
+  };
+
   const handleResetPage = () => {
     message.info("Trang sẽ được tải lại...");
     window.location.reload();
@@ -63,14 +101,15 @@ const GlobalNotification = () => {
 
   const recipients = activeNotification?.recipients || [];
   const confirmed = activeNotification?.confirmed || [];
+  const isXoaDon = isXoaDonNotification(activeNotification);
 
   return (
     <Modal
       open={!!activeNotification}
       title={
-        <div style={{ 
-          display: 'flex', 
-          alignItems: 'center', 
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
           gap: 10,
           color: '#fff',
           fontSize: 16,
@@ -82,22 +121,30 @@ const GlobalNotification = () => {
       }
       footer={
         activeNotification ? (
-          <div style={{ 
-            display: 'flex', 
-            justifyContent: 'flex-end', 
-            gap: 12 
+          <div style={{
+            display: 'flex',
+            justifyContent: 'flex-end',
+            gap: 12
           }}>
             {activeNotification.type === "reset" ? (
-              <Button 
-                danger 
+              <Button
+                danger
                 onClick={handleResetPage}
                 className="notif-btn notif-btn-danger"
               >
                 Reset trang
               </Button>
+            ) : isXoaDon ? (
+              <Button
+                icon={<EyeOutlined />}
+                onClick={handleMarkRead}
+                className="notif-btn"
+              >
+                Đánh dấu đã đọc
+              </Button>
             ) : (
-              <Button 
-                type="primary" 
+              <Button
+                type="primary"
                 onClick={handleConfirm}
                 className="notif-btn notif-btn-primary"
               >
@@ -137,7 +184,7 @@ const GlobalNotification = () => {
             {/* Recipients */}
             <div className="notif-info-item">
               <div className="notif-info-label">
-                <TeamOutlined /> Đối tượng
+                <TeamOutlined /> Người nhận
               </div>
               <div className={`notif-info-value ${!expanded ? 'notif-truncate' : ''}`}>
                 {recipients.length > 0 ? recipients.join(", ") : "Không có"}
@@ -146,7 +193,7 @@ const GlobalNotification = () => {
 
             {/* Expand button for recipients */}
             {!expanded && recipients.length > 5 && (
-              <button 
+              <button
                 className="notif-expand-btn"
                 onClick={() => setExpanded(true)}
               >
@@ -168,7 +215,7 @@ const GlobalNotification = () => {
 
             {/* Collapse button */}
             {expanded && (
-              <button 
+              <button
                 className="notif-expand-btn"
                 onClick={() => setExpanded(false)}
               >

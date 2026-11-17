@@ -15,6 +15,7 @@ import SidebarMenu, { DynamicTimeTopbar } from "./components/SidebarMenu";
 import CurrentUserSelector from "./components/CurrentUserSelector";
 import { motion, useAnimation } from "framer-motion";
 import GlobalNotification from "./components/GlobalNotification";
+import NotificationBell from "./components/NotificationBell";
 import MyRankBadge from "./components/MyRankBadge";
 import { buildPageTitle } from "./utils/pageTitles";
 
@@ -190,7 +191,8 @@ function InnerDashboardLayout({ children }: { children: ReactNode }) {
             </div>
             <div className="tb-r">
               <DynamicTimeTopbar />
-              {/* <CurrentUserSelector /> */}
+              <CurrentUserSelector />
+              <NotificationBell />
               <Button
                 type="primary"
                 icon={<LogoutOutlined />}

@@ -868,13 +868,22 @@ export default function KhoOrderList() {
     return getViewList(ordersWithState, currentView);
   }, [ordersWithState, currentView]);
 
-  // ── Tìm kiếm ──
+  // ── Tìm kiếm: khớp CHÍNH XÁC STT hoặc mã vận đơn vừa nhập ──
   const searchedList = useMemo(() => {
-    if (!searchQ.trim()) return viewList;
-    const q = searchQ.trim().toLowerCase();
-    return viewList.filter((o) =>
-      (o.cust + o.sdt + o.track + String(o.stt)).toLowerCase().includes(q),
-    );
+    const q = searchQ.trim();
+    if (!q) return viewList;
+    const qTrack = q.replace(/\s+/g, "").toLowerCase();
+    const qNum = /^\d+$/.test(q) ? q : null;
+    return viewList.filter((o) => {
+      const stt = String(o.stt ?? "").trim();
+      const sttDigits = stt.replace(/\D/g, "");
+      const track = String(o.track ?? "").replace(/\s+/g, "").toLowerCase();
+      const sttMatch =
+        stt.toLowerCase() === q.toLowerCase() ||
+        (!!qNum && sttDigits !== "" && sttDigits === qNum);
+      const trackMatch = qTrack !== "" && track === qTrack;
+      return sttMatch || trackMatch;
+    });
   }, [viewList, searchQ]);
 
   // ── Lọc theo khoảng ngày gửi & trạng thái mã vận đơn ──
@@ -1974,7 +1983,7 @@ export default function KhoOrderList() {
               </svg>
               <input
                 type="text"
-                placeholder="Tìm tên khách, SĐT, mã vận đơn…"
+                placeholder="Nhập chính xác STT hoặc mã vận đơn…"
                 value={searchQ}
                 onChange={(e) => setSearchQ(e.target.value)}
               />

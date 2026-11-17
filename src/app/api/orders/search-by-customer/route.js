@@ -16,13 +16,21 @@ export async function GET(req) {
 
     const searchTerm = customerName.trim();
     const escapedSearchTerm = searchTerm.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-    const exactNameRegex = new RegExp(`^${escapedSearchTerm}$`, 'i');
+    // Chuẩn hóa khoảng trắng: mỗi từ trong từ khóa được nối bằng \s+ để
+    // "tung hk" khớp với "tung  hk", "tung   hk", "tung\thk" trong DB.
+    const namePattern = searchTerm
+      .split(/\s+/)
+      .filter(Boolean)
+      .map((word) => word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'))
+      .join('\\s+');
+    const exactNameRegex = new RegExp(`^\\s*${namePattern}\\s*$`, 'i');
+    const exactTrackingRegex = new RegExp(`^${escapedSearchTerm}$`, 'i');
     const numericStt = Number(searchTerm);
     const query = {
       $or: [
         { customerName: { $regex: exactNameRegex } },
         ...(Number.isNaN(numericStt) ? [] : [{ stt: numericStt }]),
-        { trackingCode: { $regex: exactNameRegex } },
+        { trackingCode: { $regex: exactTrackingRegex } },
       ],
     };
 

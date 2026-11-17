@@ -582,6 +582,42 @@ const OrderList = () => {
     window.addEventListener("resize", checkMobile);
     return () => window.removeEventListener("resize", checkMobile);
   }, []);
+
+  // Mở thẳng modal xử lý xóa đơn khi đến từ link trong thông báo (/orders?xoaDon=<orderId>)
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const openFromLink = async () => {
+      const params = new URLSearchParams(window.location.search);
+      const orderId = params.get("xoaDon");
+      if (!orderId) return;
+
+      try {
+        const res = await axios.get(`/api/orders/${encodeURIComponent(orderId)}`);
+        const order = res.data?.data;
+        if (!order) return;
+
+        setXoaDonOrderId(order.id);
+        setXoaDonOrderData(order);
+        setXoaDonLyDo(order.xoaDonLyDo || "");
+        setXoaDonReport(order.saleReport2 || null);
+        setXoaDonExistingImages(
+          Array.isArray(order.xoaDonImages) ? order.xoaDonImages : [],
+        );
+        setXoaDonImages([]);
+        setXoaDonImageUrls([]);
+        setXoaDonOpenedAt(new Date().toISOString());
+        setXoaDonModalVisible(true);
+
+        // Xoá query param để F5 không mở lại modal
+        window.history.replaceState({}, "", "/orders");
+      } catch (error) {
+        console.error("Lỗi mở đơn từ thông báo:", error);
+      }
+    };
+
+    openFromLink();
+  }, []);
   const handleSearchCustomerModal = async (name) => {
     try {
       const res = await axios.get(

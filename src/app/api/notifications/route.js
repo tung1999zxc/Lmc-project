@@ -4,12 +4,38 @@ import { connectToDatabase } from '../../../app/lib/mongodb.js';
 export async function GET(req) {
   try {
     const { db } = await connectToDatabase();
-    // Lấy tất cả thông báo, sắp xếp theo createdAt giảm dần
-    const notifications = await db
+
+    // Lọc theo thời gian (since) và giới hạn số lượng (limit) nếu được truyền vào
+    const { searchParams } = new URL(req.url);
+    const sinceParam = searchParams.get('since');
+    const limitParam = parseInt(searchParams.get('limit'), 10);
+
+    const query = {};
+    if (sinceParam) {
+      const sinceDate = new Date(sinceParam);
+      if (!isNaN(sinceDate.getTime())) {
+        query.createdAt = { $gte: sinceDate };
+      }
+    }
+
+    // Đảm bảo có index theo createdAt để lọc theo thời gian nhanh (idempotent)
+    try {
+      await db.collection('notifications').createIndex({ createdAt: -1 });
+    } catch (idxErr) {
+      console.warn('Không tạo được index notifications.createdAt:', idxErr?.message);
+    }
+
+    let cursor = db
       .collection('notifications')
-      .find({})
-      .sort({ createdAt: -1 })
-      .toArray();
+      .find(query)
+      .sort({ createdAt: -1 });
+
+    if (!isNaN(limitParam) && limitParam > 0) {
+      cursor = cursor.limit(limitParam);
+    }
+
+    const notifications = await cursor.toArray();
+
     return new Response(
       JSON.stringify({
         message: 'Lấy danh sách thông báo thành công',
@@ -28,10 +54,10 @@ export async function GET(req) {
 
 export async function POST(req) {
   try {
-    const { message, author, department, recipients,type  } = await req.json();
+    const { message, author, department, recipients, type } = await req.json();
 
     // Kiểm tra các trường bắt buộc (bỏ qua department vì là tùy chọn)
-    if (!message || !author || !recipients ) {
+    if (!message || !author || !recipients) {
       return new Response(
         JSON.stringify({ error: 'Thiếu thông tin bắt buộc' }),
         { status: 400 }
@@ -44,8 +70,8 @@ export async function POST(req) {
       // Nếu không chọn department, set về null
       department: department || null,
       recipients,
-      type: type || "normal",
-      
+      type: type || 'normal',
+
       createdAt: new Date(),
       confirmed: [], // Ban đầu chưa ai xác nhận
     };
