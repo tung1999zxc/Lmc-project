@@ -191,7 +191,7 @@ function InnerDashboardLayout({ children }: { children: ReactNode }) {
             </div>
             <div className="tb-r">
               <DynamicTimeTopbar />
-              <CurrentUserSelector />
+              {/* <CurrentUserSelector /> */}
               <NotificationBell />
               <Button
                 type="primary"
